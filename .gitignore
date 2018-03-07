@@ -1,3 +1,17 @@
+# /var
+var
+var/*
+var/**
+var/*/*
+var/**/*
+var/**/**
+var/log
+var/log/*
+var/log/**
+var/log/*/*
+var/log/**/*
+var/log/**/**
+
 # Logs
 logs
 *.log
@@ -57,3 +71,5 @@ typings/
 # dotenv environment variables file
 .env
 
+# Debug log from npm
+npm-debug.log

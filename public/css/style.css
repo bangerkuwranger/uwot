@@ -1,0 +1,15 @@
+/* line 3, ../scss/style.scss */
+body {
+  padding: 50px;
+  font: 14px "Proxima Nova", Helvetica, Arial, sans-serif;
+}
+
+/* line 8, ../scss/style.scss */
+a {
+  color: #00B7FF;
+}
+
+/* line 12, ../scss/style.scss */
+#terminal {
+  font-family: monospace;
+}
