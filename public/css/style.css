@@ -1,15 +1,127 @@
-/* line 3, ../scss/style.scss */
+@charset "UTF-8";
+/****
+
+	Extended map-get to get nested values in nested maps
+	Usage: same as mapGet, but each comma-separated argument is another level down in keys
+	E.G. — given var $deep-map:
+
+	$deep-map: (
+		level-1-one: (
+			level-2-one: 11,
+			level-2-two: 12
+		),
+		level-1-two: (
+			level-2-one: 21,
+			level-2-two: (
+				level-3-one: 221,
+				level-3-two: 222
+			),
+			level-2-three: 23
+		)
+	);
+	
+	mapGet($deep-map, 'level-1-one') is equivalent to map-get($deep-map, 'level-1-one'),
+	and returns the map as a variable for further processing by the processor.
+	HOWEVER, this is more useful for getting actual deeply nested values...
+
+	mapGet($deep-map, 'level-1-one', 'level-2-two') returns 12
+	mapGet($deep-map, 'level-1-two', 'level-2-two', 'level-3-one') returns 221
+
+****/
+/****
+
+	CALC
+
+****/
+/*
+@include calc('height','100%','-','20px');
+renders to:
+	height: -webkit-calc(100% - 20px);
+	height: -moz-calc(100% - 20px);
+	height: -ms-calc(100% - 20px);
+	height: -o-calc(100% - 20px);
+	height: calc(100% - 20px);
+*/
+/* line 5, ../scss/style.scss */
 body {
-  padding: 50px;
+  margin: 0;
+}
+/* line 8, ../scss/style.scss */
+body #wot {
   font: 14px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
-
-/* line 8, ../scss/style.scss */
-a {
-  color: #00B7FF;
-}
-
-/* line 12, ../scss/style.scss */
-#terminal {
+/* line 11, ../scss/style.scss */
+body #wot .terminal {
   font-family: monospace;
+  width: calc(100% - 2em);
+  height: calc(100% - 2em);
+  min-height: 320px;
+  position: fixed;
+  padding: 1em;
+}
+/* line 19, ../scss/style.scss */
+body #wot .terminal .header {
+  min-height: 1em;
+  border-bottom: 1px solid;
+  position: absolute;
+  top: 0;
+  z-index: 10;
+  width: calc(100% - 2em);
+  margin: 0.5em 0;
+}
+/* line 29, ../scss/style.scss */
+body #wot .terminal .output {
+  width: 100%;
+  min-height: 300px;
+  margin: 2em 0;
+}
+/* line 35, ../scss/style.scss */
+body #wot .terminal .cli {
+  width: 100%;
+  height: 2em;
+  overflow: hidden;
+  min-height: 1em;
+  border-top: 1px solid;
+  position: absolute;
+  bottom: 0;
+  padding: 0.5em 0;
+  z-index: 10;
+}
+/* line 46, ../scss/style.scss */
+body #wot .terminal .cli form {
+  width: 100%;
+}
+/* line 49, ../scss/style.scss */
+body #wot .terminal .cli form .field {
+  width: 100%;
+  position: relative;
+  margin-left: 1em;
+}
+/* line 54, ../scss/style.scss */
+body #wot .terminal .cli form .field:before {
+  content: "\003e";
+  position: absolute;
+  left: -1em;
+  top: 0;
+}
+/* line 61, ../scss/style.scss */
+body #wot .terminal .cli form .field input,
+body #wot .terminal .cli form .field input:focus,
+body #wot .terminal .cli form .field input:active {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  white-space: normal;
+  line-height: 1;
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  -webkit-appearance: none;
+  font: inherit;
+  color: inherit;
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
 }

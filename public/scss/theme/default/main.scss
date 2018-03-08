@@ -1,0 +1,70 @@
+@import '../../_partial/functions';
+@import '../../_partial/mixins';
+@import 'colors';
+@import '../../_partial/ansi';
+// @error mapGet($theme-colors, 'ansi', 'black');
+
+body{
+
+	#wot {
+	
+		
+		@include ansi(mapGet($theme-colors, 'ansi'));
+		
+		.terminal {
+			color: mapGet($theme-colors, 'tag', 'text');
+			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
+			a {
+				color: mapGet($theme-colors, 'tag', 'link');
+	
+				&:hover,
+				&:active {
+					color: mapGet($theme-colors, 'tag', 'hover');
+					text-decoration: none;
+				}
+	
+			}
+
+			.header {
+				border-color: mapGet($theme-colors, 'tag', 'border');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+			}
+
+			.output {
+				width: 100%;
+				min-height: 300px;
+				margin: 2em 0;
+		
+			}
+	
+			.cli {
+				width: calc(100% - 2em);
+				margin: 0.5em 0;
+				border-color: mapGet($theme-colors, 'tag', 'hover');
+		
+				form {
+			
+					.field {
+				
+						&:before {
+					
+						}
+				
+						input,
+						input:focus,
+						input:active {						
+							color: mapGet($theme-colors, 'tag', 'hover');
+						}
+			
+					}
+		
+				}
+		
+			}
+	
+		}
+	
+	}
+
+}

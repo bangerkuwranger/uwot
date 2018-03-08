@@ -1,5 +1,16 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+	-if (theme)
+		-var themeClass = theme.toLowerCase()
+	-else
+		-var themeClass = 'default'
+	div(class=themeClass class=["wot"] id='wot')
+		div(id='woterminal' class='terminal')
+			div(id='wotheader' class='header')
+				h1= title
+			div(id='wotoutput' class='output')
+			div(id='wotcli' class='cli')
+				form(id='cliform' name='cliform')
+					div(class='field')
+						input(id='wot' name='theme')

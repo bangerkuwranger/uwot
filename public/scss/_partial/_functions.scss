@@ -1,0 +1,36 @@
+/****
+
+	Extended map-get to get nested values in nested maps
+	Usage: same as mapGet, but each comma-separated argument is another level down in keys
+	E.G. — given var $deep-map:
+
+	$deep-map: (
+		level-1-one: (
+			level-2-one: 11,
+			level-2-two: 12
+		),
+		level-1-two: (
+			level-2-one: 21,
+			level-2-two: (
+				level-3-one: 221,
+				level-3-two: 222
+			),
+			level-2-three: 23
+		)
+	);
+	
+	mapGet($deep-map, 'level-1-one') is equivalent to map-get($deep-map, 'level-1-one'),
+	and returns the map as a variable for further processing by the processor.
+	HOWEVER, this is more useful for getting actual deeply nested values...
+
+	mapGet($deep-map, 'level-1-one', 'level-2-two') returns 12
+	mapGet($deep-map, 'level-1-two', 'level-2-two', 'level-3-one') returns 221
+
+****/
+
+@function mapGet($map, $list...) {
+    @each $key in $list {
+        $map: map-get($map, $key);
+    }
+    @return $map;
+}
