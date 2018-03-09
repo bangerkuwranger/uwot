@@ -2,16 +2,18 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
+
+@import url('https://fonts.googleapis.com/css?family=Share+Tech+Mono');
 
 body{
 
 	#wot {
-	
+		font-size: 11px;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
+			font-family: "Lucida Console", 'Share Tech Mono', "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 	
@@ -41,14 +43,16 @@ body{
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'border');
+				border-color: mapGet($theme-colors, 'tag', 'hover');
 		
 				form {
 			
 					.field {
-				
+						margin-left: 3em;
+						
 						&:before {
-					
+							content: "C\003a\005c\003e";
+							left: -3em;
 						}
 				
 						input,

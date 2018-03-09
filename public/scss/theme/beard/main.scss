@@ -2,16 +2,18 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
+
+@import url('https://fonts.googleapis.com/css?family=VT323');
 
 body{
 
 	#wot {
-	
+		font: 12px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
-		@include ansi(mapGet($theme-colors, 'ansi'));
+		@include ansi(mapGet($theme-colors, 'ansi'), '8');
 		
 		.terminal {
+			font-family: 'VT323', monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 	
@@ -48,13 +50,13 @@ body{
 					.field {
 				
 						&:before {
-					
+							content: '\0023';
 						}
 				
 						input,
 						input:focus,
 						input:active {						
-							color: mapGet($theme-colors, 'tag', 'hover');
+							color: mapGet($theme-colors, 'tag', 'text');
 						}
 			
 					}

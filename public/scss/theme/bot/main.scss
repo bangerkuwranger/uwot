@@ -41,7 +41,7 @@ body{
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'border');
+				border-color: mapGet($theme-colors, 'tag', 'hover');
 		
 				form {
 			

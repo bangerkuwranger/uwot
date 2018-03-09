@@ -420,38 +420,38 @@ body #wot .ansi.bg-bright-white.reversed,
 body #wot .ansi.bg-bright-white .ansi.reversed {
   color: #fff;
 }
-/* line 14, ../../../scss/theme/default/main.scss */
+/* line 14, ../../../scss/theme/bot/main.scss */
 body #wot .terminal {
   color: #ddd;
   background: #222;
 }
-/* line 18, ../../../scss/theme/default/main.scss */
+/* line 18, ../../../scss/theme/bot/main.scss */
 body #wot .terminal a {
   color: #aaa;
 }
-/* line 21, ../../../scss/theme/default/main.scss */
+/* line 21, ../../../scss/theme/bot/main.scss */
 body #wot .terminal a:hover, body #wot .terminal a:active {
   color: #fff;
   text-decoration: none;
 }
-/* line 29, ../../../scss/theme/default/main.scss */
+/* line 29, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .header {
   border-color: #ddd;
   background: #222;
 }
-/* line 34, ../../../scss/theme/default/main.scss */
+/* line 34, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
   margin: 2em 0;
 }
-/* line 41, ../../../scss/theme/default/main.scss */
+/* line 41, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
-  border-color: #ddd;
+  border-color: #fff;
 }
-/* line 54, ../../../scss/theme/default/main.scss */
+/* line 54, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {

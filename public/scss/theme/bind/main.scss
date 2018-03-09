@@ -2,7 +2,6 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
 
 body{
 
@@ -41,20 +40,23 @@ body{
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'border');
+				border-color: mapGet($theme-colors, 'tag', 'hover');
 		
 				form {
 			
 					.field {
-				
+						margin-left: 5em;
+						
 						&:before {
-					
+							content: "(RIP) \1f72";
+							left: -5em;
 						}
 				
 						input,
 						input:focus,
 						input:active {						
 							color: mapGet($theme-colors, 'tag', 'hover');
+							width: calc(100% - 5em);
 						}
 			
 					}

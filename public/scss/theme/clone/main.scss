@@ -2,16 +2,18 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
+
+@import url('https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700&subset=latin-ext');
 
 body{
 
 	#wot {
-	
+		font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
+			font-family: monaco, 'Anonymous Pro', Consolas, "Lucida Console", monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 	
@@ -48,13 +50,13 @@ body{
 					.field {
 				
 						&:before {
-					
+							content: " \0024 ";
 						}
 				
 						input,
 						input:focus,
 						input:active {						
-							color: mapGet($theme-colors, 'tag', 'hover');
+							color: mapGet($theme-colors, 'ansi', 'bright-black');
 						}
 			
 					}

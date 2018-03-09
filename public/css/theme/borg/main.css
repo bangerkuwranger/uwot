@@ -87,6 +87,11 @@ $decorations must be one of the following:
 		'reversed' - inverts colors for any .ansi.reversed tag (heavy!)
 
 */
+@import url("https://fonts.googleapis.com/css?family=Share+Tech+Mono");
+/* line 10, ../../../scss/theme/borg/main.scss */
+body #wot {
+  font-size: 11px;
+}
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi {
   /* black */
@@ -118,288 +123,288 @@ body #wot .ansi .underline {
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-black {
-  color: #000;
+  color: #032555;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-black.reversed,
 body #wot .ansi.fg-black .ansi.reversed {
   color: inherit;
-  background-color: #000;
+  background-color: #032555;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-black {
-  background-color: #000;
+  background-color: #032555;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-black.reversed,
 body #wot .ansi.bg-black .ansi.reversed {
-  color: #000;
+  color: #032555;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-red {
-  color: #d00;
+  color: #FA1418;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-red.reversed,
 body #wot .ansi.fg-red .ansi.reversed {
   color: inherit;
-  background-color: #d00;
+  background-color: #FA1418;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-red {
-  background-color: #d00;
+  background-color: #FA1418;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-red.reversed,
 body #wot .ansi.bg-red .ansi.reversed {
-  color: #d00;
+  color: #FA1418;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-green {
-  color: #0d0;
+  color: #3CFD4D;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-green.reversed,
 body #wot .ansi.fg-green .ansi.reversed {
   color: inherit;
-  background-color: #0d0;
+  background-color: #3CFD4D;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-green {
-  background-color: #0d0;
+  background-color: #3CFD4D;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-green.reversed,
 body #wot .ansi.bg-green .ansi.reversed {
-  color: #0d0;
+  color: #3CFD4D;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-yellow {
-  color: #dd0;
+  color: #FFFD34;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-yellow.reversed,
 body #wot .ansi.fg-yellow .ansi.reversed {
   color: inherit;
-  background-color: #dd0;
+  background-color: #FFFD34;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-yellow {
-  background-color: #dd0;
+  background-color: #FFFD34;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-yellow.reversed,
 body #wot .ansi.bg-yellow .ansi.reversed {
-  color: #dd0;
+  color: #FFFD34;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-blue {
-  color: #00d;
+  color: #2D7CBF;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-blue.reversed,
 body #wot .ansi.fg-blue .ansi.reversed {
   color: inherit;
-  background-color: #00d;
+  background-color: #2D7CBF;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-blue {
-  background-color: #00d;
+  background-color: #2D7CBF;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-blue.reversed,
 body #wot .ansi.bg-blue .ansi.reversed {
-  color: #00d;
+  color: #2D7CBF;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-magenta {
-  color: #d0d;
+  color: #FA29FC;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-magenta.reversed,
 body #wot .ansi.fg-magenta .ansi.reversed {
   color: inherit;
-  background-color: #d0d;
+  background-color: #FA29FC;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-magenta {
-  background-color: #d0d;
+  background-color: #FA29FC;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-magenta.reversed,
 body #wot .ansi.bg-magenta .ansi.reversed {
-  color: #d0d;
+  color: #FA29FC;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-cyan {
-  color: #0dd;
+  color: #3AFEFE;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-cyan.reversed,
 body #wot .ansi.fg-cyan .ansi.reversed {
   color: inherit;
-  background-color: #0dd;
+  background-color: #3AFEFE;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-cyan {
-  background-color: #0dd;
+  background-color: #3AFEFE;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-cyan.reversed,
 body #wot .ansi.bg-cyan .ansi.reversed {
-  color: #0dd;
+  color: #3AFEFE;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-white {
-  color: #ddd;
+  color: #fcfcee;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-white.reversed,
 body #wot .ansi.fg-white .ansi.reversed {
   color: inherit;
-  background-color: #ddd;
+  background-color: #fcfcee;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-white {
-  background-color: #ddd;
+  background-color: #fcfcee;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-white.reversed,
 body #wot .ansi.bg-white .ansi.reversed {
-  color: #ddd;
+  color: #fcfcee;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-black {
-  color: #222;
+  color: #3F043F;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-black.reversed,
 body #wot .ansi.fg-bright-black .ansi.reversed {
   color: inherit;
-  background-color: #222;
+  background-color: #3F043F;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-black {
-  background-color: #222;
+  background-color: #3F043F;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-black.reversed,
 body #wot .ansi.bg-bright-black .ansi.reversed {
-  color: #222;
+  color: #3F043F;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-red {
-  color: #f00;
+  color: #FB8182;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-red.reversed,
 body #wot .ansi.fg-bright-red .ansi.reversed {
   color: inherit;
-  background-color: #f00;
+  background-color: #FB8182;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-red {
-  background-color: #f00;
+  background-color: #FB8182;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-red.reversed,
 body #wot .ansi.bg-bright-red .ansi.reversed {
-  color: #f00;
+  color: #FB8182;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-green {
-  color: #0f0;
+  color: #3CFD4D;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-green.reversed,
 body #wot .ansi.fg-bright-green .ansi.reversed {
   color: inherit;
-  background-color: #0f0;
+  background-color: #3CFD4D;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-green {
-  background-color: #0f0;
+  background-color: #3CFD4D;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-green.reversed,
 body #wot .ansi.bg-bright-green .ansi.reversed {
-  color: #0f0;
+  color: #3CFD4D;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-yellow {
-  color: #ff0;
+  color: #FFFE87;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-yellow.reversed,
 body #wot .ansi.fg-bright-yellow .ansi.reversed {
   color: inherit;
-  background-color: #ff0;
+  background-color: #FFFE87;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-yellow {
-  background-color: #ff0;
+  background-color: #FFFE87;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-yellow.reversed,
 body #wot .ansi.bg-bright-yellow .ansi.reversed {
-  color: #ff0;
+  color: #FFFE87;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-blue {
-  color: #00f;
+  color: #1582FB;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-blue.reversed,
 body #wot .ansi.fg-bright-blue .ansi.reversed {
   color: inherit;
-  background-color: #00f;
+  background-color: #1582FB;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-blue {
-  background-color: #00f;
+  background-color: #1582FB;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-blue.reversed,
 body #wot .ansi.bg-bright-blue .ansi.reversed {
-  color: #00f;
+  color: #1582FB;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-magenta {
-  color: #f0f;
+  color: #F582F7;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-magenta.reversed,
 body #wot .ansi.fg-bright-magenta .ansi.reversed {
   color: inherit;
-  background-color: #f0f;
+  background-color: #F582F7;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-magenta {
-  background-color: #f0f;
+  background-color: #F582F7;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-magenta.reversed,
 body #wot .ansi.bg-bright-magenta .ansi.reversed {
-  color: #f0f;
+  color: #F582F7;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-cyan {
-  color: #0ff;
+  color: #89FEFE;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-cyan.reversed,
 body #wot .ansi.fg-bright-cyan .ansi.reversed {
   color: inherit;
-  background-color: #0ff;
+  background-color: #89FEFE;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-cyan {
-  background-color: #0ff;
+  background-color: #89FEFE;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.bg-bright-cyan.reversed,
 body #wot .ansi.bg-bright-cyan .ansi.reversed {
-  color: #0ff;
+  color: #89FEFE;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
 body #wot .ansi.fg-bright-white {
@@ -420,38 +425,48 @@ body #wot .ansi.bg-bright-white.reversed,
 body #wot .ansi.bg-bright-white .ansi.reversed {
   color: #fff;
 }
-/* line 14, ../../../scss/theme/default/main.scss */
+/* line 15, ../../../scss/theme/borg/main.scss */
 body #wot .terminal {
-  color: #ddd;
-  background: #222;
+  font-family: "Lucida Console", 'Share Tech Mono', "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;
+  color: #fcfcee;
+  background: #032555;
 }
-/* line 18, ../../../scss/theme/default/main.scss */
+/* line 20, ../../../scss/theme/borg/main.scss */
 body #wot .terminal a {
-  color: #aaa;
+  color: #1582FB;
 }
-/* line 21, ../../../scss/theme/default/main.scss */
+/* line 23, ../../../scss/theme/borg/main.scss */
 body #wot .terminal a:hover, body #wot .terminal a:active {
   color: #fff;
   text-decoration: none;
 }
-/* line 29, ../../../scss/theme/default/main.scss */
+/* line 31, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .header {
-  border-color: #ddd;
-  background: #222;
+  border-color: #fcfcee;
+  background: #032555;
 }
-/* line 34, ../../../scss/theme/default/main.scss */
+/* line 36, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
   margin: 2em 0;
 }
-/* line 41, ../../../scss/theme/default/main.scss */
+/* line 43, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
-  border-color: #ddd;
+  border-color: #fff;
 }
-/* line 54, ../../../scss/theme/default/main.scss */
+/* line 50, ../../../scss/theme/borg/main.scss */
+body #wot .terminal .cli form .field {
+  margin-left: 3em;
+}
+/* line 53, ../../../scss/theme/borg/main.scss */
+body #wot .terminal .cli form .field:before {
+  content: "C\003a\005c\003e";
+  left: -3em;
+}
+/* line 58, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {

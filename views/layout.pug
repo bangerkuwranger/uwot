@@ -26,5 +26,7 @@ html
 		meta(name="theme-color" content="#ffffff")
 		-if (theme)
 			link(rel='stylesheet', href= '/css/theme/' + theme.toLowerCase() + '/main.css')
+		-else
+			link(rel='stylesheet', href= '/css/theme/default/main.css')
 	body
 		block content

@@ -67,7 +67,6 @@ body {
 							vertical-align: middle;
 							white-space: normal;
 							line-height: 1;
-							width: 100%;
 							background: transparent;
 							border: 0;
 							outline: 0;
@@ -77,6 +76,7 @@ body {
 							-webkit-box-sizing:content-box;
 							-moz-box-sizing:content-box;
 							box-sizing:content-box;
+							width: calc(100% - 1em);
 						}
 				
 					}

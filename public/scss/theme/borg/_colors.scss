@@ -7,23 +7,23 @@
 $ansi-colors: (
 
 	// Standard
-	'black': #000,
-	'red': #d00,
-	'green': #0d0,
-	'yellow': #dd0,
-	'blue': #00d,
-	'magenta': #d0d,
-	'cyan': #0dd,
-	'white': #ddd,
+	'black': #032555,
+	'red': #FA1418,
+	'green': #3CFD4D,
+	'yellow': #FFFD34,
+	'blue': #2D7CBF,
+	'magenta': #FA29FC,
+	'cyan': #3AFEFE,
+	'white': #fcfcee,
 
 	// Bright
-	'bright-black': #222,
-	'bright-red': #f00,
-	'bright-green': #0f0,
-	'bright-yellow': #ff0,
-	'bright-blue': #00f,
-	'bright-magenta': #f0f,
-	'bright-cyan': #0ff,
+	'bright-black': #3F043F,
+	'bright-red': #FB8182,
+	'bright-green': #3CFD4D,
+	'bright-yellow': #FFFE87,
+	'bright-blue': #1582FB,
+	'bright-magenta': #F582F7,
+	'bright-cyan': #89FEFE,
 	'bright-white': #fff
 
 );
@@ -41,7 +41,7 @@ $scheme-colors: (
 	'primary': (
 	
 		'fg': map-get($ansi-colors, 'white'),
-		'bg': map-get($ansi-colors, 'bright-black')
+		'bg': map-get($ansi-colors, 'black')
 	
 	),
 	// Secondary Colors
@@ -64,9 +64,9 @@ $scheme-colors: (
 $tag-colors: (
 
 		'text': mapGet($scheme-colors, 'primary', 'fg'),
-		'link': #aaa,
+		'link': map-get($ansi-colors, bright-blue),
 		'border': mapGet($scheme-colors, 'primary', 'fg'),
-		'hover': map-get($ansi-colors, 'bright-white')
+		'hover': map-get($ansi-colors, bright-white)
 
 );
 

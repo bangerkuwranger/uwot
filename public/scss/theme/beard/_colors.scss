@@ -1,0 +1,76 @@
+/****
+	
+	ANSI 16 Color Map
+
+****/
+
+$ansi-colors: (
+
+	// Standard
+	'black': #010101,
+	'red': #fe0000,
+	'green': #00fe00,
+	'yellow': #fefe00,
+	'blue': #0000fe,
+	'magenta': #fe00fe,
+	'cyan': #00fefe,
+	'white': #fefefe
+
+);
+
+
+/****
+	
+	Theme Color Map
+
+****/
+
+$scheme-colors: (
+
+	// Primary Colors
+	'primary': (
+	
+		'fg': map-get($ansi-colors, 'green'),
+		'bg': map-get($ansi-colors, 'black')
+	
+	),
+	// Secondary Colors
+	'secondary': (
+	
+		'fg': map-get($ansi-colors, 'black'),
+		'bg': map-get($ansi-colors, 'green')
+	
+	)
+
+);
+
+
+/****
+	
+	Contextual Color Shortcuts for Common Tags/States
+
+****/
+
+$tag-colors: (
+
+		'text': mapGet($scheme-colors, 'primary', 'fg'),
+		'link': mapGet($ansi-colors, 'blue'),
+		'border': mapGet($scheme-colors, 'primary', 'fg'),
+		'hover': mapGet($ansi-colors, 'blue')
+
+);
+
+
+/****
+	
+	The Master Map
+
+****/
+
+$theme-colors: (
+
+	'ansi': $ansi-colors,
+	'scheme': $scheme-colors,
+	'tag': $tag-colors
+
+);
