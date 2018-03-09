@@ -2,16 +2,20 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
+
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=greek-ext,latin-ext');
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,700,700i');
 
 body{
 
 	#wot {
 	
+		font: 16px 'Roboto', sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
+			font-family: 'Roboto Mono', monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 	
@@ -27,7 +31,7 @@ body{
 			}
 
 			.header {
-				border-color: mapGet($theme-colors, 'tag', 'border');
+				border-color: none;
 				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 			}
 
@@ -41,20 +45,20 @@ body{
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'hover');
+				border-color: none;
 		
 				form {
 			
 					.field {
 				
 						&:before {
-					
+							content: "\0024";
 						}
 				
 						input,
 						input:focus,
 						input:active {						
-							color: mapGet($theme-colors, 'tag', 'hover');
+							color: mapGet($ansi-colors, 'blue');
 						}
 			
 					}

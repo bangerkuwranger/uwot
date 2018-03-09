@@ -1,0 +1,77 @@
+@import '../../_partial/functions';
+@import '../../_partial/mixins';
+@import 'colors';
+@import '../../_partial/ansi';
+
+@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext');
+
+body{
+
+	#wot {
+	
+		font: 12px Futura, sans-serif;
+		@include ansi(mapGet($theme-colors, 'ansi'));
+		
+		.terminal {
+			font-family: 'Fira Mono', monospace;
+			color: mapGet($theme-colors, 'tag', 'text');
+			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
+			a {
+				color: mapGet($theme-colors, 'tag', 'link');
+	
+				&:hover,
+				&:active {
+					color: mapGet($theme-colors, 'tag', 'hover');
+					text-decoration: none;
+				}
+	
+			}
+
+			.header {
+				border-color: mapGet($theme-colors, 'tag', 'border');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+			}
+
+			.output {
+				width: 100%;
+				min-height: 300px;
+				margin: 2em 0;
+				background-image: url("/scss/theme/cac/img/wotcacbg.png");
+				background-size: initial;
+				background-repeat: no-repeat;
+				background-position: center;
+			}
+	
+			.cli {
+				width: calc(100% - 2em);
+				margin: 0.5em 0;
+				border-color: mapGet($theme-colors, 'tag', 'border');
+		
+				form {
+			
+					.field {
+						margin-left: 2em;
+				
+						&:before {
+							content: "\24b6 \003a ";
+							left: -2em;
+						}
+				
+						input,
+						input:focus,
+						input:active {
+							
+						}
+			
+					}
+		
+				}
+		
+			}
+	
+		}
+	
+	}
+
+}

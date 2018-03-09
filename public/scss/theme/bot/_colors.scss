@@ -7,24 +7,24 @@
 $ansi-colors: (
 
 	// Standard
-	'black': #000,
-	'red': #d00,
-	'green': #0d0,
-	'yellow': #dd0,
-	'blue': #00d,
-	'magenta': #d0d,
-	'cyan': #0dd,
-	'white': #ddd,
+	'black': #073642,
+	'red': #dc322f,
+	'green': #859900,
+	'yellow': #b58900,
+	'blue': #268bd2,
+	'magenta': #d33682,
+	'cyan': #2aa198,
+	'white': #eee8d5,
 
 	// Bright
-	'bright-black': #222,
-	'bright-red': #f00,
-	'bright-green': #0f0,
-	'bright-yellow': #ff0,
-	'bright-blue': #00f,
-	'bright-magenta': #f0f,
-	'bright-cyan': #0ff,
-	'bright-white': #fff
+	'bright-black': #002b36,
+	'bright-red': #cb4b16,
+	'bright-green': #586e75,
+	'bright-yellow': #657b83,
+	'bright-blue': #839496,
+	'bright-magenta': #6c71c4,
+	'bright-cyan': #93a1a1,
+	'bright-white': #fdf6e3
 
 );
 
@@ -64,9 +64,9 @@ $scheme-colors: (
 $tag-colors: (
 
 		'text': mapGet($scheme-colors, 'primary', 'fg'),
-		'link': #aaa,
+		'link': mapGet($ansi-colors, 'bright-green'),
 		'border': mapGet($scheme-colors, 'primary', 'fg'),
-		'hover': map-get($ansi-colors, bright-white)
+		'hover': mapGet($ansi-colors, 'white')
 
 );
 

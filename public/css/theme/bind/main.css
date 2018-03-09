@@ -437,29 +437,27 @@ body #wot .terminal .header {
 }
 /* line 33, ../../../scss/theme/bind/main.scss */
 body #wot .terminal .output {
-  width: 100%;
-  min-height: 300px;
-  margin: 2em 0;
+  background-image: url(/scss/theme/bind/img/wotbindbg.png);
 }
-/* line 40, ../../../scss/theme/bind/main.scss */
+/* line 37, ../../../scss/theme/bind/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
-  margin: 0.5em 0;
+  margin: 0 0 0.5em;
   border-color: #f0f;
 }
-/* line 47, ../../../scss/theme/bind/main.scss */
+/* line 44, ../../../scss/theme/bind/main.scss */
 body #wot .terminal .cli form .field {
-  margin-left: 5em;
+  margin-left: 2em;
 }
-/* line 50, ../../../scss/theme/bind/main.scss */
+/* line 47, ../../../scss/theme/bind/main.scss */
 body #wot .terminal .cli form .field:before {
-  content: "(RIP) \1f72";
-  left: -5em;
+  content: "\011e \00f6 \003a";
+  left: -2em;
 }
-/* line 55, ../../../scss/theme/bind/main.scss */
+/* line 52, ../../../scss/theme/bind/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {
   color: #f0f;
-  width: calc(100% - 5em);
+  width: calc(100% - 2em);
 }

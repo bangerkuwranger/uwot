@@ -30,6 +30,9 @@ body {
 				width: 100%;
 				min-height: 300px;
 				margin: 2em 0;
+				height: calc(100% - 5em);
+				background-size: cover;
+				overflow: hidden;
 			}
 		
 			.cli {

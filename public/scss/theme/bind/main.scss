@@ -31,32 +31,29 @@ body{
 			}
 
 			.output {
-				width: 100%;
-				min-height: 300px;
-				margin: 2em 0;
-		
+				background-image: url(/scss/theme/bind/img/wotbindbg.png);
 			}
 	
 			.cli {
 				width: calc(100% - 2em);
-				margin: 0.5em 0;
+				margin: 0 0 0.5em;
 				border-color: mapGet($theme-colors, 'tag', 'hover');
 		
 				form {
 			
 					.field {
-						margin-left: 5em;
+						margin-left: 2em;
 						
 						&:before {
-							content: "(RIP) \1f72";
-							left: -5em;
+							content: "\011e \00f6 \003a";
+							left: -2em;
 						}
 				
 						input,
 						input:focus,
 						input:active {						
 							color: mapGet($theme-colors, 'tag', 'hover');
-							width: calc(100% - 5em);
+							width: calc(100% - 2em);
 						}
 			
 					}
