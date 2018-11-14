@@ -1,0 +1,86 @@
+/****
+	
+	ANSI 16 Color Map
+
+****/
+
+$ansi-colors: (
+
+	// Standard
+	'black': #000000,
+	'red': #990000,
+	'green': #00A600,
+	'yellow': #999900,
+	'blue': #0000B2,
+	'magenta': #B200B2,
+	'cyan': #00A6B2,
+	'white': #BFBFBF,
+
+	// Bright
+	'bright-black': #666666,
+	'bright-red': #E50000,
+	'bright-green': #00D900,
+	'bright-yellow': #E5E500,
+	'bright-blue': #0000FF,
+	'bright-magenta': #E500E5,
+	'bright-cyan': #00E5E5,
+	'bright-white': #E5E5E5
+
+);
+
+
+/****
+	
+	Theme Color Map
+
+****/
+
+$scheme-colors: (
+
+	// Primary Colors
+	'primary': (
+	
+		'fg': #F4F4F4,
+		'bg': #262626
+	
+	),
+	// Secondary Colors
+	'secondary': (
+	
+		'fg': #000000,
+		'bg': #262626,
+	
+	)
+
+);
+
+
+/****
+	
+	Contextual Color Shortcuts for Common Tags/States
+
+****/
+
+$tag-colors: (
+
+		'text': mapGet($scheme-colors, 'primary', 'fg'),
+		'link': map-get($ansi-colors, 'blue'),
+		'border': mapGet($scheme-colors, 'primary', 'fg'),
+		'hover': map-get($ansi-colors, 'bright-blue')
+
+);
+
+
+/****
+	
+	The Master Map
+
+****/
+
+$theme-colors: (
+
+	'ansi': $ansi-colors,
+	'scheme': $scheme-colors,
+	'tag': $tag-colors
+
+);

@@ -1,0 +1,70 @@
+@import '../../_partial/functions';
+@import '../../_partial/mixins';
+@import 'colors';
+@import '../../_partial/ansi';
+
+@import url('https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700&subset=latin-ext');
+
+body{
+
+	#wot {
+		font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
+		
+		@include ansi(mapGet($theme-colors, 'ansi'));
+		
+		.terminal {
+			font-family: monaco, 'Anonymous Pro', Consolas, "Lucida Console", monospace;
+			color: mapGet($theme-colors, 'tag', 'text');
+			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
+			a {
+				color: mapGet($theme-colors, 'tag', 'link');
+	
+				&:hover,
+				&:active {
+					color: mapGet($theme-colors, 'tag', 'hover');
+					text-decoration: none;
+				}
+	
+			}
+
+			.header {
+				border-color: mapGet($theme-colors, 'tag', 'border');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+			}
+
+			.output {
+				width: 100%;
+				min-height: 300px;
+			}
+	
+			.cli {
+				width: calc(100% - 2em);
+				margin: 0.5em 0;
+				border-color: mapGet($theme-colors, 'tag', 'border');
+		
+				form {
+			
+					.field {
+				
+						&:before {
+							content: " \0024 ";
+						}
+				
+						input,
+						input:focus,
+						input:active {						
+							color: mapGet($theme-colors, 'ansi', 'bright-white');
+						}
+			
+					}
+		
+				}
+		
+			}
+	
+		}
+	
+	}
+
+}
