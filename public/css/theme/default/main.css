@@ -443,15 +443,14 @@ body #wot .terminal .header {
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 2em 0;
 }
-/* line 41, ../../../scss/theme/default/main.scss */
+/* line 39, ../../../scss/theme/default/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #ddd;
 }
-/* line 54, ../../../scss/theme/default/main.scss */
+/* line 52, ../../../scss/theme/default/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {

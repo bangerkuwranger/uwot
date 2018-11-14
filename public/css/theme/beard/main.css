@@ -297,19 +297,18 @@ body #wot .terminal .header {
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 2em 0;
 }
-/* line 43, ../../../scss/theme/beard/main.scss */
+/* line 41, ../../../scss/theme/beard/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #00fe00;
 }
-/* line 52, ../../../scss/theme/beard/main.scss */
+/* line 50, ../../../scss/theme/beard/main.scss */
 body #wot .terminal .cli form .field:before {
   content: '\0023';
 }
-/* line 56, ../../../scss/theme/beard/main.scss */
+/* line 54, ../../../scss/theme/beard/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {

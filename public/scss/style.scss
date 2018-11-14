@@ -29,10 +29,11 @@ body {
 			.output {
 				width: 100%;
 				min-height: 300px;
-				margin: 2em 0;
-				height: calc(100% - 5em);
+				margin: 5em 0;
+				height: calc(100% - 8em);
 				background-size: cover;
 				overflow: hidden;
+				overflow-y: auto;
 			}
 		
 			.cli {

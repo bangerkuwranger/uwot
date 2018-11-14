@@ -450,19 +450,18 @@ body #wot .terminal .header {
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 2em 0;
 }
-/* line 45, ../../../scss/theme/bot/main.scss */
+/* line 43, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: none;
 }
-/* line 54, ../../../scss/theme/bot/main.scss */
+/* line 52, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .cli form .field:before {
   content: "\0024";
 }
-/* line 58, ../../../scss/theme/bot/main.scss */
+/* line 56, ../../../scss/theme/bot/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {

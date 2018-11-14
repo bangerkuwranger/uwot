@@ -449,23 +449,22 @@ body #wot .terminal .header {
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 2em 0;
   background-image: url("/scss/theme/cac/img/wotcacbg.png");
   background-size: initial;
   background-repeat: no-repeat;
   background-position: center;
 }
-/* line 46, ../../../scss/theme/cac/main.scss */
+/* line 45, ../../../scss/theme/cac/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #DA1200;
 }
-/* line 53, ../../../scss/theme/cac/main.scss */
+/* line 52, ../../../scss/theme/cac/main.scss */
 body #wot .terminal .cli form .field {
   margin-left: 2em;
 }
-/* line 56, ../../../scss/theme/cac/main.scss */
+/* line 55, ../../../scss/theme/cac/main.scss */
 body #wot .terminal .cli form .field:before {
   content: "\24b6 \003a ";
   left: -2em;

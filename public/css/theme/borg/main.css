@@ -449,24 +449,23 @@ body #wot .terminal .header {
 body #wot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 2em 0;
 }
-/* line 43, ../../../scss/theme/borg/main.scss */
+/* line 41, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #fff;
 }
-/* line 50, ../../../scss/theme/borg/main.scss */
+/* line 48, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli form .field {
   margin-left: 3em;
 }
-/* line 53, ../../../scss/theme/borg/main.scss */
+/* line 51, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli form .field:before {
   content: "C\003a\005c\003e";
   left: -3em;
 }
-/* line 58, ../../../scss/theme/borg/main.scss */
+/* line 56, ../../../scss/theme/borg/main.scss */
 body #wot .terminal .cli form .field input,
 body #wot .terminal .cli form .field input:focus,
 body #wot .terminal .cli form .field input:active {
