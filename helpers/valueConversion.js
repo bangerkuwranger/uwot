@@ -1,5 +1,6 @@
-require('../helpers/dateMethods');
-require('../helpers/stringMethods');
+require('./dateMethods');
+require('./stringMethods');
+require('./arrayMethods');
 module.exports = {
 
 	stringNoSpaces: function stringNoSpaces(value, format) {
@@ -258,6 +259,12 @@ module.exports = {
 		
 		}
 	
+	},
+	
+	arrayOfObjectsOrEmpty: function arrayOfObjectsOrEmpty(value) {
+
+		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'object' == typeof value[0] ? value : [];
+		
 	}
 
 };
