@@ -3,7 +3,6 @@ var Datastore = require('nedb');
 var bcrypt = require('bcryptjs');
 var sanitize = require('./helpers/valueConversion');
 var rules = require('password-rules');
-var db = new Datastore({ filename: 'var/nedb/users.js', autoload: true, timestampData: true });
 
 /**
  * Number	_id
@@ -100,6 +99,12 @@ var db = new Datastore({ filename: 'var/nedb/users.js', autoload: true, timestam
 
 class WotUsers() {
 
+	constructor() {
+	
+		this.db = new Datastore({ filename: 'var/nedb/users.js', autoload: true, timestampData: true });
+	
+	}
+	
 	findById(uId, callback) {
 	
 		var self = this;
@@ -116,7 +121,7 @@ class WotUsers() {
 		else {
 		
 			self.fbiCallback = callback;
-			db.find({_id: uId}, {password: 0, salt: 0}, function(error, data) {
+			this.db.find({_id: uId}, {password: 0, salt: 0}, function(error, data) {
 			
 				if (error) {
 				
@@ -167,7 +172,7 @@ class WotUsers() {
 		else {
 		
 			self.fbnCallback = callback;
-			db.find({uName: sanitize.cleanString(uName)}, {password: 0, salt: 0}, function(error, data) {
+			this.db.find({uName: sanitize.cleanString(uName)}, {password: 0, salt: 0}, function(error, data) {
 			
 				if (error) {
 				
@@ -253,7 +258,7 @@ class WotUsers() {
 					);
 					newUser.password = newUser.saltPass(newUser.password);
 					delete newUser._id;
-					db.insert(newUser, function(error, data) {
+					self.db.insert(newUser, function(error, data) {
 			
 						if (error) {
 				
@@ -297,7 +302,7 @@ class WotUsers() {
 		else {
 		
 			self.rCallback = callback;
-			db.remove({_id: uId}, function(error, data) {
+			this.db.remove({_id: uId}, function(error, data) {
 			
 				if (error) {
 				
@@ -369,7 +374,7 @@ class WotUsers() {
 						false
 					);
 					uObj.password = uObj.saltPass(uObj.password);
-					db.update({_id: uId}, {$set: {password: uObj.password, salt: uObj.salt}}, function(error, data) {
+					self.db.update({_id: uId}, {$set: {password: uObj.password, salt: uObj.salt}}, function(error, data) {
 			
 						if (error) {
 				
@@ -413,7 +418,7 @@ class WotUsers() {
 		else {
 		
 			self.vCallback = callback;
-			db.find({_id: uId}, function(error, data) {
+			this.db.find({_id: uId}, function(error, data) {
 			
 				if (error) {
 				
@@ -465,7 +470,7 @@ class WotUsers() {
 		
 			self.iuCallback = callback;
 			var iuQuery = {uName: username};
-			db.count(iuQuery, function(error, result) {
+			this.db.count(iuQuery, function(error, result) {
 		
 				if (error) {
 				
