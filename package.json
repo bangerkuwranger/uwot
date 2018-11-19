@@ -8,6 +8,7 @@
   "dependencies": {
     "bash-ast-traverser": "0.5.0",
     "bash-parser": "0.5.0",
+    "bcryptjs": "2.4.3",
     "body-parser": "^1.18.3",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
@@ -20,6 +21,7 @@
     "node-timednonce": "^1.1.4",
     "passport": "^0.4.0",
     "passport-custom": "^1.0.5",
+    "password-rules": "^0.3.0",
     "pug": "2.0.0-beta11",
     "remove": "^0.1.5",
     "serve-favicon": "~2.4.5",
