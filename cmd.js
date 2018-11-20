@@ -1,4 +1,4 @@
-'use-strict'
+'use strict';
 var Datastore = require('nedb');
 var fs = require('fs');
 var path = require('path');

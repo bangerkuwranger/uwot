@@ -16,7 +16,7 @@ var rules = require('password-rules');
  * Boolean 	sudoer
  */
  
- class User {
+class User {
 
  	constructor(
  		_id,
@@ -94,10 +94,10 @@ var rules = require('password-rules');
 	
 	}
 
-}
+};
 
 
-class WotUsers() {
+module.exports = class WotUsers {
 
 	constructor() {
 	
@@ -396,7 +396,7 @@ class WotUsers() {
 				
 				}
 			
-			}
+			});
 		
 		}
 	
@@ -490,6 +490,4 @@ class WotUsers() {
 	
 	}
 
-}
-
-module.exports = WotUsers;
+};
