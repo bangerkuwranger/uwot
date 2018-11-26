@@ -1,5 +1,9 @@
 var path = require('path');
 global.appRoot = path.resolve(__dirname);
+if ('undefined' == typeof global.wotBin) {
+	global.wotBin = {}};
+}
+
 var etcProd = path.resolve(__dirname, 'etc', 'prod');
 var etcDev = path.resolve(__dirname, 'etc', 'dev');
 
@@ -10,6 +14,7 @@ var fileLog = require('./middleware/logging');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
+var cmd = require('./cmd');
 
 var index = require('./routes/index');
 
@@ -17,6 +22,13 @@ var app = express();
 var themeName = 'string' == typeof process.env.WOT_THEME ? process.env.WOT_THEME : 'default';
 app.set ('wot theme', themeName);
 var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);
+
+app.set(
+	'exports',
+	{
+		wotCmd: cmd
+	}
+);
 
 // view engine setup
 app.set('views', path.join(global.appRoot, 'views'));

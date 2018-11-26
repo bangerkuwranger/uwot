@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
 if ('undefined' == typeof global.wotBin) {
-	global.wotBin = [];
+	global.wotBin = {}};
 }
 
 class WotCmdCommand {

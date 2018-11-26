@@ -7,6 +7,7 @@ const operations = [
 	"history"
 ];
 
+//to be replaced by AST parsed logic
 router.post('/', function(req, res, next) {
 
 	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
