@@ -1,5 +1,5 @@
 'use strict';
-var Datastore = require('nedb');
+var Datastore = require('nedb-core');
 var bcrypt = require('bcryptjs');
 var sanitize = require('./helpers/valueConversion');
 var rules = require('password-rules');
