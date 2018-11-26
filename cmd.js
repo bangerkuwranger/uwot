@@ -1,5 +1,5 @@
 'use strict';
-var Datastore = require('nedb');
+var Datastore = require('nedb-core');
 var fs = require('fs');
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
@@ -28,7 +28,7 @@ class WotCmdCommand {
 class WotCmdOption {
 
 	constructor(
-		description
+		description,
 		shortOpt,
 		longOpt,
 		requiredArguments,
@@ -82,10 +82,10 @@ class WotCmd {
 		try {
 		
 			this.command = new WotCmdCommand(
-				command.name
+				command.name,
 				command.description,
-				command.required,
-				command.optional
+				command.requiredArguments,
+				command.optionalArguments
 			);
 		
 		}
@@ -105,8 +105,8 @@ class WotCmd {
 					options[i].description,
 					options[i].shortOpt,
 					options[i].longOpt,
-					options[i].required,
-					options[i].optional
+					options[i].requiredArguments,
+					options[i].optionalArguments
 				);
 			
 			}
@@ -122,7 +122,7 @@ class WotCmd {
 		try {
 		
 			this.path = sanitize.cleanString(path);
-			global[this.command.name] = require(this.path);
+			global.wotBin[this.command.name] = require(this.path);
 		
 		}
 		catch(e) {
