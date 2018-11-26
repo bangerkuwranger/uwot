@@ -30,7 +30,7 @@ class User {
  		sudoer
 	) {
 	
-		var clean_id = sanitize.cleanInt(_id, null);
+		var clean_id = sanitize.cleanString(_id, null);
 		if (null !== clean_id) {
 		
 			this._id = clean_id;
@@ -101,7 +101,7 @@ module.exports = class WotUsers {
 
 	constructor() {
 	
-		this.db = new Datastore({ filename: 'var/nedb/users.js', autoload: true, timestampData: true });
+		this.db = new Datastore({ filename: 'var/nedb/users.db', autoload: true, timestampData: true });
 	
 	}
 	
@@ -113,7 +113,7 @@ module.exports = class WotUsers {
 			throw new TypeError('invalid callback passed to findById.');
 		
 		}
-		else if (isNaN(parseInt(uId))) {
+		else if ('string' != typeof uId || '' === uId) {
 		
 			return callback(new TypeError('invalid id passed to findById.'), null);
 		
@@ -215,7 +215,7 @@ module.exports = class WotUsers {
 			throw new TypeError('invalid callback passed to createNew.');
 		
 		}
-		else if ('object' !== typeof uObj || null === uObj || 'string' !== uObj.uName || '' === uObj.uName || 'string' !== typeof uObj.password || '' === uObj.password) {
+		else if ('object' !== typeof uObj || null === uObj || 'string' !== typeof uObj.uName || '' === uObj.uName || 'string' !== typeof uObj.password || '' === uObj.password) {
 		
 			return callback(new TypeError('invalid user object passed to createNew.'), null);
 		
@@ -224,7 +224,7 @@ module.exports = class WotUsers {
 		
 			self.cnCallback = callback;
 			var pwInvalid = rules(uObj.password, {maximumLength: 255});
-			this.isUnique(sanitize.cleanString(uObj.password), function(error, isUnique) {
+			this.isUnique(sanitize.cleanString(uObj.uName), function(error, isUnique) {
 			
 				if (error) {
 		
@@ -262,17 +262,17 @@ module.exports = class WotUsers {
 			
 						if (error) {
 				
-							return this.cnCallback(error, null);
+							return self.cnCallback(error, null);
 				
 						}
-						else if (!data.length) {
+						else if ('object' != typeof data || null === data || 'string' != typeof data._id) {
 				
-							return this.cnCallback(false, false);
+							return self.cnCallback(false, false);
 				
 						}
 						else {
 				
-							return this.cnCallback(false, data);
+							return self.cnCallback(false, data);
 				
 						}
 			
@@ -294,7 +294,7 @@ module.exports = class WotUsers {
 			throw new TypeError('invalid callback passed to remove.');
 		
 		}
-		else if ('number' != typeof uId || 0 > uId) {
+		else if ('string' != typeof uId || '' === uId) {
 		
 			return callback(new TypeError('invalid user id passed to remove.'), null)
 		
@@ -306,17 +306,17 @@ module.exports = class WotUsers {
 			
 				if (error) {
 				
-					return this.rCallback(error, null);
+					return self.rCallback(error, null);
 				
 				}
 				else if (data === 0) {
 				
-					return this.rCallback(false, false);
+					return self.rCallback(false, false);
 				
 				}
 				else {
 				
-					return this.rCallback(false, true);
+					return self.rCallback(false, true);
 				
 				}
 			
@@ -334,7 +334,7 @@ module.exports = class WotUsers {
 			throw new TypeError('invalid callback passed to changePw.');
 		
 		}
-		else if ('number' != typeof uId || 0 > uId || 'string' !== typeof oldPw || 'string' !== typeof newPw) {
+		else if ('string' != typeof uId || '' === uId || 'string' !== typeof oldPw || 'string' !== typeof newPw) {
 		
 			return callback(new TypeError('invalid args passed to changePw.'), null);
 		
@@ -352,12 +352,17 @@ module.exports = class WotUsers {
 				}
 				else if (!isValid) {
 				
-					return self.cpCallback(new Error('current data for user is invalid.'), null);
+					return self.cpCallback(new Error('Cannot change user password; old password invalid.'), null);
 				
 				}
 				else if (pwInvalid) {
 				
-					return self.cpCallback(new Error(pwInvalid.sentence), null);
+					return self.cpCallback(new Error('Invalid value for new password: ' + pwInvalid.sentence), null);
+				
+				}
+				else if (oldPw === newPw) {
+					
+					return self.cpCallback(new Error('Invalid value for new password: Password must be unique.'), null);
 				
 				}
 				else {
@@ -402,6 +407,86 @@ module.exports = class WotUsers {
 	
 	}
 	
+	changeName(uId, fName, lName, callback) {
+	
+		var self = this;
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to changeName.');
+		
+		}
+		else if ('string' != typeof uId || '' === uId || 'string' !== typeof fName || 'string' !== typeof lName) {
+		
+			return callback(new TypeError('invalid args passed to changeName.'), null);
+		
+		}
+		else {
+		
+			self.cnameCallback = callback;
+			this.db.update({_id: sanitize.cleanString(uId, null)}, {$set: {fName: sanitize.cleanString(fName), lName: sanitize.cleanString(lName)}}, {}, function(error, numReplaced){
+			
+				if (error) {
+				
+					return self.cnameCallback(error, null);
+				
+				}
+				else if ('number' != typeof numReplaced || numReplaced < 1) {
+				
+					return self.cnameCallback(false, false);
+				
+				}
+				else {
+				
+					return self.cnameCallback(false, true);
+				
+				}
+			
+			});
+		
+		}
+	
+	}
+	
+	changeSudo(uId, maySudo, callback) {
+	
+		var self = this;
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to changeSudo.');
+		
+		}
+		else if ('string' != typeof uId || '' === uId || ('boolean' != typeof maySudo && ('string' == typeof maySudo && 'true' !== maySudo.toLowerCase() && 'false' !== maySudo.toLowerCase()))) {
+		
+			return callback(new TypeError('invalid args passed to changeSudo.'), null);
+		
+		}
+		else {
+		
+			self.csCallback = callback;
+			this.db.update({_id: sanitize.cleanString(uId, null)}, {$set: {sudoer: sanitize.cleanBool(maySudo)}}, {}, function(error, numReplaced){
+			
+				if (error) {
+				
+					return self.csCallback(error, null);
+				
+				}
+				else if ('number' != typeof numReplaced || numReplaced < 1) {
+				
+					return self.csCallback(false, false);
+				
+				}
+				else {
+				
+					return self.csCallback(false, true);
+				
+				}
+			
+			});
+		
+		}
+	
+	}
+	
 	validate(uId, pw, callback) {
 	
 		var self = this;
@@ -410,7 +495,7 @@ module.exports = class WotUsers {
 			throw new TypeError('invalid callback passed to validate.');
 		
 		}
-		else if ('number' != typeof uId || 0 > uId || 'string' !== typeof pw || '' === pw) {
+		else if ('string' != typeof uId || '' === uId || 'string' !== typeof pw || '' === pw) {
 		
 			return callback(new TypeError('invalid args passed to validate.'), null);
 		
@@ -450,6 +535,23 @@ module.exports = class WotUsers {
 			});
 		
 		}
+	
+	}
+	
+	listUsers(callback) {
+	
+		if ('function' != typeof callback) {
+		
+			return;
+		
+		}
+		this.db.find({})
+		.sort({uName: 1})
+		.exec(function(error, results) {
+		
+			callback(error, results);
+		
+		});
 	
 	}
 	
