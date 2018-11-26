@@ -90,7 +90,6 @@ router.use(passport.session());
 router.use(function (req, res, next) {
 
 	res.locals.login = req.isAuthenticated();
-	res.locals.message = req.flash();
     if (res.locals.login) {
     
     	res.locals.user = 'undefined' != typeof req.user.user_name ? req.user.user_name : '';
@@ -98,16 +97,13 @@ router.use(function (req, res, next) {
         next();
     
     }
-    else if (req.path.indexOf('/login') > -1 || req.path.indexOf('/logout') > -1) {
+   //  else if (req.path.indexOf('/login') > -1 || req.path.indexOf('/logout') > -1) {
+//     
+//     	next();
+//     
+//     }
+	next();
     
-    	next();
-    
-    }
-    else {
-    
-        res.redirect('/login');
-        
-    }
     
 });
 
