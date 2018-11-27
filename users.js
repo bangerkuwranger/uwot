@@ -97,7 +97,7 @@ class User {
 };
 
 
-module.exports = class WotUsers {
+module.exports = class UwotUsers {
 
 	constructor() {
 	

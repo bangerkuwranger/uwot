@@ -112,7 +112,7 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res, next) {
 	
 	var respValues = {
-		title: 'WOT 1.0.0a', 
+		title: 'UWOT 1.0.0a', 
 		theme: 'default',
 		nonce: nonceHandler.create( 'index-get', 300000 )
 	};

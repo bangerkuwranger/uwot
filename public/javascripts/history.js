@@ -1,7 +1,7 @@
 'use strict';
-const INDEX_FIELD = 'WotHistoryIndex';
-const INTVL_FIELD = 'WotHistoryInterval';
-const INDEX_PREFIX = 'wotclih';
+const INDEX_FIELD = 'UwotHistoryIndex';
+const INTVL_FIELD = 'UwotHistoryInterval';
+const INDEX_PREFIX = 'uwotclih';
 class CliHistory {
 
 	constructor() {

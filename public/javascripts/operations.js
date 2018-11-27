@@ -1,30 +1,30 @@
 'use strict';
-const wotCliValidOps = [
+const uwotCliValidOps = [
 	"clear",
 	"history"
 ];
 
-class WotCliOperations {
+class UwotCliOperations {
 
 	constructor() {}
 	
 	performOperation(operationName) {
 	
-		if (-1 != wotCliValidOps.indexOf(operationName.trim())) {
+		if (-1 != uwotCliValidOps.indexOf(operationName.trim())) {
 			this[operationName.trim()]();
 		}
 	
 	}
 	
 	clear() {
-		jQuery('#wotoutput').html('');
+		jQuery('#uwotoutput').html('');
 	}
 	
 	history() {
-		if ('undefined' == wotHistory || !(wotHistory instanceof CliHistory)) {
-			wotHistory = new CliHistory();
+		if ('undefined' == uwotHistory || !(uwotHistory instanceof CliHistory)) {
+			uwotHistory = new CliHistory();
 		}
-		var histArray = wotHistory.getAllItems();
+		var histArray = uwotHistory.getAllItems();
 		var maxDigits = countIntDigits(histArray.length);
 		for (let i = 0; i < histArray.length; i++) {
 			let digitsOff = maxDigits - countIntDigits(i);

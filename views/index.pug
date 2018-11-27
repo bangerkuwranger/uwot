@@ -9,13 +9,13 @@ block content
 		-var nval = nonce
 	-else
 		-var nval = ''
-	div(class=themeClass class=["wot"] id='wot')
-		div(id='woterminal' class='terminal')
-			div(id='wotheader' class='header')
+	div(class=themeClass class=["uwot"] id='uwot')
+		div(id='uwotterminal' class='terminal')
+			div(id='uwotheader' class='header')
 				h1= title
-			div(id='wotoutput' class='output')
-			div(id='wotcli' class='cli')
+			div(id='uwotoutput' class='output')
+			div(id='uwotcli' class='cli')
 				form(id='cliform' name='cliform' method='POST' autocomplete="off")
 					div(class='field')
-						input(id='wotcli-input' name='path' autocomplete="off")
-						input(id='wotcli-nonce' name='nonce' type='hidden' value=nval)
+						input(id='uwotcli-input' name='path' autocomplete="off")
+						input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)

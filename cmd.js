@@ -1,13 +1,12 @@
 'use strict';
-var Datastore = require('nedb-core');
 var fs = require('fs');
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
-if ('undefined' == typeof global.wotBin) {
-	global.wotBin = {}};
+if ('undefined' == typeof global.UwotBin) {
+	global.UwotBin = {}};
 }
 
-class WotCmdCommand {
+class UwotCmdCommand {
 
 	constructor(
 		name,
@@ -25,7 +24,7 @@ class WotCmdCommand {
 
 }
 
-class WotCmdOption {
+class UwotCmdOption {
 
 	constructor(
 		description,
@@ -46,7 +45,7 @@ class WotCmdOption {
 }
 
 
-class WotCmd {
+class UwotCmd {
 
 	/**
 	 * 
@@ -65,7 +64,7 @@ class WotCmd {
 	 * }
 	 *
 	 * options [
-	 *  	(WotCmdOption)option1,
+	 *  	(UwotCmdOption)option1,
 	 *		...
 	 * ]
 	 *
@@ -81,7 +80,7 @@ class WotCmd {
 	
 		try {
 		
-			this.command = new WotCmdCommand(
+			this.command = new UwotCmdCommand(
 				command.name,
 				command.description,
 				command.requiredArguments,
@@ -101,7 +100,7 @@ class WotCmd {
 			this.options = [];
 			for (let i = 0; i < options.length; i++) {
 			
-				this.options[i] = new WotCmdOption(
+				this.options[i] = new UwotCmdOption(
 					options[i].description,
 					options[i].shortOpt,
 					options[i].longOpt,
@@ -122,7 +121,7 @@ class WotCmd {
 		try {
 		
 			this.path = sanitize.cleanString(path);
-			global.wotBin[this.command.name] = require(this.path);
+			global.UwotBin[this.command.name] = require(this.path);
 		
 		}
 		catch(e) {
@@ -216,4 +215,4 @@ class WotCmd {
 
 }
 
-module.exports = WotCmd;
+module.exports = UwotCmd;

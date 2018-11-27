@@ -1,7 +1,7 @@
 var path = require('path');
 global.appRoot = path.resolve(__dirname);
-if ('undefined' == typeof global.wotBin) {
-	global.wotBin = {}};
+if ('undefined' == typeof global.UwotBin) {
+	global.UwotBin = {}};
 }
 
 var etcProd = path.resolve(__dirname, 'etc', 'prod');
@@ -19,14 +19,14 @@ var cmd = require('./cmd');
 var index = require('./routes/index');
 
 var app = express();
-var themeName = 'string' == typeof process.env.WOT_THEME ? process.env.WOT_THEME : 'default';
-app.set ('wot theme', themeName);
+var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : 'default';
+app.set ('uwot_theme', themeName);
 var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);
 
 app.set(
 	'exports',
 	{
-		wotCmd: cmd
+		UwotCmd: cmd
 	}
 );
 

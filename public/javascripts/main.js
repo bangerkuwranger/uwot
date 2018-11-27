@@ -1,18 +1,18 @@
 'use strict';
-var wotHistory;
+var uwotHistory;
 jQuery(document).ready(function($) {
 
-	wotHistory = new CliHistory();
+	uwotHistory = new CliHistory();
 	
-	$("#wotcli-input").focus();
+	$("#uwotcli-input").focus();
 	
-	$("#wotcli").submit(function(e) {
+	$("#uwotcli").submit(function(e) {
 		e.preventDefault();
-		var op = $('#wotcli-input').val();
-		wotHistory.addItem(op);
+		var op = $('#uwotcli-input').val();
+		uwotHistory.addItem(op);
 		outputToMain(op);
-		$("#wotcli-input").val('').focus();
-		var nonce = $('#wotcli-nonce').val();
+		$("#uwotcli-input").val('').focus();
+		var nonce = $('#uwotcli-nonce').val();
 		$.post(
 			'/bin',
 			{
@@ -28,18 +28,18 @@ jQuery(document).ready(function($) {
 		});
 	});
 
-	$("#wotcli-input").keyup(function(e) {
+	$("#uwotcli-input").keyup(function(e) {
 		switch(e.which) {
 			case 38: // up
 				e.preventDefault();
-				var prevCmd = wotHistory.getPrevItem();
-				$("#wotcli-input").val(prevCmd).focus();
+				var prevCmd = uwotHistory.getPrevItem();
+				$("#uwotcli-input").val(prevCmd).focus();
 				break;
 
 			case 40: // down
 				e.preventDefault();
-				var nextCmd = wotHistory.getNextItem();
-				$("#wotcli-input").val(nextCmd).focus();
+				var nextCmd = uwotHistory.getNextItem();
+				$("#uwotcli-input").val(nextCmd).focus();
 				break;
 
 			default: return; // exit this handler for other keys
@@ -50,14 +50,14 @@ jQuery(document).ready(function($) {
 
 function outputToMain(data) {
 	if ('string' == typeof data) {
-		jQuery('#wotoutput').append('<div class="outputline"><pre>'+ data +'</pre></div>');
+		jQuery('#uwotoutput').append('<div class="outputline"><pre>'+ data +'</pre></div>');
 	}
 	if ('object' == typeof data && null !== data) {
 		if ('string' == typeof data.output && '' !== data.output) {
-			jQuery('#wotoutput').append('<div class="outputline"><pre>'+ data.output +'</pre></div>');
+			jQuery('#uwotoutput').append('<div class="outputline"><pre>'+ data.output +'</pre></div>');
 		}
-		if ('string' == typeof data.operation && 'object' == typeof wotCliValidOps && Array.isArray(wotCliValidOps) && -1 != wotCliValidOps.indexOf(data.operation.trim())) {
-			let ops = new WotCliOperations();
+		if ('string' == typeof data.operation && 'object' == typeof uwotCliValidOps && Array.isArray(uwotCliValidOps) && -1 != uwotCliValidOps.indexOf(data.operation.trim())) {
+			let ops = new UwotCliOperations();
 			ops.performOperation(data.operation.trim());
 		}
 	}

@@ -1,5 +1,5 @@
 {
-  "name": "wot-cli",
+  "name": "uwot",
   "version": "1.0.0",
   "license": "MIT",
   "author": {
@@ -8,7 +8,7 @@
 		"url": "http://www.chadacarino.com"
   },
   "private": true,
-  "repository": "github:bangerkuwranger/wot",
+  "repository": "github:bangerkuwranger/uwot",
   "scripts": {
     "start": "node ./bin/www"
   },

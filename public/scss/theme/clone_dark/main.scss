@@ -7,7 +7,7 @@
 
 body{
 
-	#wot {
+	#uwot {
 		font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -54,7 +54,7 @@ body{
 						input,
 						input:focus,
 						input:active {						
-							color: mapGet($theme-colors, 'ansi', 'bright-white');
+							color: mapGet($theme-colors, 'ansi', 'bright-white ');
 						}
 			
 					}
