@@ -47,11 +47,11 @@ body {
   margin: 0;
 }
 /* line 8, ../scss/style.scss */
-body #wot {
+body #uwot {
   font: 14px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 11, ../scss/style.scss */
-body #wot .terminal {
+body #uwot .terminal {
   font-family: monospace;
   width: calc(100% - 2em);
   height: calc(100% - 2em);
@@ -60,7 +60,7 @@ body #wot .terminal {
   padding: 1em;
 }
 /* line 19, ../scss/style.scss */
-body #wot .terminal .header {
+body #uwot .terminal .header {
   min-height: 1em;
   border-bottom: 1px solid;
   position: absolute;
@@ -70,7 +70,7 @@ body #wot .terminal .header {
   margin: 0.5em 0;
 }
 /* line 29, ../scss/style.scss */
-body #wot .terminal .output {
+body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
   margin: 5em 0;
@@ -80,7 +80,7 @@ body #wot .terminal .output {
   overflow-y: auto;
 }
 /* line 39, ../scss/style.scss */
-body #wot .terminal .cli {
+body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
   overflow: hidden;
@@ -92,26 +92,26 @@ body #wot .terminal .cli {
   z-index: 10;
 }
 /* line 50, ../scss/style.scss */
-body #wot .terminal .cli form {
+body #uwot .terminal .cli form {
   width: 100%;
 }
 /* line 53, ../scss/style.scss */
-body #wot .terminal .cli form .field {
+body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 1em;
 }
 /* line 58, ../scss/style.scss */
-body #wot .terminal .cli form .field:before {
+body #uwot .terminal .cli form .field:before {
   content: "\003e";
   position: absolute;
   left: -1em;
   top: 0;
 }
 /* line 65, ../scss/style.scss */
-body #wot .terminal .cli form .field input,
-body #wot .terminal .cli form .field input:focus,
-body #wot .terminal .cli form .field input:active {
+body #uwot .terminal .cli form .field input,
+body #uwot .terminal .cli form .field input:focus,
+body #uwot .terminal .cli form .field input:active {
   margin: 0;
   padding: 0;
   display: inline-block;

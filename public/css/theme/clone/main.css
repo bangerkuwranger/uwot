@@ -89,11 +89,11 @@ $decorations must be one of the following:
 */
 @import url("https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700&subset=latin-ext");
 /* line 10, ../../../scss/theme/clone/main.scss */
-body #wot {
+body #uwot {
   font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi {
+body #uwot .ansi {
   /* black */
   /* red */
   /* green */
@@ -112,357 +112,357 @@ body #wot .ansi {
   /* bright-white */
 }
 /* line 67, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bold,
-body #wot .ansi .bold {
+body #uwot .ansi.bold,
+body #uwot .ansi .bold {
   font-weight: 800;
 }
 /* line 75, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.underline,
-body #wot .ansi .underline {
+body #uwot .ansi.underline,
+body #uwot .ansi .underline {
   text-decoration: underline;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-black {
+body #uwot .ansi.fg-black {
   color: #2C3836;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-black.reversed,
-body #wot .ansi.fg-black .ansi.reversed {
+body #uwot .ansi.fg-black.reversed,
+body #uwot .ansi.fg-black .ansi.reversed {
   color: inherit;
   background-color: #2C3836;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-black {
+body #uwot .ansi.bg-black {
   background-color: #2C3836;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-black.reversed,
-body #wot .ansi.bg-black .ansi.reversed {
+body #uwot .ansi.bg-black.reversed,
+body #uwot .ansi.bg-black .ansi.reversed {
   color: #2C3836;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-red {
+body #uwot .ansi.fg-red {
   color: #FB5233;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-red.reversed,
-body #wot .ansi.fg-red .ansi.reversed {
+body #uwot .ansi.fg-red.reversed,
+body #uwot .ansi.fg-red .ansi.reversed {
   color: inherit;
   background-color: #FB5233;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-red {
+body #uwot .ansi.bg-red {
   background-color: #FB5233;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-red.reversed,
-body #wot .ansi.bg-red .ansi.reversed {
+body #uwot .ansi.bg-red.reversed,
+body #uwot .ansi.bg-red .ansi.reversed {
   color: #FB5233;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-green {
+body #uwot .ansi.fg-green {
   color: #31CE38;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-green.reversed,
-body #wot .ansi.fg-green .ansi.reversed {
+body #uwot .ansi.fg-green.reversed,
+body #uwot .ansi.fg-green .ansi.reversed {
   color: inherit;
   background-color: #31CE38;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-green {
+body #uwot .ansi.bg-green {
   background-color: #31CE38;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-green.reversed,
-body #wot .ansi.bg-green .ansi.reversed {
+body #uwot .ansi.bg-green.reversed,
+body #uwot .ansi.bg-green .ansi.reversed {
   color: #31CE38;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-yellow {
+body #uwot .ansi.fg-yellow {
   color: #DED979;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-yellow.reversed,
-body #wot .ansi.fg-yellow .ansi.reversed {
+body #uwot .ansi.fg-yellow.reversed,
+body #uwot .ansi.fg-yellow .ansi.reversed {
   color: inherit;
   background-color: #DED979;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-yellow {
+body #uwot .ansi.bg-yellow {
   background-color: #DED979;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-yellow.reversed,
-body #wot .ansi.bg-yellow .ansi.reversed {
+body #uwot .ansi.bg-yellow.reversed,
+body #uwot .ansi.bg-yellow .ansi.reversed {
   color: #DED979;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-blue {
+body #uwot .ansi.fg-blue {
   color: #55B9F2;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-blue.reversed,
-body #wot .ansi.fg-blue .ansi.reversed {
+body #uwot .ansi.fg-blue.reversed,
+body #uwot .ansi.fg-blue .ansi.reversed {
   color: inherit;
   background-color: #55B9F2;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-blue {
+body #uwot .ansi.bg-blue {
   background-color: #55B9F2;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-blue.reversed,
-body #wot .ansi.bg-blue .ansi.reversed {
+body #uwot .ansi.bg-blue.reversed,
+body #uwot .ansi.bg-blue .ansi.reversed {
   color: #55B9F2;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-magenta {
+body #uwot .ansi.fg-magenta {
   color: #D492E5;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-magenta.reversed,
-body #wot .ansi.fg-magenta .ansi.reversed {
+body #uwot .ansi.fg-magenta.reversed,
+body #uwot .ansi.fg-magenta .ansi.reversed {
   color: inherit;
   background-color: #D492E5;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-magenta {
+body #uwot .ansi.bg-magenta {
   background-color: #D492E5;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-magenta.reversed,
-body #wot .ansi.bg-magenta .ansi.reversed {
+body #uwot .ansi.bg-magenta.reversed,
+body #uwot .ansi.bg-magenta .ansi.reversed {
   color: #D492E5;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-cyan {
+body #uwot .ansi.fg-cyan {
   color: #3AFCFE;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-cyan.reversed,
-body #wot .ansi.fg-cyan .ansi.reversed {
+body #uwot .ansi.fg-cyan.reversed,
+body #uwot .ansi.fg-cyan .ansi.reversed {
   color: inherit;
   background-color: #3AFCFE;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-cyan {
+body #uwot .ansi.bg-cyan {
   background-color: #3AFCFE;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-cyan.reversed,
-body #wot .ansi.bg-cyan .ansi.reversed {
+body #uwot .ansi.bg-cyan.reversed,
+body #uwot .ansi.bg-cyan .ansi.reversed {
   color: #3AFCFE;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-white {
+body #uwot .ansi.fg-white {
   color: #f8f7f7;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-white.reversed,
-body #wot .ansi.fg-white .ansi.reversed {
+body #uwot .ansi.fg-white.reversed,
+body #uwot .ansi.fg-white .ansi.reversed {
   color: inherit;
   background-color: #f8f7f7;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-white {
+body #uwot .ansi.bg-white {
   background-color: #f8f7f7;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-white.reversed,
-body #wot .ansi.bg-white .ansi.reversed {
+body #uwot .ansi.bg-white.reversed,
+body #uwot .ansi.bg-white .ansi.reversed {
   color: #f8f7f7;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-black {
+body #uwot .ansi.fg-bright-black {
   color: #33423F;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-black.reversed,
-body #wot .ansi.fg-bright-black .ansi.reversed {
+body #uwot .ansi.fg-bright-black.reversed,
+body #uwot .ansi.fg-bright-black .ansi.reversed {
   color: inherit;
   background-color: #33423F;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-black {
+body #uwot .ansi.bg-bright-black {
   background-color: #33423F;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-black.reversed,
-body #wot .ansi.bg-bright-black .ansi.reversed {
+body #uwot .ansi.bg-bright-black.reversed,
+body #uwot .ansi.bg-bright-black .ansi.reversed {
   color: #33423F;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-red {
+body #uwot .ansi.fg-bright-red {
   color: #FF4431;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-red.reversed,
-body #wot .ansi.fg-bright-red .ansi.reversed {
+body #uwot .ansi.fg-bright-red.reversed,
+body #uwot .ansi.fg-bright-red .ansi.reversed {
   color: inherit;
   background-color: #FF4431;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-red {
+body #uwot .ansi.bg-bright-red {
   background-color: #FF4431;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-red.reversed,
-body #wot .ansi.bg-bright-red .ansi.reversed {
+body #uwot .ansi.bg-bright-red.reversed,
+body #uwot .ansi.bg-bright-red .ansi.reversed {
   color: #FF4431;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-green {
+body #uwot .ansi.fg-bright-green {
   color: #3DF93D;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-green.reversed,
-body #wot .ansi.fg-bright-green .ansi.reversed {
+body #uwot .ansi.fg-bright-green.reversed,
+body #uwot .ansi.fg-bright-green .ansi.reversed {
   color: inherit;
   background-color: #3DF93D;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-green {
+body #uwot .ansi.bg-bright-green {
   background-color: #3DF93D;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-green.reversed,
-body #wot .ansi.bg-bright-green .ansi.reversed {
+body #uwot .ansi.bg-bright-green.reversed,
+body #uwot .ansi.bg-bright-green .ansi.reversed {
   color: #3DF93D;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-yellow {
+body #uwot .ansi.fg-bright-yellow {
   color: #FFF78D;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-yellow.reversed,
-body #wot .ansi.fg-bright-yellow .ansi.reversed {
+body #uwot .ansi.fg-bright-yellow.reversed,
+body #uwot .ansi.fg-bright-yellow .ansi.reversed {
   color: inherit;
   background-color: #FFF78D;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-yellow {
+body #uwot .ansi.bg-bright-yellow {
   background-color: #FFF78D;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-yellow.reversed,
-body #wot .ansi.bg-bright-yellow .ansi.reversed {
+body #uwot .ansi.bg-bright-yellow.reversed,
+body #uwot .ansi.bg-bright-yellow .ansi.reversed {
   color: #FFF78D;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-blue {
+body #uwot .ansi.fg-bright-blue {
   color: #40CEFF;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-blue.reversed,
-body #wot .ansi.fg-bright-blue .ansi.reversed {
+body #uwot .ansi.fg-bright-blue.reversed,
+body #uwot .ansi.fg-bright-blue .ansi.reversed {
   color: inherit;
   background-color: #40CEFF;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-blue {
+body #uwot .ansi.bg-bright-blue {
   background-color: #40CEFF;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-blue.reversed,
-body #wot .ansi.bg-bright-blue .ansi.reversed {
+body #uwot .ansi.bg-bright-blue.reversed,
+body #uwot .ansi.bg-bright-blue .ansi.reversed {
   color: #40CEFF;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-magenta {
+body #uwot .ansi.fg-bright-magenta {
   color: #D266FF;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-magenta.reversed,
-body #wot .ansi.fg-bright-magenta .ansi.reversed {
+body #uwot .ansi.fg-bright-magenta.reversed,
+body #uwot .ansi.fg-bright-magenta .ansi.reversed {
   color: inherit;
   background-color: #D266FF;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-magenta {
+body #uwot .ansi.bg-bright-magenta {
   background-color: #D266FF;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-magenta.reversed,
-body #wot .ansi.bg-bright-magenta .ansi.reversed {
+body #uwot .ansi.bg-bright-magenta.reversed,
+body #uwot .ansi.bg-bright-magenta .ansi.reversed {
   color: #D266FF;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-cyan {
+body #uwot .ansi.fg-bright-cyan {
   color: #00FCF5;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-cyan.reversed,
-body #wot .ansi.fg-bright-cyan .ansi.reversed {
+body #uwot .ansi.fg-bright-cyan.reversed,
+body #uwot .ansi.fg-bright-cyan .ansi.reversed {
   color: inherit;
   background-color: #00FCF5;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-cyan {
+body #uwot .ansi.bg-bright-cyan {
   background-color: #00FCF5;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-cyan.reversed,
-body #wot .ansi.bg-bright-cyan .ansi.reversed {
+body #uwot .ansi.bg-bright-cyan.reversed,
+body #uwot .ansi.bg-bright-cyan .ansi.reversed {
   color: #00FCF5;
 }
 /* line 90, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-white {
+body #uwot .ansi.fg-bright-white {
   color: #efefef;
 }
 /* line 95, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.fg-bright-white.reversed,
-body #wot .ansi.fg-bright-white .ansi.reversed {
+body #uwot .ansi.fg-bright-white.reversed,
+body #uwot .ansi.fg-bright-white .ansi.reversed {
   color: inherit;
   background-color: #efefef;
 }
 /* line 105, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-white {
+body #uwot .ansi.bg-bright-white {
   background-color: #efefef;
 }
 /* line 110, ../../../scss/_partial/_ansi.scss */
-body #wot .ansi.bg-bright-white.reversed,
-body #wot .ansi.bg-bright-white .ansi.reversed {
+body #uwot .ansi.bg-bright-white.reversed,
+body #uwot .ansi.bg-bright-white .ansi.reversed {
   color: #efefef;
 }
 /* line 15, ../../../scss/theme/clone/main.scss */
-body #wot .terminal {
+body #uwot .terminal {
   font-family: monaco, 'Anonymous Pro', Consolas, "Lucida Console", monospace;
   color: #2C3836;
   background: #f8f7f7;
 }
 /* line 20, ../../../scss/theme/clone/main.scss */
-body #wot .terminal a {
+body #uwot .terminal a {
   color: #40CEFF;
 }
 /* line 23, ../../../scss/theme/clone/main.scss */
-body #wot .terminal a:hover, body #wot .terminal a:active {
+body #uwot .terminal a:hover, body #uwot .terminal a:active {
   color: #55B9F2;
   text-decoration: none;
 }
 /* line 31, ../../../scss/theme/clone/main.scss */
-body #wot .terminal .header {
+body #uwot .terminal .header {
   border-color: #2C3836;
   background: #f8f7f7;
 }
 /* line 36, ../../../scss/theme/clone/main.scss */
-body #wot .terminal .output {
+body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
 }
 /* line 41, ../../../scss/theme/clone/main.scss */
-body #wot .terminal .cli {
+body #uwot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #2C3836;
 }
 /* line 50, ../../../scss/theme/clone/main.scss */
-body #wot .terminal .cli form .field:before {
+body #uwot .terminal .cli form .field:before {
   content: " \0024 ";
 }
 /* line 54, ../../../scss/theme/clone/main.scss */
-body #wot .terminal .cli form .field input,
-body #wot .terminal .cli form .field input:focus,
-body #wot .terminal .cli form .field input:active {
+body #uwot .terminal .cli form .field input,
+body #uwot .terminal .cli form .field input:focus,
+body #uwot .terminal .cli form .field input:active {
   color: #33423F;
 }
