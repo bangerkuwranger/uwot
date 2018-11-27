@@ -14,6 +14,7 @@ var fileLog = require('./middleware/logging');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
+var uwotconfig = require('./config');
 var cmd = require('./cmd');
 
 var index = require('./routes/index');
@@ -40,9 +41,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(etcDev, 'config.rb') : path.resolve(etcProd, 'config.rb')}));
-app.use(express.static(path.join(global.appRoot, 'public')));
 
-app.use(fileLog.error)
+if (app.get('env') === 'development') {
+	app.use(fileLog.info);
+}
+
+global.UwotConfig = new uwotconfig(path.resolve(etcDev, 'config.json'));
+
+app.use(express.static(path.join(global.appRoot, 'public')));
 
 app.use('/', index);
 
@@ -52,6 +58,8 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+app.use(fileLog.error);
 
 // error handler
 app.use(function(err, req, res, next) {

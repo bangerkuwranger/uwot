@@ -20,7 +20,7 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "^4.16.4",
-    "express-winston": "^2.6.0",
+    "express-winston": "^3.0.0",
     "morgan": "^1.9.1",
     "nconf": "^0.10.0",
     "nedb-core": "^3.0.6",
@@ -32,7 +32,7 @@
     "pug": "2.0.0-beta11",
     "remove": "^0.1.5",
     "serve-favicon": "~2.4.5",
-    "winston": "^2.4.4"
+    "winston": "^3.1.0"
   },
   "os": [
     "darwin",
