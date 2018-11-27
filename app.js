@@ -1,7 +1,7 @@
 var path = require('path');
 global.appRoot = path.resolve(__dirname);
 if ('undefined' == typeof global.UwotBin) {
-	global.UwotBin = {}};
+	global.UwotBin = {};
 }
 
 var etcProd = path.resolve(__dirname, 'etc', 'prod');

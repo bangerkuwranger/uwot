@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "author": {
-		"name": "Chad A. Carino",
-		"email": "artist@chadacarino.com",
-		"url": "http://www.chadacarino.com"
+    "name": "Chad A. Carino",
+    "email": "artist@chadacarino.com",
+    "url": "http://www.chadacarino.com"
   },
   "private": true,
   "repository": "github:bangerkuwranger/uwot",
@@ -34,5 +34,8 @@
     "serve-favicon": "~2.4.5",
     "winston": "^2.4.4"
   },
-  "os" : [ "darwin", "linux" ]
+  "os": [
+    "darwin",
+    "linux"
+  ]
 }
