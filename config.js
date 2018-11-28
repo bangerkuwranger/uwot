@@ -36,33 +36,60 @@ class ExternalTheme{};
 
 class ReverseProxyBin{};
 
+// want to see if we can abstract out the setters and only use those in setup.js. doubt it, but worth a try? probably will need to set property (as originally) or use method (private ain't a thing in targeted ES6)
 class UwotConfigBase {
 
 	constructor(
 		filePath
 	) {
 	
-		this.values = nconf.file(
+		nconf.file(
 			'local',
 			filePath
 		);
-		this.values.defaults(confDefaults);
-		var defaultKeys = Object.keys(confDefaults);
-		for (let kidx in defaultKeys) {
+		//yous less for saving defaults... but works well at runtime using get method, i guess?
+		nconf.defaults(confDefaults);
+		// var defaultKeys = Object.keys(confDefaults);
+// 		for (let kidx in defaultKeys) {
+// 		
+// 			let val = defaultKeys[kidx];
+// 			if ('type' !== val && 'undefined' == typeof nconf.stores.local.get(val)) {
+// 			
+// 				nconf.stores.local.set(val, nconf.stores.defaults.get(val));
+// 			
+// 			}
+// 		
+// 		}
+// 		nconf.save(null, function(error) {
+// 		
+// 			if(error) fileLog.error(error);
+// 		
+// 		});
+	
+	}
+	
+	get(cat, key) {
+	
+		if ('string' != typeof cat) {
 		
-			let val = defaultKeys[kidx];
-			if ('type' !== val && 'undefined' == typeof this.values.stores.local.get(val)) {
-			
-				this.values.stores.local.set(val, this.values.stores.defaults.get(val));
-			
-			}
+			return undefined;
 		
 		}
-		this.values.save(null, function(error) {
+		else {
 		
-			if(error) fileLog.error(error);
-		
-		});
+			var catVal = nconf.get(cat);
+			if ('object' == typeof catVal && null !== catVal && 'string' == typeof key) {
+			
+				return catVal[key];	
+			
+			}
+			else {
+			
+				return catVal;
+			
+			}
+
+		}
 	
 	}
 
