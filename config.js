@@ -4,6 +4,11 @@ const fs = require('fs');
 const nconf = require('nconf');
 const fileLog = require('./logger').all;
 const confDefaults = {
+	server: {
+		domain: 'localhost',
+		secure: false,
+		port: 80
+	},
 	users: {
 		allowGuest: false,
 		sudoOutsideHome: false,
@@ -14,7 +19,9 @@ const confDefaults = {
 	binpath: {
 		useLocal: true,
 		useExternal: false,
-		external: []
+		useReverseProxies: false,
+		external: [],
+		reverseProxies: []
 	},
 	themes: {
 		useLocal: true,
@@ -22,6 +29,12 @@ const confDefaults = {
 		external: []
 	}
 };
+
+class ExternalBinPath{};
+
+class ExternalTheme{};
+
+class ReverseProxyBin{};
 
 class UwotConfigBase {
 

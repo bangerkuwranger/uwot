@@ -3,6 +3,10 @@ global.appRoot = path.resolve(__dirname);
 if ('undefined' == typeof global.UwotBin) {
 	global.UwotBin = {};
 }
+global.UwotCliOps = [
+	"clear",
+	"history"
+];
 
 var etcProd = path.resolve(__dirname, 'etc', 'prod');
 var etcDev = path.resolve(__dirname, 'etc', 'dev');
@@ -30,6 +34,14 @@ app.set(
 		UwotCmd: cmd
 	}
 );
+
+// create reserved command list from ops
+global.UwotReserved = Array.from(global.UwotCliOps);
+// need to load bins from paths
+
+// then add to reserved list
+global.UwotReserved.push(...Object.keys(global.UwotBin));
+
 
 // view engine setup
 app.set('views', path.join(global.appRoot, 'views'));

@@ -56,7 +56,7 @@ function outputToMain(data) {
 		if ('string' == typeof data.output && '' !== data.output) {
 			jQuery('#uwotoutput').append('<div class="outputline"><pre>'+ data.output +'</pre></div>');
 		}
-		if ('string' == typeof data.operation && 'object' == typeof uwotCliValidOps && Array.isArray(uwotCliValidOps) && -1 != uwotCliValidOps.indexOf(data.operation.trim())) {
+		if ('string' == typeof data.operation && 'object' == typeof uwotOperations && Array.isArray(uwotOperations) && -1 != uwotOperations.indexOf(data.operation.trim())) {
 			let ops = new UwotCliOperations();
 			ops.performOperation(data.operation.trim());
 		}

@@ -114,7 +114,8 @@ router.get('/', function(req, res, next) {
 	var respValues = {
 		title: 'UWOT 1.0.0a', 
 		theme: 'default',
-		nonce: nonceHandler.create( 'index-get', 300000 )
+		nonce: nonceHandler.create( 'index-get', 300000 ),
+		validOps: global.UwotCliOps ? JSON.stringify(global.UwotCliOps) : '[]'
 	};
 	if ('object' === typeof req.query && 'string' === typeof req.query.theme) {
 	

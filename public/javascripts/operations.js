@@ -1,8 +1,4 @@
 'use strict';
-const uwotCliValidOps = [
-	"clear",
-	"history"
-];
 
 class UwotCliOperations {
 
@@ -10,7 +6,7 @@ class UwotCliOperations {
 	
 	performOperation(operationName) {
 	
-		if (-1 != uwotCliValidOps.indexOf(operationName.trim())) {
+		if (-1 != uwotOperations.indexOf(operationName.trim())) {
 			this[operationName.trim()]();
 		}
 	
