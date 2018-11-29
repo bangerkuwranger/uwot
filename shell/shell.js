@@ -19,6 +19,13 @@ for (let sp = 0; sp < global.appRoot.toString().length; sp++) {
 
 }
 console.log(bottomLine);
+
+// TBD
+// Add generators for theme and bin modules
+// generate:
+// 		"theme",
+//		"bin"
+
 var commandSets = {
 	adminUser: [
 		"add",

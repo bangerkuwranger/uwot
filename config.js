@@ -7,7 +7,10 @@ const confDefaults = {
 	server: {
 		domain: 'localhost',
 		secure: false,
-		port: 80
+		port: 80,
+		transport: 'http',
+		pubDir: path.resolve(global.appRoot, 'fs/var/www/html'),
+		userDir: path.resolve(global.appRoot, 'fs/home')
 	},
 	users: {
 		allowGuest: false,
@@ -37,6 +40,8 @@ class ExternalTheme{};
 class ReverseProxyBin{};
 
 // want to see if we can abstract out the setters and only use those in setup.js. doubt it, but worth a try? probably will need to set property (as originally) or use method (private ain't a thing in targeted ES6)
+
+// might make sense to just expose a prebuilt nconf and build logic off that. Not protecting anything that can't be accessed directly on server anyhow.
 class UwotConfigBase {
 
 	constructor(
