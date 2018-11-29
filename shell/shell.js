@@ -1,8 +1,10 @@
 'use strict';
 const path = require('path');
 const fs = require('fs');
+const readline = require('readline');
 const cmd = require('../cmd');
 const UserModel = require('../users');
+const Setup = require('../setup');
 if ('undefined' == typeof global.appRoot) {
 
 	global.appRoot = path.resolve(__dirname, '../');
@@ -25,6 +27,14 @@ console.log(bottomLine);
 // generate:
 // 		"theme",
 //		"bin"
+
+// TBD
+// Add setup for all config options
+// setup:
+//		"server",
+//		"users",
+//		"binpath",
+//		"themes"
 
 var commandSets = {
 	adminUser: [
