@@ -30,7 +30,9 @@ const confDefaults = {
 	themes: {
 		useLocal: true,
 		useExternal: false,
-		external: []
+		external: [],
+		allowUserSwitch: false,
+		defaultTheme: 'default'
 	}
 };
 const arrayKeys = [
@@ -46,11 +48,167 @@ const arrayMemberClassMap = new Map([
 ]);
 
 // TBD classes to clean up input objects. should have method to output clean objects without additional properties.
-class ExternalBinPath{};
+class ExternalBinPath{
 
-class ExternalTheme{};
+	constructor(
+		pathName
+		dirPath,
+		isSudoOnly
+	) {
+	
+		this.pathName = sanitize.cleanString(pathName);
+		this.dirPath = sanitize.cleanString(dirPath);
+		this.isSudoOnly = sanitize.cleanBool(isSudoOnly);
+		this.pathFiles = [];
+		this.getPathFiles(function(error, pathFiles) {
+		
+			if (error) {
+			
+				throw error;
+			
+			}
+			else {
+			
+				this.pathFiles = pathFiles;
+			
+			}
+		
+		}.bind(this));
+	
+	}
+	
+	getPathFiles(callback) {
+	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invald callback passed to getPathFiles');
+		
+		}
+		else {
+		
+			var self = this;
+			self.gpsCallback = callback;
+			fs.stat(this.dirPath, function(error, stats) {
+			
+				if (error) {
+				
+					return self.gpsCallback(error, null);
+				
+				}
+				else if (!stats.isDirectory()) {
+				
+					return self.gpsCallback(new Error('this.dirPath is not a directory'), null);
+				
+				}
+				else {
+				
+					var fileList = [];
+					fs.readdir(self.pathName, function(error, files) {
+											
+						if (error) {
+				
+							return self.gpsCallback(error, null);
+				
+						}
+						else if (files.length < 1) {
+						
+							return self.gpsCallback(false, fileList);
+						
+						}
+						else {
+						
+							var fileLength = files.length, j = 0;
+							for (let i = 0, i < fileLength, i++) {
+							
+								if (files[i].endsWith('.js')) {
+								
+									fileList.push(path.resolve(self.pathName, files[i]));
+								
+								}
+								if (j++ >= fileLength) {
+								
+									return self.gpsCallback(false, fileList);
+								
+								}
+							
+							}
+						
+						}
+					
+					});
+				
+				}
+			
+			});
+		
+		}
+	
+	}
+	
+	getGeneric() {
+	
+		return {
+			pathName: this.pathName,
+			dirPath: this.dirPath,
+			isSudoOnly: this.isSudoOnly,
+			pathFiles: this.pathFiles
+		};
+	
+	}
 
-class ReverseProxyBin{};
+};
+
+class ExternalTheme{
+
+	constructor(
+		name,
+		path
+	) {
+	
+		this.name = sanitize.cleanString(name);
+		this.path = sanitize.cleanString(path)
+	
+	}
+	
+	getGeneric() {
+	
+		return {
+			name: this.name,
+			path: this.path
+		};	
+	
+	}
+
+};
+
+class ReverseProxyBin{
+
+	constructor(
+		name,
+		url,
+		isLocal,
+		isConsole
+	) {
+	
+		this.name = sanitize.cleanString(name);
+		this.url = sanitize.cleanString(url, 1024);
+		this.isLocal = 'undefined' == typeof isLocal ? false : sanitize.cleanBool(isLocal);
+		this.isConsole = 'undefined' == typeof isConsole ? false : sanitize.cleanBool(isConsole);
+	
+	}
+	
+	getGeneric() {
+	
+		return {
+			name: this.name,
+			url: this.url,
+			isLocal: this.isLocal,
+			isConsole: this.isConsole
+		};
+	
+	}
+
+};
 
 function isArrayKey(keyString) {
 
@@ -71,12 +229,11 @@ function isArrayKey(keyString) {
 // recreates array of objects with all members as associated class instances using the
 // member object passed as the constructor argument.
 // if a member of the array is null or not an object, it is excluded from resulting array
-
-// TBD
-// add optional arg to return array of actual class instead of clean objects
+// if returnClassObj is true, will use generic object instead of class object for members
 function arrayMembersToClass(
 	arrayOfObjs,
-	arrayKey
+	arrayKey,
+	returnClassObj
 ) {
 
 	if ('object' != typeof arrayOfObjs || null === arrayOfObjs || !(Array.isArray(arrayOfObjs))) {
@@ -94,6 +251,7 @@ function arrayMembersToClass(
 		var invalidMembers = 0;
 		var newArray = [];
 		let objClass = arrayMemberClassMap.get(arrayKey);
+		let useGenericObj = 'undefined' !== typeof returnClassObj && 'false' !== returnClassObj && returnClassObj;
 		for (let i=0; i<arrayOfObjs.length; i++) {
 		
 			let thisObjArgs = arrayOfObjs[i];
@@ -105,7 +263,17 @@ function arrayMembersToClass(
 			else {
 			
 				let thisObj = new objClass(thisObjArgs);
-				newArray.push(thisObj);
+				if (useGenericObj) {
+				
+					let genericObj = thisObj.getGeneric();
+					newArray.push(genericObj);
+				
+				}
+				else {
+				
+					newArray.push(thisObj);
+			
+				}
 			
 			}
 		
@@ -138,24 +306,7 @@ class UwotConfigBase {
 			'local',
 			filePath
 		);
-		//yous less for saving defaults... but works well at runtime using get method, i guess?
 		nconf.defaults(confDefaults);
-		// var defaultKeys = Object.keys(confDefaults);
-// 		for (let kidx in defaultKeys) {
-// 		
-// 			let val = defaultKeys[kidx];
-// 			if ('type' !== val && 'undefined' == typeof nconf.stores.local.get(val)) {
-// 			
-// 				nconf.stores.local.set(val, nconf.stores.defaults.get(val));
-// 			
-// 			}
-// 		
-// 		}
-// 		nconf.save(null, function(error) {
-// 		
-// 			if(error) fileLog.error(error);
-// 		
-// 		});
 	
 	}
 	
