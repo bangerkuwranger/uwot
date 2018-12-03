@@ -2,16 +2,24 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
-const cmd = require('../cmd');
-const UserModel = require('../users');
-const Setup = require('../setup');
+
 if ('undefined' == typeof global.appRoot) {
 
 	global.appRoot = path.resolve(__dirname, '../');
 
 }
+
+const cmd = require('../cmd');
+const UserModel = require('../users');
+const Setup = require('../setup');
 const tableNames = [
 	'users'
+];
+const configCats = [
+	"server",
+	"users",
+	"binpath",
+	"themes"
 ];
 console.log('| Node application shell for: ' + global.appRoot + ' |');
 var bottomLine = '—————————————————————————————————';
@@ -48,6 +56,14 @@ var commandSets = {
 	],
 	db: [
 		"setup"
+	],
+	setup: [
+		"list",
+		"set",
+		"reset",
+		"initial",
+		"remove",
+		"add"
 	]
 };
 var args = [];
@@ -112,6 +128,30 @@ switch (args[0]) {
 		
 		}
 		break;
+	case 'setup':
+		let cs = args.shift();
+		let an = args.shift();
+		switch(an) {
+		
+			case 'list':
+			case 'initial':
+			case 'set':
+			case 'reset':
+			case 'add':
+			case 'remove':
+				setupConfigHandler(an, args.shift(), args)
+				break;
+			case undefined:
+			case '-h':
+			case '--help':
+			case 'help':
+				commandSetHelp(cs);
+				break;
+			default:
+				unrecognizedAction(cs, an);
+		
+		}
+		break;
 	case undefined:
 	case '-h':
 	case '--help':
@@ -148,6 +188,101 @@ switch (args[0]) {
 		break;
 	default:
 		console.log('Unrecognized Command Set: "' + args[0] + '". (use shell.js -h for list of available Command Sets)');
+
+}
+
+//setup config handler
+//usage:
+//	shell.js setup [action] [category] [...args]
+function setupConfigHandler(action, category, argArray) {
+
+	if ('undefined' == typeof category || '-h' === category || '--help' === category || 'help' === category) {
+	
+		var helpArgs;
+		switch(action) {
+		
+			case 'list':
+				helpArgs = [
+					'setup list',
+					'List all current values in a category.',
+					'category'
+				];
+				break;
+			case 'initial':
+				helpArgs = [
+					'setup initial',
+					'Perform initial interactive setup of a category.',
+					'category'
+				];
+				break;
+			case 'set':
+				helpArgs = [
+					'setup set',
+					'Set a single string configuration value for a key within a category.',
+					'category key value'
+				];
+				break;
+			case 'reset':
+				helpArgs = [
+					'setup reset',
+					'Reset all configuration values within a category to the default.',
+					'category'
+				];
+				break;
+			case 'add':
+				helpArgs = [
+					'setup add',
+					'Add a member to an array configuration value for a key within a category.',
+					'category key value'
+				];
+				break;
+			case 'remove':
+				helpArgs = [
+					'setup set',
+					'Remove an array member of the configuration value for a key within a category.',
+					'category key index',
+					'Index is a number representing the array item you are removing (starts from 0). Use "setup list [category]" to see current values.'
+				];
+				break;
+		
+		}
+		actionHelp(...helpArgs);
+		console.log('Available category names:');
+		console.log('	' + JSON.stringify(configCats));
+		return process.exit();
+	
+	}
+	else {
+	
+		const rl = readline.createInterface({
+			input: process.stdin,
+			output: process.stdout,
+			prompt: 'UWOT Config>'
+		});
+		rl.prompt();
+		rl.question('Is this config change for the development, production, or both environments? (default both)', function(answer) {
+		
+			var envs;
+			switch(answer.trim().toLowerCase()) {
+			
+				case 'dev':
+				case 'development':
+					envs = ['dev'];
+					break;
+				case 'prod':
+				case 'production':
+					envs = ['prod'];
+					break;
+				default:
+					envs= ['dev', 'prod'];
+			
+			}
+			console.log(envs);
+			rl.close();
+		
+		});
+	
+	}
 
 }
 

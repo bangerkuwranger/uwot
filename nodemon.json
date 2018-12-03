@@ -8,7 +8,8 @@
     "etc/**",
     "var/",
     "var/*",
-    "var/**"
+    "var/**",
+    "shell/*"
   ],
   "verbose": true,
   "events": {

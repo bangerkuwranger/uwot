@@ -2,7 +2,7 @@
 const path = require('path');
 const fileLog = require('./logger').all;
 const config = require('./config');
-const sanitize = require('./helpers/valueConversions');
+const sanitize = require('./helpers/valueConversion');
 
 var configProd = path.resolve(__dirname, 'etc', 'prod', 'config.json');
 var configDev = path.resolve(__dirname, 'etc', 'dev', 'config.json');
@@ -189,7 +189,7 @@ class UwotSetup {
 			
 				});
 			
-			}
+			});
 		
 		}
 	
@@ -313,7 +313,7 @@ class UwotSetup {
 			throw new TypeError('invalid callback passed to listCat.');
 		
 		}
-		return this.performConfigOperation('get', [cat, null, true], callback);
+		return this.performConfigOperation('get', [cat, null, false], callback);
 	
 	}
 	
