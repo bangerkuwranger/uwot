@@ -8,7 +8,7 @@ const confDefaults = {
 	server: {
 		domain: 'localhost',
 		secure: false,
-		port: 80,
+		port: '80',
 		transport: 'http',
 		pubDir: path.resolve(global.appRoot, 'fs/var/www/html'),
 		userDir: path.resolve(global.appRoot, 'fs/home')
@@ -35,23 +35,11 @@ const confDefaults = {
 		defaultTheme: 'default'
 	}
 };
-const arrayKeys = [
-	'binpath:external',
-	'binpath:reverseProxies',
-	'themes:external'
-];
 
-const arrayMemberClassMap = new Map([
-	['binpath:external', ExternalBinPath],
-	['binpath:reverseProxies', ReverseProxyBin],
-	['themes:external', ExternalTheme]
-]);
-
-// TBD classes to clean up input objects. should have method to output clean objects without additional properties.
 class ExternalBinPath{
 
 	constructor(
-		pathName
+		pathName,
 		dirPath,
 		isSudoOnly
 	) {
@@ -118,14 +106,14 @@ class ExternalBinPath{
 						else {
 						
 							var fileLength = files.length, j = 0;
-							for (let i = 0, i < fileLength, i++) {
+							for (let i = 0; i < fileLength; i++) {
 							
 								if (files[i].endsWith('.js')) {
 								
 									fileList.push(path.resolve(self.pathName, files[i]));
 								
 								}
-								if (j++ >= fileLength) {
+								if (++j >= fileLength) {
 								
 									return self.gpsCallback(false, fileList);
 								
@@ -210,6 +198,19 @@ class ReverseProxyBin{
 
 };
 
+const arrayKeys = [
+	'binpath:external',
+	'binpath:reverseProxies',
+	'themes:external'
+];
+
+const arrayMemberClassMap = new Map([
+	['binpath:external', ExternalBinPath],
+	['binpath:reverseProxies', ReverseProxyBin],
+	['themes:external', ExternalTheme]
+]);
+
+
 function isArrayKey(keyString) {
 
 	if ('string' !== typeof keyString || '' === keyString) {
@@ -293,9 +294,6 @@ function arrayMembersToClass(
 
 }
 
-// want to see if we can abstract out the setters and only use those in setup.js. doubt it, but worth a try? probably will need to set property (as originally) or use method (private ain't a thing in targeted ES6)
-
-// might make sense to just expose a prebuilt nconf and build logic off that. Not protecting anything that can't be accessed directly on server anyhow.
 class UwotConfigBase {
 
 	constructor(
@@ -310,7 +308,7 @@ class UwotConfigBase {
 	
 	}
 	
-	get(cat, key) {
+	get(cat, key, excludeArrays) {
 	
 		if ('string' != typeof cat) {
 		
@@ -325,6 +323,22 @@ class UwotConfigBase {
 				return catVal[key];	
 			
 			}
+			else if ('undefined' == typeof excludeArrays || excludeArrays) {
+			
+				arrayKeys.forEach(function(ak) {
+				
+					let thisAk = ak.split(':', 2);
+					if (cat == thisAk[0]) {
+					
+						delete catVal[thisAk[1]];
+					
+					}
+				
+				});
+				
+				return catVal;
+			
+			}
 			else {
 			
 				return catVal;
@@ -332,6 +346,12 @@ class UwotConfigBase {
 			}
 
 		}
+	
+	}
+	
+	getCats() {
+	
+		return Object.keys(nconf.get());
 	
 	}
 	
@@ -520,6 +540,37 @@ class UwotConfigBase {
 			
 			}
 
+		}
+	
+	}
+	
+	resetToDefault(cat, key, callback) {
+	
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to resetToDefault.');
+		
+		}
+		else if ('string' != typeof cat || 'string' != typeof key) {
+		
+			return callback(new TypeError('invalid args passed to resetToDefault.'), false);
+		
+		}
+		else {
+		
+			var localCatVals = nconf.stores.local.get(cat);
+			if ('object' == typeof localCatVals && 'undefined' !== typeof localCatVals[key]) {
+			
+				nconf.stores.local.clear(cat + ':' + key);
+				return nconf.save(null, callback);
+			
+			}
+			else {
+			
+				return callback(false, true);
+			
+			}
+		
 		}
 	
 	}
