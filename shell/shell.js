@@ -196,7 +196,7 @@ switch (args[0]) {
 //	shell.js setup [action] [category] [...args]
 function setupConfigHandler(action, category, argArray) {
 
-	if ('undefined' == typeof category || '-h' === category || '--help' === category || 'help' === category) {
+	if ('undefined' == typeof category || '-h' === category || '--help' === category || 'help' === category || -1 == configCats.indexOf(category)) {
 	
 		var helpArgs;
 		switch(action) {
@@ -205,7 +205,8 @@ function setupConfigHandler(action, category, argArray) {
 				helpArgs = [
 					'setup list',
 					'List all current values in a category.',
-					'category'
+					'category environment',
+					'Environment accepts "prod" or "dev". Default is prod.'
 				];
 				break;
 			case 'initial':
@@ -219,70 +220,226 @@ function setupConfigHandler(action, category, argArray) {
 				helpArgs = [
 					'setup set',
 					'Set a single string configuration value for a key within a category.',
-					'category key value'
+					'category key value environment',
+					'Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 			case 'reset':
 				helpArgs = [
 					'setup reset',
 					'Reset all configuration values within a category to the default.',
-					'category'
+					'category environment',
+					'Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 			case 'add':
 				helpArgs = [
 					'setup add',
 					'Add a member to an array configuration value for a key within a category.',
-					'category key value'
+					'category key value environment',
+					'Value must be a valid JSON representation of an object. Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 			case 'remove':
 				helpArgs = [
 					'setup set',
 					'Remove an array member of the configuration value for a key within a category.',
-					'category key index',
-					'Index is a number representing the array item you are removing (starts from 0). Use "setup list [category]" to see current values.'
+					'category key index environment',
+					'Index is a number representing the array item you are removing (starts from 0). Use "setup list [category]" to see current values. Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 		
 		}
 		actionHelp(...helpArgs);
-		console.log('Available category names:');
+		if (-1 == configCats.indexOf(category)) {
+			console.error('Invalid category "' + category + '". Use one of the following:');
+		}
+		else {
+		
+			console.log('Available category names:');
+		
+		}
 		console.log('	' + JSON.stringify(configCats));
 		return process.exit();
 	
 	}
-	else {
+	else if ('initial' === action) {
 	
 		const rl = readline.createInterface({
 			input: process.stdin,
 			output: process.stdout,
-			prompt: 'UWOT Config>'
+			prompt: 'UWOT Config> '
 		});
-		rl.prompt();
-		rl.question('Is this config change for the development, production, or both environments? (default both)', function(answer) {
 		
-			var envs;
-			switch(answer.trim().toLowerCase()) {
-			
-				case 'dev':
-				case 'development':
-					envs = ['dev'];
-					break;
-				case 'prod':
-				case 'production':
-					envs = ['prod'];
-					break;
-				default:
-					envs= ['dev', 'prod'];
-			
-			}
+		rl.question('Is this config change for the development, production, or both environments? (default both)' + "\r\n" + rl._prompt, function(answer) {
+		
+			var envs = getEnvs(answer.trim().toLowerCase(), 'both');
 			console.log(envs);
 			rl.close();
 		
 		});
 	
 	}
+	else {
+		
+		var envString = argArray.pop();
+		var envs = getEnvs(envString, 'both');
+		switch(action) {
+		
+			case 'list':
+				listSetupCategoryValues(category, getEnvs(envString, 'prod'));
+				break;
+			case 'set':
+				setSetupCategoryKeyValue(category, ...argArray, envs);
+				break;
+			case 'reset':
+				resetSetupCategoryValues(category, envs);
+				break;
+			case 'add':
+				addSetupCategoryKeyArrayValue(category, ...argArray, envs);
+				break;
+			case 'remove':
+				removeSetupCategoryKeyArrayValue(category, ...argArray, envs);
+				break;
+		
+		}
+	
+	}
+
+}
+
+function listSetupCategoryValues(category, envs) {
+
+	var setupInterface = new Setup(envs);
+	titleBlock('current values for ' + envs[0]);
+	setupInterface.listCat(category, function(error, valueList) {
+	
+		if (error) {
+		
+			console.error(error.stack);
+			process.exit();
+		
+		}
+		else {
+		
+			console.log(valueList);
+			process.exit();
+		
+		}
+	
+	});
+
+}
+
+function setSetupCategoryKeyValue(category, key, value, envs) {
+
+
+	if ('string' !== typeof key || 'string' !== typeof value) {
+	
+		console.error('key and value must be strings');
+		process.exit();
+	
+	}
+	titleBlock('setting value for ' + category + ':' + key);
+	var setupInterface = new Setup(envs);
+	setupInterface.performConfigOperation('get', [category, null, true], function(error, currentValues) {
+	
+		if (error) {
+		
+			console.error(error.stack);
+			process.exit();
+		
+		}
+		else {
+		
+			console.log('Previous Values:');
+			console.log(currentValues);
+			var catKeys = Object.keys(currentValues);
+			var newVals = new Map();
+			for (let i = 0; i < catKeys.length; i++) {
+			
+				let thisVal = currentValues[catKeys[i]];
+				if (catKeys[i] == key) {
+				
+					thisVal = value;
+				
+				}
+				newVals.set(catKeys[i], thisVal);
+				if ((i+1) >= catKeys.length) {
+				
+					setupInterface.setCat(category, newVals, function(error, savedKeys) {
+					
+						if (error) {
+		
+							console.error(error.stack);
+							process.exit();
+		
+						}
+						else if (-1 == savedKeys.indexOf(key)) {
+						
+							console.error('Unable to save value "' + value + '" for ' +  category + ':' + key);
+							process.exit();
+						
+						}
+						else {
+						
+							console.log('Successfully changed values to:');
+							console.log(newVals);
+							process.exit();
+						
+						}
+					
+					});
+				
+				}
+			
+			}
+		
+		}
+	
+	});
+	process.exit();
+
+}
+
+function resetSetupCategoryValues(category, envs) {
+
+	
+
+}
+
+function addSetupCategoryKeyArrayValue(category, key, value, envs) {
+
+
+
+}
+
+function addSetupCategoryKeyArrayValue(category, key, index, envs) {
+
+
+
+}
+
+function getEnvs(given, defVal) {
+
+	defVal = 'string' == typeof defVal ? defVal : 'prod';
+	var finalV = 'string' != typeof given ? defVal : given;
+	var envs;
+	switch(finalV) {
+	
+		case 'dev':
+		case 'development':
+			envs = ['dev'];
+			break;
+		case 'prod':
+		case 'production':
+			envs = ['prod'];
+			break;
+		default:
+			envs= ['dev', 'prod'];
+	
+	}
+	return envs;
 
 }
 

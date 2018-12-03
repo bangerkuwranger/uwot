@@ -53,7 +53,7 @@ class UwotSetup {
 				}
 			
 			}
-			if (!useDev && !useProd) {
+			if (!this.useDev && !this.useProd) {
 			
 				throw new Error('no valid environments.');
 			
@@ -201,7 +201,7 @@ class UwotSetup {
 	
 		if ('function' != typeof callback) {
 		
-			throw new TypeError('invalid callback passed to resetCat.');
+			throw new TypeError('invalid callback passed to setCat.');
 		
 		}
 		else if ('string' !== typeof cat || 'object' !== typeof values || !(values instanceof Map)) {
