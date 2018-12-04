@@ -361,8 +361,17 @@ function listSetupCategoryValues(category, envs) {
 			
 				arrays.forEach(function(val, key) {
 				
-					console.log(key + ':');
-					arrayWithIdx(val);
+					if (val.length > 0) {
+					
+						console.log(key + ':');
+						arrayWithIdx(val);
+					
+					}
+					else {
+					
+						console.log(key + ': []');
+					
+					}
 				
 				});
 			
