@@ -313,7 +313,7 @@ function arrayMembersToClass(
 		var invalidMembers = 0;
 		var newArray = [];
 		let objClass = arrayMemberClassMap.get(arrayKey);
-		let useGenericObj = 'undefined' !== typeof returnClassObj && 'false' !== returnClassObj && returnClassObj;
+		let useGenericObj = 'undefined' == typeof returnClassObj || !returnClassObj || 'false' === returnClassObj || 0 === returnClassObj;
 		for (let i=0; i<arrayOfObjs.length; i++) {
 		
 			let thisObjArgs = arrayOfObjs[i];
@@ -584,6 +584,7 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
+			var newObj = global.tryParseJSON(sanitize.cleanString(value, 1024));
 			if ('object' == typeof catVal && null !== catVal) {
 			
 				var currArr = catVal[key];
@@ -592,9 +593,14 @@ class UwotConfigBase {
 					return callback(new Error('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
-				else {
+				else if (!newObj || 'object' != typeof newObj) {
 				
-					var newValue = arrayMembersToClass([sanitize.cleanString(value)], cat + ':' + key);
+					return callback(new Error('new value for ' + cat + ':' + key + ' is not a JSON encoded object.'), false);
+				
+				}
+				else {
+					
+					var newValue = arrayMembersToClass([newObj], cat + ':' + key);
 					var updatedArr = currArr.concat(newValue);
 					if (nconf.set(cat + ':' + key.sanitize.cleanString(key), )) {
 				

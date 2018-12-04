@@ -257,7 +257,7 @@ function setupConfigHandler(action, category, argArray) {
 					'setup add',
 					'Add a member to an array configuration value for a key within a category.',
 					'category key value environment',
-					'Value must be a valid JSON representation of an object. Environment accepts "prod", "dev", or "both". Default is both.'
+					'Value must be a valid JSON representation of an array. (double quotes must be escaped with a backslash, e.g. {\\"name\\",\\"path\\"}).'+"\r\n"+'Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 			case 'remove':
@@ -462,11 +462,53 @@ function resetSetupCategoryValues(category, envs) {
 
 function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 
+	if ('string' != typeof category || 'string' != typeof key || 'string' != typeof value) {
 	
+		console.error('category, key, and value must all be strings.');
+	
+	}
+	else {
+	
+		titleBlock('adding new value to array for ' + category + ':' + key);
+		var setupInterface = new Setup(envs);
+		setupInterface.addArrayValue(category, key, value, function(error, isSaved) {
+		
+			if (error) {
+			
+				console.error(error);
+				process.exit();
+			
+			}
+			else {
+			
+				console.log('Successfully saved new values in array for ' + category + ':' + key);
+				setupInterface.listArrayValues(category, key, function(error, vals) {
+			
+					if (error) {
+		
+						console.error(error);
+						process.exit();
+		
+					}
+					else {
+				
+						console.log('Current values:');
+						console.log(vals);
+						process.exit();
+				
+					}
+			
+				});
+			
+			}
+		
+		});
+	
+	}
 
 }
 
-function addSetupCategoryKeyArrayValue(category, key, index, envs) {
+function removeSetupCategoryKeyArrayValue(category, key, index, envs) {
 
 
 
