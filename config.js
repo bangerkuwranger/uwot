@@ -227,6 +227,58 @@ function isArrayKey(keyString) {
 
 }
 
+
+// merges all string values of two maps into a single new Map
+// new values take precedence, and keeps values for keys only in new Map
+function mergeMaps(oldMap, newMap) {
+
+	if ('object' !== typeof oldMap || !(oldMap instanceof Map) || 'object' !== typeof newMap || !(newMap instanceof Map)) {
+	
+		throw new TypeError('args must be instances of Map for mergeMaps');
+	
+	}
+	else {
+	
+		var finalMap = new Map();
+		oldMap.forEach(function (oldVal, oldKey) {
+		
+			if (!isArrayKey(oldKey)) {
+			
+				if ('undefined' !== newMap.get(oldKey)) {
+				
+					finalMap.set(oldKey, newMap.get(oldKey));
+					newMap.delete(oldKey);
+				
+				}
+				else {
+				
+					finalMap.set(oldKey, oldVal);
+				
+				}
+			
+			}
+			else {
+			
+				newMap.delete(oldKey);
+			
+			}
+		
+		});
+		if (newMap.size > 0) {
+		
+			newMap.forEach(function(v, k) {
+			
+				finalMap.set(k, v);
+			
+			});
+		
+		}
+		return finalMap;
+	
+	}
+
+}
+
 // recreates array of objects with all members as associated class instances using the
 // member object passed as the constructor argument.
 // if a member of the array is null or not an object, it is excluded from resulting array
@@ -352,6 +404,70 @@ class UwotConfigBase {
 	getCats() {
 	
 		return Object.keys(nconf.get());
+	
+	}
+	
+	// sets changed string values for existing cat in values Map object
+	updateCatStrVals(cat, values, callback) {
+	
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to updateCatStrVals.');
+		
+		}
+		else if ('string' !== typeof cat || 'object' !== typeof values || !(values instanceof Map)) {
+		
+			return callback(new TypeError('invalid args passed to updateCatStrVals.'), false);
+		
+		}
+		else if (-1 === this.getCats().indexOf(cat)) {
+		
+			return callback(new Error('invalid category passed to updateCatStrVals.'), false);
+		
+		}
+		else {
+		
+			try {
+				var currentVals = new Map(Object.entries(this.get(cat, null, false)));
+				var updatedVals = mergeMaps(currentVals, values);
+				var savedKeys = [];
+				var i = 0;
+			}
+			catch(e) {
+			
+				return callback(e, null);
+			
+			}
+			updatedVals.forEach(function(val, key) {
+			
+				if (val !== currentVals.get(key)) {
+				
+					nconf.set(cat + ':' + key, val);
+					savedKeys.push(key);
+				
+				}
+				if (++i >= updatedVals.size) {
+				
+					nconf.save(null, function(error, isSaved) {
+					
+						if (error) {
+						
+							return callback(error, savedKeys);
+						
+						}
+						else {
+						
+							return callback(false, savedKeys);
+						
+						}
+					
+					});
+				
+				}
+			
+			});
+		
+		}
 	
 	}
 	

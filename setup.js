@@ -79,16 +79,24 @@ class UwotSetup {
 		
 			if (this.useDev && this.useProd) {
 			
-				let prodConfig = new config(configProd);
-				let devConfig = new config(configDev);
+				if (!this.prodConfig) {
+				
+					this.prodConfig = new config(configProd);
+				
+				}
+				if (!this.devConfig) {
+				
+					this.devConfig = new config(configDev);
+				
+				}
 				if (-1 !== noCbCos.indexOf(operation)) {
 				
-					return prodConfig[operation](...args);
+					return this.prodConfig[operation](...args);
 				
 				}
 				else {
 				
-					devConfig[operation](...args, function(error, result) {
+					this.devConfig[operation](...args, function(error, result) {
 					
 						if (error) {
 						
@@ -98,7 +106,7 @@ class UwotSetup {
 						else {
 						
 							args.push(callback);
-							return prodConfig[operation](...args);
+							return this.prodConfig[operation](...args);
 						
 						}
 					
@@ -109,32 +117,40 @@ class UwotSetup {
 			}
 			else if (this.useDev) {
 			
-				let devConfig = new config(configDev);
+				if (!this.devConfig) {
+				
+					this.devConfig = new config(configDev);
+				
+				}
 				if (-1 !== noCbCos.indexOf(operation)) {
 				
-					return callback(false, devConfig[operation](...args));
+					return callback(false, this.devConfig[operation](...args));
 				
 				}
 				else {
 				
 					args.push(callback);
-					return devConfig[operation](...args);
+					return this.devConfig[operation](...args);
 				
 				}
 			
 			}
 			else if (this.useProd) {
 			
-				let prodConfig = new config(configProd);
+				if (!this.prodConfig) {
+				
+					this.prodConfig = new config(configProd);
+				
+				}
 				if (-1 !== noCbCos.indexOf(operation)) {
 				
-					return callback(false, prodConfig[operation](...args));
+					return callback(false, this.prodConfig[operation](...args));
 				
 				}
 				else {
 				
 					args.push(callback);
-					return prodConfig[operation](...args);
+					return this.prodConfig[operation](...args);
 				
 				}
 			
@@ -211,44 +227,25 @@ class UwotSetup {
 		}
 		else {
 		
-			var self = this;
-			let i = 0;
-			let savedKeys = [];
-			for (var [key, value] of values.entries()) {
-		
-				self.performConfigOperation('isArrayKey', [key], function(error, isArrayKey) {
+			this.performConfigOperation('updateCatStrVals', [cat, values], function(error, savedKeys) {
 			
-					if (!error && !isArrayKey && 'string' == typeof value) {
+				if (error) {
 				
-						self.performConfigOperation('setStrVal', [cat, key, value], function(error, isSaved) {
-						
-							if (!error & isSaved) {
-							
-								savedKeys.push(key);
-							
-							}
-							if (++i >= values.size) {
-						
-								return callback(false, savedKeys);
-						
-							}
-						
-						});
+					return callback(error, null);
 				
-					}
-					else {
-					
-						if (++i >= values.size) {
-						
-							return callback(false, savedKeys);
-						
-						}
-					
-					}
+				}
+				else if (savedKeys.length < 1) {
+				
+					return callback(new Error('no values were changed'), false);
+				
+				}
+				else {
+				
+					return callback(false, savedKeys);
+				
+				}
 			
-				});
-		
-			}
+			});	
 		
 		}
 	
