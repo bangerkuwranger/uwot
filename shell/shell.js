@@ -398,7 +398,6 @@ function setSetupCategoryKeyValue(category, key, value, envs) {
 		}
 	
 	});
-	process.exit();
 
 }
 
