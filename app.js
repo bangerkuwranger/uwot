@@ -1,5 +1,25 @@
 var path = require('path');
 global.appRoot = path.resolve(__dirname);
+if ('function' != typeof global.tryParseJSON) {
+
+	global.tryParseJSON = function tryParseJSON(jsonString) {
+
+		try {
+
+			var jsonObj = JSON.parse(jsonString);
+			if (jsonObj && typeof jsonObj === "object") {
+
+				return jsonObj;
+
+			}
+
+		}
+		catch (e) { }
+		return false;
+
+	};
+
+}
 if ('undefined' == typeof global.UwotBin) {
 	global.UwotBin = {};
 }

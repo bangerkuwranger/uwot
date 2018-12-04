@@ -8,6 +8,26 @@ if ('undefined' == typeof global.appRoot) {
 	global.appRoot = path.resolve(__dirname, '../');
 
 }
+if ('function' != typeof global.tryParseJSON) {
+
+	global.tryParseJSON = function tryParseJSON(jsonString) {
+
+		try {
+
+			var jsonObj = JSON.parse(jsonString);
+			if (jsonObj && typeof jsonObj === "object") {
+
+				return jsonObj;
+
+			}
+
+		}
+		catch (e) { }
+		return false;
+
+	};
+
+}
 
 const cmd = require('../cmd');
 const UserModel = require('../users');
@@ -442,7 +462,7 @@ function resetSetupCategoryValues(category, envs) {
 
 function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 
-
+	
 
 }
 

@@ -230,11 +230,16 @@ function isArrayKey(keyString) {
 
 // merges all string values of two maps into a single new Map
 // new values take precedence, and keeps values for keys only in new Map
-function mergeMaps(oldMap, newMap) {
+function mergeMaps(oldMap, newMap, catName) {
 
 	if ('object' !== typeof oldMap || !(oldMap instanceof Map) || 'object' !== typeof newMap || !(newMap instanceof Map)) {
 	
 		throw new TypeError('args must be instances of Map for mergeMaps');
+	
+	}
+	else if ('string' != typeof catName || -1 == Object.keys(confDefaults).indexOf(catName)) {
+	
+		throw new TypeError('invalid category name passed to mergeMaps');
 	
 	}
 	else {
@@ -242,7 +247,7 @@ function mergeMaps(oldMap, newMap) {
 		var finalMap = new Map();
 		oldMap.forEach(function (oldVal, oldKey) {
 		
-			if (!isArrayKey(oldKey)) {
+			if (!isArrayKey(catName + ':' + oldKey)) {
 			
 				if ('undefined' !== newMap.get(oldKey)) {
 				
@@ -268,7 +273,11 @@ function mergeMaps(oldMap, newMap) {
 		
 			newMap.forEach(function(v, k) {
 			
-				finalMap.set(k, v);
+				if (!isArrayKey(catName + ':' + k)) {
+				
+					finalMap.set(k, v);
+				
+				}
 			
 			});
 		
@@ -429,7 +438,7 @@ class UwotConfigBase {
 		
 			try {
 				var currentVals = new Map(Object.entries(this.get(cat, null, false)));
-				var updatedVals = mergeMaps(currentVals, values);
+				var updatedVals = mergeMaps(currentVals, values, cat);
 				var savedKeys = [];
 				var i = 0;
 			}
