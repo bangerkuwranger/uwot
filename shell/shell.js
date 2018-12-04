@@ -257,7 +257,7 @@ function setupConfigHandler(action, category, argArray) {
 					'setup add',
 					'Add a member to an array configuration value for a key within a category.',
 					'category key value environment',
-					'Value must be a valid JSON representation of an array. (double quotes must be escaped with a backslash, e.g. {\\"name\\",\\"path\\"}).'+"\r\n"+'Environment accepts "prod", "dev", or "both". Default is both.'
+					'Value must be a valid JSON representation of an array or object. (the string should be enclosed in single quotes e.g. \'{"name","path"}\').'+"\r\n"+'Environment accepts "prod", "dev", or "both". Default is both.'
 				];
 				break;
 			case 'remove':
@@ -337,6 +337,36 @@ function listSetupCategoryValues(category, envs) {
 		if (error) {
 		
 			console.error(error.stack);
+			process.exit();
+		
+		}
+		else if ('object' == typeof valueList && null !== valueList) {
+		
+			var keys = Object.keys(valueList);
+			var arrays = new Map();
+			keys.forEach(function(key) {
+			
+				if (Array.isArray(valueList[key])) {
+				
+					arrays.set(key, valueList[key]);
+				
+				}
+				else {
+				
+					console.log(key + ': ' + valueList[key]);
+				}
+			
+			});
+			if (arrays.size > 0) {
+			
+				arrays.forEach(function(val, key) {
+				
+					console.log(key + ':');
+					arrayWithIdx(val);
+				
+				});
+			
+			}
 			process.exit();
 		
 		}
@@ -493,7 +523,7 @@ function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 					else {
 				
 						console.log('Current values:');
-						console.log(vals);
+						arrayWithIdx(vals);
 						process.exit();
 				
 					}
@@ -996,6 +1026,91 @@ function disallowAdminUserSudo(id) {
 		return process.exit();
 	
 	});
+
+}
+
+// outputs array of objects as table with properly spaced headers for each obj property and index for each element
+function arrayWithIdx(ar) {
+
+		var topline = '  index';
+		var divider = '-------';
+		var logLines = [];
+		var padding = 4;
+		var leftPad = 3;
+		var headers = new Map();
+		ar.forEach(function(arEl) {
+		
+			var theseKeys = Object.keys(arEl);
+			theseKeys.forEach(function(key) {
+			
+				var thisHead = headers.get(key);
+				var thisLen = 'string' == typeof arEl[key] ? arEl[key].length : 0;
+				if (undefined == thisHead) {
+				
+					headers.set(
+						key,
+						{
+							kLen: key.length,
+							maxLen: thisLen
+						}
+					);
+				
+				}
+				else {
+				
+					thisHead.maxLen = thisHead.maxLen < thisLen ? thisLen : thisHead.maxLen;
+				
+				}
+			
+			});
+		
+		});
+		headers.forEach(function(value, key) {
+		
+			for (let sp = value.maxLen + padding - value.kLen; sp > 0; sp--) {
+			
+				topline += ' ';
+			
+			}
+			topline += key;
+			for (let dsh = value.maxLen + padding; dsh > 0; dsh--) {
+			
+				divider += '-';
+			
+			}
+		
+		});
+		for (let i = 0; i < ar.length; i++) {
+		
+			var logLine = '';
+			for (let sp = leftPad + padding - i.toString().length; sp > 0; sp--) {
+			
+				logLine += ' ';
+			
+			}
+			logLine += i.toString();
+			headers.forEach(function(val, col) {
+			
+				var valLen = 'string' == typeof ar[i][col] ? ar[i][col].length : 0;
+				
+				for (let sp = val.maxLen + padding - valLen; sp > 0; sp--) {
+				
+					logLine += ' ';
+				
+				}
+				logLine += 0 ===  valLen ? '' : ar[i][col];
+			
+			});
+			logLines[i] = logLine;
+		
+		}
+		console.log(topline);
+		console.log(divider);
+		logLines.forEach(function(el) {
+		
+			console.log(el);
+		
+		});
 
 }
 

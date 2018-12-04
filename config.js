@@ -44,8 +44,16 @@ class ExternalBinPath{
 		isSudoOnly
 	) {
 	
+		if ('object' == typeof pathName && null !== pathName && 'undefined' == typeof dirPath && 'undefined' == typeof isSudoOnly) {
+		
+			var argsObj = Object.assign(pathName);
+			pathName = argsObj.hasOwnProperty('pathName') ? argsObj.pathName : null;
+			dirPath = argsObj.hasOwnProperty('dirPath') ? argsObj.dirPath : null;
+			isSudoOnly = argsObj.hasOwnProperty('isSudoOnly') ? argsObj.isSudoOnly : null;
+		
+		}
 		this.pathName = sanitize.cleanString(pathName);
-		this.dirPath = sanitize.cleanString(dirPath);
+		this.dirPath = sanitize.cleanString(dirPath, 1024);
 		this.isSudoOnly = sanitize.cleanBool(isSudoOnly);
 		this.pathFiles = [];
 		this.getPathFiles(function(error, pathFiles) {
@@ -153,8 +161,15 @@ class ExternalTheme{
 		path
 	) {
 	
+		if ('object' == typeof name && null !== name && 'undefined' == typeof path) {
+		
+			var argsObj = Object.assign(name);
+			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
+			path = argsObj.hasOwnProperty('path') ? argsObj.path : null;
+		
+		}
 		this.name = sanitize.cleanString(name);
-		this.path = sanitize.cleanString(path)
+		this.path = sanitize.cleanString(path, 1024)
 	
 	}
 	
@@ -178,6 +193,15 @@ class ReverseProxyBin{
 		isConsole
 	) {
 	
+		if ('object' == typeof name && null !== name && 'undefined' == typeof url && 'undefined' == typeof isLocal && 'undefined' == typeof isConsole) {
+		
+			var argsObj = Object.assign(name);
+			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
+			url = argsObj.hasOwnProperty('url') ? argsObj.url : null;
+			isLocal = argsObj.hasOwnProperty('isLocal') ? argsObj.isLocal : false;
+			isConsole = argsObj.hasOwnProperty('isConsole') ? argsObj.isConsole : false;
+		
+		}
 		this.name = sanitize.cleanString(name);
 		this.url = sanitize.cleanString(url, 1024);
 		this.isLocal = 'undefined' == typeof isLocal ? false : sanitize.cleanBool(isLocal);
@@ -317,26 +341,49 @@ function arrayMembersToClass(
 		for (let i=0; i<arrayOfObjs.length; i++) {
 		
 			let thisObjArgs = arrayOfObjs[i];
+			
+			//need to either read through an array or pull constructor args and remap. dumb.
+			var thisObj;
+			var isInvalid = false;
 			if ('object' !== typeof thisObjArgs || null === thisObjArgs) {
 			
-				invalidMembers++;
+				isInvalid = true;
+			
+			}
+			else if (Array.isArray(thisObjArgs)) {
+			
+				thisObj = new objClass(...thisObjArgs);
 			
 			}
 			else {
 			
-				let thisObj = new objClass(thisObjArgs);
-				if (useGenericObj) {
+				try{
 				
-					let genericObj = thisObj.getGeneric();
-					newArray.push(genericObj);
+					thisObj = new objClass(thisObjArgs);
 				
 				}
-				else {
+				catch(e) {
 				
-					newArray.push(thisObj);
-			
+					isInvalid = true;
+				
 				}
 			
+			}
+			if (isInvalid) {
+			
+				invalidMembers++;
+			
+			}
+			else if (useGenericObj && 'function' == typeof thisObj.getGeneric) {
+			
+				let genericObj = thisObj.getGeneric();
+				newArray.push(genericObj);
+			
+			}
+			else {
+			
+				newArray.push(thisObj);
+		
 			}
 		
 		}
@@ -602,7 +649,7 @@ class UwotConfigBase {
 					
 					var newValue = arrayMembersToClass([newObj], cat + ':' + key);
 					var updatedArr = currArr.concat(newValue);
-					if (nconf.set(cat + ':' + key.sanitize.cleanString(key), )) {
+					if (nconf.set(cat + ':' + sanitize.cleanString(key), updatedArr)) {
 				
 						return nconf.save(null, callback);
 				
