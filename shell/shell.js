@@ -403,7 +403,40 @@ function setSetupCategoryKeyValue(category, key, value, envs) {
 
 function resetSetupCategoryValues(category, envs) {
 
+	titleBlock('resetting values for ' + category + ' to defaults');
+	var setupInterface = new Setup(envs);
+	setupInterface.resetCat(category, function(error, isReset) {
 	
+		if (error) {
+		
+			console.error(error);
+			process.exit();
+		
+		}
+		else {
+		
+			console.log('Successfully reset values for category ' + category + ' to defaults.');
+			setupInterface.listCat(category, function(error, catVals) {
+			
+				if (error) {
+		
+					console.error(error);
+					process.exit();
+		
+				}
+				else {
+				
+					console.log('Current values:');
+					console.log(catVals);
+					process.exit();
+				
+				}
+			
+			});
+		
+		}
+	
+	});
 
 }
 

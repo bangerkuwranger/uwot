@@ -175,34 +175,32 @@ class UwotSetup {
 		}
 		else {
 		
-			var catVals = config.get(cat, null, false);
-			var catKeys = Object.keys(catVals);
-			let i = 0;
-			catKeys.forEach(function(key) {
+			var self = this;
+			this.performConfigOperation('get', [cat, null, false], function(error, catVals) {
+				var catKeys = Object.keys(catVals);
+				let i = 0;
+				catKeys.forEach(function(key) {
 			
-				this.performConfigOperation('resetToDefault', [cat, key], function(error, isSaved) {
+					self.performConfigOperation('resetToDefault', [cat, key], function(error, isSaved) {
 			
-					if (error) {
+						if (error) {
 					
-						return callback(error, false);
+							return callback(error, false);
 					
-					}
-					else if (!isSaved) {
-					
-						return callback(new Error('unable to reset value for ' + cat + ':' + key));
-					
-					}
-					else {
-					
-						if (++i >= catKeys.length) {
-						
-							return callback(false, true);
-						
 						}
-						
+						else if (!isSaved) {
 					
-					}
+							return callback(new Error('unable to reset value for ' + cat + ':' + key), false);
+					
+						}
+						else if (++i >= catKeys.length) {
+					
+							return callback(false, true);
+					
+						}
 			
+					});
+				
 				});
 			
 			});
