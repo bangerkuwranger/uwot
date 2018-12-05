@@ -96,6 +96,7 @@ class UwotSetup {
 				}
 				else {
 				
+					var self = this;
 					this.devConfig[operation](...args, function(error, result) {
 					
 						if (error) {
@@ -106,7 +107,7 @@ class UwotSetup {
 						else {
 						
 							args.push(callback);
-							return this.prodConfig[operation](...args);
+							return self.prodConfig[operation](...args);
 						
 						}
 					
