@@ -549,7 +549,77 @@ function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 
 function removeSetupCategoryKeyArrayValue(category, key, index, envs) {
 
-
+	//sanity check
+	if ('string' != typeof category || 'string' != typeof key || isNaN(parseInt(index))) {
+	
+		console.error('category and key must be strings. index must be an integer.');
+	
+	}
+	else {
+	
+		titleBlock('removing value at index #' + index + ' from array for ' + category + ':' + key);
+		//get interface
+		var setupInterface = new Setup(envs);
+		//perform removal
+		setupInterface.removeArrayIndex(category, key, parseInt(index), function(error, isRemoved) {
+		
+			//catch error
+			if (error) {
+			
+				console.error(error);
+				process.exit();
+			
+			}
+			//if idx doesn't exist say so
+			else if (!isRemoved) {
+			
+				console.log('Could not remove index #' + index + ' from ' + category + ':' + key + '; index is undefined.');
+				setupInterface.listArrayValues(category, key, function(error, vals) {
+			
+					if (error) {
+		
+						console.error(error);
+						process.exit();
+		
+					}
+					else {
+				
+						console.log('Current values:');
+						arrayWithIdx(vals);
+						process.exit();
+				
+					}
+			
+				});
+			
+			}
+			//display current values for key
+			else {
+			
+				console.log('Successfully removed index #' + index + ' from ' + category + ':' + key + '.');
+				setupInterface.listArrayValues(category, key, function(error, vals) {
+			
+					if (error) {
+		
+						console.error(error);
+						process.exit();
+		
+					}
+					else {
+				
+						console.log('Current values:');
+						arrayWithIdx(vals);
+						process.exit();
+				
+					}
+			
+				});
+			
+			} 
+		
+		});
+	
+	}
 
 }
 

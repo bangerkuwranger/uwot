@@ -696,10 +696,15 @@ class UwotConfigBase {
 					return callback(new Error('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
+				else if(currArr[index] == undefined) {
+				
+					return callback(false, false);
+				
+				}
 				else {
 				
 					currArr.splice(index, 1);
-					if (nconf.set(cat + ':' + key.sanitize.cleanString(key), currArr)) {
+					if (nconf.set(cat + ':' + sanitize.cleanString(key), currArr)) {
 					
 						return nconf.save(null, callback);
 					

@@ -277,14 +277,14 @@ class UwotSetup {
 			throw new TypeError('invalid callback passed to removeArrayIndex.');
 		
 		}
-		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' == typeof index) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' != typeof index) {
 		
 			return callback(new TypeError('invalid args passed to removeArrayIndex.'), false);
 		
 		}
 		else {
 		
-			return this.performConfigOperation('removeArrIdx', [cat, key, index], callback);
+			return this.performConfigOperation('removeArrIdx', [cat, key, parseInt(index)], callback);
 		
 		}
 	
