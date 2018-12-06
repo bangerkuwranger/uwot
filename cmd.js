@@ -117,19 +117,7 @@ class UwotCmd {
 			throw e;
 		
 		}
-		
-		try {
-		
-			this.path = sanitize.cleanString(path);
-			global.UwotBin[this.command.name] = require(this.path);
-		
-		}
-		catch(e) {
-		
-			e.message = 'Could not load command "' + this.command.name + '" to globals. ' + e.message;
-			throw e;
-		
-		}
+		this.path = sanitize.cleanString(path);
 		
 	}
 	

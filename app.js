@@ -34,6 +34,7 @@ var etcDev = path.resolve(__dirname, 'etc', 'dev');
 var express = require('express');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var fs = require('fs');
 var fileLog = require('./middleware/logging');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -44,7 +45,11 @@ var cmd = require('./cmd');
 var index = require('./routes/index');
 
 var app = express();
-var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : 'default';
+
+var configPath = app.get('env') === 'development' ? path.resolve(etcDev, 'config.json') : path.resolve(etcProd, 'config.json');
+global.UwotConfig = new uwotconfig(configPath);
+
+var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.UwotConfig.get('themes', 'defaultTheme');
 app.set ('uwot_theme', themeName);
 var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);
 
@@ -58,6 +63,29 @@ app.set(
 // create reserved command list from ops
 global.UwotReserved = Array.from(global.UwotCliOps);
 // need to load bins from paths
+// load locals if enabled
+if (global.UwotConfig.get('binpath', 'useLocal')) {
+
+	var localBinPath = path.resolve(global.appRoot, 'routes/bin');
+	var localBinStats = fs.statSync(localBinPath);
+	if (localBinStats.isDirectory()) {
+	
+		var localFileList = fs.readdirSync(localBinPath);
+		var localBinFiles = [];
+		var localFileLength = localFileList.length;
+		for (let i = 0; i < localFileLength; i++) {
+	
+			if (localFileList[i].endsWith('.js')) {
+		
+				global.UwotBin[path.parse(localFileList[i]).name] = require(path.resolve(localBinPath, localFileList[i]));
+		
+			}
+	
+		}
+
+	}
+
+}
 
 // then add to reserved list
 global.UwotReserved.push(...Object.keys(global.UwotBin));
@@ -77,8 +105,6 @@ app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(e
 if (app.get('env') === 'development') {
 	app.use(fileLog.info);
 }
-
-global.UwotConfig = new uwotconfig(path.resolve(etcDev, 'config.json'));
 
 app.use(express.static(path.join(global.appRoot, 'public')));
 

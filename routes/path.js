@@ -61,6 +61,17 @@ router.post('/', function(req, res, next) {
 
 });
 
+if ('object' == typeof global.UwotBin && Object.keys(global.UwotBin).length > 0) {
+
+	var binPathKeys = Object.keys(global.UwotBin);
+	for (let i = 0; i < binPathKeys.length; i++) {
+	
+		router.use('/' + binPathKeys[i], global.UwotBin[binPathKeys[i]]);
+	
+	}
+
+}
+
 router.all('/', function (req, res, next) {
 
 	var denied = '';
