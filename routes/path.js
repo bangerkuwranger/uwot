@@ -1,30 +1,14 @@
 var express = require('express');
 var router = express.Router();
 const nonceHandler = require('node-timednonce');
+const cmdParser = require('../middleware/cmdParser');
 
 const operations = [
 	"clear",
 	"history"
 ];
 
-//to be replaced by AST parsed logic
-router.post('/', function(req, res, next) {
-
-	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
-	
-		var cmdString = req.body.cmd.trim();
-		if (-1 != operations.indexOf(cmdString)) {
-		
-			req.body.operation = cmdString;
-		
-		}
-	
-	}
-	next();
-
-});
-
-router.post('/', function(req, res, next) {
+router.post('/', cmdParser(), function(req, res, next) {
 
 	var resObj = {
 		output: '<span class="ansi fg-yellow">Invalid Request</span>',
@@ -36,7 +20,16 @@ router.post('/', function(req, res, next) {
 			var nv = nonceHandler.verify('index-get', req.body.nonce);
 			if (nv && 'object' != typeof nv) {
 			
-				resObj.output = 'CMD Verified: ' + req.body.cmd;
+				if ('object' == typeof req.body.cmdAst) {
+				
+					resObj.output = 'CMD Verified: ' + "\n\r" + JSON.stringify(req.body.cmdAst);
+				
+				}
+				else {
+				
+					resObj.output = 'CMD Verified: ' + req.body.cmd;
+				
+				}
 				if ('string' === typeof req.body.operation) {
 				
 					resObj.operation = req.body.operation;
