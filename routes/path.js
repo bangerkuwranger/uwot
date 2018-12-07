@@ -2,16 +2,20 @@ var express = require('express');
 var router = express.Router();
 const nonceHandler = require('node-timednonce');
 const cmdParser = require('../middleware/cmdParser');
+const ansiParser = require('../middleware/ansi');
 
-const operations = [
-	"clear",
-	"history"
-];
 
-router.post('/', cmdParser(), function(req, res, next) {
+router.post(
+	'/',
+	cmdParser(),
+	ansiParser(),
+	function(req, res, next) {
 
 	var resObj = {
-		output: '<span class="ansi fg-yellow">Invalid Request</span>',
+		output: {
+			color: 'yellow',
+			content: 'Invalid Request'
+		},
 		operation: null
 	};
 	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
@@ -22,35 +26,47 @@ router.post('/', cmdParser(), function(req, res, next) {
 			
 				if ('object' == typeof req.body.cmdAst) {
 				
-					resObj.output = 'CMD Verified: ' + "\n\r" + JSON.stringify(req.body.cmdAst);
+					resObj.output = {
+						content: 'CMD Verified: ' + "\n\r" + JSON.stringify(req.body.cmdAst)
+					};
 				
 				}
 				else {
 				
-					resObj.output = 'CMD Verified: ' + req.body.cmd;
+					resObj.output = {
+						content: 'CMD Verified: ' + req.body.cmd
+					};
 				
 				}
 				if ('string' === typeof req.body.operation) {
 				
 					resObj.operation = req.body.operation;
+				
 				}
 				
 			
 			}
 			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
 			
-				resObj.output = '<span class="ansi fg-yellow">Invalid Request - ' + nv.message + '</span>';
+				resObj.output = {
+					color: 'yellow',
+					content: 'Invalid Request -' + nv.message
+				}
 			
 			}
+			
 		}
 		else {
 		
-			resObj.output = '<span class="ansi fg-red">Invalid Request - Reload</span>';
+			resObj.output = {
+				color: 'yellow',
+				content: 'Invalid Request - Reload'
+			};
 		
 		}
-	
+		
 	}
-	return res.json(resObj);
+	return res.ansi(resObj);
 
 });
 

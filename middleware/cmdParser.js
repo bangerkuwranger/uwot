@@ -1,4 +1,6 @@
 const bashParser = require('bash-parser');
+const minimist = require('minimist');
+const sanitize = require('../helpers/valueConversion');
 
 module.exports = function(args) {
 
@@ -20,5 +22,39 @@ module.exports = function(args) {
 		next();
 	
 	};
+
+}
+
+function buildCommand(astCommand) {
+
+	if ('object' !== typeof astCommand || 'Command' !== astCommand.type) {
+	
+		throw new TypeError('invalid ast command node passed to buildCommand');
+	
+	}
+	else if ('object' !== typeof astCommand.name || 'Word' !== astCommand.name.type) {
+	
+		return {};
+	
+	}
+	else {
+	
+		
+	
+	}
+
+}
+
+class UwotRuntimeCmd {
+
+	constructor(
+		name,
+		args
+	) {
+	
+		this.name = sanitize.cleanString(name);
+		
+	
+	}
 
 }
