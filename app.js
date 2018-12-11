@@ -61,7 +61,7 @@ app.set(
 );
 
 // create reserved command list from ops
-global.UwotReserved = Array.from(global.UwotCliOps);"#333663"
+global.UwotReserved = Array.from(global.UwotCliOps);
 // need to load bins from paths
 // load locals if enabled
 if (global.UwotConfig.get('binpath', 'useLocal')) {

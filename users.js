@@ -93,6 +93,16 @@ class User {
 		}
 	
 	}
+	
+	fullName(format) {
+	
+		format = 'string' !== format ? 'l, f' : format;
+		var fullName = format;
+		fullName.replace(/f/g, this.fName);
+		fullName.replace(/l/g, this.lName);
+		return fullName;
+	
+	}
 
 };
 
@@ -102,6 +112,50 @@ module.exports = class UwotUsers {
 	constructor() {
 	
 		this.db = new Datastore({ filename: 'var/nedb/users.db', autoload: true, timestampData: true });
+	
+	}
+	
+	getGuest(callback) {
+	
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to getGuest.');
+		
+		}
+		else if (!global.UwotConfig.get('users', 'allowGuest')) {
+		
+			return callback(new Error('config does not allow guest users.'), null);
+		
+		}
+		else {
+		
+			try {
+			
+				var guest = new User(
+					null,
+					'guest',
+					'user',
+					'guest',
+					new Date(),
+					new Date(),
+					null,
+					null,
+					false
+				);
+				delete guest.password;
+				delete guest.salt;
+				delete guest.saltPass;
+				delete guest.verifyPassword;
+				return callback(false, guest);
+			
+			}
+			catch(e) {
+			
+				return callback(e, null);
+			
+			}
+		
+		}
 	
 	}
 	

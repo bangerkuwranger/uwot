@@ -56,4 +56,4 @@ themeRouter.post('/', function(req, res, next) {
 
 themeRouter.all('/', denyAllOthers());
 
-module.exports = themeRouter;
+module.exports = theme;

@@ -75,7 +75,24 @@ if ('object' == typeof global.UwotBin && Object.keys(global.UwotBin).length > 0)
 	var binPathKeys = Object.keys(global.UwotBin);
 	for (let i = 0; i < binPathKeys.length; i++) {
 	
-		router.use('/' + binPathKeys[i], global.UwotBin[binPathKeys[i]]);
+		router.post('/' + binPathKeys[i], function(req, res, next) {
+		
+			global.UwotBin[binPathKeys[i]].execute(req.body.args, req.body.options, function(error, results) {
+			
+				if (error) {
+				
+					return res.json(error);
+				
+				}
+				else {
+				
+					return res.json(results);
+				
+				}
+			
+			});
+		
+		});
 	
 	}
 

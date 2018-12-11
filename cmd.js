@@ -148,7 +148,7 @@ class UwotCmd {
 		}
 	}
 	
-	// generic help message for -h or --help
+	// generic help message for help command (can be used for -h or --help if defined in execute)
 	// subclasses can call this or not if rewriting this function.
 	help(callback) {
 	
@@ -194,6 +194,116 @@ class UwotCmd {
 			if ((i+1) >= this.options.length) {
 			
 				return callback(false, outString);
+			
+			}
+		
+		}
+	
+	}
+	
+	matchOpt(opt) {
+	
+		var matchResult = {
+			name: '',
+			isOpt: false,
+			isLong: false,
+			isDefined: false,
+			hasArgs: false,
+			reqArgs: [],
+			optArgs: [],
+			assignedArg: ''
+		};
+		if ('string' != typeof opt || '' === opt) {
+		
+			throw new TypeError('invalid opt string passed to matchOpt')
+		
+		}
+		else {
+		
+			opt = opt.trim();
+			if ('-' === opt.substring(0, 1)) {
+		
+				matchResult.isOpt = true;
+				var thisOpt = opt.slice(1);
+				matchResult.isLong = '-' === thisOpt.substring(0, 1);
+				if (matchResult.isLong) {
+			
+					thisOpt = thisOpt.slice(1);
+			
+				}
+				var thisOptArr = thisOpt.split('=');
+				if (2 < thisOptArr.length) {
+			
+					matchResult.name = thisOptArr.shift();
+					matchResult.assignedArg = thisOptArr.toString();
+			
+				}
+				else if (1 < thisOptArr.length) {
+			
+					matchResult.name = thisOptArr[0];
+					matchResult.assignedArg = thisOptArr[1];
+			
+				}
+				else if (0 < thisOptArr.length) {
+			
+					matchResult.name = thisOptArr[0];
+			
+				}
+				else {
+			
+					return matchResult;
+			
+				}
+				if (this.options.length < 1) {
+			
+					return matchResult;
+			
+				}
+				else {
+			
+					var matchIdx = null;
+					for (let i = 0; i < this.options.length; i++) {
+				
+						var theOpt = this.options[i];
+						if (matchResult.name === theOpt.shortOpt || (matchResult.isLong && theOpt.longOpt === matchResult.name)) {
+						
+							matchIdx = i;
+							i = this.options.length;
+						
+						}
+				
+					}
+					if (null !== matchIdx) {
+					
+						matchResult.isDefined = true;
+						var matchedOpt = this.options[i];
+						if (matchedOpt.requiredArguments.length > 0) {
+						
+							matchResult.hasArgs = true;
+							matchResult.reqArgs = matchedOpt.requiredArguments;
+						
+						}
+						if (matchedOpt.optionalArguments.length > 0) {
+						
+							matchResult.hasArgs = true;
+							matchResult.optArgs = matchedOpt.optionalArguments;
+						
+						}
+						return matchResult;
+					
+					}
+					else {
+					
+						return matchResult;
+					
+					}
+			
+				}
+		
+			}
+			else {
+			
+				return matchResult;
 			
 			}
 		

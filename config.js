@@ -18,7 +18,9 @@ const confDefaults = {
 		sudoOutsideHome: false,
 		sudoOutsidePub: false,
 		createHome: false,
-		homeWritable: false
+		homeWritable: false,
+		allowShellFunctions: false,
+		allowGuestShellFunctions: false
 	},
 	binpath: {
 		useLocal: true,
