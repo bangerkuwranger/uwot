@@ -15,8 +15,7 @@ const confDefaults = {
 	},
 	users: {
 		allowGuest: false,
-		sudoOutsideHome: false,
-		sudoOutsidePub: false,
+		sudoFullRoot: false,
 		createHome: false,
 		homeWritable: false,
 		allowShellFunctions: false,

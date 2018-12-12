@@ -1,6 +1,7 @@
 const bashParser = require('bash-parser');
 const minimist = require('minimist');
 const sanitize = require('../helpers/valueConversion');
+const filesystem = require('../filesystem');
 const commandTypes = [
 	'LogicalExpression',
 	'Pipeline',
@@ -215,6 +216,8 @@ function parseLoop(loopType, loopNodes) {
 
 }
 
+// TBD
+// execute map and return conditional result as static exe instead of returning exes
 function parseConditional(condType, condNodes, condArgs) {
 
 	if ('string' !== typeof condType || ('If' !== condType && 'LogicalExpression' !== condType)) {
@@ -290,6 +293,8 @@ function parseFunction (fName, fBody, fRedirect) {
 
 }
 
+// TBD
+// execute map and return piped result as static exe instead of returning exes
 function parsePipeline(astCommands) {
 
 	if ('object' != typeof astCommands || !Array.isArray(astCommands)) {
@@ -437,12 +442,12 @@ function executeMap(exeMap, outputType) {
 						}
 						else if ('string' == typeof exe.output) {
 						
-						
+							//attempt to output to file using synchronous user filesystem
 						
 						}
 						else if ('number' == typeof exe.output) {
 						
-						
+							//attempt to output to map[exe.output]
 						
 						}
 						else {
