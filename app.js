@@ -41,6 +41,7 @@ var bodyParser = require('body-parser');
 var compass = require('node-compass');
 var uwotconfig = require('./config');
 var cmd = require('./cmd');
+var binLoader = require('./helpers/binLoader');
 
 var index = require('./routes/index');
 
@@ -66,24 +67,7 @@ global.UwotReserved = Array.from(global.UwotCliOps);
 // load locals if enabled
 if (global.UwotConfig.get('binpath', 'useLocal')) {
 
-	var localBinPath = path.resolve(global.appRoot, 'routes/bin');
-	var localBinStats = fs.statSync(localBinPath);
-	if (localBinStats.isDirectory()) {
-	
-		var localFileList = fs.readdirSync(localBinPath);
-		var localBinFiles = [];
-		var localFileLength = localFileList.length;
-		for (let i = 0; i < localFileLength; i++) {
-	
-			if (localFileList[i].endsWith('.js')) {
-		
-				global.UwotBin[path.parse(localFileList[i]).name] = require(path.resolve(localBinPath, localFileList[i]));
-		
-			}
-	
-		}
-
-	}
+	binLoader.loadLocalPath();
 
 }
 

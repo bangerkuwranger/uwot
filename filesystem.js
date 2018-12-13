@@ -1,9 +1,12 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const pathIsInside = require("path-is-inside");
+const pathIsInside = require('path-is-inside');
+const systemError = require('./helpers/systemError'');
 const Users = require('./users');
 var userInterface = new Users();
+
+const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
 
 /* 
 vfs is implemented in posix-like manner. 
@@ -172,27 +175,49 @@ class UwotFs {
 	changeCwd(pth) {
 	
 		//check is string
+		if ('string' !== typeof pth) {
 		
-		//resolve
+			return new TypeError('path must be a string');
 		
-		//check isReadable
+		}
+		else {
+			
+			//resolve
+			var absPth = this.resolvePath(pth);
+			//return error objects
+			if('string' !== typeof absPth) {
+			
+				return absPth;
+			
+			}
+			//check isReadable
+			else if (this.isReadable(absPth)) {
+			
+				this.cwd = absPth.replace(this.root.path, '');
+				return true;
+			
+			}
+			else {
+			
+				return false;
 		
-		//set this.cwd
+			}
+		
+		}
 	
 	}
 	
-	// TBD
 	// this.cwd is relative path to this.root.path
 	getVcwd() {
 	
-		
+		return 'string' == typeof this.cwd ? this.cwd : path.sep;
 	
 	}
 	
-	// TBD
+	// returns absolute path of this.cwd
 	getCwd() {
 	
-	
+		return 'string' == typeof this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
 	
 	}
 	
@@ -519,7 +544,7 @@ class UwotFs {
 		
 			if (pth.startsWith('~')) {
 			
-				return path.resolve(pth.replace('~', this.userDir.path + '/'));
+				return path.resolve(pth.replace('~', this.userDir.path + path.sep));
 			
 			}
 			return pth;
@@ -530,7 +555,49 @@ class UwotFs {
 	// resolves path w/ expansion, using this.cwd
 	resolvePath(pth) {
 	
+		if ('string' != typeof pth) {
 		
+			return new TypeError('path passed to resolvePath must be a string');
+		
+		}
+		else if (path.basename(pth) === UWOT_HIDDEN_PERMISSIONS_FILENAME) {
+		
+			return systemError.ENOENT({syscall: 'stat', path: pth});
+		
+		}
+		if (pth.startsWith('~')) {
+		
+			pth = this.tildeExpand(pth);
+		
+		}
+		if (path.isAbsolute(pth)) {
+		
+			pth = pth.replace(path.sep, '');
+		
+		}
+		var fromCwd = path.resolve(this.cwd, pth);
+		try {
+		
+			var fromCwdStats = fs.statSync(fromCwd);
+			return fromCwd;
+		
+		}
+		catch(e) {
+		
+			var fromRoot = path.resolve(this.root.path, pth);
+			try {
+			
+				var fromRootStats = fs.statSync(fromRoot);
+				return fromRoot;
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
 	
 	}
 	
@@ -542,12 +609,12 @@ class UwotFs {
 			return false;
 		
 		}
-		else if (path.basename(this.tildeExpand(pth)) === '.uwotprm') {
+		else if (path.basename(pth) === '.uwotprm') {
 		
 			return false;
 		
 		}
-		else if (!this.isInRoot(pth) && !this.isInPub(pth) && !this.isInUser(pth)) {
+		if (!this.isInRoot(pth) && !this.isInPub(pth) && !this.isInUser(pth)) {
 		
 			return false;
 		
