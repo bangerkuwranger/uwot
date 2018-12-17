@@ -799,7 +799,7 @@ class UwotFs {
 		var vfsReadable = false;
 		if ('string' !== typeof pth) {
 		
-			return false;
+			return systemError.EINVAL({'path': pth, 'syscall': 'stat'});
 		
 		}
 		else if (path.basename(pth) === UWOT_HIDDEN_PERMISSIONS_FILENAME) {
@@ -813,7 +813,7 @@ class UwotFs {
 		var inRoot = this.isInRoot(fullPath);
 		if (!inRoot && !inAllowed && !inUsers) {
 		
-			return false;
+			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
 		else if ((inRoot || inUsers) && !inAllowed) {
@@ -841,7 +841,7 @@ class UwotFs {
 					vfsReadable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['_id']] && 'boolean' == typeof permissions[this.user['_id']].r && permissions[this.user['_id']].r) {
+				else if ('object' == typeof permissions[this.user['_id']] && Array.isArray(permissions[this.user['_id']]) && -1 !== permissions[this.user['_id']].indexOf('r')) {
 				
 					vfsReadable = true;
 				
@@ -871,14 +871,79 @@ class UwotFs {
 			}
 		
 		}
-		return false;
+		return systemError.EACCES({'path': pth, 'syscall': 'stat'});;
 	
 	}
 	
 	// TBD
 	isWritable(pth) {
 	
-		return false;
+		var vfsWritable = false;
+		if ('string' !== typeof pth) {
+		
+			return systemError.EINVAL({'path': pth, 'syscall': 'stat'});
+		
+		}
+		else if (path.basename(pth) === UWOT_HIDDEN_PERMISSIONS_FILENAME) {
+		
+			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
+		
+		}
+		var fullPath = this.resolvePath(pth);
+		var inUsers = this.isInUser(fullPath);
+		var inPub = this.isInPub(fullPath);
+		var inHome = this.isInUser(fullPath, this.user['_id']);
+		var inRoot = this.isInRoot(fullPath);
+		if (!inRoot && !inPub && !inUsers) {
+		
+			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
+		
+		}
+		else if (this.sudo && global.UwotConfig.get('users', 'sudoFullRoot')) {
+		
+			vfsWritable = true;
+		
+		}
+		else if (inHome && global.UwotConfig.get('users', 'homeWritable') && global.UwotConfig.get('users', 'createHome')) {
+		
+			var permissions = this.getPermissions(fullPath);
+			if (permissions instanceof Error) {
+			
+				return permissions;
+			
+			}	
+			else if (permissions && 'object' == typeof permissions) {
+				
+				if ('string' == typeof permissions.owner && this.user['_id'] === permissions.owner) { 
+				
+					vfsWritable = true;
+				
+				}
+				else if ('object' == typeof permissions[this.user['_id']] && Array.isArray(permissions[this.user['_id']]) && permissions[this.user['_id']].indexOf('w')) {
+				
+					vfsWritable = true;
+				
+				}
+			
+			}
+		
+		}
+		if (vfsWritable) {
+		
+			try {
+			
+				fs.accessSync(fullPath, fs.constants.W_OK);
+				return true;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		return systemError.EACCES({'path': pth, 'syscall': 'stat'});
 	
 	}
 	
@@ -1078,9 +1143,108 @@ class UwotFs {
 	}
 	
 	// TBD
-	changeOwner(pth, user) {
+	changeOwner(pth, userId) {
 	
-	
+		if (!this.sudo) {
+		
+			return systemError.EPERM({path: pth, syscall: 'chmod'});
+		
+		}
+		else if ('string' !== userId) {
+		
+			return new TypeError('invalid user or permissions');
+		
+		}
+		userInterface.listUsers(function(error, userList){
+		
+			var userExists = false;
+			if (error) {
+			
+				return systemError.UNKOWN({path: pth, syscall: 'chown'});
+			
+			}
+			else if (userId !== this.user['_id']) {
+			
+				userExists = false;
+				for (let i = 0; i < userList.length; i++) {
+				
+					if (userId === userList[i]['_id']) {
+					
+						userExists = true;
+						i = userList.length;
+					
+					}
+				
+				}
+			
+			}
+			else {
+			
+				userExists = true;
+			
+			}
+			if (!userExists) {
+			
+				return new Error(userId + ': illegal user name');
+			
+			}
+			var fullPath = this.resolvePath(pth);
+			var inRoot = this.isInRoot(fullPath);
+			var inUsers = this.isInUser(fullPath);
+			var isOwned = this.isInUser(fullPath, this.user['_id']);
+			var inAllowed = (this.isInPub(fullPath) || this.isOwned);
+			if (!inRoot && !inUsers && !inAllowed) {
+			
+				return systemError.ENOENT({path: pth, syscall: 'chown'});
+			
+			}
+			var currentPermissions = this.getPermissions(fullPath);
+			if (currentPermissions instanceof Error) {
+			
+				currentPermissions = new UwotFsPermissions(null);
+			
+			}
+			var newPermissions = new UwotFsPermissions({owner: userId});
+			if (currentPermissions.allowed !== DEFAULT_ALLOWED) {
+			
+				newPermissions.allowed = currentPermissions.allowed;
+			
+			}
+			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+			try {
+			
+				var pthStats = fs.statSync(fullPath);
+				var permPath;
+				if (pthStats.isDirectory()) {
+				
+					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				
+				}
+				else {
+				
+					permPath = path.resolve(path.dirname(fullpath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				
+				}
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+			try {
+			
+				fs.writeFileSync(fullPath, updatedPermissions);
+				return true;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}.bind(this));
 	
 	}
 
