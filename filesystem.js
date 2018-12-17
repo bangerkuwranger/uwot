@@ -191,7 +191,13 @@ class UwotFs {
 			
 			}
 			//check isReadable
-			else if (this.isReadable(absPth)) {
+			var canRead = this.isReadable(absPth);
+			if (canRead instanceof Error) {
+			
+				return canRead;
+			
+			}
+			else if (canRead) {
 			
 				this.cwd = absPth.replace(this.root.path, '');
 				return true;
@@ -199,7 +205,7 @@ class UwotFs {
 			}
 			else {
 			
-				return false;
+				return systemError.EACCES({'path': pth, 'syscall': 'chdir'});
 		
 			}
 		
@@ -248,7 +254,14 @@ class UwotFs {
 	
 	copy(source, target) {
 		
-		if (this.isReadable(source) && this.isWritable(target)) {
+		var canRead = this.isReadable(source);
+		var canWrite = this.isWritable(target);
+		if (canRead instanceof Error) {
+		
+			return canRead;
+		
+		}
+		else if (canRead && canWrite) {
 		
 			try {
 			
@@ -263,9 +276,14 @@ class UwotFs {
 			}
 		
 		}
+		else if (!canRead){
+		
+			return systemError.EACCES({'path': source, 'syscall': 'open'});
+		
+		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': target, 'syscall': 'write'}); 
 		
 		}
 	
@@ -298,7 +316,13 @@ class UwotFs {
 	
 	readDir(pth) {
 	
-		if (this.isReadable(pth)) {
+		var canRead = this.isReadable(pth);
+		if (canRead instanceof Error) {
+		
+			return canRead;
+		
+		}
+		else if (canRead) {
 		
 			try {
 			
@@ -314,7 +338,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'readdir'});
 		
 		}
 	
@@ -322,11 +346,17 @@ class UwotFs {
 	
 	readFile(pth) {
 	
-		if (this.isReadable(pth)) {
+		var canRead = this.isReadable(pth);
+		if (canRead instanceof Error) {
+		
+			return canRead;
+		
+		}
+		else if (canRead) {
 		
 			try {
 			
-				return fs.readfileSync(pth);
+				return fs.readFileSync(pth);
 			
 			}
 			catch(e) {
@@ -338,7 +368,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'read'});
 		
 		}
 	
@@ -346,7 +376,15 @@ class UwotFs {
 	
 	moveFile(pth, newPath) {
 	
-		if (this.isReadable(pth) && this.isWritable(newPath)) {
+		var canRead = this.isReadable(pth);
+		var canWrite = this.isWritable(pth);
+		var canWriteNew = this.isWritable(newPath);
+		if (canRead instanceof Error) {
+		
+			return canRead;
+		
+		}
+		else if (canRead && canWrite && canWriteNew) {
 		
 			try {
 			
@@ -359,6 +397,11 @@ class UwotFs {
 				return e;
 			
 			}
+		
+		}
+		else if (!canRead) {
+		
+			return systemError.EACCES({'path': pth, 'syscall': 'read'});
 		
 		}
 		else {
@@ -421,7 +464,13 @@ class UwotFs {
 	
 	stat(pth) {
 	
-		if (this.isReadable(pth)) {	
+		var canRead = this.isReadable(pth);
+		if (canRead instanceof Error) {
+		
+			return canRead;
+		
+		}
+		else if (canRead) {	
 			
 			try {
 		
@@ -438,7 +487,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'stat'});
 		
 		}
 	
@@ -601,9 +650,9 @@ class UwotFs {
 	
 	}
 	
-	// TBD
 	isReadable(pth) {
 	
+		var vfsReadable = false;
 		if ('string' !== typeof pth) {
 		
 			return false;
@@ -611,16 +660,75 @@ class UwotFs {
 		}
 		else if (path.basename(pth) === '.uwotprm') {
 		
+			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
+		
+		}
+		fullPath = this.resolvePath(pth);
+		var inUsers = pathIsInside(fullpath, global.UwotConfig.get('server', 'userDir'));
+		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
+		var inRoot = this.isInRoot(fullPath);
+		if (!inRoot && !inAllowed && !inUsers) {
+		
 			return false;
 		
 		}
-		if (!this.isInRoot(pth) && !this.isInPub(pth) && !this.isInUser(pth)) {
+		else if ((inRoot || inUsers) && !inAllowed) {
 		
-			return false;
+			vfsReadable = (this.sudo && global.UwotConfig.get('users', 'sudoFullRoot'));
 		
 		}
+		else if (this.sudo) {
 		
-		return true;
+			vfsReadable = true;
+		
+		}
+		else if (this.isInPub(fullPath)) {
+		
+			thisDir = path.dirname(fullPath);
+			try{
+			
+				var permFile = fs.readFileSync(path.resolve(thisDir, '.uwotprm'));
+				var permissions = global.tryParseJSON(permFile);
+				if ('object' == typeof permissions) {
+				
+					if ('string' == typeof permissions.owner && this.user._id === permissions.owner) { 
+					
+						vfsReadable = true;
+					
+					}
+					else if ('object' == typeof permissions[this.user._id] && 'boolean' == typeof permissions[this.user._id].r && permissions[this.user._id].r) {
+					
+						vfsReadable = true;
+					
+					}
+				
+				}
+			
+			}
+			catch(e) {
+			
+				//permissions not set defaults to readable in pubDir
+				vfsReadable = true;
+			
+			}
+		
+		}
+		if (vfsReadable) {
+		
+			try {
+			
+				fs.accessSync(fullPath, fs.constants.R_OK);
+				return true;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		return false;
 	
 	}
 	
