@@ -4,6 +4,7 @@ const path = require('path');
 const pathIsInside = require('path-is-inside');
 const systemError = require('./helpers/systemError');
 const sanitize = require('./helpers/valueConversion');
+const FlagSet = require('./helpers/flags');
 const Users = require('./users');
 var userInterface = new Users();
 
