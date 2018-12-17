@@ -3,10 +3,140 @@ const fs = require('fs');
 const path = require('path');
 const pathIsInside = require('path-is-inside');
 const systemError = require('./helpers/systemError');
+const sanitize = require('./helpers/valueConversion');
 const Users = require('./users');
 var userInterface = new Users();
 
 const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
+const DEFAULT_OWNER = 'root';
+const ALLOWED_NONE = [];
+const ALLOWED_READ = ['r'];
+const ALLOWED_WRITE = ['w'];
+const ALLOWED_EXE = ['x'];
+const ALLOWED_READ_WRITE = ['r','w'];
+const ALLOWED_READ_EXE = ['r','x'];
+const ALLOWED_WRITE_EXE = ['w','x'];
+const ALLOWED_READ_WRITE_EXE = ['r','w','x'];
+const DEFAULT_ALLOWED = ALLOWED_READ;
+
+
+class UwotFsPermissions {
+
+	constructor(permissions) {
+	
+		if ('object' !== typeof permissions) {
+		
+			throw new TypeError('argument of UwotFsPermissions constructor must be an object');
+		
+		}
+		else if (null !== permissions) {
+		
+			if ('string' == typeof permissions.owner) {
+			
+				this.owner = sanitize.cleanString(permissions.owner);
+				delete permissions.owner;
+			
+			}
+			if ('object' == typeof permissions.allowed && Array.isArray(permissions.allowed)) {
+			
+				this.allowed = permissions.allowed;
+				delete permissions.allowed;
+			
+			}
+			else {
+			
+				this.allowed = DEFAULT_ALLOWED;
+			
+			}
+			var permUsers = Object.keys(permissions);
+			if (0 < permUsers.length) {
+			
+				userInterface.listUsers(function(error, userList) {
+			
+					for (let i = 0; i < permUsers.length; i++) {
+			
+						var thisId = userList[i];
+						if (-1 !== permUsers.indexOf(thisId) && permissions.hasOwnProperty(thisId)) {
+						
+							let userPerms = [];
+							if ('object' == typeof permissions[thisId] && Array.isArray(permissions[thisId])) {
+							
+								if (-1 !== permissions[thisId].indexOf('r')) {
+								
+									userPerms.push('r');
+								
+								}
+								if (-1 !== permissions[thisId].indexOf('w')) {
+								
+									userPerms.push('w');
+								
+								}
+								if (-1 !== permissions[thisId].indexOf('x')) {
+								
+									userPerms.push('x');
+								
+								}
+							
+							}
+							this.thisId = userPerms;
+						
+						}
+			
+					}
+		
+				}.bind(this));
+			
+			}
+		
+		}
+	
+	}
+	
+	toGeneric() {
+	
+		var genericPermissionsObj = {
+			owner: 'string' == typeof this.owner ? this.owner : DEFAULT_OWNER,
+			allowed: this.allowed
+		}
+		var permUsers = Object.keys(this);
+		for (let i = 0; i < permUsers.length; i++) {
+		
+			if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'object' == typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
+			
+				genericPermissionsObj[permUsers[i]] = this[permUsers[i]];
+			
+			}
+		
+		}
+		return genericPermissionsObj;
+	
+	}
+	
+	toJSON() {
+	
+		return JSON.stringify(this.toGeneric());
+	
+	}
+	
+	// values of this override values of otherPerms if property matches
+	// returns new UwotFsPermissions object
+	concatPerms(otherPerms) {
+	
+		if ('object' !== typeof otherPerms) {
+		
+			throw new TypeError('argument passed to concatPerms must be an object');
+		
+		}
+		else {
+		
+			var newArg = Object.assign(otherPerms, this);
+			return new UwotFsPermissions(newArg);
+		
+		}
+	
+	}
+
+};
 
 /* 
 vfs is implemented in posix-like manner. 
@@ -518,7 +648,7 @@ class UwotFs {
 	
 	}
 	
-	isInUser(pth) {
+	isInUser(pth, userId) {
 	
 		if (null === this.userDir || !this.userDir.exists()) {
 		
@@ -533,7 +663,21 @@ class UwotFs {
 		else {
 		
 			var fullPath = path.resolve(this.tildeExpand(pth));
-			return pathIsInside(fullPath, this.userDir.path);
+			if ('string' !== typeof userId) {
+			
+				return pathIsInside(fullPath, global.UwotConfig.get('server', 'userDir'))
+			
+			}
+			else if (userId === this.user['_id']) {
+			
+				return pathIsInside(fullPath, this.userDir.path);
+		
+			}
+			else {
+			
+				return pathIsInside(fullPath, path.resolve(global.UwotConfig.get('server', 'userDir'), userId));
+			
+			}
 		
 		}
 	
@@ -658,14 +802,14 @@ class UwotFs {
 			return false;
 		
 		}
-		else if (path.basename(pth) === '.uwotprm') {
+		else if (path.basename(pth) === UWOT_HIDDEN_PERMISSIONS_FILENAME) {
 		
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		fullPath = this.resolvePath(pth);
-		var inUsers = pathIsInside(fullpath, global.UwotConfig.get('server', 'userDir'));
-		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
+		var fullPath = this.resolvePath(pth);
+		var inUsers = this.isInUser(fullPath);
+		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath, this.user['_id']));
 		var inRoot = this.isInRoot(fullPath);
 		if (!inRoot && !inAllowed && !inUsers) {
 		
@@ -684,28 +828,27 @@ class UwotFs {
 		}
 		else if (this.isInPub(fullPath)) {
 		
-			thisDir = path.dirname(fullPath);
-			try{
+			var permissions = this.getPermissions(fullPath);
+			if (permissions instanceof Error) {
 			
-				var permFile = fs.readFileSync(path.resolve(thisDir, '.uwotprm'));
-				var permissions = global.tryParseJSON(permFile);
-				if ('object' == typeof permissions) {
+				return permissions;
+			
+			}	
+			else if (permissions && 'object' == typeof permissions) {
 				
-					if ('string' == typeof permissions.owner && this.user._id === permissions.owner) { 
-					
-						vfsReadable = true;
-					
-					}
-					else if ('object' == typeof permissions[this.user._id] && 'boolean' == typeof permissions[this.user._id].r && permissions[this.user._id].r) {
-					
-						vfsReadable = true;
-					
-					}
+				if ('string' == typeof permissions.owner && this.user['_id'] === permissions.owner) { 
+				
+					vfsReadable = true;
+				
+				}
+				else if ('object' == typeof permissions[this.user['_id']] && 'boolean' == typeof permissions[this.user['_id']].r && permissions[this.user['_id']].r) {
+				
+					vfsReadable = true;
 				
 				}
 			
 			}
-			catch(e) {
+			else {
 			
 				//permissions not set defaults to readable in pubDir
 				vfsReadable = true;
@@ -739,6 +882,207 @@ class UwotFs {
 	
 	}
 	
+	getPermissions(pth) {
+	
+		var fullPath = this.resolvePath(pth);
+		var inRoot = this.isInRoot(fullPath);
+		var inUsers = this.isInUser(fullPath);
+		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath, this.user['_id']));
+		if (!inRoot && !inUsers && !inAllowed) {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
+		
+		}
+		else if (!inAllowed && !(this.sudo || (global.UwotConfig.get('users', 'sudoFullRoot')))) {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
+		
+		}
+		try {
+		
+			var pthStats = fs.statSync(fullPath);
+		
+		}
+		catch (e) {
+		
+			return e;
+		
+		}
+		if (pthStats.isDirectory()) {
+			
+			try{
+		
+				var permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
+				var permissions = global.tryParseJSON(permFile);
+				if ('object' == typeof permissions) {
+			
+					return new UwotFsPermissions(permissions).toGeneric();
+			
+				}
+				else {
+				
+					return false;
+				
+				}
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		else if (pthStats.isFile()) {
+		
+			var thisDir = path.dirname(fullPath);
+			try{
+		
+				var permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
+				var permissions = global.tryParseJSON(permFile);
+				if ('object' == typeof permissions) {
+			
+					return new UwotFsPermissions(permissions).toGeneric();
+			
+				}
+				else {
+				
+					return false;
+				
+				}
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		else {
+		
+			return systemError.ENOENT({path: pth, syscall: 'stat'});
+		
+		}
+	
+	}
+	
+	setPermissions(pth, userId, permissions) {
+	
+		if (!this.sudo) {
+		
+			return systemError.EPERM({path: pth, syscall: 'chmod'});
+		
+		}
+		else if ('string' !== userId || 'object' !== typeof permissions) {
+		
+			return new TypeError('invalid user or permissions');
+		
+		}
+		userInterface.listUsers(function(error, userList){
+		
+			var userExists = false;
+			if (error) {
+			
+				return systemError.UNKOWN({path: pth, syscall: 'chmod'});
+			
+			}
+			else if (userId !== this.user['_id']) {
+			
+				userExists = false;
+				for (let i = 0; i < userList.length; i++) {
+				
+					if (userId === userList[i]['_id']) {
+					
+						userExists = true;
+						i = userList.length;
+					
+					}
+				
+				}
+			
+			}
+			else {
+			
+				userExists = true;
+			
+			}
+			if (!userExists) {
+			
+				return new Error(userId + ': illegal user name');
+			
+			}
+			var fullPath = this.resolvePath(pth);
+			var inRoot = this.isInRoot(fullPath);
+			var inUsers = this.isInUser(fullPath);
+			var isOwned = this.isInUser(fullPath, this.user['_id']);
+			var inAllowed = (this.isInPub(fullPath) || this.isOwned);
+			if (!inRoot && !inUsers && !inAllowed) {
+			
+				return systemError.ENOENT({path: pth, syscall: 'chmod'});
+			
+			}
+			var currentPermissions = this.getPermissions(fullPath);
+			if (currentPermissions instanceof Error) {
+			
+				currentPermissions = new UwotFsPermissions(null);
+			
+			}
+			var newPermissions = new UwotFsPermissions(permissions);
+			if (currentPermissions.allowed !== DEFAULT_ALLOWED) {
+			
+				newPermissions.allowed = currentPermissions.allowed;
+			
+			}
+			if (isOwned && DEFAULT_OWNER === currentPermissions.owner) {
+			
+				newPermissions.owner = this.user['_id'];
+			
+			}
+			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+			try {
+			
+				var pthStats = fs.statSync(fullPath);
+				var permPath;
+				if (pthStats.isDirectory()) {
+				
+					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				
+				}
+				else {
+				
+					permPath = path.resolve(path.dirname(fullpath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				
+				}
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+			try {
+			
+				fs.writeFileSync(fullPath, updatedPermissions);
+				return true;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}.bind(this));
+	
+	}
+	
+	// TBD
+	changeOwner(pth, user) {
+	
+	
+	
+	}
 
 }
 
