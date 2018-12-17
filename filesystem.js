@@ -19,6 +19,19 @@ const ALLOWED_WRITE_EXE = ['w','x'];
 const ALLOWED_READ_WRITE_EXE = ['r','w','x'];
 const DEFAULT_ALLOWED = ALLOWED_READ;
 
+const VALID_CMDS = [
+	'cd',
+	'ls',
+	'pwd',
+	'mkdir',
+	'rm',
+	'rmdir',
+	'mv',
+	'cp',
+	'stat',
+	'touch'
+];
+
 
 class UwotFsPermissions {
 
@@ -290,18 +303,109 @@ class UwotFs {
 	
 	// TBD
 	//async wrapper for fs commands.
+	// argArr accepts array of argument objects, empty array, or null
+	// isSudo accepts boolean or undefined
 	cmd(cmdName, argArr, callback, isSudo) {
 	
+		//sanity
+		if ('function' != typeof callback) {
+		
+			throw new TypeError('invalid callback passed to cmd');
+		
+		}
 		//check against valid
-		//set this.sudo (checking if user is allowed)
-		//perform matching command, expanding argArr
-		//set this.sudo = false
-		//handle sync and system errors
-		//return result or error
+		if ('string' != typeof cmdName || 'object' != typeof argArr || -1 === VALID_CMDS.indexOf(cmdName)) {
+		
+			return callback(systemError.EINVAL({'syscall': 'signal'}), null);
+		
+		}
+		else {
+		
+			// set null args to empty array
+			if (null === argArr) {
+			
+				argArr = [];
+			
+			}
+			//set this.sudo (checking if user is allowed)
+			if ('boolean' === typeof isSudo || isSudo) {
+			
+				this.sudo = true;
+			
+			}
+			var result;
+			try {
+				//perform matching command, expanding argArr
+				switch(cmdName) {
+			
+					case 'cd':
+						result = this.changeCwd(...argArr);
+						break;
+					case 'ls':
+						result = this.readDir(this.cwd);
+						// need to parse flags to format output...
+						break;
+					case 'pwd':
+						result = this.getVcwd();
+						break;
+					case 'mkdir':
+						result = this.createDir(...argArr);
+						break;
+					case 'rm':
+						//need to parse flags from argArr prior to calls...
+						result = this.removeFile(...argArr);
+						break;
+					case 'rmdir':
+						result = this.removeDir(...argArr);
+						break;
+					case 'mv':
+						result = this.moveFile(...argArr);
+						break;
+					case 'cp':
+						//need to parse flags from argArr prior to calls...
+						result = this.copy(...argArr);
+						break;
+					case 'stat':
+						//need to parse flags from argArr prior to call...
+						result = this.stat(...argArr);
+						// and format result after
+						break;
+					case 'touch':
+						result = this.append(...argArr, '');
+						break;
+					default:
+						result = systemError.EINVAL({'syscall': 'signal'});
+			
+				}
+			
+			}
+			catch(e) {
+			
+				//set this.sudo = false
+				this.sudo = false;
+				return callback(e, null);
+			
+			}
+			//set this.sudo = false
+			this.sudo = false;
+			//handle sync and system errors
+			// just passing these through for now
+			//return result or error
+			if (result instanceof Error) {
+			
+				return callback(result, null);
+			
+			}
+			else {
+			
+				return callback(false, result)
+			
+			}
+		
+		}
 	
 	}
 	
-	// TBD
 	changeCwd(pth) {
 	
 		//check is string
