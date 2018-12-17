@@ -359,7 +359,13 @@ class UwotFs {
 	
 	append(pth, data) {
 	
-		if (this.isWritable(pth)) {
+		var canWrite = this.isWritable(pth);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
 		
 			try {
 			
@@ -376,7 +382,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'write'});
 		
 		}
 	
@@ -389,6 +395,11 @@ class UwotFs {
 		if (canRead instanceof Error) {
 		
 			return canRead;
+		
+		}
+		else if (canWrite instanceof Error) {
+		
+			return canWrite;
 		
 		}
 		else if (canRead && canWrite) {
@@ -421,7 +432,13 @@ class UwotFs {
 	
 	createDir(pth) {
 	
-		if (this.isWritable(pth)) {
+		var canWrite = this.isWritable(pth);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
 		
 			try {
 			
@@ -514,6 +531,16 @@ class UwotFs {
 			return canRead;
 		
 		}
+		else if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWriteNew instanceof Error) {
+		
+			return canWriteNew;
+		
+		}
 		else if (canRead && canWrite && canWriteNew) {
 		
 			try {
@@ -534,9 +561,14 @@ class UwotFs {
 			return systemError.EACCES({'path': pth, 'syscall': 'read'});
 		
 		}
+		else if (!canWrite) {
+		
+			return systemError.EACCES({'path': pth, 'syscall': 'unlink'});
+		
+		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': newPath, 'syscall': 'write'});
 		
 		}
 	
@@ -544,7 +576,13 @@ class UwotFs {
 	
 	removeDir(pth) {
 	
-		if (this.isWritable(pth)) {
+		var canWrite = this.isWritable(pth);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
 		
 			try {
 			
@@ -561,7 +599,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'rmdir'});
 		
 		}
 	
@@ -569,7 +607,13 @@ class UwotFs {
 	
 	removeFile(pth) {
 	
-		if (this.isWritable(pth)) {
+		var canWrite = this.isWritable(pth);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
 		
 			try {
 			
@@ -586,7 +630,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'unlink'});
 		
 		}
 	
@@ -625,7 +669,13 @@ class UwotFs {
 	
 	write(pth, data) {
 	
-		if (this.isWritable(pth)) {
+		var canWrite = this.isWritable(pth);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
 		
 			try {
 			
@@ -642,7 +692,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'write'});
 		
 		}
 	
