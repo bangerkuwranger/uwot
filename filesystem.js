@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const pathIsInside = require('path-is-inside');
-const systemError = require('./helpers/systemError'');
+const systemError = require('./helpers/systemError');
 const Users = require('./users');
 var userInterface = new Users();
 

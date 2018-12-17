@@ -505,7 +505,7 @@ for (var key of messages.keys()) {
 	
 	}
 
-});
+};
 module.exports = sysErrors;
 
 
