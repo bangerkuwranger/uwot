@@ -69,3 +69,4 @@ npm-debug.log
 public/.sass-cache
 public/.sass-cache/*
 public/.sass-cache/**
+*.scssc
