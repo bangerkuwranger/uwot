@@ -64,3 +64,8 @@ public/.sass-cache/
 
 # Debug log from npm
 npm-debug.log
+
+# Styesheet processor cache
+public/.sass-cache
+public/.sass-cache/*
+public/.sass-cache/**
