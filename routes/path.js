@@ -15,8 +15,7 @@ router.post(
 		output: {
 			color: 'yellow',
 			content: 'Invalid Request'
-		},
-		operation: null
+		}
 	};
 	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
 	
@@ -45,9 +44,14 @@ router.post(
 					};
 				
 				}
-				if ('string' === typeof req.body.operation) {
+				if ('string' === typeof req.body.operations) {
 				
-					resObj.operation = req.body.operation;
+					resObj.operations = req.body.operations;
+				
+				}
+				else if ('object' == typeof req.body.operations && null !== req.body.operations) {
+				
+					resObj.operations = req.body.operations;
 				
 				}
 				

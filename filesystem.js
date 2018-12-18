@@ -368,10 +368,12 @@ class UwotFs {
 						break;
 					case 'cp':
 						//need to parse flags from argArr prior to calls...
+						// should support -n, -R
 						result = this.copy(...argArr);
 						break;
 					case 'stat':
 						//need to parse flags from argArr prior to call...
+						//should support -f and -F
 						result = this.stat(...argArr);
 						// and format result after
 						break;

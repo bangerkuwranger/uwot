@@ -67,9 +67,8 @@ function outputToMain(data) {
 		if ('string' == typeof data.output && '' !== data.output) {
 			jQuery('#uwotoutput .output-container').append('<div class="outputline">'+ data.output +'</div>');
 		}
-		if ('string' == typeof data.operation && 'object' == typeof uwotOperations && Array.isArray(uwotOperations) && -1 != uwotOperations.indexOf(data.operation.trim())) {
-			let ops = new UwotCliOperations();
-			ops.performOperation(data.operation.trim());
+		if ('undefined' !== typeof data.operations && 'object' == typeof uwotOperations && Array.isArray(uwotOperations)) {
+			performOperations(data.operations);
 		}
 	}
 // 	return;
@@ -85,4 +84,21 @@ function changePrompt(promptString) {
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
 	return;
+}
+
+function performOperations(operations) {
+	let ops = new UwotCliOperations();
+	if ('string' == typeof operations && -1 != uwotOperations.indexOf(operations.trim())) {
+		ops.performOperation(operations.trim());
+	}
+	if ('object' == typeof operations && null !== operations) {
+		if (Array.isArray(operations)) {
+			operations.forEach(function(operation) {
+				performOperations(operation);
+			});
+		}
+		else if ('string' == typeof operations.name && 'object' == typeof operations.args && Array.isArray(operations.args)) {
+			ops.performOperation(operations.name, operations.args);
+		}
+	}
 }

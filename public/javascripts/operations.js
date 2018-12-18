@@ -4,10 +4,15 @@ class UwotCliOperations {
 
 	constructor() {}
 	
-	performOperation(operationName) {
+	performOperation(operationName, operationArgs) {
 	
 		if (-1 != uwotOperations.indexOf(operationName.trim())) {
-			this[operationName.trim()]();
+			if('object' !== typeof operationArgs || !Array.isArray(operationArgs)) {
+				this[operationName.trim()]();
+			}
+			else {
+				this[operationName.trim()](operationArgs);
+			}
 		}
 	
 	}
@@ -32,5 +37,17 @@ class UwotCliOperations {
 			outputToMain(histLine);
 		}
 	}
-
+	
+	echo(args) {
+		outputToMain('echo' + args);
+	}
+	
+	login(args) {
+		
+	}
+	
+	logout() {
+	
+	}
+	
 }

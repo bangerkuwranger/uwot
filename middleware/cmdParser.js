@@ -23,9 +23,20 @@ module.exports = function(args) {
 	
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();
-			if (-1 != global.UwotCliOps.indexOf(cmdString)) {
+			var cmdArray = cmdString.split(' ');
+			if (cmdArray.some(r=> global.UwotCliOps.includes(r))) {
 		
-				req.body.operation = cmdString;
+				if (cmdArray.length === 1) {
+				
+					req.body.operations = cmdString;
+				
+				}
+				else {
+				
+					//simple parsing, won't do args and any non-ops words get skipped
+					req.body.operations = cmdArray;
+				
+				}
 		
 			}
 	

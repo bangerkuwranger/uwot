@@ -138,6 +138,12 @@ router.post('/login',
 			res.json({error: error, user: null});
 		
 		}
+		else if (!req.user) {
+		
+			// failure state
+			res.json({error: new Error('invalid login credentials'), user: null});
+		
+		}
 		else {
 		
 			res.json({error: false, user: req.user});
@@ -145,6 +151,7 @@ router.post('/login',
 		}
 	
 	}
+	
 );
 
 router.all('/login', function (req, res, next) {
