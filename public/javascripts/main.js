@@ -4,6 +4,7 @@ jQuery(document).ready(function($) {
 
 	uwotHistory = new CliHistory();
 	
+	changePrompt(user);
 	$("#uwotcli-input").focus();
 	
 	$("#uwotcli").submit(function(e) {
@@ -66,4 +67,9 @@ function outputToMain(data) {
 
 function countIntDigits(num) {
 	return num.toString().length;
+}
+
+function changePrompt(promptString) {
+	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
 }

@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -90,7 +100,8 @@ $decorations must be one of the following:
 @import url("https://fonts.googleapis.com/css?family=VT323");
 /* line 10, ../../../scss/theme/beard/main.scss */
 body #uwot {
-  font: 12px "Proxima Nova", Helvetica, Arial, sans-serif;
+  --prompt: '#';
+  font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
@@ -273,44 +284,47 @@ body #uwot .ansi.bg-white .ansi.reversed {
   background-color: inherit;
   color: #fefefe;
 }
-/* line 15, ../../../scss/theme/beard/main.scss */
+/* line 16, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal {
   font-family: 'VT323', monospace;
   color: #00fe00;
   background: #010101;
 }
-/* line 20, ../../../scss/theme/beard/main.scss */
+/* line 21, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal a {
   color: #0000fe;
 }
-/* line 23, ../../../scss/theme/beard/main.scss */
+/* line 24, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal a:hover, body #uwot .terminal a:active {
   color: #0000fe;
   text-decoration: none;
 }
-/* line 31, ../../../scss/theme/beard/main.scss */
+/* line 32, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal .header {
   border-color: #00fe00;
   background: #010101;
 }
-/* line 36, ../../../scss/theme/beard/main.scss */
+/* line 37, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
 }
-/* line 41, ../../../scss/theme/beard/main.scss */
+/* line 42, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #00fe00;
 }
-/* line 50, ../../../scss/theme/beard/main.scss */
-body #uwot .terminal .cli form .field:before {
-  content: '\0023';
-}
-/* line 54, ../../../scss/theme/beard/main.scss */
+/* line 51, ../../../scss/theme/beard/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
   color: #00fe00;
+}
+
+@media (min-width: 642px) {
+  /* line 73, ../../../scss/theme/beard/main.scss */
+  body #uwot {
+    font-size: 12px;
+  }
 }

@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 

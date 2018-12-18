@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -90,7 +100,8 @@ $decorations must be one of the following:
 @import url("https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700&subset=latin-ext");
 /* line 10, ../../../scss/theme/clone/main.scss */
 body #uwot {
-  font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
+  --prompt: '$';
+  font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
@@ -425,44 +436,47 @@ body #uwot .ansi.bg-bright-white.reversed,
 body #uwot .ansi.bg-bright-white .ansi.reversed {
   color: #efefef;
 }
-/* line 15, ../../../scss/theme/clone/main.scss */
+/* line 16, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal {
   font-family: monaco, 'Anonymous Pro', Consolas, "Lucida Console", monospace;
   color: #2C3836;
   background: #f8f7f7;
 }
-/* line 20, ../../../scss/theme/clone/main.scss */
+/* line 21, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal a {
   color: #40CEFF;
 }
-/* line 23, ../../../scss/theme/clone/main.scss */
+/* line 24, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal a:hover, body #uwot .terminal a:active {
   color: #55B9F2;
   text-decoration: none;
 }
-/* line 31, ../../../scss/theme/clone/main.scss */
+/* line 32, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal .header {
   border-color: #2C3836;
   background: #f8f7f7;
 }
-/* line 36, ../../../scss/theme/clone/main.scss */
+/* line 37, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
 }
-/* line 41, ../../../scss/theme/clone/main.scss */
+/* line 42, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #2C3836;
 }
-/* line 50, ../../../scss/theme/clone/main.scss */
-body #uwot .terminal .cli form .field:before {
-  content: " \0024 ";
-}
-/* line 54, ../../../scss/theme/clone/main.scss */
+/* line 51, ../../../scss/theme/clone/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
   color: #33423F;
+}
+
+@media (min-width: 642px) {
+  /* line 73, ../../../scss/theme/clone/main.scss */
+  body #uwot {
+    font-size: 10px;
+  }
 }

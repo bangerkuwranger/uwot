@@ -8,7 +8,8 @@
 body{
 
 	#uwot {
-		font-size: 11px;
+		--prompt: 'C:\\>';
+		font-size: 8px;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
@@ -46,11 +47,10 @@ body{
 				form {
 			
 					.field {
-						margin-left: 3em;
+						margin-left: 3ch;
 						
 						&:before {
-							content: "C\003a\005c\003e";
-							left: -3em;
+							left: -3ch;
 						}
 				
 						input,
@@ -67,6 +67,18 @@ body{
 	
 		}
 	
+	}
+
+}
+
+@media (min-width: 642px) {
+
+	body {
+	
+		#uwot {
+			font-size: 12px;
+		}
+
 	}
 
 }

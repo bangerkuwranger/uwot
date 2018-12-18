@@ -42,13 +42,23 @@ renders to:
 	height: -o-calc(100% - 20px);
 	height: calc(100% - 20px);
 */
+/****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
 /* line 5, ../scss/style.scss */
 body {
   margin: 0;
 }
 /* line 8, ../scss/style.scss */
 body #uwot {
-  font: 14px "Proxima Nova", Helvetica, Arial, sans-serif;
+  font: 10px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 11, ../scss/style.scss */
 body #uwot .terminal {
@@ -76,10 +86,11 @@ body #uwot .terminal .output {
   margin: 5em 0;
   height: calc(100% - 8em);
   background-size: cover;
+  background-position-x: center;
   overflow: hidden;
   overflow-y: auto;
 }
-/* line 39, ../scss/style.scss */
+/* line 40, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -91,31 +102,31 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 50, ../scss/style.scss */
+/* line 51, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 53, ../scss/style.scss */
+/* line 54, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
-  margin-left: 1em;
+  margin-left: 0;
 }
-/* line 58, ../scss/style.scss */
+/* line 59, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
-  content: "\003e";
+  content: attr(data-prompt) var(--prompt, ">");
   position: absolute;
-  left: -1em;
+  left: 0;
   top: 0;
+  font: inherit;
 }
-/* line 65, ../scss/style.scss */
+/* line 67, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
   margin: 0;
   padding: 0;
   display: inline-block;
-  vertical-align: middle;
   white-space: normal;
   line-height: 1;
   background: transparent;
@@ -128,4 +139,15 @@ body #uwot .terminal .cli form .field input:active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   width: calc(100% - 1em);
+}
+
+@media (min-width: 642px) {
+  /* line 103, ../scss/style.scss */
+  body #uwot {
+    font-size: 14px;
+  }
+  /* line 108, ../scss/style.scss */
+  body #uwot .terminal .output {
+    background-position-x: initial;
+  }
 }

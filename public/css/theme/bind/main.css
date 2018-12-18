@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -87,6 +97,10 @@ $decorations must be one of the following:
 		'reversed' - inverts colors for any .ansi.reversed tag (heavy!)
 
 */
+/* line 8, ../../../scss/theme/bind/main.scss */
+body #uwot {
+  --prompt: "Ğö:";
+}
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
   /* black */
@@ -447,14 +461,13 @@ body #uwot .terminal .cli {
 }
 /* line 44, ../../../scss/theme/bind/main.scss */
 body #uwot .terminal .cli form .field {
-  margin-left: 2em;
+  margin-left: 2ch;
 }
 /* line 47, ../../../scss/theme/bind/main.scss */
 body #uwot .terminal .cli form .field:before {
-  content: "\011e \00f6 \003a";
-  left: -2em;
+  left: -2ch;
 }
-/* line 52, ../../../scss/theme/bind/main.scss */
+/* line 51, ../../../scss/theme/bind/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {

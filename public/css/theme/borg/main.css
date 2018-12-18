@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -90,7 +100,8 @@ $decorations must be one of the following:
 @import url("https://fonts.googleapis.com/css?family=Share+Tech+Mono");
 /* line 10, ../../../scss/theme/borg/main.scss */
 body #uwot {
-  font-size: 11px;
+  --prompt: 'C:\\>';
+  font-size: 8px;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
@@ -425,49 +436,55 @@ body #uwot .ansi.bg-bright-white.reversed,
 body #uwot .ansi.bg-bright-white .ansi.reversed {
   color: #fff;
 }
-/* line 15, ../../../scss/theme/borg/main.scss */
+/* line 16, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal {
   font-family: "Lucida Console", 'Share Tech Mono', "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;
   color: #fcfcee;
   background: #032555;
 }
-/* line 20, ../../../scss/theme/borg/main.scss */
+/* line 21, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal a {
   color: #1582FB;
 }
-/* line 23, ../../../scss/theme/borg/main.scss */
+/* line 24, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal a:hover, body #uwot .terminal a:active {
   color: #fff;
   text-decoration: none;
 }
-/* line 31, ../../../scss/theme/borg/main.scss */
+/* line 32, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .header {
   border-color: #fcfcee;
   background: #032555;
 }
-/* line 36, ../../../scss/theme/borg/main.scss */
+/* line 37, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
 }
-/* line 41, ../../../scss/theme/borg/main.scss */
+/* line 42, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #fff;
 }
-/* line 48, ../../../scss/theme/borg/main.scss */
+/* line 49, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .cli form .field {
-  margin-left: 3em;
+  margin-left: 3ch;
 }
-/* line 51, ../../../scss/theme/borg/main.scss */
+/* line 52, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .cli form .field:before {
-  content: "C\003a\005c\003e";
-  left: -3em;
+  left: -3ch;
 }
 /* line 56, ../../../scss/theme/borg/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
   color: #fff;
+}
+
+@media (min-width: 642px) {
+  /* line 78, ../../../scss/theme/borg/main.scss */
+  body #uwot {
+    font-size: 12px;
+  }
 }

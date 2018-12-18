@@ -6,7 +6,7 @@
 body{
 
 	#uwot {
-	
+		--prompt: "Ğö:";
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
@@ -42,11 +42,10 @@ body{
 				form {
 			
 					.field {
-						margin-left: 2em;
+						margin-left: 2ch;
 						
 						&:before {
-							content: "\011e \00f6 \003a";
-							left: -2em;
+							left: -2ch;
 						}
 				
 						input,

@@ -24,3 +24,21 @@ renders to:
 	}
 
 }
+
+/****
+
+	NUMBER STRING TO EM
+
+****/
+
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+
+@mixin numstrtoem($property, $val) {
+	
+	#{$property}: #{$val}em;
+
+}

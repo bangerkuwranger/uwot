@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -90,7 +100,8 @@ $decorations must be one of the following:
 @import url("https://fonts.googleapis.com/css?family=Fira+Mono:400,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext");
 /* line 10, ../../../scss/theme/cac/main.scss */
 body #uwot {
-  font: 12px Futura, sans-serif;
+  --prompt: "Ⓐ:";
+  font: 8px Futura, sans-serif;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
@@ -462,10 +473,22 @@ body #uwot .terminal .cli {
 }
 /* line 52, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli form .field {
-  margin-left: 2em;
+  margin-left: 2ch;
 }
 /* line 55, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli form .field:before {
-  content: "\24b6 \003a ";
-  left: -2em;
+  left: -2ch;
+}
+/* line 59, ../../../scss/theme/cac/main.scss */
+body #uwot .terminal .cli form .field input,
+body #uwot .terminal .cli form .field input:focus,
+body #uwot .terminal .cli form .field input:active {
+  vertical-align: middle;
+}
+
+@media (min-width: 642px) {
+  /* line 81, ../../../scss/theme/cac/main.scss */
+  body #uwot {
+    font-size: 12px;
+  }
 }

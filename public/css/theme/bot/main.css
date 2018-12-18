@@ -43,6 +43,16 @@ renders to:
 	height: calc(100% - 20px);
 */
 /****
+
+	NUMBER STRING TO EM
+
+****/
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+/****
 	
 	ANSI 16 Color Map
 
@@ -91,7 +101,8 @@ $decorations must be one of the following:
 @import url("https://fonts.googleapis.com/css?family=Roboto:300,300i,400,700,700i");
 /* line 11, ../../../scss/theme/bot/main.scss */
 body #uwot {
-  font: 16px 'Roboto', sans-serif;
+  --prompt: '$';
+  font: 12px 'Roboto', sans-serif;
 }
 /* line 61, ../../../scss/_partial/_ansi.scss */
 body #uwot .ansi {
@@ -458,12 +469,15 @@ body #uwot .terminal .cli {
   border-color: none;
 }
 /* line 52, ../../../scss/theme/bot/main.scss */
-body #uwot .terminal .cli form .field:before {
-  content: "\0024";
-}
-/* line 56, ../../../scss/theme/bot/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
   color: #268bd2;
+}
+
+@media (min-width: 642px) {
+  /* line 74, ../../../scss/theme/bot/main.scss */
+  body #uwot {
+    font-size: 16px;
+  }
 }

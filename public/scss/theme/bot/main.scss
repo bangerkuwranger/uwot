@@ -9,8 +9,8 @@
 body{
 
 	#uwot {
-	
-		font: 16px 'Roboto', sans-serif;
+		--prompt: '$';
+		font: 12px 'Roboto', sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
@@ -49,10 +49,6 @@ body{
 			
 					.field {
 				
-						&:before {
-							content: "\0024";
-						}
-				
 						input,
 						input:focus,
 						input:active {						
@@ -67,6 +63,18 @@ body{
 	
 		}
 	
+	}
+
+}
+
+@media (min-width: 642px) {
+
+	body {
+	
+		#uwot {
+			font-size: 16px;
+		}
+
 	}
 
 }

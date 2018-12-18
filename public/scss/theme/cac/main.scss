@@ -8,8 +8,8 @@
 body{
 
 	#uwot {
-	
-		font: 12px Futura, sans-serif;
+		--prompt: "Ⓐ:";
+		font: 8px Futura, sans-serif;
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
@@ -50,17 +50,16 @@ body{
 				form {
 			
 					.field {
-						margin-left: 2em;
+						margin-left: 2ch;
 				
 						&:before {
-							content: "\24b6 \003a ";
-							left: -2em;
+							left: -2ch;
 						}
 				
 						input,
 						input:focus,
 						input:active {
-							
+							vertical-align: middle;
 						}
 			
 					}
@@ -71,6 +70,18 @@ body{
 	
 		}
 	
+	}
+
+}
+
+@media (min-width: 642px) {
+
+	body {
+	
+		#uwot {
+			font-size: 12px;
+		}
+
 	}
 
 }

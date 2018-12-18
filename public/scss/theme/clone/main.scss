@@ -8,7 +8,8 @@
 body{
 
 	#uwot {
-		font: 9px "Proxima Nova", Helvetica, Arial, sans-serif;
+		--prompt: '$';
+		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
@@ -47,10 +48,6 @@ body{
 			
 					.field {
 				
-						&:before {
-							content: " \0024 ";
-						}
-				
 						input,
 						input:focus,
 						input:active {						
@@ -65,6 +62,18 @@ body{
 	
 		}
 	
+	}
+
+}
+
+@media (min-width: 642px) {
+
+	body {
+	
+		#uwot {
+			font-size: 10px;
+		}
+
 	}
 
 }

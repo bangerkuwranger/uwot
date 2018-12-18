@@ -4,9 +4,9 @@
 
 body {
 	margin: 0;
-
+	
 	#uwot {
-		font: 14px "Proxima Nova", Helvetica, Arial, sans-serif;
+		font: 10px "Proxima Nova", Helvetica, Arial, sans-serif;
 
 		.terminal {
 			font-family: monospace;
@@ -32,6 +32,7 @@ body {
 				margin: 5em 0;
 				height: calc(100% - 8em);
 				background-size: cover;
+				background-position-x: center;
 				overflow: hidden;
 				overflow-y: auto;
 			}
@@ -53,13 +54,14 @@ body {
 					.field {
 						width: 100%;
 						position: relative;
-						margin-left: 1em;
+						margin-left: 0;
 					
 						&:before {
-							content: "\003e";
+							content: attr(data-prompt) var(--prompt, '>');
 							position: absolute;
-							left: -1em;
+							left: 0;
 							top: 0;
+							font: inherit;
 						}
 					
 						input,
@@ -68,7 +70,6 @@ body {
 							margin: 0;
 							padding: 0;
 							display: inline-block;
-							vertical-align: middle;
 							white-space: normal;
 							line-height: 1;
 							background: transparent;
@@ -93,4 +94,25 @@ body {
 	
 	}
 	
+}
+
+@media (min-width: 642px) {
+
+	body {
+	
+		#uwot {
+			font-size: 14px;
+			
+			.terminal {
+			
+				.output {
+					background-position-x: initial;
+				}
+			
+			}
+			
+		}
+
+	}
+
 }
