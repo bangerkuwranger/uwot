@@ -72,4 +72,5 @@ function countIntDigits(num) {
 function changePrompt(promptString) {
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
+	return;
 }

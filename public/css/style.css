@@ -65,7 +65,7 @@ body #uwot .terminal {
   font-family: monospace;
   width: calc(100% - 2em);
   height: calc(100% - 2em);
-  min-height: 320px;
+  min-height: calc(320px - 2em);
   position: fixed;
   padding: 1em;
 }
