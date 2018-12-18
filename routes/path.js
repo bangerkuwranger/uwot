@@ -27,8 +27,15 @@ router.post(
 				if ('object' == typeof req.body.cmdAst) {
 				
 					resObj.output = {
-						content: 'CMD Verified: ' + "\n\r" + JSON.stringify(req.body.cmdAst)
+						content: ['CMD Verified: ', {tag:'br'}, JSON.stringify(req.body.cmdAst)]
 					};
+				
+				}
+				else if ('' === req.body.cmd) {
+				
+					resObj.output = {
+						content: {tag:'br'}
+					}
 				
 				}
 				else {

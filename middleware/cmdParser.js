@@ -19,7 +19,7 @@ module.exports = function(args) {
 
 	return function(req, res, next) {
 	
-		if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
+		if ('object' === typeof req.body && 'string' === typeof req.body.cmd && '' !== req.body.cmd) {
 	
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();

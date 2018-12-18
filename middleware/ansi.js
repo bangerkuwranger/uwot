@@ -43,7 +43,12 @@ function parseToAnsi(ansiObj) {
 	}
 	var openTag = '<' + tagName + ' class="' + classesString + '">';
 	var closeTag = '</' + tagName + '>';
-	if ('string' == typeof ansiObj.content) {
+	if ('undefined' == typeof ansiObj.content) {
+	
+		return '<' + tagName + ' class="' + classesString + '" />';
+	
+	}
+	else if ('string' == typeof ansiObj.content) {
 	
 		return openTag + ansiObj.content + closeTag;
 	
