@@ -1,5 +1,5 @@
 'use strict';
-var uwotHistory;
+var uwotHistory, uwotInteractive = false;
 jQuery(document).ready(function($) {
 
 	uwotHistory = new CliHistory();
@@ -45,17 +45,27 @@ jQuery(document).ready(function($) {
 
 			default: return; // exit this handler for other keys
 		}
-	});	
+	});
+	
+	$('#uwotterminal').click(function() {
+	
+		if (!uwotInteractive) {
+		
+			$("#uwotcli-input").focus();
+		
+		}
+	
+	})
 
 });
 
 function outputToMain(data) {
 	if ('string' == typeof data) {
-		jQuery('#uwotoutput').append('<div class="outputline"><pre>'+ data +'</pre></div>');
+		jQuery('#uwotoutput .output-container').append('<div class="outputline">'+ data +'</div>');
 	}
 	if ('object' == typeof data && null !== data) {
 		if ('string' == typeof data.output && '' !== data.output) {
-			jQuery('#uwotoutput').append('<div class="outputline"><pre>'+ data.output +'</pre></div>');
+			jQuery('#uwotoutput .output-container').append('<div class="outputline">'+ data.output +'</div>');
 		}
 		if ('string' == typeof data.operation && 'object' == typeof uwotOperations && Array.isArray(uwotOperations) && -1 != uwotOperations.indexOf(data.operation.trim())) {
 			let ops = new UwotCliOperations();
