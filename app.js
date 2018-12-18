@@ -25,7 +25,10 @@ if ('undefined' == typeof global.UwotBin) {
 }
 global.UwotCliOps = [
 	"clear",
-	"history"
+	"history",
+	"echo",
+	"login",
+	"logout"
 ];
 
 var etcProd = path.resolve(__dirname, 'etc', 'prod');

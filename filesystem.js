@@ -345,21 +345,25 @@ class UwotFs {
 					case 'ls':
 						result = this.readDir(this.cwd);
 						// need to parse flags to format output...
+						// only supporting -l and -a
 						break;
 					case 'pwd':
 						result = this.getVcwd();
 						break;
 					case 'mkdir':
+						// will support -p (recursive path dir creation)
 						result = this.createDir(...argArr);
 						break;
 					case 'rm':
 						//need to parse flags from argArr prior to calls...
+						// -d for dirs, -R recursive
 						result = this.removeFile(...argArr);
 						break;
 					case 'rmdir':
 						result = this.removeDir(...argArr);
 						break;
 					case 'mv':
+						// should support -n
 						result = this.moveFile(...argArr);
 						break;
 					case 'cp':
