@@ -68,8 +68,9 @@ body #uwot .terminal {
   min-height: calc(320px - 2em);
   position: fixed;
   padding: 1em;
+  overflow: hidden;
 }
-/* line 19, ../scss/style.scss */
+/* line 20, ../scss/style.scss */
 body #uwot .terminal .header {
   min-height: 1em;
   border-bottom: 1px solid;
@@ -79,7 +80,7 @@ body #uwot .terminal .header {
   width: calc(100% - 2em);
   margin: 0.5em 0;
 }
-/* line 29, ../scss/style.scss */
+/* line 30, ../scss/style.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
@@ -88,9 +89,27 @@ body #uwot .terminal .output {
   background-size: cover;
   background-position-x: center;
   overflow: hidden;
-  overflow-y: auto;
 }
-/* line 40, ../scss/style.scss */
+/* line 39, ../scss/style.scss */
+body #uwot .terminal .output .output-container {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+/* line 49, ../scss/style.scss */
+body #uwot .terminal .output .output-container > :first-child {
+  margin-top: auto !important;
+}
+/* line 54, ../scss/style.scss */
+body #uwot .terminal .output .output-container .outputline {
+  line-height: 1.1em;
+  margin: 0.25em 0;
+}
+/* line 64, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -102,17 +121,17 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 51, ../scss/style.scss */
+/* line 75, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 54, ../scss/style.scss */
+/* line 78, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
 }
-/* line 59, ../scss/style.scss */
+/* line 83, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -120,7 +139,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 67, ../scss/style.scss */
+/* line 91, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -142,11 +161,11 @@ body #uwot .terminal .cli form .field input:active {
 }
 
 @media (min-width: 642px) {
-  /* line 103, ../scss/style.scss */
+  /* line 127, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 108, ../scss/style.scss */
+  /* line 132, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
   }

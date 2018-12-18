@@ -15,6 +15,7 @@ body {
 			min-height: calc(320px - 2em);
 			position: fixed;
 			padding: 1em;
+			overflow: hidden;
 	
 			.header {
 				min-height: 1em;
@@ -34,7 +35,30 @@ body {
 				background-size: cover;
 				background-position-x: center;
 				overflow: hidden;
-				overflow-y: auto;
+				
+				.output-container {
+					width: 100%;
+					height: 100%;
+					margin: 0;
+					padding: 0;
+					overflow-y: auto;
+					display: flex;
+					flex-direction: column;
+// 					justify-content: flex-end;
+					// yucky bugs are yucky.
+					> :first-child {
+						margin-top: auto !important;
+						//yucky workarounds are also yucky
+					}
+					
+					.outputline {
+						line-height: 1.1em;
+						margin: 0.25em 0;
+					}
+					
+					
+				}
+				
 			}
 		
 			.cli {

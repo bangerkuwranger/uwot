@@ -72,7 +72,9 @@ function outputToMain(data) {
 			ops.performOperation(data.operation.trim());
 		}
 	}
-	return;
+// 	return;
+	//yucky bugs make yuckier things yucky
+	return jQuery('#uwotoutput .output-container').scrollTop(1E10);
 }
 
 function countIntDigits(num) {
