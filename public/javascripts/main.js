@@ -11,7 +11,7 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		var op = $('#uwotcli-input').val();
 		uwotHistory.addItem(op);
-		outputToMain(op);
+		outputToMain(op, {addPrompt:true});
 		$("#uwotcli-input").val('').focus();
 		var nonce = $('#uwotcli-nonce').val();
 		$.post(
@@ -64,13 +64,19 @@ jQuery(document).ready(function($) {
 
 });
 
-function outputToMain(data) {
+function outputToMain(data, args) {
+	var lineClasses = "outputline";
+	if ('object' == typeof args) {
+		if ('boolean' == typeof args.addPrompt && args.addPrompt) {
+			lineClasses += " add-prompt";
+		}
+	}
 	if ('string' == typeof data) {
-		jQuery('#uwotoutput .output-container').append('<div class="outputline">'+ data +'</div>');
+		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
 	}
 	if ('object' == typeof data && null !== data) {
 		if ('string' == typeof data.output && '' !== data.output) {
-			jQuery('#uwotoutput .output-container').append('<div class="outputline">'+ data.output +'</div>');
+			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
 		}
 		if ('undefined' !== typeof data.operations && 'object' == typeof uwotOperations && Array.isArray(uwotOperations)) {
 			performOperations(data.operations);

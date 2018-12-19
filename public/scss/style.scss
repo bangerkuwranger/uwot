@@ -54,6 +54,21 @@ body {
 					.outputline {
 						line-height: 1.1em;
 						margin: 0.25em 0;
+						
+						&.add-prompt {
+							margin-left: 4ch;
+							position: relative;
+							
+							&:before {
+								content: var(--prompt, '>') ' ';
+								position: absolute;
+								left: -4ch;
+								top: 0;
+								font: inherit;
+							}
+						
+						}
+						
 					}
 					
 					
