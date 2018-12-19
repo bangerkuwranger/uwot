@@ -82,13 +82,10 @@ global.UwotBin.sudo = {
 	
 		return callback(
 			false,
-			[
-				{
-					content: 'sudo what? sudo please...',
-					color: 'magenta'
-				},
-				"\r\n"
-			]
+			{
+				content: ['sudo what? sudo please...'],
+				color: 'magenta'
+			}
 		);
 	
 	},
