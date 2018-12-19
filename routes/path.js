@@ -25,11 +25,10 @@ router.post(
 			
 				if ('object' == typeof req.body.cmdAst) {
 				
+					resObj.output = {content: []};
 					if ("development" === global.process.env.NODE_ENV) {
 					
-						resObj.output = {
-							content: [{content: 'CMD Verified. AST: ', color: 'cyan'}, {tag:'br'}, {tag:'br'}, JSON.stringify(req.body.cmdAst), {tag:'br'}, {tag:'br'}]
-						};
+						resObj.output.content.push([{content: 'CMD Verified. AST: ', color: 'cyan'}, {tag:'br'}, {tag:'br'}, JSON.stringify(req.body.cmdAst), {tag:'br'}, {tag:'br'}]);
 					
 					}
 					if ('object' == typeof req.body.runtime && 'object' == typeof req.body.runtime.exes) {
