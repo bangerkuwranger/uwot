@@ -67,6 +67,51 @@ app.set(
 
 // create reserved command list from ops
 global.UwotReserved = Array.from(global.UwotCliOps);
+// add sudo. it's special.
+global.UwotReserved.push('sudo');
+global.UwotBin.sudo = {
+	command: {
+		name: 'sudo',
+		description: 'Allows user to run commands with elevated privileges.',
+		requiredArguments: [],
+		optionalArguments: []
+	},
+	options: [],
+	path: global.appRoot,
+	execute: function execute(args, options, callback, isSudo) {
+	
+		return callback(
+			false,
+			[
+				{
+					content: 'sudo what? sudo please...',
+					color: 'magenta'
+				},
+				"\r\n"
+			]
+		);
+	
+	},
+	help: function help(cb) {
+	
+		return cb(false, 'sudo <command>' + "\r\n" + 'Either you can or you can\'t. There is no "maybe" in sudo.');
+	
+	},
+	matchOpt: function matchOpt(opt) {
+	
+		return {
+			name: '',
+			isOpt: false,
+			isLong: false,
+			isDefined: false,
+			hasArgs: false,
+			reqArgs: [],
+			optArgs: [],
+			assignedArg: ''
+		};
+	
+	}
+};
 // need to load bins from paths
 // load locals if enabled
 if (global.UwotConfig.get('binpath', 'useLocal')) {

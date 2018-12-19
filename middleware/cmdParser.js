@@ -21,6 +21,10 @@ module.exports = function(args) {
 	
 		if ('object' === typeof req.body && 'string' === typeof req.body.cmd && '' !== req.body.cmd) {
 	
+			// TBD
+			// get user from req
+			// check user.maySudo()
+			// req.body.maySudo =
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();
 			var cmdArray = cmdString.split(' ');
@@ -102,11 +106,44 @@ function parseCommandNode(astCmd, output, input) {
 
 function parseCommand(astCommand, output, input) {
 
-	var exe = {isOp: false, type: 'Command'};
+	var exe = {isOp: false, type: 'Command', isSudo: false};
 	exe.name = sanitize.cleanString(astCommand.name.text);
 	if ('string' == typeof exe.name && '' !== exe.name) {
 	
-		if (-1 !== global.UwotCliOps.indexOf(exe.name)) {
+		if ('sudo' === exe.name) {
+		
+			exe.input = 'undefined' != typeof input ? input : null;
+			exe.output = 'undefined' != typeof output ? output : null;
+			var args = [];
+			if ('object' == typeof astCommand.suffix) {
+		
+				args = args.concat(astCommand.suffix);
+		
+			}
+			// TBD
+			// if req.body.maySudo
+				// exe.isSudo: true
+			
+			if (args.length > 0) {
+			
+				var sudoCmdWord = args.shift();
+				var sudoCmdNode = {
+					type: 'Command',
+					name: sudoCmdWord,
+					suffix: args
+				};
+				
+				exe = parseCommandNode(sudoCmdNode, exe.output, exe.input);
+				// TBD
+				// if req.body.maySudo
+					// exe.isSudo: true
+				exe.isSudo = true;
+			
+			}
+			return exe;
+		
+		}
+		else if (-1 !== global.UwotCliOps.indexOf(exe.name)) {
 		
 			exe.isOp = true;
 			if ('object' !== typeof astCommand.suffix) {
@@ -465,13 +502,18 @@ function executeMap(exeMap, outputType) {
 										results.output.push(outputLine(error, outputType));
 									
 									}
+									else if ('sudo' === exe.name) {
+									
+										results.output.push(result);
+									
+									}
 									else {
 									
 										results.output.push(outputLine(result, outputType));
 									
 									}
 								
-								})
+								});
 							
 							}
 							catch(e) {
@@ -496,6 +538,11 @@ function executeMap(exeMap, outputType) {
 									if (error) {
 									
 										results.output.push(outputLine(error, 'object'));
+									
+									}
+									else if ('sudo' === exe.name) {
+									
+										results.output.push(result);
 									
 									}
 									else {
@@ -541,6 +588,11 @@ function executeMap(exeMap, outputType) {
 										if (error) {
 									
 											results.output.push(outputLine(error, outputType));
+									
+										}
+										else if ('sudo' === exe.name) {
+									
+											results.output.push(result);
 									
 										}
 										else {

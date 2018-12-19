@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
 			outputToMain(data);
 		})
 		.fail(function(obj, status, error) {
-			outputToMain(status);
+			outputToMain(error);
 		});
 	});
 

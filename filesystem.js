@@ -247,8 +247,9 @@ class UwotFs {
 						else {
 				
 							this.user = user;
+							this.user.maySudo = function() {return false;};
 							this.setDirs();
-					return;
+							return;
 				
 						}
 			
@@ -329,7 +330,7 @@ class UwotFs {
 			
 			}
 			//set this.sudo (checking if user is allowed)
-			if ('boolean' === typeof isSudo || isSudo) {
+			if ('boolean' === typeof isSudo && isSudo && this.user.maySudo()) {
 			
 				this.sudo = true;
 			
