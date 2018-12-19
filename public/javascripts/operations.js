@@ -18,7 +18,7 @@ class UwotCliOperations {
 	}
 	
 	clear() {
-		jQuery('#uwotoutput').html('');
+		jQuery('#uwotoutput .output-container').html('');
 	}
 	
 	history() {

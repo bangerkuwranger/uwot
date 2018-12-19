@@ -58,6 +58,7 @@ body {
 						&.add-prompt {
 							margin-left: 4ch;
 							position: relative;
+							min-height: 1em;
 							
 							&:before {
 								content: var(--prompt, '>') ' ';
