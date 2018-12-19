@@ -39,6 +39,7 @@ module.exports = function(args) {
 				}
 		
 			}
+			req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst);
 	
 		}
 		next();
@@ -108,7 +109,29 @@ function parseCommand(astCommand, output, input) {
 		if (-1 !== global.UwotCliOps.indexOf(exe.name)) {
 		
 			exe.isOp = true;
-			return exe;
+			if ('object' !== typeof astCommand.suffix) {
+			
+				return exe;
+			
+			}
+			else {
+			
+				var args = [];
+				args = args = args.concat(astCommand.suffix);
+				if (0 < args.length) {
+				
+					var eom = false;
+					exe.args = [];
+					for (let argIdx = 0; argIdx < args.length; argIdx++) {
+					
+						exe.args.push(args[argIdx]);
+					
+					}
+					
+				}
+				return exe;
+			
+			}
 		
 		}
 		else if (-1 !== global.UwotReserved.indexOf(exe.name)) {
@@ -137,7 +160,7 @@ function parseCommand(astCommand, output, input) {
 					
 					if (!eom) {
 					
-						var optMatch = global.UwotBin[exe.name].matchOpt(args[cIdx]);
+						var optMatch = global.UwotBin[exe.name].matchOpt(args[cIdx].text);
 						if (optMatch.isOpt) {
 					
 							if (optMatch.name === '') {
@@ -206,7 +229,7 @@ function parseCommand(astCommand, output, input) {
 		}
 		else {
 		
-			return {error: new Error('command not found')}
+			return {error: new Error(exe.name + ': command not found')}
 		
 		}
 	
@@ -342,7 +365,7 @@ function outputLine(output, type) {
 
 	var outLine;
 	type = 'string' == typeof type ? type : 'ansi';
-	if (string !== typeof output && type !== 'object') {
+	if ('string' !== typeof output && type !== 'object') {
 	
 		var outputString = JSON.stringify(output);
 	
@@ -406,18 +429,25 @@ function executeMap(exeMap, outputType) {
 			operations: []
 		};
 		var promiseMap = new Map();
-		for (let i = exeMap.size; i > 0; i--) {
+		for (let i = 0; i < exeMap.size; i++) {
 		
+			var exe = exeMap.get(i);
 			if ('object' !== typeof exe || null === exe) {
 			
 				results.output.push(outputLine(new TypeError('exe with index ' + key + ' is invalid'), outputType));
+			
+			}
+			else if ('undefined' !== typeof exe.error) {
+			
+				results.output.push(outputLine(exe.error, outputType));
 			
 			}
 			else {
 			
 				if (exe.isOp) {
 				
-					results.operations.push(exe.name);
+					results.output.push(outputLine('operation ' + exe.name, outputType));
+					results.operations.push(exe);
 				
 				}
 				else {
@@ -437,7 +467,7 @@ function executeMap(exeMap, outputType) {
 									}
 									else {
 									
-										resutls.output.push(outputLine(result, outputType));
+										results.output.push(outputLine(result, outputType));
 									
 									}
 								
@@ -459,6 +489,29 @@ function executeMap(exeMap, outputType) {
 						else if ('number' == typeof exe.output) {
 						
 							//attempt to output to map[exe.output]
+							try {
+							
+								global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+								
+									if (error) {
+									
+										results.output.push(outputLine(error, 'object'));
+									
+									}
+									else {
+									
+										results.output.push(outputLine(result, 'object'));
+									
+									}
+								
+								})
+							
+							}
+							catch(e) {
+							
+								results.output.push(outputLine(e, 'object'));
+							
+							}
 						
 						}
 						else {
@@ -468,8 +521,75 @@ function executeMap(exeMap, outputType) {
 						}
 					
 					}
+					else {
+					
+						if ('string' == typeof exe.input) {
+					
+							//attempt to input from file using synchronous user filesystem
+					
+						}
+						else if ('number' == typeof exe.input) {
+					
+							//attempt to input from map[exe.output]
+							exe.args.unshift(results.output[exe.input]);
+							if (null === exe.output) {
+							
+								try {
+							
+									global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+								
+										if (error) {
+									
+											results.output.push(outputLine(error, outputType));
+									
+										}
+										else {
+									
+											results.output.push(outputLine(result, outputType));
+									
+										}
+								
+									})
+							
+								}
+								catch(e) {
+							
+									results.output.push(outputLine(e, outputType));
+							
+								}
+							
+							}
+							else if ('string' == typeof exe.output) {
+						
+								//attempt to output to file using synchronous user filesystem
+						
+							}
+							else if ('number' == typeof exe.output) {
+						
+								//attempt to output to map[exe.output]
+						
+							}
+							else {
+						
+								results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+						
+							}
+						
+						}
+						else {
+					
+							results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid input'), outputType));
+					
+						}
+					
+					}
 				
 				}
+			
+			}
+			if ((i + 1) >= exeMap.size) {
+			
+				return results;
 			
 			}
 		
@@ -493,7 +613,8 @@ class UwotRuntimeCmds {
 			this.ast = ast;
 		
 		}
-		
+		this.buildCommands();
+		return;
 	
 	}
 	
@@ -502,10 +623,18 @@ class UwotRuntimeCmds {
 		this.exes = new Map();
 		for (let i = 0; i < this.ast.commands.length; i++) {
 		
-			this.exes.set(i, parseCommandNode(ast.commands[i]));
+			this.exes.set(i, parseCommandNode(this.ast.commands[i]));
 		
 		}
+		return this.exes;
 
+	}
+	
+	executeCommands() {
+	
+		this.results = executeMap(this.exes);
+		return this.results;
+	
 	}
 
 }

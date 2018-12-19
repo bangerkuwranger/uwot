@@ -28,7 +28,8 @@ global.UwotCliOps = [
 	"history",
 	"echo",
 	"login",
-	"logout"
+	"logout",
+	"exit"
 ];
 
 var etcProd = path.resolve(__dirname, 'etc', 'prod');

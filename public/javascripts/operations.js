@@ -39,7 +39,29 @@ class UwotCliOperations {
 	}
 	
 	echo(args) {
-		outputToMain('echo' + args);
+		if ('string' == typeof args) {
+			outputToMain(args);
+		}
+		else if ('object' == typeof args && null !== args) {
+			if (Array.isArray(args)) {
+				var os = '';
+				args.forEach(function(arg) {
+					os += arg.toString() + ' ';
+				});
+				outputToMain(os);
+			}
+			else {
+				var argList = Object.keys(args);
+				var os = '';
+				argList.forEach(function(argName) {
+					os += args[argName].toString() + ' ';
+				});
+				outputToMain(os);
+			}
+		}
+		else {
+			outputToMain('');
+		}
 	}
 	
 	login(args) {
@@ -47,6 +69,10 @@ class UwotCliOperations {
 	}
 	
 	logout() {
+	
+	}
+	
+	exit() {
 	
 	}
 	

@@ -29,8 +29,13 @@ jQuery(document).ready(function($) {
 		});
 	});
 
-	$("#uwotcli-input").keyup(function(e) {
+	$("#uwotcli-input").keydown(function(e) {
 		switch(e.which) {
+			case 9: // tab
+				e.preventDefault();
+				outputToMain('You probably wish autocomplete was implemented, don\'t you?');
+				return false;
+				break;
 			case 38: // up
 				e.preventDefault();
 				var prevCmd = uwotHistory.getPrevItem();
@@ -98,7 +103,8 @@ function performOperations(operations) {
 			});
 		}
 		else if ('string' == typeof operations.name && 'object' == typeof operations.args && Array.isArray(operations.args)) {
-			ops.performOperation(operations.name, operations.args);
+			var args = (operations.args.length > 0) ? operations.args.map(x => x.text) : [];
+			ops.performOperation(operations.name, args);
 		}
 	}
 }
