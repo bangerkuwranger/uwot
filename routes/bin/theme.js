@@ -1,7 +1,5 @@
 'use strict';
 const path = require('path');
-var express = require('express');
-var themeRouter = express.Router();
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
 const UwotCmd = require('../../cmd');
@@ -39,21 +37,21 @@ class UwotCmdTheme extends UwotCmd {
 
 var theme = new UwotCmdTheme (
 	{
-		name: 'theme',
-		description: 'Changes the theme for the console window.',
-		requiredArguments: ['themeName'],
-		optionalArguments: []
+		name:				'theme',
+		description:		'Changes the theme for the console window.',
+		requiredArguments:	['themeName'],
+		optionalArguments:	[]
 	},
-	[],
+	[
+		{
+			description: 		'save theme selection for future sessions for this user',
+			shortOpt: 			'-s',
+			longOpt: 			'--save',
+			requiredArguments:	[],
+			optionalArguments:	[]
+		}
+	],
 	path.resolve(global.appRoot, 'routes/bin/theme')
 );
-
-themeRouter.post('/', function(req, res, next) {
-
-	
-
-});
-
-themeRouter.all('/', denyAllOthers());
 
 module.exports = theme;
