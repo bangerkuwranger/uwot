@@ -61,6 +61,15 @@ body #uwot {
   font: 10px "Proxima Nova", Helvetica, Arial, sans-serif;
 }
 /* line 11, ../scss/style.scss */
+body #uwot .indicator-container {
+  background-size: cover;
+}
+/* line 14, ../scss/style.scss */
+body #uwot .indicator-container.loading {
+  background-image: url("/images/tmploader.gif");
+  background-image: url("/images/tmploader.svg");
+}
+/* line 21, ../scss/style.scss */
 body #uwot .terminal {
   font-family: monospace;
   width: calc(100% - 2em);
@@ -70,7 +79,7 @@ body #uwot .terminal {
   padding: 1em;
   overflow: hidden;
 }
-/* line 20, ../scss/style.scss */
+/* line 30, ../scss/style.scss */
 body #uwot .terminal .header {
   min-height: 1em;
   border-bottom: 1px solid;
@@ -80,7 +89,18 @@ body #uwot .terminal .header {
   width: calc(100% - 2em);
   margin: 0.5em 0;
 }
-/* line 30, ../scss/style.scss */
+/* line 39, ../scss/style.scss */
+body #uwot .terminal .header .indicator-container {
+  min-height: 1em;
+  min-width: 1em;
+  position: absolute;
+  border: 1px solid;
+  font-size: 2em;
+  top: 0;
+  right: 0;
+  margin: 0.67em 0;
+}
+/* line 52, ../scss/style.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
@@ -90,7 +110,7 @@ body #uwot .terminal .output {
   background-position-x: center;
   overflow: hidden;
 }
-/* line 39, ../scss/style.scss */
+/* line 61, ../scss/style.scss */
 body #uwot .terminal .output .output-container {
   width: 100%;
   height: 100%;
@@ -100,22 +120,22 @@ body #uwot .terminal .output .output-container {
   display: flex;
   flex-direction: column;
 }
-/* line 49, ../scss/style.scss */
+/* line 71, ../scss/style.scss */
 body #uwot .terminal .output .output-container > :first-child {
   margin-top: auto !important;
 }
-/* line 54, ../scss/style.scss */
+/* line 76, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline {
   line-height: 1.1em;
   margin: 0.25em 0;
 }
-/* line 58, ../scss/style.scss */
+/* line 80, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt {
   margin-left: 4ch;
   position: relative;
   min-height: 1em;
 }
-/* line 63, ../scss/style.scss */
+/* line 85, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   content: var(--prompt, ">") " ";
   position: absolute;
@@ -123,7 +143,7 @@ body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   top: 0;
   font: inherit;
 }
-/* line 80, ../scss/style.scss */
+/* line 102, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -135,17 +155,17 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 91, ../scss/style.scss */
+/* line 113, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 94, ../scss/style.scss */
+/* line 116, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
 }
-/* line 99, ../scss/style.scss */
+/* line 121, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -153,7 +173,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 107, ../scss/style.scss */
+/* line 129, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -175,11 +195,11 @@ body #uwot .terminal .cli form .field input:active {
 }
 
 @media (min-width: 642px) {
-  /* line 143, ../scss/style.scss */
+  /* line 165, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 148, ../scss/style.scss */
+  /* line 170, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
   }

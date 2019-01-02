@@ -8,6 +8,16 @@ body {
 	#uwot {
 		font: 10px "Proxima Nova", Helvetica, Arial, sans-serif;
 
+		.indicator-container {
+			background-size: cover;
+			
+			&.loading {
+				background-image: url('/images/tmploader.gif');
+				background-image: url('/images/tmploader.svg');
+			}
+			
+		}
+		
 		.terminal {
 			font-family: monospace;
 			width: calc(100% - 2em);
@@ -25,6 +35,18 @@ body {
 				z-index: 10;
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
+				
+				.indicator-container {
+					min-height: 1em;
+					min-width: 1em;
+					position: absolute;
+					border: 1px solid;
+					font-size: 2em;
+					top: 0;
+					right: 0;
+					margin: 0.67em 0;
+				}
+				
 			}
 	
 			.output {

@@ -30,6 +30,7 @@ jQuery(document).ready(function($) {
 		}
 		$("#uwotcli-input").val('').focus();
 		var nonce = $('#uwotcli-nonce').val();
+		$('#uwotheader-indicator').addClass('loading');
 		$.post(
 			'/bin',
 			{
@@ -42,6 +43,9 @@ jQuery(document).ready(function($) {
 		})
 		.fail(function(obj, status, error) {
 			outputToMain(error);
+		})
+		.always(function() {
+			$('#uwotheader-indicator').removeClass('loading');
 		});
 	});
 
