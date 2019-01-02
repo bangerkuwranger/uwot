@@ -65,7 +65,55 @@ class UwotCliOperations {
 	}
 	
 	login(args) {
-		
+		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+			if('string' == typeof args[0] && '' !== args[0]) {
+				if('string' == typeof args[1] && '' !== args[1]) {
+					jQuery('#uwotcli-doLogin').val('false');
+					jQuery("#uwotcli-login").val('');
+					var nonce = $('#uwotcli-nonce').val();
+					$.post(
+						'/login',
+						{
+							username: args[0],
+							password: args[1],
+							nonce: nonce
+						}
+					)
+					.done(function(data) {
+						if (data.error) {
+							outputToMain(data.error.message);
+							jQuery('#uwotcli-doLogin').val('true');
+							jQuery("#uwotcli-login").val('');
+							changePrompt('login');
+						}
+						else {
+							outputToMain('Successful login for user: ' + data.user.uName);
+							user = data.user.uName;
+							changePrompt(user);
+						}
+					})
+					.fail(function(obj, status, error) {
+						outputToMain(error);
+						jQuery('#uwotcli-doLogin').val('true');
+						jQuery("#uwotcli-login").val('');
+						changePrompt('login');
+					});
+				}
+				else {
+					jQuery('#uwotcli-doLogin').val('true');
+					$("#uwotcli-login").val(args[0]);
+					changePrompt('Password');
+				}
+			}
+			else {
+				jQuery('#uwotcli-doLogin').val('true');
+				changePrompt('login');
+			}
+		}
+		else {
+			jQuery('#uwotcli-doLogin').val('true');
+			changePrompt('login');
+		}
 	}
 	
 	logout() {

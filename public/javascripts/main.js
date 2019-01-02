@@ -9,9 +9,20 @@ jQuery(document).ready(function($) {
 	
 	$("#uwotcli").submit(function(e) {
 		e.preventDefault();
-		var op = $('#uwotcli-input').val();
-		uwotHistory.addItem(op);
-		outputToMain(op, {addPrompt:true});
+		var op;
+		if ('string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
+			if ('string' == typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val()) {
+				op = 'login ' + $("#uwotcli-login").val() + ' ' + $('#uwotcli-input').val();
+			}
+			else {
+				op = 'login ' + $('#uwotcli-input').val();
+			}
+		}
+		else {
+			op = $('#uwotcli-input').val();
+			uwotHistory.addItem(op);
+			outputToMain(op, {addPrompt:true});
+		}
 		$("#uwotcli-input").val('').focus();
 		var nonce = $('#uwotcli-nonce').val();
 		$.post(
@@ -92,7 +103,18 @@ function countIntDigits(num) {
 }
 
 function changePrompt(promptString) {
+	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
+	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
+	return;
+}
+
+function revertPrompt() {
+	var promptString = 'string' == typeof jQuery('#cliform .field').attr('data-prev-prompt') && '' !== jQuery('#cliform .field').attr('data-prev-prompt') ? jQuery('#cliform .field').attr('data-prev-prompt') : user;
+	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
+	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
+	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
 	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
 	return;
 }

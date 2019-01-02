@@ -130,10 +130,34 @@ router.get('/', function(req, res, next) {
 router.use('/bin', binRouter);
 
 router.post('/login', 
+	function(req, res, next) {
+	
+		if ('string' == typeof req.body.nonce) {
+		
+			var nv = nonceHandler.verify('index-get', req.body.nonce);
+			if (nv && 'object' != typeof nv) {
+			
+				next();
+			
+			}
+			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
+			
+				res.json({error: new Error('Invalid Request - Reload' + nv.message), user: null});
+			
+			}
+		
+		}
+		else {
+		
+			res.json({error: new Error('Invalid Request - Reload'), user: null});
+		
+		}
+	
+	},
 	passport.authenticate('local', {session: true}), 
 	function(req, res, next) {
 	
-		if (error) {
+		if (req.error) {
 		
 			res.json({error: error, user: null});
 		

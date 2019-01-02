@@ -251,7 +251,7 @@ module.exports = class UwotUsers {
 						null,
 						data[0].sudoer
 					);
-					return self.fbiCallback(false, foundRecord);
+					return self.fbnCallback(false, foundRecord);
 				
 				}
 			

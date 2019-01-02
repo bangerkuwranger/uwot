@@ -41,9 +41,9 @@ html
 		script(type="text/javascript")
 			| const uwotOperations = !{validOps};
 			-if (userName)
-				| const user = !{userName};
+				| var user = !{userName};
 			-else
-				|const user = "uwot";
+				| var user = "uwot";
 		script(type="text/javascript" src="/javascripts/operations.js")
 		script(type="text/javascript" src="/javascripts/main.js")
 	body

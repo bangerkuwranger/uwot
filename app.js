@@ -32,6 +32,8 @@ global.UwotCliOps = [
 	"exit"
 ];
 
+const sessionHours = 12;
+
 var etcProd = path.resolve(__dirname, 'etc', 'prod');
 var etcDev = path.resolve(__dirname, 'etc', 'dev');
 
@@ -40,6 +42,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var fs = require('fs');
 var fileLog = require('./middleware/logging');
+var session = require('express-session');
+var nedbSessionStore = require('nedb-session-store')(session);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
@@ -120,6 +124,37 @@ if (global.UwotConfig.get('binpath', 'useLocal')) {
 // then add to reserved list
 global.UwotReserved.push(...Object.keys(global.UwotBin));
 
+// set up sessions
+const sessionMs = sessionHours * 3600000;
+var sessionArgs = {
+	cookie: {
+		sameSite: true,
+		secure: true,
+		maxAge: sessionMs,		
+		httpOnly: false
+	},
+	resave: false,
+	saveUninitialized: false,
+	name: 'session',
+	proxy: true,
+	secret: 'thq_uwot'
+}
+if ("development" === global.process.env.NODE_ENV) {
+
+	sessionArgs.cookie.secure = false; // serve secure cookies in prod only
+	sessionArgs.proxy = false;
+	sessionArgs.cookie.sameSite = false;
+
+}
+else {
+
+	app.set('trust proxy', 1);
+
+}
+sessionArgs.store = new nedbSessionStore({
+	filename: global.appRoot + '/var/nedb/session.db'
+});
+app.use(session(sessionArgs));
 
 // view engine setup
 app.set('views', path.join(global.appRoot, 'views'));

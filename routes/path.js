@@ -78,7 +78,7 @@ router.post(
 									else if ('object' == typeof req.body.runtime.results.operations[i] && null !== req.body.runtime.results.operations[i]) {
 							
 										req.body.operations = req.body.runtime.results.operations[i];
-										req.body.operations.args = 'object' == req.body.operations.args ? req.body.operations.args : [];
+										req.body.operations.args = 'object' == typeof req.body.operations.args ? req.body.operations.args : [];
 							
 									}
 									if ('string' === typeof req.body.operations) {
