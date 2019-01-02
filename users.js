@@ -122,11 +122,11 @@ module.exports = class UwotUsers {
 			throw new TypeError('invalid callback passed to getGuest.');
 		
 		}
-		else if (!global.UwotConfig.get('users', 'allowGuest')) {
-		
-			return callback(new Error('config does not allow guest users.'), null);
-		
-		}
+// 		else if (!global.UwotConfig.get('users', 'allowGuest')) {
+// 		
+// 			return callback(new Error('config does not allow guest users.'), null);
+// 		
+// 		}
 		else {
 		
 			try {
@@ -620,6 +620,11 @@ module.exports = class UwotUsers {
 		else if ('string' != typeof username) {
 		
 			return callback(new TypeError('invalid username passed to isUnique.'), null);
+		
+		}
+		else if ('guest' === username) {
+		
+			return self.iuCallback(false, false);
 		
 		}
 		else {

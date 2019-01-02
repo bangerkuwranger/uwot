@@ -92,8 +92,8 @@ router.use(function (req, res, next) {
 	res.locals.login = req.isAuthenticated();
     if (res.locals.login) {
     
-    	res.locals.user = 'undefined' != typeof req.user.user_name ? req.user.user_name : '';
-    	res.locals.userId = 'undefined' != typeof req.user.id ? req.user.id : 0;
+    	res.locals.user = 'undefined' != typeof req.user.uName ? req.user.uName : '';
+    	res.locals.userId = 'undefined' != typeof req.user._id ? req.user._id : 0;
         next();
     
     }
@@ -102,7 +102,11 @@ router.use(function (req, res, next) {
 //     	next();
 //     
 //     }
-	next();
+	else {
+	
+		next();
+	
+	}
     
     
 });
@@ -124,12 +128,23 @@ router.get('/', function(req, res, next) {
 		respValues.theme = themeName;
 	
 	}
+	if ('object' == typeof res.locals && res.locals.login && '' !== res.locals.user) {
+	
+		respValues.userName = res.locals.user;
+	
+	}
+	if (!global.UwotConfig.get('users', 'allowGuest')) {
+	
+		respValues.forceLogin = true;
+	
+	}
 	res.render('index', respValues);
 });
 
 router.use('/bin', binRouter);
 
-router.post('/login', 
+router.post(
+	'/login', 
 	function(req, res, next) {
 	
 		if ('string' == typeof req.body.nonce) {
@@ -142,14 +157,14 @@ router.post('/login',
 			}
 			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
 			
-				res.json({error: new Error('Invalid Request - Reload' + nv.message), user: null});
+				res.json({error: new Error('Invalid Request - Reload' + nv.message).message, user: null});
 			
 			}
 		
 		}
 		else {
 		
-			res.json({error: new Error('Invalid Request - Reload'), user: null});
+			res.json({error: new Error('Invalid Request - Reload').message, user: null});
 		
 		}
 	
@@ -159,13 +174,13 @@ router.post('/login',
 	
 		if (req.error) {
 		
-			res.json({error: error, user: null});
+			res.json({error: error.message, user: null});
 		
 		}
 		else if (!req.user) {
 		
 			// failure state
-			res.json({error: new Error('invalid login credentials'), user: null});
+			res.json({error: new Error('invalid login credentials').message, user: null});
 		
 		}
 		else {
@@ -179,6 +194,60 @@ router.post('/login',
 );
 
 router.all('/login', function (req, res, next) {
+
+	var denied = '';
+	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
+	
+		denied += req.body.cmd.trim() + ': '; 
+	
+	}
+	denied += '<span class="ansi fg-red">Permission Denied</span>';
+	return res.json(denied);
+
+});
+
+router.post(
+	'/logout', 
+	function(req, res, next) {
+	
+		if ('string' == typeof req.body.nonce) {
+		
+			var nv = nonceHandler.verify('index-get', req.body.nonce);
+			if (nv && 'object' != typeof nv) {
+			
+				if (!req.user) {
+		
+					// failure state
+					res.json({error: new Error('no user session available for logout').message, user: null});
+		
+				}
+				else {
+		
+					var reqUser = req.user;
+					req.logout();
+					res.json({error: false, user: reqUser});
+		
+				}
+			
+			}
+			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
+			
+				res.json({error: new Error('Invalid Request - Reload' + nv.message).message, user: null});
+			
+			}
+		
+		}
+		else {
+		
+			res.json({error: new Error('Invalid Request - Reload').message, user: null});
+		
+		}
+	
+	}
+	
+);
+
+router.all('/logout', function (req, res, next) {
 
 	var denied = '';
 	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {

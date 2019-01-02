@@ -6,7 +6,7 @@ const systemError = require('./helpers/systemError');
 const sanitize = require('./helpers/valueConversion');
 const FlagSet = require('./helpers/flags');
 const Users = require('./users');
-var userInterface = new Users();
+
 
 const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
 const DEFAULT_OWNER = 'root';
@@ -65,6 +65,7 @@ class UwotFsPermissions {
 			var permUsers = Object.keys(permissions);
 			if (0 < permUsers.length) {
 			
+				var userInterface = new Users();
 				userInterface.listUsers(function(error, userList) {
 			
 					for (let i = 0; i < permUsers.length; i++) {
@@ -206,6 +207,7 @@ class UwotFs {
 			this.changeCwd(cwd);
 		
 		}
+		var userInterface = new Users();
 		if ('string' !== typeof userId) {
 		
 			userInterface.getGuest(function(error, user) {
@@ -1206,6 +1208,7 @@ class UwotFs {
 			return new TypeError('invalid user or permissions');
 		
 		}
+		var userInterface = new Users();
 		userInterface.listUsers(function(error, userList){
 		
 			var userExists = false;
@@ -1317,6 +1320,7 @@ class UwotFs {
 			return new TypeError('invalid user or permissions');
 		
 		}
+		var userInterface = new Users();
 		userInterface.listUsers(function(error, userList){
 		
 			var userExists = false;

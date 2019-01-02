@@ -1,6 +1,7 @@
 const bashParser = require('bash-parser');
 const minimist = require('minimist');
 const sanitize = require('../helpers/valueConversion');
+const Users = require('../users');
 const filesystem = require('../filesystem');
 const commandTypes = [
 	'LogicalExpression',
@@ -21,10 +22,8 @@ module.exports = function(args) {
 	
 		if ('object' === typeof req.body && 'string' === typeof req.body.cmd && '' !== req.body.cmd) {
 	
-			// TBD
-			// get user from req
-			// check user.maySudo()
-			// req.body.maySudo =
+			// get user id from res.locals
+			var uid = req.isAuthenticated() && 'object' == typeof res.locals && 'string' == typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null;
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();
 			var cmdArray = cmdString.split(' ');
@@ -43,10 +42,68 @@ module.exports = function(args) {
 				}
 		
 			}
-			req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst);
+			var userInterface = new Users();
+			if ('string' !== typeof uid) {
+		
+				userInterface.getGuest(function(error, user) {
+			
+					if (error) {
+				
+						throw error;
+				
+					}
+					else {
+				
+						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+						next();
+				
+					}
+			
+				}.bind(this));
+		
+			}
+			else {
+		
+				userInterface.findById(uid, function(error, user) {
+			
+					if (error) {
+				
+						throw error;
+				
+					}
+					else if (!user) {
+				
+						userInterface.getGuest(function(error, user) {
+			
+							if (error) {
+				
+								throw error;
+				
+							}
+							else {
+							
+								user.maySudo = function() {return false;};
+								req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+								next();
+				
+							}
+			
+						}.bind(this));
+				
+					}
+					else {
+				
+						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+						next();
+				
+					}
+			
+				}.bind(this));
+		
+			}
+			
 	
 		}
-		next();
 	
 	};
 
@@ -451,7 +508,10 @@ function outputLine(output, type) {
 
 }
 
-function executeMap(exeMap, outputType) {
+// TBD
+// Move this and other standalones into the object class so user properties are available without inheriting through arg chain
+
+function executeMap(exeMap, user, outputType) {
 
 	outputType = 'string' == typeof outputType ? outputType : 'ansi';
 	if ('object' !== typeof exeMap && !(exeMap instanceof Map)) {
@@ -466,183 +526,204 @@ function executeMap(exeMap, outputType) {
 			operations: []
 		};
 		var promiseMap = new Map();
-		for (let i = 0; i < exeMap.size; i++) {
+		if (exeMap.size < 1) {
 		
-			var exe = exeMap.get(i);
-			if ('object' !== typeof exe || null === exe) {
+			return results;
+		
+		}
+		else {
+		
+			for (let i = 0; i < exeMap.size; i++) {
+		
+				var exe = exeMap.get(i);
+				if ('object' !== typeof exe || null === exe) {
 			
-				results.output.push(outputLine(new TypeError('exe with index ' + key + ' is invalid'), outputType));
+					results.output.push(outputLine(new TypeError('exe with index ' + key + ' is invalid'), outputType));
 			
-			}
-			else if ('undefined' !== typeof exe.error) {
+				}
+				else if ('undefined' !== typeof exe.error) {
 			
-				results.output.push(outputLine(exe.error, outputType));
+					results.output.push(outputLine(exe.error, outputType));
 			
-			}
-			else {
-			
-				if (exe.isOp) {
-				
-					results.output.push(outputLine('operation ' + exe.name, outputType));
-					results.operations.push(exe);
-				
 				}
 				else {
+			
+					if (exe.isOp) {
 				
-					if (null === exe.input) {
+						if (user.uName !== 'guest' || exe.name === 'login' || global.UwotConfig.get('users', 'allowGuest')) {
 					
-						if (null === exe.output) {
-						
-							try {
-							
-								global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
-								
-									if (error) {
-									
-										results.output.push(outputLine(error, outputType));
-									
-									}
-									else if ('sudo' === exe.name) {
-									
-										results.output.push(result);
-									
-									}
-									else {
-									
-										results.output.push(outputLine(result, outputType));
-									
-									}
-								
-								});
-							
-							}
-							catch(e) {
-							
-								results.output.push(outputLine(e, outputType));
-							
-							}
-						
+							results.output.push(outputLine('operation ' + exe.name, outputType));
+							results.operations.push(exe);
 						}
-						else if ('string' == typeof exe.output) {
-						
-							//attempt to output to file using synchronous user filesystem
-						
-						}
-						else if ('number' == typeof exe.output) {
-						
-							//attempt to output to map[exe.output]
-							try {
-							
-								global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
-								
-									if (error) {
-									
-										results.output.push(outputLine(error, 'object'));
-									
-									}
-									else if ('sudo' === exe.name) {
-									
-										results.output.push(result);
-									
-									}
-									else {
-									
-										results.output.push(outputLine(result, 'object'));
-									
-									}
-								
-								})
-							
-							}
-							catch(e) {
-							
-								results.output.push(outputLine(e, 'object'));
-							
-							}
-						
-						}
-						else {
-						
-							results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
-						
-						}
-					
+				
 					}
 					else {
+				
+						if (user.uName !== 'guest' || global.UwotConfig.get('users', 'allowGuest')) {
 					
-						if ('string' == typeof exe.input) {
+							if (null === exe.input) {
 					
-							//attempt to input from file using synchronous user filesystem
-					
-						}
-						else if ('number' == typeof exe.input) {
-					
-							//attempt to input from map[exe.output]
-							exe.args.unshift(results.output[exe.input]);
-							if (null === exe.output) {
+								if (null === exe.output) {
+						
+									try {
 							
-								try {
-							
-									global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+										global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
 								
-										if (error) {
+											if (error) {
 									
-											results.output.push(outputLine(error, outputType));
+												results.output.push(outputLine(error, outputType));
 									
-										}
-										else if ('sudo' === exe.name) {
+											}
+											else if ('sudo' === exe.name) {
 									
-											results.output.push(result);
+												results.output.push(result);
 									
-										}
-										else {
+											}
+											else {
 									
-											results.output.push(outputLine(result, outputType));
+												results.output.push(outputLine(result, outputType));
 									
-										}
+											}
 								
-									})
+										});
 							
+									}
+									catch(e) {
+							
+										results.output.push(outputLine(e, outputType));
+							
+									}
+						
 								}
-								catch(e) {
-							
-									results.output.push(outputLine(e, outputType));
-							
+								else if ('string' == typeof exe.output) {
+						
+									//attempt to output to file using synchronous user filesystem
+						
 								}
+								else if ('number' == typeof exe.output) {
+						
+									//attempt to output to map[exe.output]
+									try {
 							
-							}
-							else if ('string' == typeof exe.output) {
+										global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+								
+											if (error) {
+									
+												results.output.push(outputLine(error, 'object'));
+									
+											}
+											else if ('sudo' === exe.name) {
+									
+												results.output.push(result);
+									
+											}
+											else {
+									
+												results.output.push(outputLine(result, 'object'));
+									
+											}
+								
+										})
+							
+									}
+									catch(e) {
+							
+										results.output.push(outputLine(e, 'object'));
+							
+									}
 						
-								//attempt to output to file using synchronous user filesystem
+								}
+								else {
 						
-							}
-							else if ('number' == typeof exe.output) {
+									results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
 						
-								//attempt to output to map[exe.output]
-						
+								}
+					
 							}
 							else {
+					
+								if ('string' == typeof exe.input) {
+					
+									//attempt to input from file using synchronous user filesystem
+					
+								}
+								else if ('number' == typeof exe.input) {
+					
+									//attempt to input from map[exe.output]
+									exe.args.unshift(results.output[exe.input]);
+									if (null === exe.output) {
+							
+										try {
+							
+											global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+								
+												if (error) {
+									
+													results.output.push(outputLine(error, outputType));
+									
+												}
+												else if ('sudo' === exe.name) {
+									
+													results.output.push(result);
+									
+												}
+												else {
+									
+													results.output.push(outputLine(result, outputType));
+									
+												}
+								
+											})
+							
+										}
+										catch(e) {
+							
+											results.output.push(outputLine(e, outputType));
+							
+										}
+							
+									}
+									else if ('string' == typeof exe.output) {
 						
-								results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+										//attempt to output to file using synchronous user filesystem
 						
+									}
+									else if ('number' == typeof exe.output) {
+						
+										//attempt to output to map[exe.output]
+						
+									}
+									else {
+						
+										results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+						
+									}
+						
+								}
+								else {
+					
+									results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid input'), outputType));
+					
+								}
+					
 							}
-						
-						}
-						else {
-					
-							results.output.push(outputLine(new TypeError('exe with index ' + key + ' has invalid input'), outputType));
 					
 						}
-					
-					}
 				
+					}
+			
 				}
+				if ((i + 1) >= exeMap.size) {
 			
-			}
-			if ((i + 1) >= exeMap.size) {
+					if (results.output.length < 1 && results.operations.length < 1 && user.uName === 'guest' && !global.UwotConfig.get('users', 'allowGuest')) {
 			
-				return results;
+						results.output.push(outputLine(new Error('config does not allow guest users.'), outputType));
 			
+					}
+					return results;
+			
+				}
+		
 			}
 		
 		}
@@ -653,7 +734,7 @@ function executeMap(exeMap, outputType) {
 
 class UwotRuntimeCmds {
 
-	constructor(ast) {
+	constructor(ast, user) {
 	
 		if ('object' !== typeof ast || ast.type !== 'Script' || 'object' !== typeof ast.commands || !(Array.isArray(ast.commands))) {
 		
@@ -663,10 +744,10 @@ class UwotRuntimeCmds {
 		else {
 		
 			this.ast = ast;
+			this.user = user;
+			this.buildCommands();
 		
 		}
-		this.buildCommands();
-		return;
 	
 	}
 	
@@ -682,9 +763,11 @@ class UwotRuntimeCmds {
 
 	}
 	
+	
+	
 	executeCommands() {
 	
-		this.results = executeMap(this.exes);
+		this.results = executeMap(this.exes, this.user);
 		return this.results;
 	
 	}

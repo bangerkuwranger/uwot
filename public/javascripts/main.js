@@ -4,7 +4,12 @@ jQuery(document).ready(function($) {
 
 	uwotHistory = new CliHistory();
 	
-	changePrompt(user);
+	if ('string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
+		changePrompt('login')
+	}
+	else {
+		changePrompt(user);
+	}
 	$("#uwotcli-input").focus();
 	
 	$("#uwotcli").submit(function(e) {

@@ -70,6 +70,7 @@ class UwotCliOperations {
 				if('string' == typeof args[1] && '' !== args[1]) {
 					jQuery('#uwotcli-doLogin').val('false');
 					jQuery("#uwotcli-login").val('');
+					jQuery('#uwotcli-input').attr('type', 'text');
 					var nonce = $('#uwotcli-nonce').val();
 					$.post(
 						'/login',
@@ -81,9 +82,8 @@ class UwotCliOperations {
 					)
 					.done(function(data) {
 						if (data.error) {
-							outputToMain(data.error.message);
+							outputToMain(data.error);
 							jQuery('#uwotcli-doLogin').val('true');
-							jQuery("#uwotcli-login").val('');
 							changePrompt('login');
 						}
 						else {
@@ -101,27 +101,49 @@ class UwotCliOperations {
 				}
 				else {
 					jQuery('#uwotcli-doLogin').val('true');
-					$("#uwotcli-login").val(args[0]);
+					jQuery("#uwotcli-login").val(args[0]);
+					jQuery('#uwotcli-input').attr('type', 'password');
 					changePrompt('Password');
 				}
 			}
 			else {
 				jQuery('#uwotcli-doLogin').val('true');
+				jQuery('#uwotcli-input').attr('type', 'text');
 				changePrompt('login');
 			}
 		}
 		else {
 			jQuery('#uwotcli-doLogin').val('true');
+			jQuery('#uwotcli-input').attr('type', 'text');
 			changePrompt('login');
 		}
 	}
 	
 	logout() {
-	
+		var nonce = $('#uwotcli-nonce').val();
+		$.post(
+			'/logout',
+			{
+				nonce: nonce
+			}
+		)
+		.done(function(data) {
+			if (data.error) {
+				outputToMain(data.error);
+			}
+			else {
+				outputToMain('Successfully logged out session for user: ' + data.user.uName);
+				user = 'uwot';
+				changePrompt(user);
+			}
+		})
+		.fail(function(obj, status, error) {
+			outputToMain(error);
+		});
 	}
 	
 	exit() {
-	
+		return this.logout();
 	}
 	
 }
