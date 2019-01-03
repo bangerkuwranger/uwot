@@ -4,7 +4,7 @@ const binRouter = require('./path');
 const nonceHandler = require('node-timednonce');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const UserModel = require('../users');
+// const UserModel = require('../users');
 
 passport.use(
 
@@ -25,8 +25,8 @@ passport.use(
     		else {
     		
     			var self = this;
-    			var users = new UserModel();
-    			users.findByName(username, function(error, userObj) {
+//     			var users = new UserModel();
+    			global.UwotUsers.findByName(username, function(error, userObj) {
     			
     				if (error) {
     				
@@ -40,7 +40,7 @@ passport.use(
     				}
     				else {
     				
-    					users.validate(userObj._id, password, function(error, pwIsValid) {
+    					global.UwotUsers.validate(userObj._id, password, function(error, pwIsValid) {
     					
     						if (error) {
     						

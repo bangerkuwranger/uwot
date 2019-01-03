@@ -1,7 +1,7 @@
 const bashParser = require('bash-parser');
 const minimist = require('minimist');
 const sanitize = require('../helpers/valueConversion');
-const Users = require('../users');
+// const Users = require('../users');
 const filesystem = require('../filesystem');
 const commandTypes = [
 	'LogicalExpression',
@@ -42,10 +42,10 @@ module.exports = function(args) {
 				}
 		
 			}
-			var userInterface = new Users();
+// 			var userInterface = new Users();
 			if ('string' !== typeof uid) {
 		
-				userInterface.getGuest(function(error, user) {
+				global.UwotUsers.getGuest(function(error, user) {
 			
 					if (error) {
 				
@@ -64,7 +64,7 @@ module.exports = function(args) {
 			}
 			else {
 		
-				userInterface.findById(uid, function(error, user) {
+				global.UwotUsers.findById(uid, function(error, user) {
 			
 					if (error) {
 				
@@ -73,7 +73,7 @@ module.exports = function(args) {
 					}
 					else if (!user) {
 				
-						userInterface.getGuest(function(error, user) {
+						global.UwotUsers.getGuest(function(error, user) {
 			
 							if (error) {
 				

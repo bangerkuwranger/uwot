@@ -5,7 +5,7 @@ const pathIsInside = require('path-is-inside');
 const systemError = require('./helpers/systemError');
 const sanitize = require('./helpers/valueConversion');
 const FlagSet = require('./helpers/flags');
-const Users = require('./users');
+// const Users = require('./users');
 
 
 const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
@@ -65,8 +65,8 @@ class UwotFsPermissions {
 			var permUsers = Object.keys(permissions);
 			if (0 < permUsers.length) {
 			
-				var userInterface = new Users();
-				userInterface.listUsers(function(error, userList) {
+				// var userInterface = new Users();
+				global.UwotUsers.listUsers(function(error, userList) {
 			
 					for (let i = 0; i < permUsers.length; i++) {
 			
@@ -207,10 +207,10 @@ class UwotFs {
 			this.changeCwd(cwd);
 		
 		}
-		var userInterface = new Users();
+		// var userInterface = new Users();
 		if ('string' !== typeof userId) {
 		
-			userInterface.getGuest(function(error, user) {
+			global.UwotUsers.getGuest(function(error, user) {
 			
 				if (error) {
 				
@@ -1208,8 +1208,8 @@ class UwotFs {
 			return new TypeError('invalid user or permissions');
 		
 		}
-		var userInterface = new Users();
-		userInterface.listUsers(function(error, userList){
+// 		var userInterface = new Users();
+		global.UwotUsers.listUsers(function(error, userList){
 		
 			var userExists = false;
 			if (error) {
@@ -1320,8 +1320,8 @@ class UwotFs {
 			return new TypeError('invalid user or permissions');
 		
 		}
-		var userInterface = new Users();
-		userInterface.listUsers(function(error, userList){
+// 		var userInterface = new Users();
+		global.UwotUsers.listUsers(function(error, userList){
 		
 			var userExists = false;
 			if (error) {

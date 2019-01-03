@@ -48,6 +48,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
 var uwotconfig = require('./config');
+var uwotusers = require('./users');
 var cmd = require('./cmd');
 var binLoader = require('./helpers/binLoader');
 
@@ -57,6 +58,7 @@ var app = express();
 
 var configPath = app.get('env') === 'development' ? path.resolve(etcDev, 'config.json') : path.resolve(etcProd, 'config.json');
 global.UwotConfig = new uwotconfig(configPath);
+global.UwotUsers = new uwotusers();
 
 var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.UwotConfig.get('themes', 'defaultTheme');
 app.set ('uwot_theme', themeName);

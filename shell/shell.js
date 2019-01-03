@@ -28,12 +28,18 @@ if ('function' != typeof global.tryParseJSON) {
 	};
 
 }
+if ('undefined' == typeof global.UwotUsers) {
+
+	var uwotusers = require('../users');
+	global.UwotUsers = new uwotusers();
+
+}
 
 const cmd = require('../cmd');
-const UserModel = require('../users');
 const Setup = require('../setup');
 const tableNames = [
-	'users'
+	'users',
+	'sessions'
 ];
 const configCats = [
 	"server",
@@ -770,7 +776,7 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
+// 	var users = new UserModel();
 	var now = new Date();
 	var newUserObj = {
 		'fName': fname,
@@ -781,7 +787,7 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 		'password': password,
 		'sudoer': ('string' == typeof canSudo && 'true' === canSudo.toLowerCase()) ? true : false
 	};
-	users.createNew(newUserObj, function(error, user) {
+	global.UwotUsers.createNew(newUserObj, function(error, user) {
 	
 		if (error) {
 		
@@ -813,8 +819,8 @@ function deleteAdminUser(id) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.remove(id, function(error, removed) {
+// 	var users = new UserModel();
+	global.UwotUsers.remove(id, function(error, removed) {
 	
 		if (error) {
 		
@@ -865,8 +871,8 @@ function changeAdminUserPassword(id, oldpw, newpw) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.changePw(id, oldpw, newpw, function(error, changed) {
+// 	var users = new UserModel();
+	global.UwotUsers.changePw(id, oldpw, newpw, function(error, changed) {
 	
 		if (error) {
 		
@@ -917,8 +923,8 @@ function changeAdminUserName(id, fname, lname) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.changeName(id, fname, lname, function(error, changed) {
+// 	var users = new UserModel();
+	global.UwotUsers.changeName(id, fname, lname, function(error, changed) {
 	
 		if (error) {
 		
@@ -957,8 +963,8 @@ function listAdminUsers(arg) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.listUsers(function(error, userList) {
+// 	var users = new UserModel();
+	global.UwotUsers.listUsers(function(error, userList) {
 	
 		if (error) {
 		
@@ -1045,8 +1051,8 @@ function allowAdminUserSudo(id) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.changeSudo(id, true, function(error, changed) {
+// 	var users = new UserModel();
+	global.UwotUsers.changeSudo(id, true, function(error, changed) {
 	
 		if (error) {
 		
@@ -1085,8 +1091,8 @@ function disallowAdminUserSudo(id) {
 		return process.exit();
 	
 	}
-	var users = new UserModel();
-	users.changeSudo(id, false, function(error, changed) {
+// 	var users = new UserModel();
+	global.UwotUsers.changeSudo(id, false, function(error, changed) {
 	
 		if (error) {
 		
