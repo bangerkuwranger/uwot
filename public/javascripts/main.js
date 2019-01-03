@@ -15,8 +15,10 @@ jQuery(document).ready(function($) {
 	$("#uwotcli").submit(function(e) {
 		e.preventDefault();
 		var op;
-		if ('string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
-			if ('string' == typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val()) {
+		var doLogin = 'string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
+		var hasLoginUser = 'string' == typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
+		if (doLogin) {
+			if (hasLoginUser) {
 				op = 'login ' + $("#uwotcli-login").val() + ' ' + $('#uwotcli-input').val();
 			}
 			else {
@@ -45,7 +47,9 @@ jQuery(document).ready(function($) {
 			outputToMain(error);
 		})
 		.always(function() {
-			$('#uwotheader-indicator').removeClass('loading');
+			if (!hasLoginUser) {
+				$('#uwotheader-indicator').removeClass('loading');
+			}
 		});
 	});
 
