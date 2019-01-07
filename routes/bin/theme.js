@@ -100,8 +100,8 @@ var theme = new UwotCmdTheme (
 	[
 		{
 			description: 		'save theme selection for future sessions for this user',
-			shortOpt: 			'-s',
-			longOpt: 			'--save',
+			shortOpt: 			's',
+			longOpt: 			'save',
 			requiredArguments:	[],
 			optionalArguments:	[]
 		}

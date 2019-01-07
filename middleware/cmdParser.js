@@ -519,11 +519,17 @@ class UwotRuntimeCmds {
 	outputLine(output, type) {
 
 		var outLine;
+		var outputString;
 		type = 'string' == typeof type ? type : 'ansi';
-		if ('string' !== typeof output && type !== 'object') {
+		if ('string' !== typeof output && type !== 'object' && type !== 'ansi') {
 	
-			var outputString = JSON.stringify(output);
+			outputString = JSON.stringify(output);
 	
+		}
+		else if (type === 'ansi' && 'object' == typeof output && !Array.isArray(output)) {
+		
+			outputString = JSON.stringify(output);
+		
 		}
 		else {
 	
@@ -542,7 +548,7 @@ class UwotRuntimeCmds {
 				outLine.content.push(output.message);
 		
 			}
-			else if ('object' == typeof output && 'object' == output.content && Array.isArray(output.content)) {
+			else if ('object' == typeof output && 'object' == typeof output.content && Array.isArray(output.content)) {
 		
 				outLine.content.push(output);
 		
@@ -552,7 +558,7 @@ class UwotRuntimeCmds {
 				outLine.content.push(outputString);
 		
 			}
-			outLine.content.push("\r\n");
+			outLine.content.push({tag: 'br'});
 	
 		}
 		else if ('object' === type) {

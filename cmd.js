@@ -17,8 +17,8 @@ class UwotCmdCommand {
 	
 		this.name = sanitize.stringNoSpaces(sanitize.cleanString(name), 'us');
 		this.description = sanitize.cleanString(description);
-		this.requiredArguments = sanitize.arrayOfObjectsOrEmpty(requiredArguments);
-		this.optionalArguments = sanitize.arrayOfObjectsOrEmpty(optionalArguments);
+		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
+		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
 	
 	}
 
@@ -37,8 +37,8 @@ class UwotCmdOption {
 		this.description = sanitize.cleanString(description);
 		this.shortOpt = sanitize.cleanString(shortOpt, 1);
 		this.longOpt = sanitize.stringNoSpaces(sanitize.cleanString(longOpt), 'us');
-		this.requiredArguments = sanitize.arrayOfObjectsOrEmpty(requiredArguments);
-		this.optionalArguments = sanitize.arrayOfObjectsOrEmpty(optionalArguments);
+		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
+		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
 	
 	}
 
@@ -126,26 +126,45 @@ class UwotCmd {
 	execute(args, options, callback, isSudo) {
 	
 		var executeString = 'executed: ' + this.command.name;
+		var helpString = false;
 		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
 		
 			for (let i = 0; i < args.length; i++) {
-		
-				executeString += ' ' + args[i];
+			
+				executeString += ' ' + args[i].toString();
 		
 			}
 		
 		}
-		if ('object' != typeof args || !Array.isArray(args) || options.length < 1) {
+		if ('object' != typeof options || !Array.isArray(options) || options.length < 1) {
 		
 			return callback(false, executeString);
 		
 		}
 		for (let i = 0; i < this.options.length; i++) {
 		
-			executeString += ' ' + options[i];
+			executeString += ' ' + options[i].toString();
+			if (options[i].name && options[i].name === 'h') {
+			
+				helpString = true;
+			
+			}
 			if ((i+1) >= options.length) {
 			
-				return callback(false, executeString);
+				if (!helpString) {
+				
+					return callback(false, executeString);
+				
+				}
+				else {
+				
+					this.help(function(error, helpStr) {
+					
+						return callback(error, helpStr);
+					
+					});
+				
+				}
 			
 			}
 		
@@ -157,14 +176,14 @@ class UwotCmd {
 	help(callback) {
 	
 		var outString = this.command.name;		
-		for (let i = 0; i < this.command.required.length; i++) {
+		for (let i = 0; i < this.command.requiredArguments.length; i++) {
 		
-			outString += ' <' + this.command.required[i] + '>';
+			outString += ' <' + this.command.requiredArguments[i] + '>';
 		
 		}
-		for (let i = 0; i < this.command.optional.length; i++) {
+		for (let i = 0; i < this.command.optionalArguments.length; i++) {
 		
-			outString += ' [' + this.command.optional[i] + ']';
+			outString += ' [' + this.command.optionalArguments[i] + ']';
 		
 		}
 		if (this.options.length > 0) {
@@ -177,27 +196,30 @@ class UwotCmd {
 		outString += "\r\n";
 		if (this.options.length < 1) {
 		
-			return callback(false, outString);
+			return callback(false, this.parsePre(outString));
 		
 		}
+		outString += 'Options:';
+		outString += "\r\n";
 		for (let i = 0; i < this.options.length; i++) {
 		
-			outString += '-' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
-			for (let j = 0; j < this.options[i].required.length; j++) {
+			outString += '    -' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
+			for (let j = 0; j < this.options[i].requiredArguments.length; j++) {
 			
-				outString += ' <' + this.options[i].required[j] + '>';
-			
-			}
-			for (let j = 0; j < this.options[i].optional.length; j++) {
-			
-				outString += ' [' + this.options[i].optional[j] + ']';
+				outString += ' <' + this.options[i].requiredArguments[j] + '>';
 			
 			}
-			outString += ' ' + this.options[i].description;
+			for (let j = 0; j < this.options[i].optionalArguments.length; j++) {
+			
+				outString += ' [' + this.options[i].optionalArguments[j] + ']';
+			
+			}
+			outString += "\r\n";
+			outString += '       ' + this.options[i].description;
 			outString += "\r\n";
 			if ((i+1) >= this.options.length) {
 			
-				return callback(false, outString);
+				return callback(false, this.parsePre(outString));
 			
 			}
 		
@@ -280,7 +302,7 @@ class UwotCmd {
 					if (null !== matchIdx) {
 					
 						matchResult.isDefined = true;
-						var matchedOpt = this.options[i];
+						var matchedOpt = this.options[matchIdx];
 						if (matchedOpt.requiredArguments.length > 0) {
 						
 							matchResult.hasArgs = true;
@@ -314,6 +336,69 @@ class UwotCmd {
 		}
 	
 	}
+	
+	parsePre(preString) {
+	
+		if ('string' !== typeof preString) {
+		
+			return preString;
+		
+		}
+		var output = {content: []};
+		var crArray = preString.split(/[\n\r]/g);
+		for (let i = 0; i < crArray.length; i++) {
+		
+			if ('' !== crArray[i]) {
+			
+				var thisNode = {content: []};
+				var spaceArray = crArray[i].replace(/\t/g, '    ').split(' ');
+				for (let j = 0; j < spaceArray.length; j++) {
+			
+					if ('' == spaceArray[j]) {
+				
+						thisNode.content.push({tag: 'span', content: '&nbsp;'})
+				
+					}
+					else {
+				
+						thisNode.content.push({content: this.escapeHtml(spaceArray[j])});
+						if ((j + 1) < spaceArray.length && '' !== spaceArray[j+1]) {
+					
+							thisNode.content.push({tag: 'span', content: '&nbsp;'});
+					
+						}
+					
+					}
+			
+				}
+				if ((i+1) < crArray.length) {
+			
+					thisNode.content.push({tag: 'br'});
+			
+				}
+				output.content.push(thisNode);
+			
+			}
+		
+		}
+		return output;
+	
+	}
+	
+	escapeHtml(str) {
+	
+		if ('string' !== typeof str) {
+		
+			return str;
+			
+		}
+		return str.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+		
+	 }
 
 }
 

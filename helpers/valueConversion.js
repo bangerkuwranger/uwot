@@ -266,6 +266,13 @@ module.exports = {
 		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'object' == typeof value[0] ? value : [];
 		return value;
 		
+	},
+	
+	arrayOfStringsOrEmpty: function arrayOfStringsOrEmpty(value) {
+
+		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'string' == typeof value[0] ? value : [];
+		return value;
+		
 	}
 
 };
