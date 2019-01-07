@@ -516,6 +516,8 @@ class UwotRuntimeCmds {
 
 	}
 	
+	// TBD
+	// This is getting more complex than it needs to be...
 	outputLine(output, type) {
 
 		var outLine;
