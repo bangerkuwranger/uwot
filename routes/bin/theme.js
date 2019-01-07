@@ -21,9 +21,62 @@ class UwotCmdTheme extends UwotCmd {
 	
 	}
 	
-	execute(args, options, callback) {
+	execute(args, options, callback, isSudo) {
 	
-		return super.execute(args, options, callback);
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/theme/execute');
+		
+		}
+		var saveTheme = false;
+		var themeName = '';
+		var executeResult = {
+			output: ''
+		};
+		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+		
+			themeName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : themeName;
+			if (themeName === '') {
+			
+				return super.execute(args, options, callback, isSudo);
+			
+			}
+			if ('object' == typeof options && Array.isArray(options) && options.length > 0) {
+		
+				for (let i = 0; i < options.length; i++) {
+				
+					if ('object' == typeof options[i] && 'string' == typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
+				
+						saveTheme = true;
+						i = options.length;
+				
+					}
+			
+				}
+				if (saveTheme) {
+			
+					var now = new Date();
+					var oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+					executeResult.cookies = {
+						uwotSavedTheme: {
+							value: themeName,
+							expiry: oneYearLater
+						}
+					}
+			
+				}
+			
+			}
+			executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
+			executeResult.outputType = 'object';
+			return callback(false, executeResult);
+		
+		}
+		else {
+		
+			return super.execute(args, options, callback, isSudo);
+		
+		}
 	
 	}
 	

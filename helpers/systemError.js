@@ -16,12 +16,12 @@
 //	properties can be directly returned using dot notation like 'real' SystemErrors
 
 // Usage:
-//	const systemError = require(path/to/helpers/systemError);
+//	const systemError = require('path/to/helpers/systemError');
 //	function fakeSystemProcess(args, callback) {
 //		doSomething(args, function(err, val) {
 //			if(err) {
 // 				var context = {path: '/usr/local/bin/mongo', syscall: 'unlink'};
-// 				var error = SystemError.EPERM(context);
+// 				var error = systemError.EPERM(context);
 // 				console.error(error.message);
 // 				return callback(error, null);
 //			}
@@ -500,10 +500,10 @@ for (var key of messages.keys()) {
 	sysErrors[key] = function(context) {
 	
 		// TBD
-		// Test if we can captureStackTrace or if strict mode throws error.å
-		return new SystemError(key, context);
+		// Test if we can captureStackTrace or if strict mode throws error.
+		return new SystemError(this, context);
 	
-	}
+	}.bind(key);
 
 };
 module.exports = sysErrors;
@@ -543,34 +543,38 @@ class SystemError extends Error {
 		}
 		context.errno = msgConst.errno;
 		super(message);
-		Object.defineProperty(this, kInfo, {
+		Object.defineProperty(this, 'kInfo', {
 			configurable: false,
 			enumerable: false,
 			value: context
 		});
-		Object.defineProperty(this, kCode, {
+		Object.defineProperty(this, 'kCode', {
 			configurable: true,
 			enumerable: false,
 			value: key,
 			writable: true
 		});
-		Object.defineProperty(this, code, {
+		Object.defineProperty(this, 'code', {
 			enumerable: true,
 			value: key
 		});
-		Object.defineProperty(this, dest, {
+		Object.defineProperty(this, 'dest', {
 			enumerable: true,
 			value: context.dest
 		});
-		Object.defineProperty(this, path, {
+		Object.defineProperty(this, 'path', {
 			enumerable: true,
 			value: context.path
 		});
-		Object.defineProperty(this, errno, {
+		Object.defineProperty(this, 'errno', {
 			enumerable: true,
 			value: context.errno
 		});
-		
+		// Object.defineProperty(this, 'stack', {
+// 			enumerable: true,
+// 			value: 
+Error.captureStackTrace(this, SystemError)
+// 		});
 		
   }
 

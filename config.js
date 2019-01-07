@@ -764,6 +764,26 @@ class UwotConfigBase {
 		return isArrayKey(keyString);
 	
 	}
+	
+	getConfigServerOrigin() {
+	
+		var serverCnf = nconf.get('server');
+		var cnfTransport = serverCnf.transport;
+		var cnfPort = serverCnf.port.toString();
+		if (serverCnf.secure) {
+			cnfPort = '443';
+			cnfTransport = 'https';
+		}
+		var confOrigin = cnfTransport + '://' + serverCnf.domain;
+		if (cnfPort !== '80' && cnfPort !== '443') {
+		
+			confOrigin += ':' + cnfPort;
+		
+		}
+		confOrigin += '/';
+		return confOrigin;
+	
+	}
 
 };
 

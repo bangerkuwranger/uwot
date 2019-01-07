@@ -3,6 +3,7 @@ const minimist = require('minimist');
 const sanitize = require('../helpers/valueConversion');
 // const Users = require('../users');
 const filesystem = require('../filesystem');
+const systemError = require('../helpers/systemError');
 const commandTypes = [
 	'LogicalExpression',
 	'Pipeline',
@@ -227,33 +228,34 @@ class UwotRuntimeCmds {
 	
 			if ('sudo' === exe.name) {
 		
-				exe.input = 'undefined' != typeof input ? input : null;
-				exe.output = 'undefined' != typeof output ? output : null;
-				var args = [];
-				if ('object' == typeof astCommand.suffix) {
+				if (this.user.maySudo()) {
+					exe.input = 'undefined' != typeof input ? input : null;
+					exe.output = 'undefined' != typeof output ? output : null;
+					var args = [];
+					if ('object' == typeof astCommand.suffix) {
 		
-					args = args.concat(astCommand.suffix);
+						args = args.concat(astCommand.suffix);
 		
-				}
-				// TBD
-				// if req.body.maySudo
-					// exe.isSudo: true
+					}
+					if (args.length > 0) {
 			
-				if (args.length > 0) {
-			
-					var sudoCmdWord = args.shift();
-					var sudoCmdNode = {
-						type: 'Command',
-						name: sudoCmdWord,
-						suffix: args
-					};
+						var sudoCmdWord = args.shift();
+						var sudoCmdNode = {
+							type: 'Command',
+							name: sudoCmdWord,
+							suffix: args
+						};
 				
-					exe = this.parseCommandNode(sudoCmdNode, exe.output, exe.input);
-					// TBD
-					// if req.body.maySudo
-						// exe.isSudo: true
-					exe.isSudo = true;
+						exe = this.parseCommandNode(sudoCmdNode, exe.output, exe.input);
+						exe.isSudo = true;
+					
+					}
 			
+				}
+				else {
+				
+					exe.error = systemError.EPERM({syscall: 'fork'});
+				
 				}
 				return exe;
 		
@@ -579,7 +581,8 @@ class UwotRuntimeCmds {
 	
 			var results = {
 				output: [],
-				operations: []
+				operations: [],
+				cookies: {}
 			};
 // 			var promiseMap = new Map();
 			if (exeMap.size < 1) {
@@ -589,17 +592,20 @@ class UwotRuntimeCmds {
 			}
 			else {
 		
+				var j = 0;
 				for (let i = 0; i < exeMap.size; i++) {
 		
 					var exe = exeMap.get(i);
 					if ('object' !== typeof exe || null === exe) {
 			
 						results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' is invalid'), outputType));
+						j++;
 			
 					}
 					else if ('undefined' !== typeof exe.error) {
 			
 						results.output.push(this.outputLine(exe.error, outputType));
+						j++;
 			
 					}
 					else {
@@ -610,6 +616,7 @@ class UwotRuntimeCmds {
 					
 								results.output.push(this.outputLine('operation ' + exe.name, outputType));
 								results.operations.push(exe);
+								j++;
 							}
 				
 						}
@@ -628,16 +635,42 @@ class UwotRuntimeCmds {
 												if (error) {
 									
 													results.output.push(this.outputLine(error, outputType));
+													j++;
 									
 												}
 												else if ('sudo' === exe.name) {
 									
 													results.output.push(result);
+													j++;
 									
+												}
+												else if ('string' == typeof result.outputType && 'object' == result.outputType) {
+												
+													if ('string' == typeof result.redirect) {
+													
+														results.redirect = result.redirect;
+														delete result.redirect;
+													
+													} 
+													if ('object' == typeof result.cookies && null !== result.cookies) {
+													
+														var cnames = Object.keys(result.cookies);
+														cnames.forEach(function(cname) {
+														
+															results.cookies[cname] = result.cookies[cname];
+														
+														})
+														delete result.cookies;
+													
+													}
+													results.output.push(this.outputLine(result, 'object'));
+													j++;
+												
 												}
 												else {
 									
 													results.output.push(this.outputLine(result, outputType));
+													j++;
 									
 												}
 								
@@ -647,6 +680,7 @@ class UwotRuntimeCmds {
 										catch(e) {
 							
 											results.output.push(this.outputLine(e, outputType));
+											j++;
 							
 										}
 						
@@ -666,16 +700,37 @@ class UwotRuntimeCmds {
 												if (error) {
 									
 													results.output.push(this.outputLine(error, 'object'));
+													j++;
 									
 												}
 												else if ('sudo' === exe.name) {
 									
 													results.output.push(result);
+													j++;
 									
+												}
+												else if ('string' == typeof result.outputType && 'object' == result.outputType) {
+												
+													if ('string' == typeof result.redirect) {
+													
+														results.redirect = result.redirect;
+														delete result.redirect;
+													
+													} 
+													if ('object' == typeof result.cookies && Array.isArray(result.cookies) && result.cookies.length > 0) {
+													
+														results.cookies = results.cookies.concat(result.cookies);
+														delete result.cookies;
+													
+													}
+													results.output.push(this.outputLine(result, 'object'));
+													j++;
+												
 												}
 												else {
 									
 													results.output.push(this.outputLine(result, 'object'));
+													j++;
 									
 												}
 								
@@ -685,6 +740,7 @@ class UwotRuntimeCmds {
 										catch(e) {
 							
 											results.output.push(this.outputLine(e, 'object'));
+											j++;
 							
 										}
 						
@@ -692,6 +748,7 @@ class UwotRuntimeCmds {
 									else {
 						
 										results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+										j++;
 						
 									}
 					
@@ -716,16 +773,37 @@ class UwotRuntimeCmds {
 													if (error) {
 									
 														results.output.push(this.outputLine(error, outputType));
+														j++;
 									
 													}
 													else if ('sudo' === exe.name) {
 									
 														results.output.push(result);
+														j++;
 									
+													}
+													else if ('string' == typeof result.outputType && 'object' == result.outputType) {
+													
+														if ('string' == typeof result.redirect) {
+													
+															results.redirect = result.redirect;
+															delete result.redirect;
+													
+														} 
+														if ('object' == typeof result.cookies && Array.isArray(result.cookies) && result.cookies.length > 0) {
+													
+															results.cookies = results.cookies.concat(result.cookies);
+															delete result.cookies;
+													
+														}
+														results.output.push(this.outputLine(result, 'object'));
+														j++;
+												
 													}
 													else {
 									
 														results.output.push(this.outputLine(result, outputType));
+														j++;
 									
 													}
 								
@@ -735,6 +813,7 @@ class UwotRuntimeCmds {
 											catch(e) {
 							
 												results.output.push(this.outputLine(e, outputType));
+												j++;
 							
 											}
 							
@@ -752,6 +831,7 @@ class UwotRuntimeCmds {
 										else {
 						
 											results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+											j++;
 						
 										}
 						
@@ -759,6 +839,7 @@ class UwotRuntimeCmds {
 									else {
 					
 										results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid input'), outputType));
+										j++;
 					
 									}
 					
@@ -769,7 +850,7 @@ class UwotRuntimeCmds {
 						}
 			
 					}
-					if ((i + 1) >= exeMap.size) {
+					if (j >= exeMap.size) {
 			
 						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.UwotConfig.get('users', 'allowGuest')) {
 			

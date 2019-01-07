@@ -105,6 +105,37 @@ function outputToMain(data, args) {
 		if ('undefined' !== typeof data.operations && 'object' == typeof uwotOperations && Array.isArray(uwotOperations)) {
 			performOperations(data.operations);
 		}
+		if ('object' == typeof data.cookies && null !== data.cookies) {
+		
+			var cNames = Object.keys(data.cookies);
+			for (let i =0; i < cNames.length; i++) {
+				var thisCName = cNames[i];
+				var thisCookie = data.cookies[thisCName];
+				var curVal = uwotGetCookieValue(thisCName);
+				if ('object' == typeof thisCookie && null !== thisCookie && 'string' == typeof thisCookie.value) {
+					var thisValue = thisCookie.value;
+					var expiry = null;
+					if ('string' == typeof thisCookie.expiry) {
+						expiry = new Date(thisCookie.expiry);
+					}
+					else if ('object' == typeof thisCookie.expiry && thisCookie.expiry instanceof Date) {
+						expiry = thisCookie.expiry;
+					}
+					if (thisValue == '' && null !== expiry) {
+						uwotSetCookie(thisCName, curVal, expiry);
+					}
+					else if (thisValue !== '' && null !== expiry) {
+						uwotSetCookie(thisCName, thisValue, expiry);
+					}
+					else if (thisValue !== '') {
+						uwotSetCookie(thisCName, thisValue);
+					}
+				}
+			}
+		}
+		if ('object' == typeof data.redirect && data.redirect !== null) {
+			window.setTimeout(uwotClientRedirect(data.redirect), 250);
+		}
 	}
 // 	return;
 	//yucky bugs make yuckier things yucky
@@ -147,5 +178,38 @@ function performOperations(operations) {
 			var args = (operations.args.length > 0) ? operations.args.map(x => x.text) : [];
 			ops.performOperation(operations.name, args);
 		}
+	}
+}
+
+function uwotGetCookieValue(cname) {
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+}
+
+function uwotSetCookie(cname, cvalue, cexpiry) {
+	var expires = cexpiry instanceof Date ? "expires="+cexpiry.toUTCString() : null;
+	var cstring = cname + "=" + cvalue + ";";
+	if (null !== expires) {
+		cstring += expires + ";path=/";
+	}
+	else {
+		cstring += ";path=/";
+	}
+	document.cookie = cstring;
+}
+
+function uwotClientRedirect(redirect) {
+	if ('object' == typeof redirect && null !== redirect) {
+		return window.location.replace(redirect.path);
 	}
 }

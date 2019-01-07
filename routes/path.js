@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const Url = require('url');
 const nonceHandler = require('node-timednonce');
 const cmdParser = require('../middleware/cmdParser');
 const ansiParser = require('../middleware/ansi');
@@ -102,6 +103,16 @@ router.post(
 									}
 						
 								}
+							
+							}
+							if ('object' == typeof req.body.runtime.results.cookies && null !== req.body.runtime.results.cookies) {
+							
+								resObj.cookies = req.body.runtime.results.cookies;
+							
+							}
+							if ('string' == typeof req.body.runtime.results.redirect) {
+							
+								resObj.redirect = Url.parse(req.body.runtime.results.redirect, global.UwotConfig.getConfigServerOrigin());
 							
 							}
 						
