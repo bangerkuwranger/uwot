@@ -10,7 +10,11 @@
   "private": true,
   "repository": "github:bangerkuwranger/uwot",
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "NODE_ENV=production node ./bin/www",
+    "startdev": "NODE_ENV=development node ./bin/www",
+    "debug": "NODE_ENV=development nodemon --inspect-brk ./bin/www",
+    "debugprod": "NODE_ENV=production nodemon --inspect-brk ./bin/www",
+    "test": "NODE_ENV=test mocha --reporter spec"
   },
   "dependencies": {
     "bash-ast-traverser": "0.5.0",
