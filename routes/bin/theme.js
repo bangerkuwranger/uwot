@@ -76,7 +76,7 @@ class UwotCmdTheme extends UwotCmd {
 		}
 		else {
 		
-			return super.execute(args, options, callback, isSudo);
+			return this.help(callback);
 		
 		}
 	
