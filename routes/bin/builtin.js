@@ -3,15 +3,21 @@ const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
 const UwotCmd = require('../../cmd');
-const validateTheme = require('../../helpers/themeLoader').isValidTheme;
+const filesystem = require('../../filesystem')
 if ('undefined' == typeof global.appRoot) {
 	global.appRoot = path.resolve('../../');
 }
 if ('undefined' == typeof global.UwotBin) {
 	global.UwotBin = {};
 }
+const validBuiltins = [
+	'cd',
+	'pwd',
+	'help',
+	'printf'
+];
 
-class UwotCmdTheme extends UwotCmd {
+class UwotCmdBuiltin extends UwotCmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -20,6 +26,10 @@ class UwotCmdTheme extends UwotCmd {
 			cmdOpts,
 			cmdPath
 		);
+		
+		// Super don't do this; these are other commands that don't have an assoc. file
+		// TBD
+		// add each builtin directly to global.UwotBin 
 	
 	}
 	
@@ -27,19 +37,19 @@ class UwotCmdTheme extends UwotCmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to bin/theme/execute');
+			throw new TypeError('invalid callback passed to bin/builtin/execute');
 		
 		}
-
-		var saveTheme = false;
-		var themeName = '';
+		var biName = '';
+		var biArgs = [];
+		var biOpts = [];
 		var executeResult = {
 			output: ''
 		};
 		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
 		
-			themeName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : themeName;
-			if (themeName === '') {
+			biName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : biName;
+			if (biName === '') {
 			
 				this.help(function(error, helpOutput) {
 				
@@ -50,7 +60,6 @@ class UwotCmdTheme extends UwotCmd {
 					}
 					else {
 					
-						helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
 						return callback(false, helpOutput);
 					
 					}
@@ -58,42 +67,28 @@ class UwotCmdTheme extends UwotCmd {
 				}.bind(this));
 			
 			}
+			else if(args.length > 1) {
+			
+				//loop through addtl args and set to biArgs for execution
+			
+			}
 			if ('object' == typeof options && Array.isArray(options) && options.length > 0) {
 		
 				for (let i = 0; i < options.length; i++) {
 				
-					if ('object' == typeof options[i] && 'string' == typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
-				
-						saveTheme = true;
-						i = options.length;
-				
-					}
-			
-				}
-				if (saveTheme) {
-			
-					var now = new Date();
-					var oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
-					executeResult.cookies = {
-						uwotSavedTheme: {
-							value: themeName,
-							expiry: oneYearLater
-						}
-					}
+					// parse options and assign to biOpts for execution of bi
 			
 				}
 			
 			}
-			if (validateTheme(themeName)) {
+			if (-1 !== validBuiltins.indexOf(biName)) {
 			
-				executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
-				executeResult.outputType = 'object';
-				return callback(false, executeResult);
+				return global.UwotBin[biName].execute(biArgs, biOpts, app, callback);
 			
 			}
 			else {
 			
-				return callback(new Error('invalid theme'), null);
+				return callback(new Error('invalid builtin'), null);
 			
 			}
 		
@@ -167,23 +162,15 @@ class UwotCmdTheme extends UwotCmd {
 
 };
 
-var theme = new UwotCmdTheme (
+var builtin = new UwotCmdBuiltin (
 	{
-		name:				'theme',
-		description:		'Changes the theme for the console window.',
-		requiredArguments:	['themeName'],
-		optionalArguments:	[]
+		name:				'builtin',
+		description:		'Run builtin commands in the running uwot process. This differs from ACTUAL shells in that most logical, memory, user, and process management builtins are implemented elsewhere (e.g. login/logout) or not implemented at all.',
+		requiredArguments:	['shell-builtin'],
+		optionalArguments:	['shell-builtin-args']
 	},
-	[
-		{
-			description: 		'save theme selection for future sessions for this user',
-			shortOpt: 			's',
-			longOpt: 			'save',
-			requiredArguments:	[],
-			optionalArguments:	[]
-		}
-	],
-	path.resolve(global.appRoot, 'routes/bin/theme')
+	[],
+	path.resolve(global.appRoot, 'routes/bin/builtin')
 );
 
-module.exports = theme;
+module.exports = builtin;
