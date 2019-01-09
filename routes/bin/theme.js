@@ -22,8 +22,6 @@ class UwotCmdTheme extends UwotCmd {
 	
 	}
 	
-	// TBD
-	// Help function, return current theme/theme list if no args
 	execute(args, options, app, callback, isSudo) {
 	
 		if ('function' !== typeof callback) {

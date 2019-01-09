@@ -73,8 +73,6 @@ class UwotCliOperations {
 					jQuery('#uwotcli-input').attr('type', 'text');
 					var nonce = $('#uwotcli-nonce').val();
 					jQuery('#uwotheader-indicator').addClass('loading');
-					// TBD
-					// This call causes nedb to open two parallel async connections to the same db... which wouldn't be an issue if one didn't remove the temp file while the other one was accessing it. need to make sure all nedb instances of filestore use singleton behavior. Inadvertantly did the opposite while rewriting some of the model code for cmdParser and filesystem. Since both cmdParser and path router use their own instances of the user model, will need to rethink. But me thinker is broked today... so TBD and off to buy milk.
 					$.post(
 						'/login',
 						{

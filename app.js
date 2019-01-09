@@ -65,13 +65,16 @@ var configPath = app.get('env') === 'development' ? path.resolve(etcDev, 'config
 global.UwotConfig = new uwotconfig(configPath);
 global.UwotUsers = new uwotusers();
 
-// TBD
-// implement default path continuously through index and bin/theme
+// load local themes if enabled
 if (global.UwotConfig.get('themes', 'useLocal')) {
 
 	themeLoader.loadLocalPath();
 
 }
+
+// TBD
+// load external themes if enabled
+
 var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.UwotConfig.get('themes', 'defaultTheme');
 app.set ('uwot_theme', themeName);
 var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);
@@ -134,6 +137,9 @@ if (global.UwotConfig.get('binpath', 'useLocal')) {
 	binLoader.loadLocalPath();
 
 }
+
+// TBD
+// load externals if enabled
 
 // then add to reserved list
 global.UwotReserved.push(...Object.keys(global.UwotBin));
