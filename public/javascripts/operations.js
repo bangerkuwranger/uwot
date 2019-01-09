@@ -73,6 +73,8 @@ class UwotCliOperations {
 					jQuery('#uwotcli-input').attr('type', 'text');
 					var nonce = $('#uwotcli-nonce').val();
 					jQuery('#uwotheader-indicator').addClass('loading');
+					$('#cliform > .field').addClass('disabled');
+					$('#uwotcli-input').prop('disabled', true);
 					$.post(
 						'/login',
 						{
@@ -100,6 +102,9 @@ class UwotCliOperations {
 						changePrompt('login');
 					}).always(function() {
 						jQuery('#uwotheader-indicator').removeClass('loading');
+						$('#cliform > .field').removeClass('disabled');
+						$('#uwotcli-input').prop('disabled', false);
+						$("#uwotcli-input").focus();
 					});
 				}
 				else {

@@ -17,6 +17,153 @@ const validBuiltins = [
 	'printf'
 ];
 
+const builtinConstructorArgs = {
+	cd: [
+		{
+			name:				'cd',
+			description:		'Change working directory.',
+			requiredArguments:	['directory'],
+			optionalArguments:	[]
+		},
+		[],
+		path.resolve(global.appRoot, 'routes/bin/builtin')
+	],
+	pwd: [
+		{
+			name:				'pwd',
+			description:		'Print working directory to console.',
+			requiredArguments:	[],
+			optionalArguments:	[]
+		},
+		[],
+		path.resolve(global.appRoot, 'routes/bin/builtin')
+	],
+	help: [
+		{
+			name:				'help',
+			description:		'Display helpful information about builtin commands.',
+			requiredArguments:	['pattern'],
+			optionalArguments:	[]
+		},
+		[],
+		path.resolve(global.appRoot, 'routes/bin/builtin')
+	],
+	printf: [
+		{
+			name:				'printf',
+			description:		'Write the formatted arguments to the standard output under the control of the format.',
+			requiredArguments:	['format'],
+			optionalArguments:	['arguments']
+		},
+		[],
+		path.resolve(global.appRoot, 'routes/bin/builtin')
+	]
+};
+
+class UwotCmdCd extends UwotCmd {
+
+	constructor( cmdObj, cmdOpts, cmdPath ) {
+	
+		super(
+			cmdObj,
+			cmdOpts,
+			cmdPath
+		);
+	
+	}
+
+	execute(args, options, app, callback, isSudo) {
+	
+		return super.execute(args, options, app, callback, isSudo);
+	
+	}
+	
+	help(callback) {
+	
+		return super.help(callback);
+	
+	}
+	
+}
+
+class UwotCmdPwd extends UwotCmd {
+
+	constructor( cmdObj, cmdOpts, cmdPath ) {
+	
+		super(
+			cmdObj,
+			cmdOpts,
+			cmdPath
+		);
+	
+	}
+
+	execute(args, options, app, callback, isSudo) {
+	
+		return super.execute(args, options, app, callback, isSudo);
+	
+	}
+	
+	help(callback) {
+	
+		return super.help(callback);
+	
+	}
+	
+}
+
+class UwotCmdHelp extends UwotCmd {
+
+	constructor( cmdObj, cmdOpts, cmdPath ) {
+	
+		super(
+			cmdObj,
+			cmdOpts,
+			cmdPath
+		);
+	
+	}
+
+	execute(args, options, app, callback, isSudo) {
+	
+		return super.execute(args, options, app, callback, isSudo);
+	
+	}
+	
+	help(callback) {
+	
+		return super.help(callback);
+	
+	}
+	
+}
+
+class UwotCmdPrintf extends UwotCmd {
+
+	constructor( cmdObj, cmdOpts, cmdPath ) {
+	
+		super(
+			cmdObj,
+			cmdOpts,
+			cmdPath
+		);
+	
+	}
+
+	execute(args, options, app, callback, isSudo) {
+	
+		return super.execute(args, options, app, callback, isSudo);
+	
+	}
+	
+	help(callback) {
+	
+		return super.help(callback);
+	
+	}
+	
+}
+
 class UwotCmdBuiltin extends UwotCmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
@@ -30,7 +177,11 @@ class UwotCmdBuiltin extends UwotCmd {
 		// Super don't do this; these are other commands that don't have an assoc. file
 		// TBD
 		// add each builtin directly to global.UwotBin 
-	
+		global.UwotBin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
+		global.UwotBin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);
+		global.UwotBin.help = new UwotCmdHelp(...builtinConstructorArgs.help);
+		global.UwotBin.printf = new UwotCmdPrintf(...builtinConstructorArgs.printf);
+		
 	}
 	
 	execute(args, options, app, callback, isSudo) {
@@ -104,7 +255,6 @@ class UwotCmdBuiltin extends UwotCmd {
 					}
 					else {
 					
-						helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
 						return callback(false, helpOutput);
 					
 					}
@@ -119,7 +269,6 @@ class UwotCmdBuiltin extends UwotCmd {
 	
 		super.help(function(error, helpOutput) {
 		
-			var themeList = this.outputValidThemes();
 			if (error) {
 			
 				return callback(error, null);
@@ -127,14 +276,12 @@ class UwotCmdBuiltin extends UwotCmd {
 			}
 			else if ('object' == typeof helpOutput && null !== helpOutput) {
 			
-				helpOutput.content.push(themeList);
 				return callback(false, helpOutput);
 			
 			}
 			else {
 			
-				themeList.content.unshift({output: '*** Help system currently unavailable. ***', isBold: true});
-				return callback(false, themeList)
+				return callback(false, {output: '*** Help system currently unavailable. ***', isBold: true})
 			
 			}
 		
@@ -142,24 +289,6 @@ class UwotCmdBuiltin extends UwotCmd {
 	
 	}
 	
-	outputValidThemes() {
-	
-		var themeArray = validateTheme();
-		var validThemeOutput = {content:[{tag: 'div', content: 'List of valid themeNames:', isBold: true}, {content:[], tag: 'ul'}]};
-		for (let i = 0; i < themeArray.length; i++) {
-		
-			validThemeOutput.content[1].content.push(
-				{
-					content: themeArray[i],
-					tag: 'li'
-				}
-			);
-		
-		}
-		return validThemeOutput;
-	
-	}
-
 };
 
 var builtin = new UwotCmdBuiltin (

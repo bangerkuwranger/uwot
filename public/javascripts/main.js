@@ -33,6 +33,8 @@ jQuery(document).ready(function($) {
 		$("#uwotcli-input").val('').focus();
 		var nonce = $('#uwotcli-nonce').val();
 		$('#uwotheader-indicator').addClass('loading');
+		$('#cliform > .field').addClass('disabled');
+		$('#uwotcli-input').prop('disabled', true);
 		$.post(
 			'/bin',
 			{
@@ -49,6 +51,9 @@ jQuery(document).ready(function($) {
 		.always(function() {
 			if (!hasLoginUser) {
 				$('#uwotheader-indicator').removeClass('loading');
+				$('#cliform > .field').removeClass('disabled');
+				$('#uwotcli-input').prop('disabled', false);
+				$("#uwotcli-input").focus();
 			}
 		});
 	});
@@ -134,6 +139,7 @@ function outputToMain(data, args) {
 			}
 		}
 		if ('object' == typeof data.redirect && data.redirect !== null) {
+			jQuery('#uwotheader-indicator').addClass('loading');
 			window.setTimeout(uwotClientRedirect(data.redirect), 250);
 		}
 	}

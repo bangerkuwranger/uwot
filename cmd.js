@@ -196,7 +196,10 @@ class UwotCmd {
 		outString += "\r\n";
 		if (this.options.length < 1) {
 		
-			return callback(false, this.parsePre(outString));
+			var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
+			var outArray = this.parsePre(outString);
+			outArray.content.unshift(cmdTitleNode);
+			return callback(false, outArray);
 		
 		}
 		outString += 'Options:';
