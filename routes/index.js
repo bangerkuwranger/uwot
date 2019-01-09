@@ -4,6 +4,7 @@ const binRouter = require('./path');
 const nonceHandler = require('node-timednonce');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const validateTheme = require('../helpers/themeLoader').isValidTheme;
 // const UserModel = require('../users');
 
 passport.use(
@@ -116,10 +117,12 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res, next) {
 	
 	var respValues = {
-		title: 'UWOT 1.0.0a',
-		nonce: nonceHandler.create( 'index-get', 300000 ),
-		validOps: global.UwotCliOps ? JSON.stringify(global.UwotCliOps) : '[]'
+		title: 'UWoT',
 	};
+	
+	res.locals.nonce = nonceHandler.create( 'index-get', 300000 );
+	res.locals.validOps = global.UwotCliOps ? JSON.stringify(global.UwotCliOps) : '[]';
+	res.locals.uwotVersion = global.UwotVersion;
 	var themeName = 'default';
 	if ('object' === typeof req.query && 'string' === typeof req.query.theme) {
 	
@@ -131,16 +134,30 @@ router.get('/', function(req, res, next) {
 		themeName = req.cookies.uwotSavedTheme;
 		
 	}
-	respValues.title +=  ' - ' + themeName + ' theme';
-	respValues.theme = themeName;
+	else if ('string' === typeof app.get('uwot_theme')) {
+	
+		themeName = req.app.get('uwot_theme');
+	
+	}
+	if (!validateTheme(themeName)) {
+	
+		themeName == 'default';
+	
+	}
+	if (req.app.get('uwot_theme') !== themeName) {
+	
+		req.app.set('uwot_theme', themeName);
+	
+	}
+	res.locals.theme = themeName;
 	if ('object' == typeof res.locals && res.locals.login && '' !== res.locals.user) {
 	
-		respValues.userName = res.locals.user;
+		res.locals.userName = res.locals.user;
 	
 	}
 	if (!global.UwotConfig.get('users', 'allowGuest')) {
 	
-		respValues.forceLogin = true;
+		res.locals.forceLogin = true;
 	
 	}
 	res.render('index', respValues);

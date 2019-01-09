@@ -23,6 +23,9 @@ if ('function' != typeof global.tryParseJSON) {
 if ('undefined' == typeof global.UwotBin) {
 	global.UwotBin = {};
 }
+if ('undefined' == typeof global.UwotThemes) {
+	global.UwotThemes = {};
+}
 global.UwotCliOps = [
 	"clear",
 	"history",
@@ -31,6 +34,7 @@ global.UwotCliOps = [
 	"logout",
 	"exit"
 ];
+global.UwotVersion = require('./package.json').version;
 
 const sessionHours = 12;
 
@@ -51,6 +55,7 @@ var uwotconfig = require('./config');
 var uwotusers = require('./users');
 var cmd = require('./cmd');
 var binLoader = require('./helpers/binLoader');
+var themeLoader = require('./helpers/themeLoader')
 
 var index = require('./routes/index');
 
@@ -62,6 +67,11 @@ global.UwotUsers = new uwotusers();
 
 // TBD
 // implement default path continuously through index and bin/theme
+if (global.UwotConfig.get('themes', 'useLocal')) {
+
+	themeLoader.loadLocalPath();
+
+}
 var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.UwotConfig.get('themes', 'defaultTheme');
 app.set ('uwot_theme', themeName);
 var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);

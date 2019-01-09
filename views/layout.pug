@@ -6,14 +6,22 @@
 	-const uwotValidOps = validOps
 -else
 	-const uwotValidOps = '[]'
--if (userName)
-	-const user = userName
+-if (user)
+	-const userName = user
 -else
-	-const user = null
+	-const userName = null
+-if (title)
+	-var titleString = title
+-else
+	-var titleString = 'UWOT'
+-if (uwotVersion)
+	-titleString += ' ' + uwotVersion
+-if (theme)
+	-titleString += ' - ' + theme + ' theme'
 doctype html
 html
 	head
-		title= title
+		title= titleString
 		link(rel='stylesheet', href='/css/style.css')
 		link(rel="apple-touch-icon" sizes="57x57" href= iconPath + "/apple-icon-57x57.png")
 		link(rel="apple-touch-icon" sizes="60x60" href= iconPath + "/apple-icon-60x60.png")

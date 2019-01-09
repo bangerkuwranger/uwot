@@ -3,6 +3,7 @@ const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
 const UwotCmd = require('../../cmd');
+const validateTheme = require('../../helpers/themeLoader').isValidTheme;
 if ('undefined' == typeof global.appRoot) {
 	global.appRoot = path.resolve('../../');
 }
@@ -69,9 +70,18 @@ class UwotCmdTheme extends UwotCmd {
 				}
 			
 			}
-			executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
-			executeResult.outputType = 'object';
-			return callback(false, executeResult);
+			if (validateTheme(themeName)) {
+			
+				executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
+				executeResult.outputType = 'object';
+				return callback(false, executeResult);
+			
+			}
+			else {
+			
+				return callback(new Error('invalid theme'), null);
+			
+			}
 		
 		}
 		else {
@@ -84,7 +94,46 @@ class UwotCmdTheme extends UwotCmd {
 	
 	help(callback) {
 	
-		return super.help(callback);
+		super.help(function(error, helpOutput) {
+		
+			var themeList = this.outputValidThemes();
+			if (error) {
+			
+				return callback(error, null);
+			
+			}
+			else if ('object' == typeof helpOutput && null !== helpOutput) {
+			
+				helpOutput.content.push(themeList);
+				return callback(false, helpOutput);
+			
+			}
+			else {
+			
+				themeList.content.unshift({output: '*** Help system currently unavailable. ***', isBold: true});
+				return callback(false, themeList)
+			
+			}
+		
+		}.bind(this));
+	
+	}
+	
+	outputValidThemes() {
+	
+		var themeArray = validateTheme();
+		var validThemeOutput = {content:[{tag: 'div', content: 'List of valid themeNames:', isBold: true}, {content:[], tag: 'ul'}]};
+		for (let i = 0; i < themeArray.length; i++) {
+		
+			validThemeOutput.content[1].content.push(
+				{
+					content: themeArray[i],
+					tag: 'li'
+				}
+			);
+		
+		}
+		return validThemeOutput;
 	
 	}
 
