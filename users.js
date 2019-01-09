@@ -112,6 +112,10 @@ module.exports = class UwotUsers {
 	constructor() {
 	
 		this.db = new Datastore({ filename: 'var/nedb/users.db', autoload: true, timestampData: true });
+		// TBD
+		// check if create user dir is set in config
+		// if so, verify each user has a dir
+		// if not, create dir and set perms for user
 	
 	}
 	
@@ -261,6 +265,10 @@ module.exports = class UwotUsers {
 	
 	}
 	
+	// TBD
+	// check if create user dir is set in config
+	// create user dir if not exists
+	// rename old and create new if dir already exists
 	createNew(uObj, callback) {
 	
 		var self = this;

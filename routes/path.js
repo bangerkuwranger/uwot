@@ -167,7 +167,8 @@ if ('object' == typeof global.UwotBin && Object.keys(global.UwotBin).length > 0)
 	for (let i = 0; i < binPathKeys.length; i++) {
 	
 		router.post('/' + binPathKeys[i], function(req, res, next) {
-		
+		// TBD
+		// get/set req.session.vfsCwd
 			global.UwotBin[binPathKeys[i]].execute(req.body.args, req.body.options, req.app, function(error, results) {
 			
 				if (error) {

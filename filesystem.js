@@ -416,6 +416,8 @@ class UwotFs {
 	
 	}
 	
+	// TBD
+	// set req.session.vfsCwd
 	changeCwd(pth) {
 	
 		//check is string
@@ -458,6 +460,8 @@ class UwotFs {
 	}
 	
 	// this.cwd is relative path to this.root.path
+	// TBD
+	// get req.session.vfsCwd
 	getVcwd() {
 	
 		return 'string' == typeof this.cwd ? this.cwd : path.sep;
@@ -465,6 +469,8 @@ class UwotFs {
 	}
 	
 	// returns absolute path of this.cwd
+	// TBD
+	// get req.session.vfsCwd
 	getCwd() {
 	
 		return 'string' == typeof this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
