@@ -6,6 +6,8 @@ const sanitize = require('./helpers/valueConversion');
 const fileLog = require('./logger').all;
 const confDefaults = {
 	server: {
+		siteName: 'UWOT',
+		showVersion: true,
 		domain: 'localhost',
 		secure: false,
 		port: '80',
@@ -31,6 +33,7 @@ const confDefaults = {
 	themes: {
 		useLocal: true,
 		useExternal: false,
+		showTheme: true,
 		external: [],
 		allowUserSwitch: false,
 		defaultTheme: 'default'

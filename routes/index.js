@@ -117,12 +117,16 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res, next) {
 	
 	var respValues = {
-		title: 'UWoT',
+		title: global.UwotConfig.get('server', 'siteName'),
 	};
 	
 	res.locals.nonce = nonceHandler.create( 'index-get', 300000 );
 	res.locals.validOps = global.UwotCliOps ? JSON.stringify(global.UwotCliOps) : '[]';
-	res.locals.uwotVersion = global.UwotVersion;
+	if (global.UwotConfig.get('server', 'showVersion')) {
+	
+		res.locals.uwotVersion = global.UwotVersion;
+	
+	}
 	var themeName = 'default';
 	if ('object' === typeof req.query && 'string' === typeof req.query.theme) {
 	
@@ -150,6 +154,7 @@ router.get('/', function(req, res, next) {
 	
 	}
 	res.locals.theme = themeName;
+	res.locals.showTheme = global.UwotConfig.get('themes', 'showTheme');
 	if ('object' == typeof res.locals && res.locals.login && '' !== res.locals.user) {
 	
 		res.locals.userName = res.locals.user;

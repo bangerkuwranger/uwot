@@ -123,7 +123,7 @@ class UwotCmd {
 	
 	// just says what it's sent. shouldn't be used outside of testing...
 	// subclasses should implement their own logic.
-	execute(args, options, callback, isSudo) {
+	execute(args, options, app, callback, isSudo) {
 	
 		var executeString = 'executed: ' + this.command.name;
 		var helpString = false;

@@ -50,12 +50,12 @@ module.exports = function(args) {
 			
 					if (error) {
 				
-						throw error;
+						next(error);
 				
 					}
 					else {
 				
-						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 						next();
 				
 					}
@@ -69,7 +69,7 @@ module.exports = function(args) {
 			
 					if (error) {
 				
-						throw error;
+						next(error);
 				
 					}
 					else if (!user) {
@@ -78,13 +78,13 @@ module.exports = function(args) {
 			
 							if (error) {
 				
-								throw error;
+								next(error);
 				
 							}
 							else {
 							
 								user.maySudo = function() {return false;};
-								req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+								req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 								next();
 				
 							}
@@ -94,7 +94,7 @@ module.exports = function(args) {
 					}
 					else {
 				
-						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user);
+						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 						next();
 				
 					}
@@ -102,7 +102,6 @@ module.exports = function(args) {
 				}.bind(this));
 		
 			}
-			
 	
 		}
 	
@@ -638,7 +637,7 @@ class UwotRuntimeCmds {
 						
 										try {
 							
-											global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+											global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 												if (error) {
 									
@@ -703,7 +702,7 @@ class UwotRuntimeCmds {
 										//attempt to output to map[exe.output]
 										try {
 							
-											global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+											global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 												if (error) {
 									
@@ -776,7 +775,7 @@ class UwotRuntimeCmds {
 							
 											try {
 							
-												global.UwotBin[exe.name].execute(exe.args, exe.opts, function(error, result) {
+												global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 													if (error) {
 									
@@ -875,6 +874,13 @@ class UwotRuntimeCmds {
 	
 		}
 
+	}
+	
+	addAppInstance(app) {
+	
+		this.app = app;
+		return this;
+	
 	}
 
 }

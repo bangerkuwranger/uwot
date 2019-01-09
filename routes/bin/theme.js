@@ -24,7 +24,7 @@ class UwotCmdTheme extends UwotCmd {
 	
 	// TBD
 	// Help function, return current theme/theme list if no args
-	execute(args, options, callback, isSudo) {
+	execute(args, options, app, callback, isSudo) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -41,7 +41,21 @@ class UwotCmdTheme extends UwotCmd {
 			themeName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : themeName;
 			if (themeName === '') {
 			
-				return super.execute(args, options, callback, isSudo);
+				this.help(function(error, helpOutput) {
+				
+					if (error) {
+					
+						return callback(error, null);
+					
+					}
+					else {
+					
+						helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
+						return callback(false, helpOutput);
+					
+					}
+				
+				}.bind(this));
 			
 			}
 			if ('object' == typeof options && Array.isArray(options) && options.length > 0) {
@@ -86,7 +100,21 @@ class UwotCmdTheme extends UwotCmd {
 		}
 		else {
 		
-			return this.help(callback);
+			this.help(function(error, helpOutput) {
+				
+					if (error) {
+					
+						return callback(error, null);
+					
+					}
+					else {
+					
+						helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
+						return callback(false, helpOutput);
+					
+					}
+				
+				}.bind(this));
 		
 		}
 	

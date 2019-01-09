@@ -168,7 +168,7 @@ if ('object' == typeof global.UwotBin && Object.keys(global.UwotBin).length > 0)
 	
 		router.post('/' + binPathKeys[i], function(req, res, next) {
 		
-			global.UwotBin[binPathKeys[i]].execute(req.body.args, req.body.options, function(error, results) {
+			global.UwotBin[binPathKeys[i]].execute(req.body.args, req.body.options, req.app, function(error, results) {
 			
 				if (error) {
 				
