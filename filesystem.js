@@ -204,6 +204,9 @@ class UwotFs {
 		
 			// distinct from process.cwd; this is 'virtual' fs cwd
 // 			this.cwd = cwd;
+			// TBD
+			// check if current user can access dir at cwd
+			// it's possible that a session can set a cwd and maintain that value for another user, or that perms change between access periods.
 			this.changeCwd(cwd);
 		
 		}
@@ -462,6 +465,7 @@ class UwotFs {
 	// this.cwd is relative path to this.root.path
 	// TBD
 	// get req.session.vfsCwd
+	// check if user can access that dir
 	getVcwd() {
 	
 		return 'string' == typeof this.cwd ? this.cwd : path.sep;
@@ -471,6 +475,7 @@ class UwotFs {
 	// returns absolute path of this.cwd
 	// TBD
 	// get req.session.vfsCwd
+	// check if user can access that dir
 	getCwd() {
 	
 		return 'string' == typeof this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;

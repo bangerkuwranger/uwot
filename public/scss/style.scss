@@ -26,6 +26,34 @@ body {
 			position: fixed;
 			padding: 1em;
 			overflow: hidden;
+			
+			h1 {
+				font-size: 1.5em;
+				font-weight: 500;
+			}
+			
+			h2 {
+				font-size: 1.25em;
+				font-weight: 500;
+			}
+			
+			h3 {
+				font-size: 1.125em;
+				font-weight: 500;
+			}
+			
+			h4 {
+				font-size: 1em;
+				font-weight: 600;
+			}
+			
+			h5 {
+				font-weight: 200;
+			}
+			
+			h6 {
+				font-weight: 200;
+			}
 	
 			.header {
 				min-height: 1em;
@@ -35,6 +63,16 @@ body {
 				z-index: 10;
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
+				
+				>h1 {
+					max-width: calc(100% - 2em - 4px);
+					
+					>span {
+						margin-right: 1ch;
+						word-break: break-all;
+					}
+				
+				}
 				
 				.indicator-container {
 					min-height: 1em;
@@ -123,7 +161,7 @@ body {
 						margin-left: 0;
 					
 						&:before {
-							content: attr(data-prompt) var(--prompt, '>');
+							content: attr(data-cwd) ' ' attr(data-prompt) var(--prompt, '>');
 							position: absolute;
 							left: 0;
 							top: 0;

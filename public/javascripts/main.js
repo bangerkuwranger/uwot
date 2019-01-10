@@ -30,32 +30,43 @@ jQuery(document).ready(function($) {
 			uwotHistory.addItem(op);
 			outputToMain(op, {addPrompt:true});
 		}
-		$("#uwotcli-input").val('').focus();
-		var nonce = $('#uwotcli-nonce').val();
-		$('#uwotheader-indicator').addClass('loading');
-		$('#cliform > .field').addClass('disabled');
-		$('#uwotcli-input').prop('disabled', true);
-		$.post(
-			'/bin',
-			{
-				cmd: op,
-				nonce: nonce
-			}
-		)
-		.done(function(data) {
-			outputToMain(data);
-		})
-		.fail(function(obj, status, error) {
-			outputToMain(error);
-		})
-		.always(function() {
-			if (!hasLoginUser) {
-				$('#uwotheader-indicator').removeClass('loading');
-				$('#cliform > .field').removeClass('disabled');
-				$('#uwotcli-input').prop('disabled', false);
-				$("#uwotcli-input").focus();
-			}
-		});
+		if (op.trim() === '') {
+			$('#uwotheader-indicator').removeClass('loading');
+			$('#cliform > .field').removeClass('disabled');
+			$('#uwotcli-input').prop('disabled', false);
+			$("#uwotcli-input").val('').focus();
+		}
+		else {
+			$("#uwotcli-input").val('').focus();
+			var nonce = $('#uwotcli-nonce').val();
+			$('#uwotheader-indicator').addClass('loading');
+			$('#cliform > .field').addClass('disabled');
+			$('#uwotcli-input').prop('disabled', true);
+			$.post(
+				'/bin',
+				{
+					cmd: op,
+					nonce: nonce
+				}
+			)
+			.done(function(data) {
+				outputToMain(data);
+			})
+			.fail(function(obj, status, error) {
+				if ('' === error) {
+					error = 'Command failed - Server temporarily unavailable';
+				}
+				outputToMain(error);
+			})
+			.always(function() {
+				if (!hasLoginUser) {
+					$('#uwotheader-indicator').removeClass('loading');
+					$('#cliform > .field').removeClass('disabled');
+					$('#uwotcli-input').prop('disabled', false);
+					$("#uwotcli-input").focus();
+				}
+			});
+		}
 	});
 
 	$("#uwotcli-input").keydown(function(e) {
@@ -103,7 +114,7 @@ function outputToMain(data, args) {
 	if ('string' == typeof data) {
 		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
 	}
-	if ('object' == typeof data && null !== data) {
+	else if ('object' == typeof data && null !== data) {
 		if ('string' == typeof data.output && '' !== data.output) {
 			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
 		}
@@ -146,6 +157,7 @@ function outputToMain(data, args) {
 // 	return;
 	//yucky bugs make yuckier things yucky
 	return jQuery('#uwotoutput .output-container').scrollTop(1E10);
+	
 }
 
 function countIntDigits(num) {
@@ -156,7 +168,7 @@ function changePrompt(promptString) {
 	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
-	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
 	return;
 }
 
@@ -165,7 +177,37 @@ function revertPrompt() {
 	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
-	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + 2) + 'ch');
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
+	return;
+}
+
+function changeCwd(cwdString) {
+		var cwdArray = cwdString.split('/');
+		var cwdLast;
+		if (cwdString.trim() === '/') {
+			cwdLast = '/';
+		}
+		else if (cwdArray.length < 2) {
+			cwdLast = cwdString;
+		}
+		else {
+			cwdLast = cwdArray.pop();
+			while (cwdLast === "") {
+				cwdLast = cwdArray.pop();
+			}
+			cwdLast = 'undefined' == typeof cwdLast ? '/' : cwdLast;
+			while (cwdArray[0] === "") {
+				cwdArray.shift();
+			}
+			cwdString = cwdLast === '/' ? '' : '/';
+			cwdString += cwdArray.join('/') + '/' + cwdLast;
+		}
+		jQuery('#cliform .field').attr('data-cwd', cwdLast);
+		jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
+		var $headerCwd = jQuery('#uwotheader > h1 > .header-cwd');
+		if($headerCwd.length > 0) {
+			$headerCwd.text(cwdString);
+		}
 	return;
 }
 

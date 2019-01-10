@@ -96,6 +96,9 @@ class UwotCliOperations {
 						}
 					})
 					.fail(function(obj, status, error) {
+						if ('' === error) {
+							error = 'Command failed - Server temporarily unavailable';
+						}
 						outputToMain(error);
 						jQuery('#uwotcli-doLogin').val('true');
 						jQuery("#uwotcli-login").val('');

@@ -12,20 +12,33 @@ block content
 	div(class=themeClass class=["uwot"] id='uwot')
 		div(id='uwotterminal' class='terminal')
 			div(id='uwotheader' class='header')
-				h1= titleString
+				h1
+					-if (title)
+						span(class="header-title") #{title}
+					-else
+						span(class="header-title") UWOT
+					-if (uwotVersion)
+						span(class="header-version") #{uwotVersion}
+					-if (theme && showTheme)
+						-var ThemeName = '- ' + theme + ' theme'
+						span(class="header-theme") #{ThemeName}
+					-if (vfsCwd)
+						span(class="header-cwd") #{vfsCwd}
+					-else
+						span(class="header-cwd") /
 				div(id='uwotheader-indicator' class='indicator-container')
 			div(id='uwotoutput' class='output')
 				div(class='output-container')
 			div(id='uwotcli' class='cli')
 				form(id='cliform' name='cliform' method='POST' autocomplete="off")
 					-if (forceLogin && !userName)
-						div(class='field' data-prompt="login")
+						div(class='field' data-prompt="login" data-cwd="/")
 							input(id='uwotcli-input' name='path' type='text' autocomplete="off")
 							input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)
 							input(id='uwotcli-login' name='username' type='hidden')
 							input(id='uwotcli-doLogin' name='doLogin' type='hidden' value='true')
 					-else
-						div(class='field' data-prompt="")
+						div(class='field' data-prompt="" data-cwd="/")
 							input(id='uwotcli-input' name='path' type='text' autocomplete="off")
 							input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)
 							input(id='uwotcli-login' name='username' type='hidden')
