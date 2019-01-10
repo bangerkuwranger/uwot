@@ -101,6 +101,12 @@ jQuery(document).ready(function($) {
 		}
 	
 	})
+	
+	$(window).resize(function() {
+        window.setTimeout(onWidth(), 1000)
+    });
+    
+    onWidth();
 
 });
 
@@ -168,7 +174,7 @@ function changePrompt(promptString) {
 	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
-	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 3) + 'ch');
 	return;
 }
 
@@ -177,7 +183,7 @@ function revertPrompt() {
 	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
-	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
+	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 3) + 'ch');
 	return;
 }
 
@@ -204,9 +210,10 @@ function changeCwd(cwdString) {
 		}
 		jQuery('#cliform .field').attr('data-cwd', cwdLast);
 		jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 2) + 'ch');
-		var $headerCwd = jQuery('#uwotheader > h1 > .header-cwd');
+		var $headerCwd = jQuery('#uwotheader > h1 > .header-cwd .ellipsis-text');
 		if($headerCwd.length > 0) {
 			$headerCwd.text(cwdString);
+			onWidth();
 		}
 	return;
 }
@@ -261,3 +268,16 @@ function uwotClientRedirect(redirect) {
 		return window.location.replace(redirect.path);
 	}
 }
+
+function onWidth() {
+	
+	jQuery('.header-cwd .ellipsis-text').css('width', 'auto');
+	if ((jQuery('.header-cwd .ellipsis-text').prop('scrollWidth') -1 ) > jQuery('.header-cwd .ellipsis-text').width()) {
+		jQuery('.header-cwd .ellipsis').show();
+	}
+	else {
+		jQuery('.header-cwd .ellipsis').hide();
+	}
+	jQuery('.header-cwd').css('width', 'calc(' + (jQuery('#uwotheader > h1').width() - (jQuery('.header-title').width() + jQuery('.header-version').width() + jQuery('.header-theme').width()) + 'px - 7ch)'));
+}
+

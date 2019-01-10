@@ -138,7 +138,7 @@ router.get('/', function(req, res, next) {
 		themeName = req.cookies.uwotSavedTheme;
 		
 	}
-	else if ('string' === typeof app.get('uwot_theme')) {
+	else if ('string' === typeof req.app.get('uwot_theme')) {
 	
 		themeName = req.app.get('uwot_theme');
 	

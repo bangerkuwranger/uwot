@@ -70,6 +70,29 @@ body {
 					>span {
 						margin-right: 1ch;
 						word-break: break-all;
+						
+						&.header-cwd {
+							margin-left: 1ch;
+							white-space: nowrap;
+							display: inline-block;
+						
+							.ellipsis-text {
+								display: inline-block;
+								position: relative;
+								text-align: left;
+								direction: rtl;
+								white-space: nowrap;
+								overflow-x: hidden;
+								max-width: 100%;
+								vertical-align: bottom;
+							}
+							
+							>.ellipsis {
+								display: none;
+							}
+							
+						}
+						
 					}
 				
 				}
@@ -186,6 +209,7 @@ body {
 							-moz-box-sizing:content-box;
 							box-sizing:content-box;
 							width: calc(100% - 1em);
+							font-size: 16px;
 						}
 				
 					}
@@ -209,6 +233,14 @@ body {
 			
 			.terminal {
 			
+				.header {
+				
+					.indicator-container {
+						margin: 0.33em 0;
+					}
+				
+				}
+				
 				.output {
 					background-position-x: initial;
 				}

@@ -35,6 +35,23 @@ global.UwotCliOps = [
 	"exit"
 ];
 global.UwotVersion = require('./package.json').version;
+var isPre = global.UwotVersion.indexOf('-');
+if (-1 !== isPre) {
+
+	var preVersion = global.UwotVersion.substring(isPre+1);
+	global.UwotVersion = global.UwotVersion.substring(0, isPre);
+	if (preVersion.indexOf('alpha') !== -1) {
+	
+		global.UwotVersion += 'a';
+	
+	}
+	else if (preVersion.indexOf('beta') !== -1) {
+	
+		global.UwotVersion += 'b';
+	
+	}
+	
+}
 
 const sessionHours = 12;
 

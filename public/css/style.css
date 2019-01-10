@@ -126,7 +126,28 @@ body #uwot .terminal .header > h1 > span {
   margin-right: 1ch;
   word-break: break-all;
 }
-/* line 77, ../scss/style.scss */
+/* line 74, ../scss/style.scss */
+body #uwot .terminal .header > h1 > span.header-cwd {
+  margin-left: 1ch;
+  white-space: nowrap;
+  display: inline-block;
+}
+/* line 79, ../scss/style.scss */
+body #uwot .terminal .header > h1 > span.header-cwd .ellipsis-text {
+  display: inline-block;
+  position: relative;
+  text-align: left;
+  direction: rtl;
+  white-space: nowrap;
+  overflow-x: hidden;
+  max-width: 100%;
+  vertical-align: bottom;
+}
+/* line 90, ../scss/style.scss */
+body #uwot .terminal .header > h1 > span.header-cwd > .ellipsis {
+  display: none;
+}
+/* line 100, ../scss/style.scss */
 body #uwot .terminal .header .indicator-container {
   min-height: 1em;
   min-width: 1em;
@@ -137,7 +158,7 @@ body #uwot .terminal .header .indicator-container {
   right: 0;
   margin: 0.67em 0;
 }
-/* line 90, ../scss/style.scss */
+/* line 113, ../scss/style.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
@@ -147,7 +168,7 @@ body #uwot .terminal .output {
   background-position-x: center;
   overflow: hidden;
 }
-/* line 99, ../scss/style.scss */
+/* line 122, ../scss/style.scss */
 body #uwot .terminal .output .output-container {
   width: 100%;
   height: 100%;
@@ -157,22 +178,22 @@ body #uwot .terminal .output .output-container {
   display: flex;
   flex-direction: column;
 }
-/* line 109, ../scss/style.scss */
+/* line 132, ../scss/style.scss */
 body #uwot .terminal .output .output-container > :first-child {
   margin-top: auto !important;
 }
-/* line 114, ../scss/style.scss */
+/* line 137, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline {
   line-height: 1.1em;
   margin: 0.25em 0;
 }
-/* line 118, ../scss/style.scss */
+/* line 141, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt {
   margin-left: 4ch;
   position: relative;
   min-height: 1em;
 }
-/* line 123, ../scss/style.scss */
+/* line 146, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   content: var(--prompt, ">") " ";
   position: absolute;
@@ -180,7 +201,7 @@ body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   top: 0;
   font: inherit;
 }
-/* line 140, ../scss/style.scss */
+/* line 163, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -192,21 +213,21 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 151, ../scss/style.scss */
+/* line 174, ../scss/style.scss */
 body #uwot .terminal .cli .disabled {
   opacity: 0.5;
 }
-/* line 155, ../scss/style.scss */
+/* line 178, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 158, ../scss/style.scss */
+/* line 181, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
 }
-/* line 163, ../scss/style.scss */
+/* line 186, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-cwd) " " attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -214,7 +235,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 171, ../scss/style.scss */
+/* line 194, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -233,14 +254,19 @@ body #uwot .terminal .cli form .field input:active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   width: calc(100% - 1em);
+  font-size: 16px;
 }
 
 @media (min-width: 642px) {
-  /* line 207, ../scss/style.scss */
+  /* line 231, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 212, ../scss/style.scss */
+  /* line 238, ../scss/style.scss */
+  body #uwot .terminal .header .indicator-container {
+    margin: 0.33em 0;
+  }
+  /* line 244, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
   }

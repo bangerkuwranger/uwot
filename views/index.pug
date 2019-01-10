@@ -23,9 +23,13 @@ block content
 						-var ThemeName = '- ' + theme + ' theme'
 						span(class="header-theme") #{ThemeName}
 					-if (vfsCwd)
-						span(class="header-cwd") #{vfsCwd}
+						span(class="header-cwd") 
+							span(class="ellipsis")="..."
+							span(class="ellipsis-text")="#{vfsCwd}"
 					-else
-						span(class="header-cwd") /
+						span(class="header-cwd")
+							span(class="ellipsis")="..."
+							span(class="ellipsis-text")="/"
 				div(id='uwotheader-indicator' class='indicator-container')
 			div(id='uwotoutput' class='output')
 				div(class='output-container')
