@@ -67,6 +67,8 @@ body {
 				
 				>h1 {
 					max-width: calc(100% - 2em - 4px);
+					max-height: 1.33em;
+					overflow-y: hidden;
 					
 					>span {
 						margin-right: 1ch;
@@ -76,6 +78,7 @@ body {
 							margin-left: 1ch;
 							white-space: nowrap;
 							display: inline-block;
+							min-width: 2ch;
 						
 							.ellipsis-text {
 								display: inline-block;
