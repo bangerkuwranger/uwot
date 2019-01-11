@@ -485,7 +485,7 @@ body #uwot .terminal .cli form .field:before {
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
-  vertical-align: middle;
+  margin-top: .1em;
 }
 
 @media (min-width: 642px) {
@@ -500,5 +500,12 @@ body #uwot .terminal .cli form .field input:active {
   /* line 92, ../../../scss/theme/cac/main.scss */
   body #uwot .terminal .cli {
     padding: 0.5em 0;
+  }
+  /* line 99, ../../../scss/theme/cac/main.scss */
+  body #uwot .terminal .cli form .field input,
+  body #uwot .terminal .cli form .field input:focus,
+  body #uwot .terminal .cli form .field input:active {
+    vertical-align: bottom;
+    margin-top: .25em;
   }
 }

@@ -61,7 +61,7 @@ body{
 						input,
 						input:focus,
 						input:active {
-							vertical-align: middle;
+							margin-top: .1em;
 						}
 			
 					}
@@ -91,6 +91,22 @@ body{
 				
 				.cli {
 					padding: 0.5em 0;
+					
+					form {
+			
+						.field {
+				
+							input,
+							input:focus,
+							input:active {
+								vertical-align: bottom;
+								margin-top: .25em;
+							}
+			
+						}
+					
+					}
+					
 				}
 			
 			}
