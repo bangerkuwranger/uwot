@@ -26,6 +26,7 @@ class UwotCliOperations {
 			uwotHistory = new CliHistory();
 		}
 		var histArray = uwotHistory.getAllItems();
+		var histString = '<pre>';
 		var maxDigits = countIntDigits(histArray.length);
 		for (let i = 0; i < histArray.length; i++) {
 			let digitsOff = maxDigits - countIntDigits(i);
@@ -34,8 +35,10 @@ class UwotCliOperations {
 				histLine += ' ';
 			}
 			histLine += i + '  ' + histArray[i];
-			outputToMain(histLine);
+			histString += histLine + "\n\r";
 		}
+		histString += '</pre>';
+		outputToMain(histString);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 	}
 	
 	echo(args) {

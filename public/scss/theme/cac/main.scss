@@ -40,12 +40,14 @@ body{
 				background-size: initial;
 				background-repeat: no-repeat;
 				background-position: center;
+				margin: 8em 0 0;
 			}
 	
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
 				border-color: mapGet($theme-colors, 'tag', 'border');
+				padding: 0.5em 0 1.75em;
 		
 				form {
 			
@@ -80,6 +82,19 @@ body{
 	
 		#uwot {
 			font-size: 12px;
+			
+			.terminal {
+			
+				.output {
+					margin: 4em 0;
+				}
+				
+				.cli {
+					padding: 0.5em 0;
+				}
+			
+			}
+			
 		}
 
 	}

@@ -156,7 +156,7 @@ body #uwot .terminal .header .indicator-container {
   font-size: 2em;
   top: 0;
   right: 0;
-  margin: 0.67em 0;
+  margin: 0.33em 0;
 }
 /* line 114, ../scss/style.scss */
 body #uwot .terminal .output {
@@ -171,26 +171,29 @@ body #uwot .terminal .output {
 /* line 124, ../scss/style.scss */
 body #uwot .terminal .output .output-container {
   width: 100%;
-  height: 100%;
+  max-height: 100%;
   margin: 0;
   padding: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column-reverse;
-  justify-content: flex-end;
 }
-/* line 140, ../scss/style.scss */
+/* line 136, ../scss/style.scss */
+body #uwot .terminal .output .output-container > :first-child {
+  margin-top: auto !important;
+}
+/* line 141, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline {
   line-height: 1.1em;
   margin: 0.25em 0;
 }
-/* line 144, ../scss/style.scss */
+/* line 145, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt {
   margin-left: 4ch;
   position: relative;
   min-height: 1em;
 }
-/* line 149, ../scss/style.scss */
+/* line 150, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   content: var(--prompt, ">") " ";
   position: absolute;
@@ -198,7 +201,7 @@ body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   top: 0;
   font: inherit;
 }
-/* line 166, ../scss/style.scss */
+/* line 167, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -210,22 +213,22 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 180, ../scss/style.scss */
+/* line 181, ../scss/style.scss */
 body #uwot .terminal .cli .disabled {
   opacity: 0.5;
 }
-/* line 184, ../scss/style.scss */
+/* line 185, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 187, ../scss/style.scss */
+/* line 188, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
   font-size: 16px;
 }
-/* line 193, ../scss/style.scss */
+/* line 194, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-cwd) " " attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -233,7 +236,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 201, ../scss/style.scss */
+/* line 202, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -255,33 +258,34 @@ body #uwot .terminal .cli form .field input:active {
 }
 
 @media (min-width: 648px) {
-  /* line 237, ../scss/style.scss */
+  /* line 238, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 242, ../scss/style.scss */
+  /* line 243, ../scss/style.scss */
   body #uwot .terminal .header {
     position: absolute;
   }
-  /* line 245, ../scss/style.scss */
+  /* line 246, ../scss/style.scss */
   body #uwot .terminal .header .indicator-container {
     margin: 0.33em 0;
   }
-  /* line 251, ../scss/style.scss */
+  /* line 252, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
     margin: 5em 0;
   }
-  /* line 255, ../scss/style.scss */
+  /* line 256, ../scss/style.scss */
   body #uwot .terminal .output .output-container {
     flex-direction: column;
     justify-content: initial;
   }
-  /* line 259, ../scss/style.scss */
+  /* line 260, ../scss/style.scss */
   body #uwot .terminal .output .output-container > :first-child {
     margin-top: auto !important;
+    margin-bottom: 0 !important;
   }
-  /* line 267, ../scss/style.scss */
+  /* line 269, ../scss/style.scss */
   body #uwot .terminal .cli {
     position: absolute;
     border-top: 1px solid;
@@ -289,7 +293,7 @@ body #uwot .terminal .cli form .field input:active {
     top: initial;
     bottom: 0;
   }
-  /* line 276, ../scss/style.scss */
+  /* line 278, ../scss/style.scss */
   body #uwot .terminal .cli form .field {
     font-size: inherit;
   }

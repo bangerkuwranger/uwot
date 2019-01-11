@@ -1,5 +1,6 @@
 'use strict';
 var uwotHistory, uwotInteractive = false;
+var initTouchSupport = false;
 jQuery(document).ready(function($) {
 
 	uwotHistory = new CliHistory();
@@ -10,6 +11,31 @@ jQuery(document).ready(function($) {
 	else {
 		changePrompt(user);
 	}
+	
+	window.addEventListener('touchstart', function() {
+		if (!initTouchSupport) {
+			$.ajaxSetup({cache: true});
+			$.getScript('/javascripts/jquery.touchSwipe.min.js')
+			.done(function(script, status) {
+				$('#uwotcli').swipe({
+					swipeLeft:function(event, direction, distance, duration, fingerCount) {
+						var prevCmd = uwotHistory.getPrevItem();
+						$("#uwotcli-input").val(prevCmd).focus();	
+					},
+					swipeRight:function(event, direction, distance, duration, fingerCount) {
+						var nextCmd = uwotHistory.getNextItem();
+						$("#uwotcli-input").val(nextCmd).focus();
+					},
+				});
+				return initTouchSupport = true;
+			})
+			.always(function() {
+				$("#uwotcli-input").focus();
+				return $.ajaxSetup({cache: false});
+			});
+		}
+	});
+	
 	$("#uwotcli-input").focus();
 	
 	$("#uwotcli").submit(function(e) {

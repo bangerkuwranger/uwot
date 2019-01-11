@@ -464,22 +464,24 @@ body #uwot .terminal .output {
   background-size: initial;
   background-repeat: no-repeat;
   background-position: center;
+  margin: 8em 0 0;
 }
-/* line 45, ../../../scss/theme/cac/main.scss */
+/* line 46, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli {
   width: calc(100% - 2em);
   margin: 0.5em 0;
   border-color: #DA1200;
+  padding: 0.5em 0 1.75em;
 }
-/* line 52, ../../../scss/theme/cac/main.scss */
+/* line 54, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli form .field {
   margin-left: 2ch;
 }
-/* line 55, ../../../scss/theme/cac/main.scss */
+/* line 57, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli form .field:before {
   left: -2ch;
 }
-/* line 59, ../../../scss/theme/cac/main.scss */
+/* line 61, ../../../scss/theme/cac/main.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -487,8 +489,16 @@ body #uwot .terminal .cli form .field input:active {
 }
 
 @media (min-width: 642px) {
-  /* line 81, ../../../scss/theme/cac/main.scss */
+  /* line 83, ../../../scss/theme/cac/main.scss */
   body #uwot {
     font-size: 12px;
+  }
+  /* line 88, ../../../scss/theme/cac/main.scss */
+  body #uwot .terminal .output {
+    margin: 4em 0;
+  }
+  /* line 92, ../../../scss/theme/cac/main.scss */
+  body #uwot .terminal .cli {
+    padding: 0.5em 0;
   }
 }

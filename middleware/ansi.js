@@ -90,6 +90,9 @@ function ansi(obj) {
 		return this.json(obj);
 	
 	}
+	else {
+		return this.json(obj);
+	}
 
 };
 
