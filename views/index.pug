@@ -31,19 +31,21 @@ block content
 							span(class="ellipsis")="..."
 							span(class="ellipsis-text")="/"
 				div(id='uwotheader-indicator' class='indicator-container')
-			div(id='uwotoutput' class='output')
-				div(class='output-container')
+				
 			div(id='uwotcli' class='cli')
 				form(id='cliform' name='cliform' method='POST' autocomplete="off")
 					-if (forceLogin && !userName)
 						div(class='field' data-prompt="login" data-cwd="/")
-							input(id='uwotcli-input' name='path' type='text' autocomplete="off")
+							input(id='uwotcli-input' name='path' type='text' autocomplete="off" autocorrect="off" autocapitalize="none")
 							input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)
 							input(id='uwotcli-login' name='username' type='hidden')
 							input(id='uwotcli-doLogin' name='doLogin' type='hidden' value='true')
 					-else
 						div(class='field' data-prompt="" data-cwd="/")
-							input(id='uwotcli-input' name='path' type='text' autocomplete="off")
+							input(id='uwotcli-input' name='path' type='text' autocomplete="off" autocorrect="off" autocapitalize="none")
 							input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)
 							input(id='uwotcli-login' name='username' type='hidden')
 							input(id='uwotcli-doLogin' name='doLogin' type='hidden' value='false')
+
+			div(id='uwotoutput' class='output')
+				div(class='output-container')

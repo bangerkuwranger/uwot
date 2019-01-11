@@ -58,7 +58,8 @@ body {
 			.header {
 				min-height: 1em;
 				border-bottom: 1px solid;
-				position: absolute;
+// 				position: absolute;
+				position: fixed;
 				top: 0;
 				z-index: 10;
 				width: calc(100% - 2em);
@@ -113,7 +114,8 @@ body {
 			.output {
 				width: 100%;
 				min-height: 300px;
-				margin: 5em 0;
+// 				margin: 5em 0;
+				margin: 7em 0 0;
 				height: calc(100% - 8em);
 				background-size: cover;
 				background-position-x: center;
@@ -126,11 +128,12 @@ body {
 					padding: 0;
 					overflow-y: auto;
 					display: flex;
-					flex-direction: column;
-// 					justify-content: flex-end;
+// 					flex-direction: column;
+					flex-direction: column-reverse;
+					justify-content: flex-end;
 					// yucky bugs are yucky.
 					> :first-child {
-						margin-top: auto !important;
+// 						margin-top: auto !important;
 						//yucky workarounds are also yucky
 					}
 					
@@ -165,9 +168,12 @@ body {
 				height: 2em;
 				overflow: hidden;
 				min-height: 1em;
-				border-top: 1px solid;
-				position: absolute;
-				bottom: 0;
+// 				border-top: 1px solid;
+				border-bottom: 1px solid;
+// 				position: absolute;
+				position: fixed;
+// 				bottom: 0;
+				top: 4em;
 				padding: 0.5em 0;
 				z-index: 10;
 				
@@ -182,6 +188,7 @@ body {
 						width: 100%;
 						position: relative;
 						margin-left: 0;
+						font-size: 16px;
 					
 						&:before {
 							content: attr(data-cwd) ' ' attr(data-prompt) var(--prompt, '>');
@@ -209,7 +216,6 @@ body {
 							-moz-box-sizing:content-box;
 							box-sizing:content-box;
 							width: calc(100% - 1em);
-							font-size: 16px;
 						}
 				
 					}
@@ -224,7 +230,7 @@ body {
 	
 }
 
-@media (min-width: 642px) {
+@media (min-width: 648px) {
 
 	body {
 	
@@ -234,7 +240,8 @@ body {
 			.terminal {
 			
 				.header {
-				
+					position: absolute;
+					
 					.indicator-container {
 						margin: 0.33em 0;
 					}
@@ -243,6 +250,42 @@ body {
 				
 				.output {
 					background-position-x: initial;
+					margin: 5em 0;
+					
+					.output-container {
+						flex-direction: column;
+						justify-content: initial;
+				
+						> :first-child {
+							margin-top: auto !important;
+						}
+
+					}
+					
+				}
+				
+				.cli {
+					position: absolute;
+					border-top: 1px solid;
+					border-bottom-width: 0;
+					top: initial;					
+					bottom: 0;
+					
+					form {
+					
+						.field {
+							font-size: inherit;
+							
+							input,
+							input:focus,
+							input:active {
+								
+							}
+
+						}
+						
+					}
+					
 				}
 			
 			}

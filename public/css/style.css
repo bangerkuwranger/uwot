@@ -111,28 +111,28 @@ body #uwot .terminal h6 {
 body #uwot .terminal .header {
   min-height: 1em;
   border-bottom: 1px solid;
-  position: absolute;
+  position: fixed;
   top: 0;
   z-index: 10;
   width: calc(100% - 2em);
   margin: 0.5em 0;
 }
-/* line 67, ../scss/style.scss */
+/* line 68, ../scss/style.scss */
 body #uwot .terminal .header > h1 {
   max-width: calc(100% - 2em - 4px);
 }
-/* line 70, ../scss/style.scss */
+/* line 71, ../scss/style.scss */
 body #uwot .terminal .header > h1 > span {
   margin-right: 1ch;
   word-break: break-all;
 }
-/* line 74, ../scss/style.scss */
+/* line 75, ../scss/style.scss */
 body #uwot .terminal .header > h1 > span.header-cwd {
   margin-left: 1ch;
   white-space: nowrap;
   display: inline-block;
 }
-/* line 79, ../scss/style.scss */
+/* line 80, ../scss/style.scss */
 body #uwot .terminal .header > h1 > span.header-cwd .ellipsis-text {
   display: inline-block;
   position: relative;
@@ -143,11 +143,11 @@ body #uwot .terminal .header > h1 > span.header-cwd .ellipsis-text {
   max-width: 100%;
   vertical-align: bottom;
 }
-/* line 90, ../scss/style.scss */
+/* line 91, ../scss/style.scss */
 body #uwot .terminal .header > h1 > span.header-cwd > .ellipsis {
   display: none;
 }
-/* line 100, ../scss/style.scss */
+/* line 101, ../scss/style.scss */
 body #uwot .terminal .header .indicator-container {
   min-height: 1em;
   min-width: 1em;
@@ -158,17 +158,17 @@ body #uwot .terminal .header .indicator-container {
   right: 0;
   margin: 0.67em 0;
 }
-/* line 113, ../scss/style.scss */
+/* line 114, ../scss/style.scss */
 body #uwot .terminal .output {
   width: 100%;
   min-height: 300px;
-  margin: 5em 0;
+  margin: 7em 0 0;
   height: calc(100% - 8em);
   background-size: cover;
   background-position-x: center;
   overflow: hidden;
 }
-/* line 122, ../scss/style.scss */
+/* line 124, ../scss/style.scss */
 body #uwot .terminal .output .output-container {
   width: 100%;
   height: 100%;
@@ -176,24 +176,21 @@ body #uwot .terminal .output .output-container {
   padding: 0;
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
 }
-/* line 132, ../scss/style.scss */
-body #uwot .terminal .output .output-container > :first-child {
-  margin-top: auto !important;
-}
-/* line 137, ../scss/style.scss */
+/* line 140, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline {
   line-height: 1.1em;
   margin: 0.25em 0;
 }
-/* line 141, ../scss/style.scss */
+/* line 144, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt {
   margin-left: 4ch;
   position: relative;
   min-height: 1em;
 }
-/* line 146, ../scss/style.scss */
+/* line 149, ../scss/style.scss */
 body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   content: var(--prompt, ">") " ";
   position: absolute;
@@ -201,33 +198,34 @@ body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   top: 0;
   font: inherit;
 }
-/* line 163, ../scss/style.scss */
+/* line 166, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
   overflow: hidden;
   min-height: 1em;
-  border-top: 1px solid;
-  position: absolute;
-  bottom: 0;
+  border-bottom: 1px solid;
+  position: fixed;
+  top: 4em;
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 174, ../scss/style.scss */
+/* line 180, ../scss/style.scss */
 body #uwot .terminal .cli .disabled {
   opacity: 0.5;
 }
-/* line 178, ../scss/style.scss */
+/* line 184, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 181, ../scss/style.scss */
+/* line 187, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
+  font-size: 16px;
 }
-/* line 186, ../scss/style.scss */
+/* line 193, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-cwd) " " attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -235,7 +233,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 194, ../scss/style.scss */
+/* line 201, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -254,20 +252,45 @@ body #uwot .terminal .cli form .field input:active {
   -moz-box-sizing: content-box;
   box-sizing: content-box;
   width: calc(100% - 1em);
-  font-size: 16px;
 }
 
-@media (min-width: 642px) {
-  /* line 231, ../scss/style.scss */
+@media (min-width: 648px) {
+  /* line 237, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 238, ../scss/style.scss */
+  /* line 242, ../scss/style.scss */
+  body #uwot .terminal .header {
+    position: absolute;
+  }
+  /* line 245, ../scss/style.scss */
   body #uwot .terminal .header .indicator-container {
     margin: 0.33em 0;
   }
-  /* line 244, ../scss/style.scss */
+  /* line 251, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
+    margin: 5em 0;
+  }
+  /* line 255, ../scss/style.scss */
+  body #uwot .terminal .output .output-container {
+    flex-direction: column;
+    justify-content: initial;
+  }
+  /* line 259, ../scss/style.scss */
+  body #uwot .terminal .output .output-container > :first-child {
+    margin-top: auto !important;
+  }
+  /* line 267, ../scss/style.scss */
+  body #uwot .terminal .cli {
+    position: absolute;
+    border-top: 1px solid;
+    border-bottom-width: 0;
+    top: initial;
+    bottom: 0;
+  }
+  /* line 276, ../scss/style.scss */
+  body #uwot .terminal .cli form .field {
+    font-size: inherit;
   }
 }

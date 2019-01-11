@@ -162,7 +162,12 @@ function outputToMain(data, args) {
 	}
 // 	return;
 	//yucky bugs make yuckier things yucky
-	return jQuery('#uwotoutput .output-container').scrollTop(1E10);
+	if (window.screen.width > 648) {
+		return jQuery('#uwotoutput .output-container').scrollTop(1E10);
+	}
+	else {
+		return jQuery('#uwotoutput .output-container').scrollTop(-1E10);
+	}
 	
 }
 
