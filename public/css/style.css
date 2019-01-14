@@ -204,7 +204,12 @@ body #uwot .terminal .output .output-container .outputline.add-prompt:before {
   top: 0;
   font: inherit;
 }
-/* line 170, ../scss/style.scss */
+/* line 163, ../scss/style.scss */
+body #uwot .terminal .output .output-container .outputline .ansi {
+  word-break: break-word;
+  text-indent: 4ch;
+}
+/* line 175, ../scss/style.scss */
 body #uwot .terminal .cli {
   width: 100%;
   height: 2em;
@@ -216,22 +221,22 @@ body #uwot .terminal .cli {
   padding: 0.5em 0;
   z-index: 10;
 }
-/* line 184, ../scss/style.scss */
+/* line 189, ../scss/style.scss */
 body #uwot .terminal .cli .disabled {
   opacity: 0.5;
 }
-/* line 188, ../scss/style.scss */
+/* line 193, ../scss/style.scss */
 body #uwot .terminal .cli form {
   width: 100%;
 }
-/* line 191, ../scss/style.scss */
+/* line 196, ../scss/style.scss */
 body #uwot .terminal .cli form .field {
   width: 100%;
   position: relative;
   margin-left: 0;
   font-size: 16px;
 }
-/* line 197, ../scss/style.scss */
+/* line 202, ../scss/style.scss */
 body #uwot .terminal .cli form .field:before {
   content: attr(data-cwd) " " attr(data-prompt) var(--prompt, ">");
   position: absolute;
@@ -239,7 +244,7 @@ body #uwot .terminal .cli form .field:before {
   top: 0;
   font: inherit;
 }
-/* line 205, ../scss/style.scss */
+/* line 210, ../scss/style.scss */
 body #uwot .terminal .cli form .field input,
 body #uwot .terminal .cli form .field input:focus,
 body #uwot .terminal .cli form .field input:active {
@@ -261,34 +266,34 @@ body #uwot .terminal .cli form .field input:active {
 }
 
 @media (min-width: 648px) {
-  /* line 241, ../scss/style.scss */
+  /* line 246, ../scss/style.scss */
   body #uwot {
     font-size: 14px;
   }
-  /* line 246, ../scss/style.scss */
+  /* line 251, ../scss/style.scss */
   body #uwot .terminal .header {
     position: absolute;
   }
-  /* line 249, ../scss/style.scss */
+  /* line 254, ../scss/style.scss */
   body #uwot .terminal .header .indicator-container {
     margin: 0.33em 0;
   }
-  /* line 255, ../scss/style.scss */
+  /* line 260, ../scss/style.scss */
   body #uwot .terminal .output {
     background-position-x: initial;
     margin: 5em 0;
   }
-  /* line 259, ../scss/style.scss */
+  /* line 264, ../scss/style.scss */
   body #uwot .terminal .output .output-container {
     flex-direction: column;
     justify-content: initial;
   }
-  /* line 263, ../scss/style.scss */
+  /* line 268, ../scss/style.scss */
   body #uwot .terminal .output .output-container > :first-child {
     margin-top: auto !important;
     margin-bottom: 0 !important;
   }
-  /* line 272, ../scss/style.scss */
+  /* line 277, ../scss/style.scss */
   body #uwot .terminal .cli {
     position: absolute;
     border-top: 1px solid;
@@ -296,7 +301,7 @@ body #uwot .terminal .cli form .field input:active {
     top: initial;
     bottom: 0;
   }
-  /* line 281, ../scss/style.scss */
+  /* line 286, ../scss/style.scss */
   body #uwot .terminal .cli form .field {
     font-size: inherit;
   }

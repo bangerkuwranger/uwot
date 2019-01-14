@@ -9,7 +9,8 @@
     "var/",
     "var/*",
     "var/**",
-    "shell/*"
+    "shell/*",
+    "test/*"
   ],
   "verbose": true,
   "events": {
