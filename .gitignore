@@ -65,8 +65,15 @@ public/.sass-cache/
 # Debug log from npm
 npm-debug.log
 
-# Styesheet processor cache
+# Stylesheet processor cache
 public/.sass-cache
 public/.sass-cache/*
 public/.sass-cache/**
 *.scssc
+
+# Generated CSS
+public/css
+public/css/*
+public/css/**
+public/css/**/*
+public/css/**/**
