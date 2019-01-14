@@ -118,7 +118,7 @@ var themePath = path.join(global.Uwot.Constants.appRoot, 'default' === currentTh
 
 
 // add sudo. it's special.
-global.Uwot.Constants.Reserved.push('sudo');
+// global.Uwot.Constants.reserved.push('sudo');
 global.Uwot.Bin.sudo = {
 	command: {
 		name: 'sudo',

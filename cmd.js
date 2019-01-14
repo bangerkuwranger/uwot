@@ -2,9 +2,6 @@
 var fs = require('fs');
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
-if ('undefined' == typeof global.Uwot.Bin) {
-	global.Uwot.Bin = {};
-}
 
 class UwotCmdCommand {
 

@@ -13,6 +13,12 @@ var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
 
 // init globals with empty values if non-extant or wrong type
+if ('object' !== typeof global.Uwot || null == global.Uwot) {
+
+	global.Uwot = {};
+
+}
+
 if ('object' !== typeof global.Uwot.Constants || null == global.Uwot.Constants) {
 
 	global.Uwot.Constants = {};
@@ -56,13 +62,13 @@ if ('object' !== typeof global.Uwot.Bin || null === global.Uwot.Bin) {
 
 module.exports = {
 
-	initConstants = function initConstants() {
+	initConstants: function initConstants() {
 
 		// init constant values
 		if ('string' !== typeof global.Uwot.Constants.appRoot) {
 
 			// was 'global.appRoot'
-			global.Uwot.Constants.appRoot = path.resolve(__dirname);
+			global.Uwot.Constants.appRoot = path.resolve(__dirname, '../');
 
 		}
 
@@ -112,7 +118,7 @@ module.exports = {
 		if ('string' !== typeof global.Uwot.Constants.version) {
 
 			// was 'global.UwotVersion'
-			global.Uwot.Constants.version = require('./package.json').version;
+			global.Uwot.Constants.version = require('../package.json').version;
 			var isPre = global.Uwot.Constants.version.indexOf('-');
 			if (-1 !== isPre) {
 
@@ -142,13 +148,13 @@ module.exports = {
 
 		if ('string' !== typeof global.Uwot.Constants.etcProd) {
 
-			global.Uwot.Constants.etcProd = path.resolve(__dirname, 'etc', 'prod');
+			global.Uwot.Constants.etcProd = path.resolve(global.Uwot.Constants.appRoot, 'etc', 'prod');
 
 		}
 
 		if ('string' !== typeof global.Uwot.Constants.etcDev) {
 
-			global.Uwot.Constants.etcDev = path.resolve(__dirname, 'etc', 'dev');
+			global.Uwot.Constants.etcDev = path.resolve(global.Uwot.Constants.appRoot, 'etc', 'dev');
 
 		}
 		return global.Uwot.Constants;
@@ -161,12 +167,12 @@ module.exports = {
 		var configPath;
 		if ("development" !== global.process.env.NODE_ENV) {
 
-			configPath = path.resolve(etcProd, 'config.json');
+			configPath = path.resolve(global.Uwot.Constants.etcProd, 'config.json');
 
 		}
 		else {
 
-			configPath = path.resolve(etcDev, 'config.json') : 
+			configPath = path.resolve(global.Uwot.Constants.etcDev, 'config.json');
 
 		}
 
@@ -223,7 +229,7 @@ module.exports = {
 		// load externals if enabled
 
 		// then add to reserved list
-		global.Uwot.Constants.Reserved.push(...Object.keys(global.Uwot.Bin));
+		global.Uwot.Constants.reserved.push(...Object.keys(global.Uwot.Bin));
 		return global.Uwot.Bin;
 	
 	}

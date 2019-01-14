@@ -290,14 +290,14 @@ class UwotFs {
 			r: true,
 			w: false,
 			x: false,
-			exists: function () { fs.existsSync(this.pubDir.path) }
+			exists: function () { fs.existsSync(path.resolve(this.pubDir.path)) }
 		};
 		this.userDir = this.user.uName === 'guest' ? null : {
 			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), user.uName),
 			r: true,
 			w: global.Uwot.Config.get('server', 'homeWritable'),
 			x: false,
-			exists: function () { fs.existsSync(this.userDir.path) }
+			exists: function () { fs.existsSync(path.resolve(this.userDir.path)) }
 		};
 		if ('string' !== this.cwd) {
 		
