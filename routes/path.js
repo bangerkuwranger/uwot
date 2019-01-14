@@ -112,7 +112,7 @@ router.post(
 							}
 							if ('string' == typeof req.body.runtime.results.redirect) {
 							
-								resObj.redirect = Url.parse(req.body.runtime.results.redirect, global.UwotConfig.getConfigServerOrigin());
+								resObj.redirect = Url.parse(req.body.runtime.results.redirect, global.Uwot.Config.getConfigServerOrigin());
 							
 							}
 						
@@ -161,15 +161,15 @@ router.post(
 
 });
 
-if ('object' == typeof global.UwotBin && Object.keys(global.UwotBin).length > 0) {
+if ('object' == typeof global.Uwot.Bin && Object.keys(global.Uwot.Bin).length > 0) {
 
-	var binPathKeys = Object.keys(global.UwotBin);
+	var binPathKeys = Object.keys(global.Uwot.Bin);
 	for (let i = 0; i < binPathKeys.length; i++) {
 	
 		router.post('/' + binPathKeys[i], function(req, res, next) {
 		// TBD
 		// get/set req.session.vfsCwd
-			global.UwotBin[binPathKeys[i]].execute(req.body.args, req.body.options, req.app, function(error, results) {
+			global.Uwot.Bin[binPathKeys[i]].execute(req.body.args, req.body.options, req.app, function(error, results) {
 			
 				if (error) {
 				

@@ -14,7 +14,8 @@
     "startdev": "NODE_ENV=development node ./bin/www",
     "debug": "NODE_ENV=development nodemon --inspect-brk ./bin/www",
     "debugprod": "NODE_ENV=production nodemon --inspect-brk ./bin/www",
-    "test": "NODE_ENV=test mocha --reporter spec"
+    "test": "npm run test-unit",
+    "test-unit": "NODE_ENV=test mocha '/**/*.spec.js'"
   },
   "dependencies": {
     "bash-ast-traverser": "0.5.0",
@@ -52,6 +53,7 @@
     "chai": "^4.2.0",
     "istanbul": "^0.4.5",
     "mocha": "^5.2.0",
-    "sinon": "^7.2.2"
+    "sinon": "^7.2.2",
+    "sinon-chai": "^3.3.0"
   }
 }

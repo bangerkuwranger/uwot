@@ -27,7 +27,7 @@ passport.use(
     		
     			var self = this;
 //     			var users = new UserModel();
-    			global.UwotUsers.findByName(username, function(error, userObj) {
+    			global.Uwot.Users.findByName(username, function(error, userObj) {
     			
     				if (error) {
     				
@@ -41,7 +41,7 @@ passport.use(
     				}
     				else {
     				
-    					global.UwotUsers.validate(userObj._id, password, function(error, pwIsValid) {
+    					global.Uwot.Users.validate(userObj._id, password, function(error, pwIsValid) {
     					
     						if (error) {
     						
@@ -117,14 +117,14 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res, next) {
 	
 	var respValues = {
-		title: global.UwotConfig.get('server', 'siteName'),
+		title: global.Uwot.Config.get('server', 'siteName'),
 	};
 	
 	res.locals.nonce = nonceHandler.create( 'index-get', 300000 );
-	res.locals.validOps = global.UwotCliOps ? JSON.stringify(global.UwotCliOps) : '[]';
-	if (global.UwotConfig.get('server', 'showVersion')) {
+	res.locals.validOps = global.Uwot.Constants.cliOps ? JSON.stringify(global.Uwot.Constants.cliOps) : '[]';
+	if (global.Uwot.Config.get('server', 'showVersion')) {
 	
-		res.locals.uwotVersion = global.UwotVersion;
+		res.locals.uwotVersion = global.Uwot.Constants.version;
 	
 	}
 	var themeName = 'default';
@@ -154,13 +154,13 @@ router.get('/', function(req, res, next) {
 	
 	}
 	res.locals.theme = themeName;
-	res.locals.showTheme = global.UwotConfig.get('themes', 'showTheme');
+	res.locals.showTheme = global.Uwot.Config.get('themes', 'showTheme');
 	if ('object' == typeof res.locals && res.locals.login && '' !== res.locals.user) {
 	
 		res.locals.userName = res.locals.user;
 	
 	}
-	if (!global.UwotConfig.get('users', 'allowGuest')) {
+	if (!global.Uwot.Config.get('users', 'allowGuest')) {
 	
 		res.locals.forceLogin = true;
 	

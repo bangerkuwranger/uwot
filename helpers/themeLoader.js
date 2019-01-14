@@ -6,7 +6,7 @@ module.exports = {
 	// loads /public/css/theme
 	loadLocalPath: function loadLocalPath() {
 	
-		var localThemePath = path.resolve(global.appRoot, 'public/css/theme');
+		var localThemePath = path.resolve(global.Uwot.Constants.appRoot, 'public/css/theme');
 		var localThemeStats = fs.statSync(localThemePath);
 		if (localThemeStats.isDirectory()) {
 	
@@ -21,7 +21,7 @@ module.exports = {
 					var thisThemeFiles = fs.readdirSync(thisFilePath);
 					if (thisThemeFiles.indexOf('main.css') !== -1) {
 					
-						global.UwotThemes[path.parse(thisFilePath).name] = thisFilePath;
+						global.Uwot.Themes[path.parse(thisFilePath).name] = thisFilePath;
 					
 					}
 		
@@ -40,7 +40,7 @@ module.exports = {
 	
 		if ('undefined' == typeof themeName || null === themeName || '' === themeName) {
 		
-			return Object.keys(global.UwotThemes);
+			return Object.keys(global.Uwot.Themes);
 		
 		}
 		else if ('string' !== typeof themeName) {
@@ -50,7 +50,7 @@ module.exports = {
 		}
 		else {
 		
-			var loadedThemes = Object.keys(global.UwotThemes);
+			var loadedThemes = Object.keys(global.Uwot.Themes);
 			return loadedThemes.indexOf(themeName.trim()) != -1;
 		
 		}

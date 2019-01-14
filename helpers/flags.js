@@ -70,7 +70,7 @@ class Flag {
 					parsed.push(flagValue);
 					break;
 				case 'json':
-					var flagValueObj = global.tryParseJSON(flagValue);
+					var flagValueObj = global.Uwot.Constants.tryParseJSON(flagValue);
 					parsed.push(flagValueObj ? flagValueObj : {value: flagValue});
 					break;
 				default:

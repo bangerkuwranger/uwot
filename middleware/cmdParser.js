@@ -28,7 +28,7 @@ module.exports = function(args) {
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();
 			var cmdArray = cmdString.split(' ');
-			if (cmdArray.some(r=> global.UwotCliOps.includes(r))) {
+			if (cmdArray.some(r=> global.Uwot.Constants.cliOps.includes(r))) {
 		
 				if (cmdArray.length === 1) {
 				
@@ -46,7 +46,7 @@ module.exports = function(args) {
 // 			var userInterface = new Users();
 			if ('string' !== typeof uid) {
 		
-				global.UwotUsers.getGuest(function(error, user) {
+				global.Uwot.Users.getGuest(function(error, user) {
 			
 					if (error) {
 				
@@ -65,7 +65,7 @@ module.exports = function(args) {
 			}
 			else {
 		
-				global.UwotUsers.findById(uid, function(error, user) {
+				global.Uwot.Users.findById(uid, function(error, user) {
 			
 					if (error) {
 				
@@ -74,7 +74,7 @@ module.exports = function(args) {
 					}
 					else if (!user) {
 				
-						global.UwotUsers.getGuest(function(error, user) {
+						global.Uwot.Users.getGuest(function(error, user) {
 			
 							if (error) {
 				
@@ -122,9 +122,9 @@ class UwotRuntimeCmds {
 		
 			this.ast = ast;
 			this.user = user;
-			if (global.UwotConfig.get('users', 'allowShellFunctions') && 'string' == typeof this.user.uName) {
+			if (global.Uwot.Config.get('users', 'allowShellFunctions') && 'string' == typeof this.user.uName) {
 			
-				if ('guest' === this.user.uName && global.UwotConfig.get('users', 'allowGuest') && global.UwotConfig.get('users', 'allowGuestShellFunctions')) {
+				if ('guest' === this.user.uName && global.Uwot.Config.get('users', 'allowGuest') && global.Uwot.Config.get('users', 'allowGuestShellFunctions')) {
 				
 					this.fx = new Map();
 				
@@ -259,7 +259,7 @@ class UwotRuntimeCmds {
 				return exe;
 		
 			}
-			else if (-1 !== global.UwotCliOps.indexOf(exe.name)) {
+			else if (-1 !== global.Uwot.Constants.cliOps.indexOf(exe.name)) {
 		
 				exe.isOp = true;
 				if ('object' !== typeof astCommand.suffix) {
@@ -287,7 +287,7 @@ class UwotRuntimeCmds {
 				}
 		
 			}
-			else if (-1 !== global.UwotReserved.indexOf(exe.name)) {
+			else if (-1 !== global.Uwot.Constants.reserved.indexOf(exe.name)) {
 		
 				exe.input = 'undefined' != typeof input ? input : null;
 				exe.output = 'undefined' != typeof output ? output : null;
@@ -313,7 +313,7 @@ class UwotRuntimeCmds {
 					
 						if (!eom) {
 					
-							var optMatch = global.UwotBin[exe.name].matchOpt(args[cIdx].text);
+							var optMatch = global.Uwot.Bin[exe.name].matchOpt(args[cIdx].text);
 							if (optMatch.isOpt) {
 					
 								if (optMatch.name === '') {
@@ -619,7 +619,7 @@ class UwotRuntimeCmds {
 			
 						if (exe.isOp) {
 				
-							if (this.user.uName !== 'guest' || exe.name === 'login' || global.UwotConfig.get('users', 'allowGuest')) {
+							if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.get('users', 'allowGuest')) {
 					
 								results.output.push(this.outputLine('operation ' + exe.name, outputType));
 								results.operations.push(exe);
@@ -629,7 +629,7 @@ class UwotRuntimeCmds {
 						}
 						else {
 				
-							if (this.user.uName !== 'guest' || global.UwotConfig.get('users', 'allowGuest')) {
+							if (this.user.uName !== 'guest' || global.Uwot.Config.get('users', 'allowGuest')) {
 					
 								if (null === exe.input) {
 					
@@ -637,7 +637,7 @@ class UwotRuntimeCmds {
 						
 										try {
 							
-											global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 												if (error) {
 									
@@ -702,7 +702,7 @@ class UwotRuntimeCmds {
 										//attempt to output to map[exe.output]
 										try {
 							
-											global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 												if (error) {
 									
@@ -775,7 +775,7 @@ class UwotRuntimeCmds {
 							
 											try {
 							
-												global.UwotBin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+												global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
 								
 													if (error) {
 									
@@ -859,7 +859,7 @@ class UwotRuntimeCmds {
 					}
 					if (j >= exeMap.size) {
 			
-						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.UwotConfig.get('users', 'allowGuest')) {
+						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.get('users', 'allowGuest')) {
 			
 							results.output.push(this.outputLine(new Error('config does not allow guest users.'), outputType));
 			

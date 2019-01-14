@@ -2,13 +2,13 @@
 const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
-const UwotCmd = require('../../cmd');
+const UwotCmd = global.Uwot.Exports.Cmd;
 const filesystem = require('../../filesystem')
-if ('undefined' == typeof global.appRoot) {
-	global.appRoot = path.resolve('../../');
+if ('undefined' == typeof global.Uwot.Constants.appRoot) {
+	global.Uwot.Constants.appRoot = path.resolve('../../');
 }
-if ('undefined' == typeof global.UwotBin) {
-	global.UwotBin = {};
+if ('undefined' == typeof global.Uwot.Bin) {
+	global.Uwot.Bin = {};
 }
 const validBuiltins = [
 	'cd',
@@ -26,7 +26,7 @@ const builtinConstructorArgs = {
 			optionalArguments:	[]
 		},
 		[],
-		path.resolve(global.appRoot, 'routes/bin/builtin')
+		path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/builtin')
 	],
 	pwd: [
 		{
@@ -36,7 +36,7 @@ const builtinConstructorArgs = {
 			optionalArguments:	[]
 		},
 		[],
-		path.resolve(global.appRoot, 'routes/bin/builtin')
+		path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/builtin')
 	],
 	help: [
 		{
@@ -46,7 +46,7 @@ const builtinConstructorArgs = {
 			optionalArguments:	[]
 		},
 		[],
-		path.resolve(global.appRoot, 'routes/bin/builtin')
+		path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/builtin')
 	],
 	printf: [
 		{
@@ -56,7 +56,7 @@ const builtinConstructorArgs = {
 			optionalArguments:	['arguments']
 		},
 		[],
-		path.resolve(global.appRoot, 'routes/bin/builtin')
+		path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/builtin')
 	]
 };
 
@@ -176,11 +176,11 @@ class UwotCmdBuiltin extends UwotCmd {
 		
 		// Super don't do this; these are other commands that don't have an assoc. file
 		// TBD
-		// add each builtin directly to global.UwotBin 
-		global.UwotBin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
-		global.UwotBin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);
-		global.UwotBin.help = new UwotCmdHelp(...builtinConstructorArgs.help);
-		global.UwotBin.printf = new UwotCmdPrintf(...builtinConstructorArgs.printf);
+		// add each builtin directly to global.Uwot.Bin 
+		global.Uwot.Bin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
+		global.Uwot.Bin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);
+		global.Uwot.Bin.help = new UwotCmdHelp(...builtinConstructorArgs.help);
+		global.Uwot.Bin.printf = new UwotCmdPrintf(...builtinConstructorArgs.printf);
 		
 	}
 	
@@ -234,7 +234,7 @@ class UwotCmdBuiltin extends UwotCmd {
 			}
 			if (-1 !== validBuiltins.indexOf(biName)) {
 			
-				return global.UwotBin[biName].execute(biArgs, biOpts, app, callback);
+				return global.Uwot.Bin[biName].execute(biArgs, biOpts, app, callback);
 			
 			}
 			else {
@@ -299,7 +299,7 @@ var builtin = new UwotCmdBuiltin (
 		optionalArguments:	['shell-builtin-args']
 	},
 	[],
-	path.resolve(global.appRoot, 'routes/bin/builtin')
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/builtin')
 );
 
 module.exports = builtin;

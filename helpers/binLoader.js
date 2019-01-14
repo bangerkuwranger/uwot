@@ -6,7 +6,7 @@ module.exports = {
 	// loads /router/bin
 	loadLocalPath: function loadLocalPath() {
 	
-		var localBinPath = path.resolve(global.appRoot, 'routes/bin');
+		var localBinPath = path.resolve(global.Uwot.Constants.appRoot, 'routes/bin');
 		var localBinStats = fs.statSync(localBinPath);
 		if (localBinStats.isDirectory()) {
 	
@@ -17,7 +17,7 @@ module.exports = {
 	
 				if (localFileList[i].endsWith('.js')) {
 		
-					global.UwotBin[path.parse(localFileList[i]).name] = require(path.resolve(localBinPath, localFileList[i]));
+					global.Uwot.Bin[path.parse(localFileList[i]).name] = require(path.resolve(localBinPath, localFileList[i]));
 		
 				}
 	

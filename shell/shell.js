@@ -2,40 +2,47 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
+const globalSetupHelper = require('../helpers/globalSetup');
 
-if ('undefined' == typeof global.appRoot) {
+// if ('undefined' == typeof global.appRoot) {
+// 
+// 	global.appRoot = path.resolve(__dirname, '../');
+// 
+// }
+// if ('function' != typeof global.tryParseJSON) {
+// 
+// 	global.tryParseJSON = function tryParseJSON(jsonString) {
+// 
+// 		try {
+// 
+// 			var jsonObj = JSON.parse(jsonString);
+// 			if (jsonObj && typeof jsonObj === "object") {
+// 
+// 				return jsonObj;
+// 
+// 			}
+// 
+// 		}
+// 		catch (e) { }
+// 		return false;
+// 
+// 	};
+// 
+// }
 
-	global.appRoot = path.resolve(__dirname, '../');
+globalSetupHelper.initConstants();
+globalSetupHelper.initEnvironment();
 
-}
-if ('function' != typeof global.tryParseJSON) {
+// if ('undefined' == typeof global.Uwot.Users) {
+// 
+// 	var uwotusers = require('../users');
+// 	global.Uwot.Users = new uwotusers();
+// 
+// }
 
-	global.tryParseJSON = function tryParseJSON(jsonString) {
+globalSetupHelper.initExports();
 
-		try {
-
-			var jsonObj = JSON.parse(jsonString);
-			if (jsonObj && typeof jsonObj === "object") {
-
-				return jsonObj;
-
-			}
-
-		}
-		catch (e) { }
-		return false;
-
-	};
-
-}
-if ('undefined' == typeof global.UwotUsers) {
-
-	var uwotusers = require('../users');
-	global.UwotUsers = new uwotusers();
-
-}
-
-const cmd = require('../cmd');
+// const cmd = require('../cmd');
 const Setup = require('../setup');
 const tableNames = [
 	'users',
@@ -787,7 +794,7 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 		'password': password,
 		'sudoer': ('string' == typeof canSudo && 'true' === canSudo.toLowerCase()) ? true : false
 	};
-	global.UwotUsers.createNew(newUserObj, function(error, user) {
+	global.Uwot.Users.createNew(newUserObj, function(error, user) {
 	
 		if (error) {
 		
@@ -820,7 +827,7 @@ function deleteAdminUser(id) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.remove(id, function(error, removed) {
+	global.Uwot.Users.remove(id, function(error, removed) {
 	
 		if (error) {
 		
@@ -872,7 +879,7 @@ function changeAdminUserPassword(id, oldpw, newpw) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.changePw(id, oldpw, newpw, function(error, changed) {
+	global.Uwot.Users.changePw(id, oldpw, newpw, function(error, changed) {
 	
 		if (error) {
 		
@@ -924,7 +931,7 @@ function changeAdminUserName(id, fname, lname) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.changeName(id, fname, lname, function(error, changed) {
+	global.Uwot.Users.changeName(id, fname, lname, function(error, changed) {
 	
 		if (error) {
 		
@@ -964,7 +971,7 @@ function listAdminUsers(arg) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.listUsers(function(error, userList) {
+	global.Uwot.Users.listUsers(function(error, userList) {
 	
 		if (error) {
 		
@@ -1052,7 +1059,7 @@ function allowAdminUserSudo(id) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.changeSudo(id, true, function(error, changed) {
+	global.Uwot.Users.changeSudo(id, true, function(error, changed) {
 	
 		if (error) {
 		
@@ -1092,7 +1099,7 @@ function disallowAdminUserSudo(id) {
 	
 	}
 // 	var users = new UserModel();
-	global.UwotUsers.changeSudo(id, false, function(error, changed) {
+	global.Uwot.Users.changeSudo(id, false, function(error, changed) {
 	
 		if (error) {
 		

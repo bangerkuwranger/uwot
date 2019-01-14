@@ -2,10 +2,10 @@
 const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
-const UwotCmd = require('../../cmd');
+const UwotCmd = global.Uwot.Exports.Cmd;
 const validateTheme = require('../../helpers/themeLoader').isValidTheme;
-if ('undefined' == typeof global.appRoot) {
-	global.appRoot = path.resolve('../../');
+if ('undefined' == typeof global.Uwot.Constants.appRoot) {
+	global.Uwot.Constants.appRoot = path.resolve('../../');
 }
 if ('undefined' == typeof global.UwotBin) {
 	global.UwotBin = {};
@@ -183,7 +183,7 @@ var theme = new UwotCmdTheme (
 			optionalArguments:	[]
 		}
 	],
-	path.resolve(global.appRoot, 'routes/bin/theme')
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/theme')
 );
 
 module.exports = theme;

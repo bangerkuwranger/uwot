@@ -12,8 +12,8 @@ const confDefaults = {
 		secure: false,
 		port: '80',
 		transport: 'http',
-		pubDir: path.resolve(global.appRoot, 'fs/var/www/html'),
-		userDir: path.resolve(global.appRoot, 'fs/home')
+		pubDir: path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html'),
+		userDir: path.resolve(global.Uwot.Constants.appRoot, 'fs/home')
 	},
 	users: {
 		allowGuest: false,
@@ -635,7 +635,7 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			var newObj = global.tryParseJSON(sanitize.cleanString(value, 1024));
+			var newObj = global.Uwot.Constants.tryParseJSON(sanitize.cleanString(value, 1024));
 			if ('object' == typeof catVal && null !== catVal) {
 			
 				var currArr = catVal[key];

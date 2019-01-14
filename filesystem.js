@@ -66,7 +66,7 @@ class UwotFsPermissions {
 			if (0 < permUsers.length) {
 			
 				// var userInterface = new Users();
-				global.UwotUsers.listUsers(function(error, userList) {
+				global.Uwot.Users.listUsers(function(error, userList) {
 			
 					for (let i = 0; i < permUsers.length; i++) {
 			
@@ -213,7 +213,7 @@ class UwotFs {
 		// var userInterface = new Users();
 		if ('string' !== typeof userId) {
 		
-			global.UwotUsers.getGuest(function(error, user) {
+			global.Uwot.Users.getGuest(function(error, user) {
 			
 				if (error) {
 				
@@ -279,23 +279,23 @@ class UwotFs {
 	setDirs() {
 	
 		this.root = {
-			path: path.resolve(global.appRoot, 'fs'),
+			path: path.resolve(global.Uwot.Constants.appRoot, 'fs'),
 			r: true,
 			w: false,
 			x: false,
 			exists: function () { fs.existsSync(this.root.path) }
 		};
 		this.pubDir = {
-			path: global.UwotConfig.get('server', 'pubDir'),
+			path: global.Uwot.Config.get('server', 'pubDir'),
 			r: true,
 			w: false,
 			x: false,
 			exists: function () { fs.existsSync(this.pubDir.path) }
 		};
 		this.userDir = this.user.uName === 'guest' ? null : {
-			path: path.resolve(global.UwotConfig.get('server', 'userDir'), user.uName),
+			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), user.uName),
 			r: true,
-			w: global.UwotConfig.get('server', 'homeWritable'),
+			w: global.Uwot.Config.get('server', 'homeWritable'),
 			x: false,
 			exists: function () { fs.existsSync(this.userDir.path) }
 		};
@@ -840,7 +840,7 @@ class UwotFs {
 			var fullPath = path.resolve(this.tildeExpand(pth));
 			if ('string' !== typeof userId) {
 			
-				return pathIsInside(fullPath, global.UwotConfig.get('server', 'userDir'))
+				return pathIsInside(fullPath, global.Uwot.Config.get('server', 'userDir'))
 			
 			}
 			else if (userId === this.user['_id']) {
@@ -850,7 +850,7 @@ class UwotFs {
 			}
 			else {
 			
-				return pathIsInside(fullPath, path.resolve(global.UwotConfig.get('server', 'userDir'), userId));
+				return pathIsInside(fullPath, path.resolve(global.Uwot.Config.get('server', 'userDir'), userId));
 			
 			}
 		
@@ -993,7 +993,7 @@ class UwotFs {
 		}
 		else if ((inRoot || inUsers) && !inAllowed) {
 		
-			vfsReadable = (this.sudo && global.UwotConfig.get('users', 'sudoFullRoot'));
+			vfsReadable = (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot'));
 		
 		}
 		else if (this.sudo) {
@@ -1074,12 +1074,12 @@ class UwotFs {
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		else if (this.sudo && global.UwotConfig.get('users', 'sudoFullRoot')) {
+		else if (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot')) {
 		
 			vfsWritable = true;
 		
 		}
-		else if (inHome && global.UwotConfig.get('users', 'homeWritable') && global.UwotConfig.get('users', 'createHome')) {
+		else if (inHome && global.Uwot.Config.get('users', 'homeWritable') && global.Uwot.Config.get('users', 'createHome')) {
 		
 			var permissions = this.getPermissions(fullPath);
 			if (permissions instanceof Error) {
@@ -1133,7 +1133,7 @@ class UwotFs {
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
 		}
-		else if (!inAllowed && !(this.sudo || (global.UwotConfig.get('users', 'sudoFullRoot')))) {
+		else if (!inAllowed && !(this.sudo || (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
@@ -1153,7 +1153,7 @@ class UwotFs {
 			try{
 		
 				var permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
-				var permissions = global.tryParseJSON(permFile);
+				var permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
 					return new UwotFsPermissions(permissions).toGeneric();
@@ -1179,7 +1179,7 @@ class UwotFs {
 			try{
 		
 				var permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
-				var permissions = global.tryParseJSON(permFile);
+				var permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
 					return new UwotFsPermissions(permissions).toGeneric();
@@ -1220,7 +1220,7 @@ class UwotFs {
 		
 		}
 // 		var userInterface = new Users();
-		global.UwotUsers.listUsers(function(error, userList){
+		global.Uwot.Users.listUsers(function(error, userList){
 		
 			var userExists = false;
 			if (error) {
@@ -1332,7 +1332,7 @@ class UwotFs {
 		
 		}
 // 		var userInterface = new Users();
-		global.UwotUsers.listUsers(function(error, userList){
+		global.Uwot.Users.listUsers(function(error, userList){
 		
 			var userExists = false;
 			if (error) {

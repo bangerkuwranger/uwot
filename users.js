@@ -126,7 +126,7 @@ module.exports = class UwotUsers {
 			throw new TypeError('invalid callback passed to getGuest.');
 		
 		}
-// 		else if (!global.UwotConfig.get('users', 'allowGuest')) {
+// 		else if (!global.Uwot.Config.get('users', 'allowGuest')) {
 // 		
 // 			return callback(new Error('config does not allow guest users.'), null);
 // 		

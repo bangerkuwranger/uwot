@@ -1,62 +1,67 @@
 var path = require('path');
-global.appRoot = path.resolve(__dirname);
-if ('function' != typeof global.tryParseJSON) {
+const globalSetupHelper = require('./helpers/globalSetup');
 
-	global.tryParseJSON = function tryParseJSON(jsonString) {
+// global.appRoot = path.resolve(__dirname);
 
-		try {
+// if ('function' != typeof global.tryParseJSON) {
+// 
+// 	global.tryParseJSON = function tryParseJSON(jsonString) {
+// 
+// 		try {
+// 
+// 			var jsonObj = JSON.parse(jsonString);
+// 			if (jsonObj && typeof jsonObj === "object") {
+// 
+// 				return jsonObj;
+// 
+// 			}
+// 
+// 		}
+// 		catch (e) { }
+// 		return false;
+// 
+// 	};
+// 
+// }
+// if ('undefined' == typeof global.UwotBin) {
+// 	global.UwotBin = {};
+// }
+// if ('undefined' == typeof global.UwotThemes) {
+// 	global.UwotThemes = {};
+// }
+// global.UwotCliOps = [
+// 	"clear",
+// 	"history",
+// 	"echo",
+// 	"login",
+// 	"logout",
+// 	"exit"
+// ];
+// global.UwotVersion = require('./package.json').version;
+// var isPre = global.UwotVersion.indexOf('-');
+// if (-1 !== isPre) {
+// 
+// 	var preVersion = global.UwotVersion.substring(isPre+1);
+// 	global.UwotVersion = global.UwotVersion.substring(0, isPre);
+// 	if (preVersion.indexOf('alpha') !== -1) {
+// 	
+// 		global.UwotVersion += 'a';
+// 	
+// 	}
+// 	else if (preVersion.indexOf('beta') !== -1) {
+// 	
+// 		global.UwotVersion += 'b';
+// 	
+// 	}
+// 	
+// }
+// 
+// const sessionHours = 12;
+// 
+// var etcProd = path.resolve(__dirname, 'etc', 'prod');
+// var etcDev = path.resolve(__dirname, 'etc', 'dev');
 
-			var jsonObj = JSON.parse(jsonString);
-			if (jsonObj && typeof jsonObj === "object") {
-
-				return jsonObj;
-
-			}
-
-		}
-		catch (e) { }
-		return false;
-
-	};
-
-}
-if ('undefined' == typeof global.UwotBin) {
-	global.UwotBin = {};
-}
-if ('undefined' == typeof global.UwotThemes) {
-	global.UwotThemes = {};
-}
-global.UwotCliOps = [
-	"clear",
-	"history",
-	"echo",
-	"login",
-	"logout",
-	"exit"
-];
-global.UwotVersion = require('./package.json').version;
-var isPre = global.UwotVersion.indexOf('-');
-if (-1 !== isPre) {
-
-	var preVersion = global.UwotVersion.substring(isPre+1);
-	global.UwotVersion = global.UwotVersion.substring(0, isPre);
-	if (preVersion.indexOf('alpha') !== -1) {
-	
-		global.UwotVersion += 'a';
-	
-	}
-	else if (preVersion.indexOf('beta') !== -1) {
-	
-		global.UwotVersion += 'b';
-	
-	}
-	
-}
-
-const sessionHours = 12;
-
-var etcProd = path.resolve(__dirname, 'etc', 'prod');
-var etcDev = path.resolve(__dirname, 'etc', 'dev');
+globalSetupHelper.initConstants();
 
 var express = require('express');
 var favicon = require('serve-favicon');
@@ -68,46 +73,53 @@ var nedbSessionStore = require('nedb-session-store')(session);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
-var uwotconfig = require('./config');
-var uwotusers = require('./users');
-var cmd = require('./cmd');
-var binLoader = require('./helpers/binLoader');
-var themeLoader = require('./helpers/themeLoader')
+// var uwotconfig = require('./config');
+// var uwotusers = require('./users');
+// var cmd = require('./cmd');
+// var binLoader = require('./helpers/binLoader');
+// var themeLoader = require('./helpers/themeLoader');
 
 var index = require('./routes/index');
 
 var app = express();
 
-var configPath = app.get('env') === 'development' ? path.resolve(etcDev, 'config.json') : path.resolve(etcProd, 'config.json');
-global.UwotConfig = new uwotconfig(configPath);
-global.UwotUsers = new uwotusers();
+// var configPath = app.get('env') === 'development' ? path.resolve(etcDev, 'config.json') : path.resolve(etcProd, 'config.json');
+// global.UwotConfig = new uwotconfig(configPath);
+// global.UwotUsers = new uwotusers();
+
+globalSetupHelper.initEnvironment();
 
 // load local themes if enabled
-if (global.UwotConfig.get('themes', 'useLocal')) {
+// if (global.UwotConfig.get('themes', 'useLocal')) {
+// 
+// 	themeLoader.loadLocalPath();
+// 
+// }
 
-	themeLoader.loadLocalPath();
+// app.set(
+// 	'exports',
+// 	{
+// 		UwotCmd: cmd
+// 	}
+// );
 
-}
+globalSetupHelper.initExports();
 
-// TBD
-// load external themes if enabled
+globalSetupHelper.initThemes();
 
-var themeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.UwotConfig.get('themes', 'defaultTheme');
-app.set ('uwot_theme', themeName);
-var themePath = path.join(global.appRoot, 'default' === themeName ? 'public' : themeName);
+var currentThemeName = 'string' == typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.Uwot.Config.get('themes', 'defaultTheme');
+app.set ('uwot_theme', currentThemeName);
+var themePath = path.join(global.Uwot.Constants.appRoot, 'default' === currentThemeName ? 'public' : currentThemeName);
 
-app.set(
-	'exports',
-	{
-		UwotCmd: cmd
-	}
-);
+
 
 // create reserved command list from ops
-global.UwotReserved = Array.from(global.UwotCliOps);
+// global.UwotReserved = Array.from(global.UwotCliOps);
+
+
 // add sudo. it's special.
-global.UwotReserved.push('sudo');
-global.UwotBin.sudo = {
+global.Uwot.Constants.Reserved.push('sudo');
+global.Uwot.Bin.sudo = {
 	command: {
 		name: 'sudo',
 		description: 'Allows user to run commands with elevated privileges.',
@@ -115,7 +127,7 @@ global.UwotBin.sudo = {
 		optionalArguments: []
 	},
 	options: [],
-	path: global.appRoot,
+	path: global.Uwot.Constants.appRoot,
 	execute: function execute(args, options, callback, isSudo) {
 	
 		return callback(
@@ -149,20 +161,22 @@ global.UwotBin.sudo = {
 };
 // need to load bins from paths
 // load locals if enabled
-if (global.UwotConfig.get('binpath', 'useLocal')) {
-
-	binLoader.loadLocalPath();
-
-}
+// if (global.UwotConfig.get('binpath', 'useLocal')) {
+// 
+// 	binLoader.loadLocalPath();
+// 
+// }
 
 // TBD
 // load externals if enabled
 
 // then add to reserved list
-global.UwotReserved.push(...Object.keys(global.UwotBin));
+// global.UwotReserved.push(...Object.keys(global.UwotBin));
+globalSetupHelper.initBins();
+
 
 // set up sessions
-const sessionMs = sessionHours * 3600000;
+const sessionMs = global.Uwot.Constants.sessionHours * 3600000;
 var sessionArgs = {
 	cookie: {
 		sameSite: true,
@@ -189,12 +203,12 @@ else {
 
 }
 sessionArgs.store = new nedbSessionStore({
-	filename: global.appRoot + '/var/nedb/session.db'
+	filename: global.Uwot.Constants.appRoot + '/var/nedb/session.db'
 });
 app.use(session(sessionArgs));
 
 // view engine setup
-app.set('views', path.join(global.appRoot, 'views'));
+app.set('views', path.join(global.Uwot.Constants.appRoot, 'views'));
 app.set('view engine', 'pug');
 
 app.use(favicon(path.join(themePath, 'favicon.ico')));
@@ -202,13 +216,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(etcDev, 'config.rb') : path.resolve(etcProd, 'config.rb')}));
+app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(global.Uwot.Constants.etcDev, 'config.rb') : path.resolve(global.Uwot.Constants.etcProd, 'config.rb')}));
 
 if (app.get('env') === 'development') {
 	app.use(fileLog.info);
 }
 
-app.use(express.static(path.join(global.appRoot, 'public')));
+app.use(express.static(path.join(global.Uwot.Constants.appRoot, 'public')));
 
 app.use('/', index);
 
