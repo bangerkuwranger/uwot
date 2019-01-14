@@ -2,16 +2,9 @@
 const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
-const UwotCmd = global.Uwot.Exports.Cmd;
 const validateTheme = require('../../helpers/themeLoader').isValidTheme;
-if ('undefined' == typeof global.Uwot.Constants.appRoot) {
-	global.Uwot.Constants.appRoot = path.resolve('../../');
-}
-if ('undefined' == typeof global.UwotBin) {
-	global.UwotBin = {};
-}
 
-class UwotCmdTheme extends UwotCmd {
+class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	

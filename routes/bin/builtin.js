@@ -2,14 +2,8 @@
 const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
-const UwotCmd = global.Uwot.Exports.Cmd;
 const filesystem = require('../../filesystem')
-if ('undefined' == typeof global.Uwot.Constants.appRoot) {
-	global.Uwot.Constants.appRoot = path.resolve('../../');
-}
-if ('undefined' == typeof global.Uwot.Bin) {
-	global.Uwot.Bin = {};
-}
+
 const validBuiltins = [
 	'cd',
 	'pwd',
@@ -60,7 +54,7 @@ const builtinConstructorArgs = {
 	]
 };
 
-class UwotCmdCd extends UwotCmd {
+class UwotCmdCd extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -86,7 +80,7 @@ class UwotCmdCd extends UwotCmd {
 	
 }
 
-class UwotCmdPwd extends UwotCmd {
+class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -112,7 +106,7 @@ class UwotCmdPwd extends UwotCmd {
 	
 }
 
-class UwotCmdHelp extends UwotCmd {
+class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -138,7 +132,7 @@ class UwotCmdHelp extends UwotCmd {
 	
 }
 
-class UwotCmdPrintf extends UwotCmd {
+class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -164,7 +158,7 @@ class UwotCmdPrintf extends UwotCmd {
 	
 }
 
-class UwotCmdBuiltin extends UwotCmd {
+class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	

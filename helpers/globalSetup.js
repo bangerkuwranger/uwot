@@ -54,7 +54,6 @@ if ('object' !== typeof global.Uwot.Bin || null === global.Uwot.Bin) {
 
 }
 
-
 module.exports = {
 
 	initConstants = function initConstants() {
