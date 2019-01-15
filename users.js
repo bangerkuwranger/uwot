@@ -222,7 +222,7 @@ module.exports = class UwotUsers {
 			throw new TypeError('invalid callback passed to findByName.');
 		
 		}
-		else if ('string' !== typeof uName) {
+		else if ('string' !== typeof uName || '' === uName) {
 		
 			return callback(new TypeError('invalid user name passed to findByName.'), null);
 		
