@@ -66,6 +66,11 @@ class User {
 	
 	verifyPassword(password) {
 	
+		if ('string' != typeof password) {
+		
+			throw new TypeError('invalid password value passed to verifyPassword.');
+		
+		}
 		if ('undefined' == typeof this.salt || null == this.salt || !this.salt) {
 		
 			return false;
@@ -96,10 +101,10 @@ class User {
 	
 	fullName(format) {
 	
-		format = 'string' !== format ? 'l, f' : format;
-		var fullName = format;
-		fullName.replace(/f/g, this.fName);
-		fullName.replace(/l/g, this.lName);
+		format = 'string' !== typeof format ? 'l, f' : format;
+		var fullName = format
+		.replace(/f/g, this.fName)
+		.replace(/l/g, this.lName);
 		return fullName;
 	
 	}

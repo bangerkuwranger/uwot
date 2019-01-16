@@ -731,9 +731,9 @@ describe('Users.js', function() {
 							"fName": "Found",
 							"lName": "User",
 							"uName": "fuser",
-							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
 							"sudoer": true,
-							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
 							"createdAt": new Date(1546450800498),
 							"updatedAt": new Date(1546450800498),
 							"_id": "CDeOOrH0gOg791cZ"
@@ -749,7 +749,7 @@ describe('Users.js', function() {
 				});
 	
 		});
-		it('should not allow the constructor to be used outside of the UwotUsers class methods', function() {
+		it('should not allow the constructor to be called outside of the UwotUsers class methods', function() {
 	
 			function returnNewUser() {
 			
@@ -796,6 +796,110 @@ describe('Users.js', function() {
 			
 				var newSaltedPassword = testUser.saltPass('newTestP@55');
 				expect(newSaltedPassword).to.include(testUser.salt);
+			
+			});
+		
+		});
+		describe('verifyPassword', function() {
+		
+			this.timeout(15000);
+			beforeEach('generating password', function() {
+			
+				testUser.password = testUser.saltPass('testP@55');
+			
+			});
+			it('should throw a TypeError if it is passed a non-string value for password', function() {
+			
+				function passNullPassword() {
+				
+					return testUser.verifyPassword(null);	
+				
+				}
+				expect(passNullPassword).to.throw(TypeError, 'invalid password value passed to verifyPassword.');
+			
+			});
+			it('should return false if salt property is undefined', function() {
+			
+				delete testUser.salt;
+				var verify = testUser.verifyPassword('testP@55');
+				expect(verify).to.be.false;
+			
+			});
+			it('should return false if salt property is null', function() {
+			
+				testUser.salt = null;
+				var verify = testUser.verifyPassword('testP@55');
+				expect(verify).to.be.false;
+			
+			});
+			it('should return false if salt property is falsey', function() {
+			
+				testUser.salt = 0;
+				var verify = testUser.verifyPassword('testP@55');
+				expect(verify).to.be.false;
+			
+			});
+			it('should return false if salted password doesn\'t match password property', function() {
+			
+				var verify = testUser.verifyPassword('testPass');
+				expect(verify).to.be.false;
+			
+			});
+			it('should return true if salted password matches password property', function() {
+			
+				var verify = testUser.verifyPassword('testP@55');
+				expect(verify).to.be.true;
+			
+			});
+		
+		});
+		describe('maySudo', function() {
+		
+			it('should return false if sudoer property is not a boolean', function() {
+			
+				testUser.sudoer = 1;
+				expect(testUser.maySudo()).to.be.false;
+			
+			});
+			it('should return false if sudoer property is false', function() {
+			
+				testUser.sudoer = false;
+				expect(testUser.maySudo()).to.be.false;
+			
+			});
+			it('should return true if sudoer property is true', function() {
+			
+				testUser.sudoer = true;
+				expect(testUser.maySudo()).to.be.true;
+			
+			});
+		
+		});
+		describe('fullName', function() {
+		
+			it('should return a string in format "lName, fName" with no arguments provided', function() {
+			
+				expect(testUser.fullName()).to.equal('User, Found');
+			
+			});
+			it('should return a string in format "lName, fName" with if format argument is not a string', function() {
+			
+				expect(testUser.fullName(null)).to.equal('User, Found');
+			
+			});
+			it('should return a string in that replaces the character "f" in format argument with the value of the fName property', function() {
+			
+				expect(testUser.fullName('f theMagnificent')).to.equal('Found theMagniFoundicent');
+			
+			});
+			it('should return a string in that replaces the character "l" in format argument with the value of the lName property', function() {
+			
+				expect(testUser.fullName('Mr./Ms. l')).to.equal('Mr./Ms. User');
+			
+			});
+			it('should return a string replacing both "l" and "f" in the format argument', function() {
+			
+				expect(testUser.fullName('Mr./Ms. f l')).to.equal('Mr./Ms. Found User');
 			
 			});
 		
