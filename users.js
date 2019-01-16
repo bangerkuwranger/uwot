@@ -112,6 +112,10 @@ module.exports = class UwotUsers {
 	constructor() {
 	
 		this.db = new Datastore({ filename: 'var/nedb/users.db', autoload: true, timestampData: true });
+		this.db.ensureIndex({
+			fieldName: 'uName',
+			unique: true,
+		});
 		// TBD
 		// check if create user dir is set in config
 		// if so, verify each user has a dir
@@ -334,7 +338,19 @@ module.exports = class UwotUsers {
 						}
 						else {
 				
-							return self.cnCallback(false, data);
+							var savedUser = new User(
+								data._id,
+								data.fName,
+								data.lName,
+								data.uName,
+								data.createdAt,
+								data.updatedAt,
+								data.password,
+								data.salt,
+								data.sudoer
+					
+							);
+							return self.cnCallback(false, savedUser);
 				
 						}
 			
@@ -364,7 +380,7 @@ module.exports = class UwotUsers {
 		else {
 		
 			self.rCallback = callback;
-			this.db.remove({_id: uId}, function(error, data) {
+			this.db.remove({_id: uId}, {}, function(error, data) {
 			
 				if (error) {
 				
