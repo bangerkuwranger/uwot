@@ -10,7 +10,7 @@ const expect = chai.expect;
 const Users = require('../users');
 var users;
 
-describe('Users.js', function() {
+describe('users.js', function() {
 
 	before('getting fresh UserInterface instance', function() {
 	
