@@ -54,9 +54,9 @@ const configCats = [
 	"binpath",
 	"themes"
 ];
-console.log('| Node application shell for: ' + global.appRoot + ' |');
+console.log('| Node application shell for: ' + global.Uwot.Constants.appRoot + ' |');
 var bottomLine = '—————————————————————————————————';
-for (let sp = 0; sp < global.appRoot.toString().length; sp++) {
+for (let sp = 0; sp < global.Uwot.Constants.appRoot.toString().length; sp++) {
 
 	bottomLine += '—';
 
@@ -709,7 +709,7 @@ function setupDb(tableName) {
 		else {
 		
 			console.log('Setting up table: ' + tableName);
-			var dbPath = path.resolve(global.appRoot, 'var/nedb/', tableName + '.db');
+			var dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableName + '.db');
 			dropAndCreateTable(tableName, dbPath);
 			return process.exit();
 		
@@ -722,7 +722,7 @@ function setupDb(tableName) {
 		var tableCount = 0;
 		for (let i = 0; i < tableNames.length; i++) {
 		
-			var dbPath = path.resolve(global.appRoot, 'var/nedb/', tableNames[i] + '.db');
+			var dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableNames[i] + '.db');
 			dropAndCreateTable(tableNames[i], dbPath);
 			tableCount++;
 		

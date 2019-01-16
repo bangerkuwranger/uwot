@@ -533,12 +533,26 @@ module.exports = class UwotUsers {
 	changeSudo(uId, maySudo, callback) {
 	
 		var self = this;
+		if ('string' === typeof maySudo) {
+		
+			if ('true' === maySudo.toLowerCase()) {
+			
+				maySudo = true;
+			
+			}
+			else if ('false' === maySudo.toLowerCase()) {
+			
+				maySudo = false;
+			
+			}
+		
+		}
 		if ('function' != typeof callback) {
 		
 			throw new TypeError('invalid callback passed to changeSudo.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId || ('boolean' != typeof maySudo && ('string' == typeof maySudo && 'true' !== maySudo.toLowerCase() && 'false' !== maySudo.toLowerCase()))) {
+		else if ('string' != typeof uId || '' === uId || 'boolean' != typeof maySudo) {
 		
 			return callback(new TypeError('invalid args passed to changeSudo.'), null);
 		
@@ -546,7 +560,7 @@ module.exports = class UwotUsers {
 		else {
 		
 			self.csCallback = callback;
-			this.db.update({_id: sanitize.cleanString(uId, null)}, {$set: {sudoer: sanitize.cleanBool(maySudo)}}, {}, function(error, numReplaced){
+			this.db.update({_id: sanitize.cleanString(uId, null)}, {$set: {sudoer: maySudo}}, {}, function(error, numReplaced){
 			
 				if (error) {
 				
@@ -586,7 +600,7 @@ module.exports = class UwotUsers {
 		else {
 		
 			self.vCallback = callback;
-			this.db.find({_id: uId}, function(error, data) {
+			this.db.find({_id: uId}, {}, function(error, data) {
 			
 				if (error) {
 				
@@ -625,16 +639,21 @@ module.exports = class UwotUsers {
 	
 		if ('function' != typeof callback) {
 		
-			return;
+			throw new TypeError('invalid callback passed to listUsers.');
 		
 		}
-		this.db.find({})
-		.sort({uName: 1})
-		.exec(function(error, results) {
+		else {
 		
-			callback(error, results);
+			this.db.find({})
+			.projection({password: 0, salt: 0})
+			.sort({uName: 1})
+			.exec(function(error, results) {
 		
-		});
+				callback(error, results);
+		
+			});
+		
+		}
 	
 	}
 	
@@ -646,14 +665,14 @@ module.exports = class UwotUsers {
 			throw new TypeError('invalid callback passed to isUnique.');
 		
 		}
-		else if ('string' != typeof username) {
+		else if ('string' != typeof username || '' === username) {
 		
 			return callback(new TypeError('invalid username passed to isUnique.'), null);
 		
 		}
 		else if ('guest' === username) {
 		
-			return self.iuCallback(false, false);
+			return callback(false, false);
 		
 		}
 		else {
