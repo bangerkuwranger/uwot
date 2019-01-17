@@ -299,6 +299,8 @@ class UwotCmd {
 				}
 				else {
 			
+					//empty array; will never happen since error thrown for empty string &
+					// even empty string will result in positive integer length...
 					return matchResult;
 			
 				}

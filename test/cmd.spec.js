@@ -483,6 +483,77 @@ describe('cmd.js', function() {
 				expect(matchResult.isLong).to.be.false;
 			
 			});
+			it('should return an object with name stripped of leading hyphen if isLong=false', function() {
+			
+				var matchResult = cmd.matchOpt('-t');
+				expect(matchResult.name).to.equal('t');
+			
+			});
+			it('should return an object with name stripped of two leading hyphens if isLong=true', function() {
+			
+				var matchResult = cmd.matchOpt('--turbo');
+				expect(matchResult.name).to.equal('turbo');
+			
+			});
+			it('should return an object with name not stripped of more than two leading hyphens', function() {
+			
+				var matchResult = cmd.matchOpt('---triple');
+				expect(matchResult.name).to.equal('-triple');
+			
+			});
+			it('should return an object with assignedArg containing single assignment string if opt contains a single "="', function() {
+			
+				var matchResult = cmd.matchOpt('--t=testAssignedArg');
+				expect(matchResult.assignedArg).to.equal('testAssignedArg');
+			
+			});
+			it('should return an object with assignedArg containing comma separated assignment string if opt contains more than one "="', function() {
+			
+				var matchResult = cmd.matchOpt('--t=testAssignedArg=2500');
+				expect(matchResult.assignedArg).to.equal('testAssignedArg,2500');
+			
+			});
+			it('should return an object with isDefined=false if cmd.options is empty', function() {
+			
+				cmd.options = [];
+				matchResult = cmd.matchOpt('-s');
+				expect(matchResult.isDefined).to.be.false;
+			
+			});
+			it('should return an object with isDefined=false if cmd.options doesn\'t contain a matching short or long option', function() {
+			
+				matchResult = cmd.matchOpt('-t');
+				expect(matchResult.isDefined).to.be.false;
+			
+			});
+			it('should return an object with isDefined=true if cmd.options contains a matching short option', function() {
+			
+				matchResult = cmd.matchOpt('-s');
+				expect(matchResult.isDefined).to.be.true;
+			
+			});
+			it('should return an object with isDefined=true if cmd.options contains a matching long option', function() {
+			
+				matchResult = cmd.matchOpt('--save');
+				expect(matchResult.isDefined).to.be.true;
+			
+			});
+			it('should return an object with hasArgs=true and reqArgs set to cmd.options[idx].reqArgs if defined and cmd.options[idx].reqArgs.length > 0', function() {
+			
+				matchResult = cmd.matchOpt('--save=theWorld');
+				expect(matchResult.isDefined).to.be.true;
+				expect(matchResult.hasArgs).to.be.true;
+				expect(matchResult.reqArgs).to.be.an('array').that.includes(testCmdArgs.options[0].requiredArguments[0]);
+			
+			});
+			it('should return an object with hasArgs=true and optArgs set to cmd.options[idx].optArgs if defined and cmd.options[idx].optArgs.length > 0', function() {
+			
+				matchResult = cmd.matchOpt('--save=theWorld');
+				expect(matchResult.isDefined).to.be.true;
+				expect(matchResult.hasArgs).to.be.true;
+				expect(matchResult.optArgs).to.be.an('array').that.includes(testCmdArgs.options[0].optionalArguments[0]);
+			
+			});
 		
 		});
 		describe('parsePre', function() {
