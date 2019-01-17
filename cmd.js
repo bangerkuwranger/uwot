@@ -12,7 +12,7 @@ class UwotCmdCommand {
 		optionalArguments
 	) {
 	
-		this.name = sanitize.stringNoSpaces(sanitize.cleanString(name), 'us');
+		this.name = sanitize.stringNoSpaces(sanitize.cleanString(name), 'cc');
 		this.description = sanitize.cleanString(description);
 		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
 		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
@@ -122,47 +122,57 @@ class UwotCmd {
 	// subclasses should implement their own logic.
 	execute(args, options, app, callback, isSudo) {
 	
-		var executeString = 'executed: ' + this.command.name;
-		var helpString = false;
-		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+		if ('function' !== typeof callback) {
 		
-			for (let i = 0; i < args.length; i++) {
-			
-				executeString += ' ' + args[i].toString();
-		
-			}
+			throw new TypeError('invalid callback passed to execute.')
 		
 		}
-		if ('object' != typeof options || !Array.isArray(options) || options.length < 1) {
+		else {
 		
-			return callback(false, executeString);
+			var executeString = 'executed: ' + this.command.name;
+			var helpString = false;
+			if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
 		
-		}
-		for (let i = 0; i < this.options.length; i++) {
-		
-			executeString += ' ' + options[i].toString();
-			if (options[i].name && options[i].name === 'h') {
+				for (let i = 0; i < args.length; i++) {
 			
-				helpString = true;
-			
+					executeString += ' ' + args[i].toString();
+		
+				}
+		
 			}
-			if ((i+1) >= options.length) {
+			if ('object' != typeof options || !Array.isArray(options) || options.length < 1) {
+		
+				return callback(false, executeString);
+		
+			}
+			for (let i = 0; i < this.options.length; i++) {
+		
+				executeString += 'boolean' == typeof options[i].isLong && options[i].isLong ? ' --' : ' -'
+				executeString += options[i].name.toString();
+				if (options[i].name && (options[i].name === 'h' || options[i].name === 'help')) {
 			
-				if (!helpString) {
-				
-					return callback(false, executeString);
-				
-				}
-				else {
-				
-					this.help(function(error, helpStr) {
-					
-						return callback(error, helpStr);
-					
-					});
-				
-				}
+					helpString = true;
 			
+				}
+				if ((i+1) >= options.length) {
+			
+					if (!helpString) {
+				
+						return callback(false, executeString);
+				
+					}
+					else {
+				
+						this.help(function(error, helpStr) {
+					
+							return callback(error, helpStr);
+					
+						});
+				
+					}
+			
+				}
+		
 			}
 		
 		}
@@ -172,60 +182,69 @@ class UwotCmd {
 	// subclasses can call this or not if rewriting this function.
 	help(callback) {
 	
-		var outString = this.command.name;		
-		for (let i = 0; i < this.command.requiredArguments.length; i++) {
+		if ('function' !== typeof callback) {
 		
-			outString += ' <' + this.command.requiredArguments[i] + '>';
-		
-		}
-		for (let i = 0; i < this.command.optionalArguments.length; i++) {
-		
-			outString += ' [' + this.command.optionalArguments[i] + ']';
+			throw new TypeError('invalid callback passed to help.')
 		
 		}
-		if (this.options.length > 0) {
+		else {
 		
-			outString += ' [--options]';
+			var outString = this.command.name;		
+			for (let i = 0; i < this.command.requiredArguments.length; i++) {
 		
-		}
-		outString += "\r\n";
-		outString += this.command.description;
-		outString += "\r\n";
-		if (this.options.length < 1) {
+				outString += ' <' + this.command.requiredArguments[i] + '>';
 		
-			var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
-			var outArray = this.parsePre(outString);
-			outArray.content.unshift(cmdTitleNode);
-			return callback(false, outArray);
-		
-		}
-		outString += 'Options:';
-		outString += "\r\n";
-		for (let i = 0; i < this.options.length; i++) {
-		
-			outString += '    -' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
-			for (let j = 0; j < this.options[i].requiredArguments.length; j++) {
-			
-				outString += ' <' + this.options[i].requiredArguments[j] + '>';
-			
 			}
-			for (let j = 0; j < this.options[i].optionalArguments.length; j++) {
-			
-				outString += ' [' + this.options[i].optionalArguments[j] + ']';
-			
+			for (let i = 0; i < this.command.optionalArguments.length; i++) {
+		
+				outString += ' [' + this.command.optionalArguments[i] + ']';
+		
+			}
+			if (this.options.length > 0) {
+		
+				outString += ' [--options]';
+		
 			}
 			outString += "\r\n";
-			outString += '       ' + this.options[i].description;
+			outString += this.command.description;
 			outString += "\r\n";
-			if ((i+1) >= this.options.length) {
-			
+			if (this.options.length < 1) {
+		
 				var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
 				var outArray = this.parsePre(outString);
 				outArray.content.unshift(cmdTitleNode);
 				return callback(false, outArray);
-			
-			}
 		
+			}
+			outString += 'Options:';
+			outString += "\r\n";
+			for (let i = 0; i < this.options.length; i++) {
+		
+				outString += '    -' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
+				for (let j = 0; j < this.options[i].requiredArguments.length; j++) {
+			
+					outString += ' <' + this.options[i].requiredArguments[j] + '>';
+			
+				}
+				for (let j = 0; j < this.options[i].optionalArguments.length; j++) {
+			
+					outString += ' [' + this.options[i].optionalArguments[j] + ']';
+			
+				}
+				outString += "\r\n";
+				outString += '       ' + this.options[i].description;
+				outString += "\r\n";
+				if ((i+1) >= this.options.length) {
+			
+					var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
+					var outArray = this.parsePre(outString);
+					outArray.content.unshift(cmdTitleNode);
+					return callback(false, outArray);
+			
+				}
+		
+			}
+
 		}
 	
 	}
