@@ -264,14 +264,26 @@ module.exports = {
 	arrayOfObjectsOrEmpty: function arrayOfObjectsOrEmpty(value) {
 
 		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'object' == typeof value[0] ? value : [];
-		return value;
+		var objectArray = [];
+		for (let i = 0; i < value.length; i++) {
+		
+			objectArray[i] = 'object' === typeof value[i] ? value[i] : null;
+		
+		}
+		return objectArray;
 		
 	},
 	
 	arrayOfStringsOrEmpty: function arrayOfStringsOrEmpty(value) {
 
 		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'string' == typeof value[0] ? value : [];
-		return value;
+		var stringArray = [];
+		for (let i = 0; i < value.length; i++) {
+		
+			stringArray[i] = 'string' === typeof value[i] ? value[i].trim() : '';
+		
+		}
+		return stringArray;
 		
 	}
 

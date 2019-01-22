@@ -8,6 +8,7 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
+const sanitize = require('../helpers/valueConversion');
 const Cmd = require('../cmd');
 var cmd;
 const testCmdArgs = {
@@ -115,7 +116,7 @@ describe('cmd.js', function() {
 			
 				cmd.execute(null, null, this, function(error, result) {
 				
-					expect(result).to.be.a('string').that.includes(testCmdArgs.command.name);
+					expect(result).to.be.a('string').that.includes(sanitize.stringNoSpaces(sanitize.cleanString(testCmdArgs.command.name), 'cc'));
 					done();
 				
 				});
@@ -233,7 +234,7 @@ describe('cmd.js', function() {
 				
 					expect(helpArray.content[0]).to.be.an('object');
 					expect(helpArray.content[0].isBold).to.be.true;
-					expect(helpArray.content[0].content).to.be.a('string').that.includes(testCmdArgs.command.name);
+					expect(helpArray.content[0].content).to.be.a('string').that.includes(sanitize.stringNoSpaces(sanitize.cleanString(testCmdArgs.command.name), 'cc'));
 					done();
 				
 				});
@@ -649,6 +650,17 @@ describe('cmd.js', function() {
 	
 		describe('constructor', function() {
 		
+			var testCommand;
+			beforeEach(function() {
+		
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+		
+			});
 			it('should not be callable outside of UwotCmd methods', function() {
 			
 				function returnNewCmdCommand() {
@@ -659,6 +671,114 @@ describe('cmd.js', function() {
 				expect(returnNewCmdCommand).to.throw(ReferenceError, 'UwotCmdCommad is not defined');
 			
 			});
+			it('should remove spaces from passed name property by camelCapping the string', function() {
+			
+				testCommand.name = 'test cmd';
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.name).to.equal(sanitize.stringNoSpaces(sanitize.cleanString(testCmdArgs.command.name), 'cc'));
+			
+			});
+			it('should trim leading & trailing whitespace from passed description property', function() {
+			
+				testCommand.description = '    test command instance    ';
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.description).to.equal(testCmdArgs.command.description);
+			
+			});
+			it('should truncate passed description property to 255 characters (excluding trimmed whitespace)', function() {
+			
+				testCommand.description = 'Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.';
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.description).to.equal('Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia ' + testCmdArgs.command.description);
+			
+			});
+			it('should set requiredArguments property to an empty array if argument passed is not an array.', function() {
+			
+				testCommand.requiredArguments = 'test command argument';
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.requiredArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set requiredArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			
+				testCommand.requiredArguments = [null, 'testCommandArgument'];
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.requiredArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set requiredArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			
+				testCommand.requiredArguments = ['testCommandArgment', null, 'testCommandArgumentThree'];
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.requiredArguments).to.be.an('array').that.includes('');
+			
+			});
+			it('should set optionalArguments property to an empty array if argument passed is not an array.', function() {
+			
+				testCommand.optionalArguments = 'test command argument';
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.optionalArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set optionalArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			
+				testCommand.optionalArguments = [null, 'testCommandArgument'];
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.optionalArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set optionalArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			
+				testCommand.optionalArguments = ['testCommandArgment', null, 'testCommandArgumentThree'];
+				cmd = new Cmd(
+					testCommand,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testCommand = cmd.command;
+				expect(testCommand.optionalArguments).to.be.an('array').that.includes('');
+			
+			});
 		
 		});
 	
@@ -667,6 +787,17 @@ describe('cmd.js', function() {
 	
 		describe('constructor', function() {
 		
+			var testOptions;
+			beforeEach(function() {
+		
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+		
+			});
 			it('should not be callable outside of UwotCmd methods', function() {
 			
 				function returnNewCmdOption() {
@@ -675,6 +806,126 @@ describe('cmd.js', function() {
 				
 				}
 				expect(returnNewCmdOption).to.throw(ReferenceError, 'UwotCmdOption is not defined');
+			
+			});
+			it('should remove spaces from passed longOpt property by camelCapping the string', function() {
+			
+				testOptions[0].longOpt = 'test cmd opt';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].longOpt).to.equal('testCmdOpt');
+			
+			});
+			it('should trim leading & trailing whitespace from passed longOpt property', function() {
+			
+				testOptions[0].longOpt = '    test options instance    ';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].longOpt).to.equal('testOptionsInstance');
+			
+			});
+			it('should trim leading & trailing whitespace, and truncate to 1 character from beginning of passed shortOpt property', function() {
+			
+				testOptions[0].shortOpt = '    test options instance    ';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].shortOpt).to.equal('t');
+			
+			});
+			it('should truncate passed description property to 255 characters (excluding trimmed whitespace)', function() {
+			
+				testOptions[0].description = 'Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test options instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].description).to.equal('Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test options instance');
+			
+			});
+			it('should set requiredArguments property to an empty array if argument passed is not an array.', function() {
+			
+				testOptions[0].requiredArguments = 'test options argument';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].requiredArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set requiredArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			
+				testOptions[0].requiredArguments = [null, 'testOptionsArgument'];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].requiredArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set requiredArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			
+				testOptions[0].requiredArguments = ['testOptionsArgment', null, 'testOptionsArgumentThree'];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].requiredArguments).to.be.an('array').that.includes('');
+			
+			});
+			it('should set optionalArguments property to an empty array if argument passed is not an array.', function() {
+			
+				testOptions[0].optionalArguments = 'test options argument';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].optionalArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set optionalArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			
+				testOptions[0].optionalArguments = [null, 'testOptionsArgument'];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].optionalArguments).to.be.an('array').that.is.empty;
+			
+			});
+			it('should set optionalArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			
+				testOptions[0].optionalArguments = ['testOptionsArgment', null, 'testOptionsArgumentThree'];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testOptions,
+					testCmdArgs.path
+				);
+				testOptions = cmd.options;
+				expect(testOptions[0].optionalArguments).to.be.an('array').that.includes('');
 			
 			});
 		
