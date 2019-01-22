@@ -57,28 +57,39 @@ class Flag {
 		else {
 		
 			stringValue = sanitize.cleanString(stringValue, 1024);
-			var flagIdx = stringValue.indexOf(this.flagString);
+			var flagIdx = stringValue.indexOf('=') - 1;
+			var isAssignment = flagIdx >= 0;
 			var flagLength = this.flagString.length;
 			var flagValue;
-			if (-1 === flagIdx) {
+			if (!isAssignment) {
 			
 				flagValue = stringValue;
 			
 			}
 			else {
 					
-				var flagValue = stringValue.substring(flagIdx + flagLength).trim();
+				var flagValue = stringValue.substring(flagIdx + flagLength + 1).trim();
+			
+			}
+			if (flagValue.length < 1) {
+			
+				flagValue = this.defaultVal;
 			
 			}
 			switch(this.type) {
 			
 				case 'string':
-					parsed.push(flagValue);
+					parsed.push(flagValue.toString());
 					break;
 				case 'json':
 					var flagValueObj = global.Uwot.Constants.tryParseJSON(flagValue);
-					parsed.push(flagValueObj ? flagValueObj : {value: flagValue});
+					parsed.push(!flagValueObj ? {value: flagValue} : flagValueObj === '' ? this.defaultVal : flagValueObj);
 					break;
+				case 'boolean':
+					if (!isAssignment && stringValue.trim() === this.flagString) {
+						parsed.push(true);
+						break;
+					}
 				default:
 					parsed.push(-1 !== flagIdx && false !== flagValue && 'false' !== flagValue);
 			
@@ -106,18 +117,29 @@ class FlagSet{
 		
 			this.flags = new Map();
 			this.invalidFlags = [];
+			this.flagErrors = [];
 			for (let i = 0; i < flags.length; i++) {
 			
-				if ('object' == typeof flags[i]) {
+				if ('object' == typeof flags[i] && null !== flags[i]) {
 				
-					try {
-					
-						this.flags.set(flags[i].flagString, new Flag(flags[i].flagString, flags[i].type, flags[i].name, flags[i].defaultVal));
-					
-					}
-					catch(e) {
+					if ('string' == typeof flags[i].flagString && '' === flags[i].flagString) {
 					
 						this.invalidFlags.push(flags[i]);
+					
+					}
+					else {
+					
+						try {
+					
+							this.flags.set(flags[i].flagString, new Flag(flags[i].flagString, flags[i].type, flags[i].name, flags[i].defaultVal));
+					
+						}
+						catch(e) {
+					
+							this.invalidFlags.push(flags[i]);
+							this.flagErrors.push(e);
+					
+						}
 					
 					}
 				
