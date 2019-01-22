@@ -16,8 +16,14 @@ class Flag {
 		defaultVal
 	) {
 	
+		if ('string' !== typeof flagString) {
+		
+			throw new TypeError('invalid flagString');
+		
+		}
+		this.flagString = sanitize.cleanString(flagString);
 		var cleantype = sanitize.cleanString(type);
-		if (-1 === VALID_FLAG_TYPES.indexof(cleantype)) {
+		if (-1 === VALID_FLAG_TYPES.indexOf(cleantype)) {
 		
 			throw new TypeError('invalid flag type');
 		
@@ -128,18 +134,21 @@ class FlagSet{
 	
 	}
 	
+	// TBD
 	addFlag(flagObj) {
 	
 		
 	
 	}
 	
+	// TBD
 	removeFlag(flagString) {
 	
 		
 	
 	}
 	
+	// TBD
 	parseFlags(flagsToParse) {
 	
 		var parsed = new Map();
