@@ -562,6 +562,59 @@ describe('cmd.js', function() {
 				expect(cmd.parsePre).to.be.a('function');
 			
 			});
+			it('should return preString unchanged if preString is not a string', function() {
+			
+				var str = null;
+				expect(cmd.parsePre(str)).to.be.null;
+			
+			});
+			it('should return an object with a content property if preString is a string', function() {
+			
+				var str = 'this charming man';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+			
+			});
+			it('should return an ansi object that ignores opening carriage returns of string', function() {
+			
+				var str = "\n\r" + 'this charming man';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+				expect(cmd.parsePre(str).content[0].content[0].content).to.equal('this');
+			
+			});
+			it('should return an ansi object that has new nodes for each internal carriage return of string', function() {
+			
+				var str = "\n\r" + 'I would go out tonight' + "\n\r" + 'But I haven\'t got a stitch to wear';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+				expect(cmd.parsePre(str).content[1].content[0].content).to.equal('But');
+			
+			});
+			it('should return an ansi object that has &nbsp; nodes for each internal space character of string', function() {
+			
+				var str = "\n\r" + 'I would go out tonight' + "\n\r" + 'But I haven\'t got a stitch to wear';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+				expect(cmd.parsePre(str).content[1].content[1].content).to.equal('&nbsp;');
+			
+			});
+			it('should return an ansi object that has multiple &nbsp; nodes for each internal space character in sequence of string', function() {
+			
+				var str = "\n\r" + 'I would go out tonight' + "\n\r" + 'But     I haven\'t got a stitch to wear';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+				expect(cmd.parsePre(str).content[1].content[4].content).to.equal('&nbsp;');
+			
+			});
+			it('should return an ansi object that has 4 &nbsp; nodes for each internal tab character of string', function() {
+			
+				var str = "\n\r" + 'I would go out tonight' + "\n\r" + 'But 	I haven\'t got a stitch to wear';
+				expect(cmd.parsePre(str)).to.be.an('object');
+				expect(cmd.parsePre(str).content).to.be.an('array');
+				expect(cmd.parsePre(str).content[1].content[4].content).to.equal('&nbsp;');
+			
+			});
 		
 		});
 		describe('escapeHtml', function() {
