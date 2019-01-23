@@ -159,6 +159,11 @@ describe('flags.js', function() {
 				expect(testFlagSet.addFlag).to.be.a('function');
 			
 			});
+			it('is not implemented yet', function() {
+		
+				expect(testFlagSet.addFlag).to.throw(Error, 'this function is not yet implemented');
+		
+			});
 		
 		});
 		describe('removeFlag', function() {
@@ -167,6 +172,11 @@ describe('flags.js', function() {
 			
 				expect(testFlagSet.removeFlag).to.be.a('function');
 			
+			});
+			it('is not implemented yet', function() {
+		
+				expect(testFlagSet.removeFlag).to.throw(Error, 'this function is not yet implemented');
+		
 			});
 		
 		});

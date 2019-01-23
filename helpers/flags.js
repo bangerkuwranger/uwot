@@ -159,14 +159,14 @@ class FlagSet{
 	// TBD
 	addFlag(flagObj) {
 	
-		
+		throw new Error('this function is not yet implemented');
 	
 	}
 	
 	// TBD
 	removeFlag(flagString) {
 	
-		
+		throw new Error('this function is not yet implemented');
 	
 	}
 	
