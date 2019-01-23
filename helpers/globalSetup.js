@@ -12,53 +12,59 @@ var Theme = require('../theme');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
 
-// init globals with empty values if non-extant or wrong type
-if ('object' !== typeof global.Uwot || null == global.Uwot) {
+function initGlobalObjects() {
 
-	global.Uwot = {};
+	// init globals with empty values if non-extant or wrong type
+	if ('object' !== typeof global.Uwot || null == global.Uwot) {
+
+		global.Uwot = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Constants || null == global.Uwot.Constants) {
+
+		global.Uwot.Constants = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Config || null === global.Uwot.Config) {
+
+		// was 'global.UwotConfig'
+		global.Uwot.Config = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Users || null === global.Uwot.Users) {
+
+		// was 'global.UwotUsers'
+		global.Uwot.Users = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Exports || null === global.Uwot.Exports) {
+
+		// was 'app.Exports'
+		global.Uwot.Exports = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Themes || null === global.Uwot.Themes) {
+
+		// was 'global.UwotThemes'
+		global.Uwot.Themes = {};
+
+	}
+
+	if ('object' !== typeof global.Uwot.Bin || null === global.Uwot.Bin) {
+
+		// was 'global.UwotBin'
+		global.Uwot.Bin = {};
+
+	}
 
 }
 
-if ('object' !== typeof global.Uwot.Constants || null == global.Uwot.Constants) {
-
-	global.Uwot.Constants = {};
-
-}
-
-if ('object' !== typeof global.Uwot.Config || null === global.Uwot.Config) {
-
-	// was 'global.UwotConfig'
-	global.Uwot.Config = {};
-
-}
-
-if ('object' !== typeof global.Uwot.Users || null === global.Uwot.Users) {
-
-	// was 'global.UwotUsers'
-	global.Uwot.Users = {};
-
-}
-
-if ('object' !== typeof global.Uwot.Exports || null === global.Uwot.Exports) {
-
-	// was 'app.Exports'
-	global.Uwot.Exports = {};
-
-}
-
-if ('object' !== typeof global.Uwot.Themes || null === global.Uwot.Themes) {
-
-	// was 'global.UwotThemes'
-	global.Uwot.Themes = {};
-
-}
-
-if ('object' !== typeof global.Uwot.Bin || null === global.Uwot.Bin) {
-
-	// was 'global.UwotBin'
-	global.Uwot.Bin = {};
-
-}
+initGlobalObjects();
 
 module.exports = {
 
@@ -234,10 +240,12 @@ module.exports = {
 	
 	},
 	
-	uninitAll: function uninitAll() {
+	uninitialize: function uninitAll() {
 	
 		delete global.Uwot;
 	
-	}
+	},
+	
+	initGlobalObjects: initGlobalObjects
 
 }

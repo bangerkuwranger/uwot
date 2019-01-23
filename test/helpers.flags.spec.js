@@ -88,6 +88,12 @@ describe('flags.js', function() {
 	
 	});
 	describe('FlagSet', function() {
+		
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 	
 		describe('constructor', function() {
 		
@@ -203,6 +209,11 @@ describe('flags.js', function() {
 	
 			testFlagSet = new FlagSet(testFlagSetArgs);
 	
+		});
+		afterEach(function() {
+
+			sinon.restore();
+
 		});
 		it('should not allow the constructor to be called outside of the FlagSet class methods', function() {
 	

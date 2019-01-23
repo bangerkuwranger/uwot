@@ -19,6 +19,11 @@ describe('users.js', function() {
 	});
 	describe('UwotUsers', function() {
 	
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 	
 			it('creates an object with a db property', function() {
@@ -1624,6 +1629,11 @@ describe('users.js', function() {
 			
 				});
 	
+		});
+		afterEach(function() {
+
+			sinon.restore();
+
 		});
 		it('should not allow the constructor to be called outside of the UwotUsers class methods', function() {
 	

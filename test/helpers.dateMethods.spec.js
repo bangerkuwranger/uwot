@@ -15,6 +15,11 @@ describe('dateMethods.js', function() {
 		testDate = new Date(1546450800498);
 	
 	});
+	afterEach(function() {
+
+		sinon.restore();
+
+	});
 	describe('Date.toMySqlString', function() {
 	
 		var asMySqlString = '2019-01-02 17:40:00';

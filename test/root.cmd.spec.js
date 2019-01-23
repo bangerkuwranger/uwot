@@ -65,6 +65,11 @@ describe('cmd.js', function() {
 			);
 		
 		});
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			it('should be a function', function() {
@@ -648,6 +653,11 @@ describe('cmd.js', function() {
 	});
 	describe('UwotCmdCommand', function() {
 	
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			var testCommand;
@@ -785,6 +795,11 @@ describe('cmd.js', function() {
 	});
 	describe('UwotCmdOption', function() {
 	
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			var testOptions;

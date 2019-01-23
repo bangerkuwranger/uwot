@@ -21,6 +21,12 @@ const testLocalBinPathFiles = [
 describe('binLoader.js', function() {
 
 	describe('loadLocalPath', function() {
+		
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 	
 		it('should be a function', function() {
 		
