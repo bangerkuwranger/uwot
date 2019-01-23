@@ -84,6 +84,12 @@ describe('binLoader.js', function() {
 			expect(binLoader.loadExternalPath).to.be.a('function');
 		
 		});
+		
+		it('is not implemented yet', function() {
+		
+			expect(binLoader.loadExternalPath).to.throw(Error, 'this function is not yet implemented');
+		
+		});
 	
 	});
 

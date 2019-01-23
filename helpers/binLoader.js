@@ -31,7 +31,13 @@ module.exports = {
 		}
 	
 	},
+	
+	// TBD
 	//loads from external or node-modules pathObj as defined in config
-	loadExternalPath: function loadExternalPath(pathObj) {}
+	loadExternalPath: function loadExternalPath(pathObj) {
+	
+		throw new Error('this function is not yet implemented');
+	
+	}
 
 }

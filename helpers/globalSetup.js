@@ -232,6 +232,12 @@ module.exports = {
 		global.Uwot.Constants.reserved.push(...Object.keys(global.Uwot.Bin));
 		return global.Uwot.Bin;
 	
+	},
+	
+	uninitAll: function uninitAll() {
+	
+		delete global.Uwot;
+	
 	}
 
 }
