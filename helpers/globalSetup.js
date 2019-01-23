@@ -238,7 +238,11 @@ module.exports = {
 
 		// TBD
 		// load externals if enabled
+		if (global.Uwot.Config.get('binpath', 'useExternal')) {
 
+			binLoader.loadExternalPath();
+
+		}
 		// then add to reserved list
 		global.Uwot.Constants.reserved.push(...Object.keys(global.Uwot.Bin));
 		return global.Uwot.Bin;

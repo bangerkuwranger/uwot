@@ -437,7 +437,7 @@ describe('globalSetup.js', function() {
 // 			expect(Object.keys(testLocalBins)).to.include(...expectedExternalThemes);
 
 			// method loadExternalPath() not implemented yet
-// 			expect(gsh.initBins).to.throw(Error, 'this function is not yet implemented');
+			expect(gsh.initBins).to.throw(Error, 'this function is not yet implemented');
 
 			configGetStub.restore();
 		
