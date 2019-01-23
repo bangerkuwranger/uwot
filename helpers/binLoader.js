@@ -24,6 +24,11 @@ module.exports = {
 			}
 
 		}
+		else {
+		
+			throw new Error('localBinPath is not a valid directory');
+		
+		}
 	
 	},
 	//loads from external or node-modules pathObj as defined in config
