@@ -191,13 +191,13 @@ module.exports = {
 	
 	initExports: function initExports() {
 	
-		if ('object' !== typeof global.Uwot.Exports.Cmd || null === global.Uwot.Exports.Cmd) {
+		if ('function' !== typeof global.Uwot.Exports.Cmd || global.Uwot.Exports.Cmd.name !== 'UwotCmd') {
 
 			global.Uwot.Exports.Cmd = Cmd;
 
 		}
 		
-		if ('object' !== typeof global.Uwot.Exports.Theme || null === global.Uwot.Exports.Theme) {
+		if ('function' !== typeof global.Uwot.Exports.Theme || global.Uwot.Exports.Theme.name !== 'UwotTheme') {
 
 			global.Uwot.Exports.Theme = Theme;
 
@@ -217,6 +217,11 @@ module.exports = {
 
 		// TBD
 		// load external themes if enabled
+		if (global.Uwot.Config.get('themes', 'useExternal')) {
+		
+			themeLoader.loadExternalPath();
+		
+		}
 		
 		return global.Uwot.Themes;
 	
@@ -240,9 +245,10 @@ module.exports = {
 	
 	},
 	
-	uninitialize: function uninitAll() {
+	uninitialize: function uninitialize() {
 	
 		delete global.Uwot;
+		return;
 	
 	},
 	

@@ -412,9 +412,10 @@ class UwotConfigBase {
 		filePath
 	) {
 	
+		this.filePath = sanitize.cleanString(filePath);
 		nconf.file(
 			'local',
-			filePath
+			this.filePath
 		);
 		nconf.defaults(confDefaults);
 	
@@ -432,7 +433,27 @@ class UwotConfigBase {
 			var catVal = nconf.get(cat);
 			if ('object' == typeof catVal && null !== catVal && 'string' == typeof key) {
 			
-				return catVal[key];	
+				var confVal = catVal[key];
+				if ('string' == typeof confVal) {
+				
+					if ('true' === confVal.trim().toLowerCase()) {
+					
+						return true;
+					
+					}
+					else if ('false' === confVal.trim().toLowerCase()) {
+					
+						return false;
+					
+					}
+					else {
+					
+						return confVal.trim();	
+					
+					}
+				
+				}
+				return confVal;	
 			
 			}
 			else if ('undefined' == typeof excludeArrays || excludeArrays) {
@@ -448,6 +469,30 @@ class UwotConfigBase {
 				
 				});
 				
+				return catVal;
+			
+			}
+			else if ('object' == typeof catVal) {
+			
+				var catKeys = Object.keys(catVal);
+				catKeys.forEach(function(key) {
+				
+					if ('string' === typeof catVal[key]) {
+					
+						if ('true' === catVal[key].trim().toLowerCase()) {
+						
+							catVal[key] = true;
+						
+						}
+						else if ('false' === catVal[key].trim().toLowerCase()) {
+						
+							catVal[key] = false;
+						
+						}
+					
+					}
+				
+				});
 				return catVal;
 			
 			}
@@ -500,9 +545,24 @@ class UwotConfigBase {
 			}
 			updatedVals.forEach(function(val, key) {
 			
+				
 				if (val !== currentVals.get(key)) {
 				
-					nconf.set(cat + ':' + key, val);
+					if ('true' === val.toString().trim().toLowerCase()) {
+					
+						nconf.set(cat + ':' + key, true);
+					
+					}
+					else if ('false' === val.toString().trim().toLowerCase()) {
+					
+						nconf.set(cat + ':' + key, false);
+					
+					}
+					else {
+					
+						nconf.set(cat + ':' + key, val);
+					
+					}
 					savedKeys.push(key);
 				
 				}
@@ -548,7 +608,22 @@ class UwotConfigBase {
 			var catVal = nconf.get(cat);
 			if ('object' == typeof catVal && null !== catVal && 'string' == typeof key) {
 			
-				var valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), sanitize.cleanString(value));
+				var valIsSet = false;
+				if ('true' === val.toString().trim().toLowerCase()) {
+				
+					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), true);
+				
+				}
+				else if ('false' === val.toString().trim().toLowerCase()) {
+				
+					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), false);
+				
+				}
+				else {
+				
+					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), sanitize.cleanString(value));
+				
+				}
 				if (!valIsSet) {
 				
 					return callback(new Error('unable to set value for ' + cat + ':' + key + '.'), false);

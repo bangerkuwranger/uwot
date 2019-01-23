@@ -30,12 +30,26 @@ module.exports = {
 			}
 
 		}
+		else {
+		
+			throw new Error('localThemePath is not a valid directory');
+		
+		}
 	
 	},
 	
+	// TBD
 	//loads from external or node-modules pathObj as defined in config
-	loadExternalPath: function loadExternalPath(pathObj) {},
+	loadExternalPath: function loadExternalPath(pathObj) {
 	
+		throw new Error('this function is not yet implemented');
+	
+	},
+	
+	// if themeName is not passed, returns array of loaded theme names.
+	// if themeName is provided, compares against list of loaded theme names and returns
+	// true if themeName is loaded,
+	// false if not.
 	isValidTheme(themeName) {
 	
 		if ('undefined' == typeof themeName || null === themeName || '' === themeName) {
