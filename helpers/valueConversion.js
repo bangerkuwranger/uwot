@@ -36,9 +36,14 @@ module.exports = {
 	
 	cleanString: function cleanString(value, length, defaultValue) {
 	
-		if ('number' !== typeof length || null === length || 1 > length) {
+		if ('number' !== typeof length || 1 > length) {
 		
 			length = 255;
+		
+		}
+		else {
+		
+			length = parseInt(length);
 		
 		}
 		if ('string' !== typeof defaultValue) {
