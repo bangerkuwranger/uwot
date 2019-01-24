@@ -88,5 +88,53 @@ describe('themeLoader.js', function() {
 		});
 	
 	});
+	describe('isValidTheme', function() {
+	
+		var loadedThemes;
+		before(function() {
+		
+			global.Uwot.Themes = {};
+			themeLoader.loadLocalPath();
+			loadedThemes = Object.keys(global.Uwot.Themes);
+		
+		});
+		
+		it('should be a function', function() {
+		
+			expect(themeLoader.isValidTheme).to.be.a('function');
+		
+		});
+		it('should return the theme names as an array if themeName arg is undefined', function() {
+		
+			expect(themeLoader.isValidTheme()).to.be.an('array').that.deep.equals(loadedThemes);
+		
+		});
+		it('should return the theme names as an array if themeName arg is null', function() {
+		
+			expect(themeLoader.isValidTheme(null)).to.be.an('array').that.deep.equals(loadedThemes);
+		
+		});
+		it('should return the theme names as an array if themeName arg is an empty string', function() {
+		
+			expect(themeLoader.isValidTheme('')).to.be.an('array').that.deep.equals(loadedThemes);
+		
+		});
+		it('should return false if themeName arg is not undefined, null, or a string', function() {
+		
+			expect(themeLoader.isValidTheme(['themeName'])).to.be.false;
+		
+		});
+		it('should return false if themeName arg is a string that is not a key in global.Uwot.Themes', function() {
+		
+			expect(themeLoader.isValidTheme('[themeName]')).to.be.false;
+		
+		});
+		it('should return true if themeName arg is a string that is a key in global.Uwot.Themes', function() {
+		
+			expect(themeLoader.isValidTheme('cac')).to.be.true;
+		
+		});
+	
+	});
 
 });
