@@ -934,6 +934,38 @@ describe('valueConversion.js', function() {
 			expect(sanitize.arrayOfObjectsOrEmpty).to.be.a('function');
 		
 		});
+		it('should return an empty array if passed no arguments', function() {
+		
+			expect(sanitize.arrayOfObjectsOrEmpty()).to.deep.equal([]);
+		
+		});
+		it('should return an empty array if value argument is not an array or if the first array element is not an object (or null...)', function() {
+		
+			expect(sanitize.arrayOfObjectsOrEmpty([1,2,3])).to.deep.equal([]);
+			expect(sanitize.arrayOfObjectsOrEmpty(null)).to.deep.equal([]);
+			expect(sanitize.arrayOfObjectsOrEmpty('[1,2,3]')).to.deep.equal([]);
+			expect(sanitize.arrayOfObjectsOrEmpty(new Date())).to.deep.equal([]);
+			expect(sanitize.arrayOfObjectsOrEmpty(['heresy', new Error('excommunicated.'), new Date()])).to.deep.equal([]);
+		
+		});
+		it('should return an array with the same elements as the value argument if it is an array that only has objects as elements', function() {
+		
+			
+			expect(sanitize.arrayOfObjectsOrEmpty(testValues.array)).to.deep.equal(testArray);
+			var testArraywNull = Array.from(testArray);
+			testArraywNull.unshift(null);
+			expect(sanitize.arrayOfObjectsOrEmpty(testArraywNull)).to.deep.equal(testArraywNull);
+		
+		});
+		it('should return an array with the same elements as the value argument, replacing any non-object members with null, if it is an array that has an object as its first element', function() {
+		
+			var testArraywGarbage = Array.from(testValues.array);
+			var testArraywNulls = Array.from(testArray);
+			testArraywGarbage.push(testValues.string, testValues.number, testValues.boolean);
+			testArraywNulls.push(null, null, null);
+			expect(sanitize.arrayOfObjectsOrEmpty(testArraywGarbage)).to.deep.equal(testArraywNulls);
+		
+		});
 	
 	});
 	describe('arrayOfStringsOrEmpty', function() {
