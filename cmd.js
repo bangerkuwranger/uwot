@@ -135,7 +135,8 @@ class UwotCmd {
 		
 				for (let i = 0; i < args.length; i++) {
 			
-					executeString += ' ' + args[i].toString();
+					executeString += ' ';
+					executeString += 'string' === typeof args[i].text ?  args[i].text : JSON.stringify(args[i]);
 		
 				}
 		
@@ -147,7 +148,9 @@ class UwotCmd {
 			}
 			for (let i = 0; i < this.options.length; i++) {
 		
-				executeString += 'boolean' == typeof options[i].isLong && options[i].isLong ? ' --' : ' -'
+				//fails on non-defined options
+				executeString += 'boolean' == typeof options[i].isLong && options[i].isLong ? ' --' : ' -';
+				
 				executeString += options[i].name.toString();
 				if (options[i].name && (options[i].name === 'h' || options[i].name === 'help')) {
 			
