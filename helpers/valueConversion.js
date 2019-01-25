@@ -238,8 +238,10 @@ module.exports = {
 	
 	cleanDate: function cleanDate(value, format) {
 	
-		value = 'string' == typeof value ? new Date(value) : value;
-		value = ('object' == typeof value && value instanceof Date) ? value : new Date();
+		var defaultValue = new Date();
+		value = 'string' == typeof value || 'number' == typeof value ? new Date(value) : value;
+		value = ('object' == typeof value && value instanceof Date) ? value : defaultValue;
+		value = value.toString() === 'Invalid Date' ? defaultValue : value;
 		if ('string' !== typeof format) {
 		
 			return value;

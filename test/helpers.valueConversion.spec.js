@@ -824,7 +824,62 @@ describe('valueConversion.js', function() {
 			expect(sanitize.cleanDate).to.be.a('function');
 		
 		});
-	
+		it('should return new Date() if not passed any arguments', function() {
+		
+			let now = new Date();
+			let result = sanitize.cleanDate();
+			expect(result).to.be.an.instanceof(Date);
+			expect(result >= now).to.be.true;
+		
+		});
+		it('should return value if value is a Date object and format !== "db" || "csv"', function() {
+		
+			expect(sanitize.cleanDate(testValues.date)).to.deep.equal(testDate);
+			expect(sanitize.cleanDate(testValues.date, testValues.string)).to.deep.equal(testDate);
+			expect(sanitize.cleanDate(testValues.date, testValues.array)).to.deep.equal(testDate);
+		
+		});
+		it('should return new Date(value) if value is a string that can be parsed to a valid date and format !== "db" || "csv"', function() {
+		
+			var testDateString = testValues.date.toISOString();
+			var nowDate = new Date();
+			var nowString = nowDate.toISOString();
+			expect(sanitize.cleanDate(testDateString)).to.deep.equal(testDate);
+			expect(sanitize.cleanDate(nowString)).to.deep.equal(nowDate);
+		
+		});
+		it('should return new Date(value) if value is a number that can be parsed to a valid date and format !== "db" || "csv"', function() {
+		
+			var testNumDate = new Date(testNumber);
+			expect(sanitize.cleanDate(1546450800498)).to.deep.equal(testDate);
+			expect(sanitize.cleanDate(testValues.number)).to.deep.equal(testNumDate);
+		
+		});
+		it('should return new Date() if value cannot be parsed to a valid date and format !== "db" || "csv"', function() {
+		
+			var testNum = -68000000000000000000000;
+			var testNumDate = sanitize.cleanDate(testNum);
+			var testStringDate = sanitize.cleanDate(testValues.string);
+			var nowDate = new Date();
+			expect(nowDate >= testNumDate).to.be.true;
+			expect(nowDate >= testStringDate).to.be.true;
+			expect(new Date(testNum).toString()).to.equal('Invalid Date');
+			expect(new Date(testString).toString()).to.equal('Invalid Date');
+			expect(testNumDate.toString()).not.to.equal('Invalid Date');
+			expect(testStringDate.toString()).not.to.equal('Invalid Date');
+		
+		});
+		it('should return a string in MySQL format (YYYY-MM-DD HH:MM:SS) parsed from expected Date object if format==="db"', function() {
+		
+			expect(sanitize.cleanDate(testValues.date, 'db')).to.equal('2019-01-02 17:40:00');
+		
+		});
+		it('should return a string in csv format (YYYY-MM-DD HH:MM:SS ZZZ) parsed from expected Date object if format==="csv"', function() {
+		
+			expect(sanitize.cleanDate(testValues.date, 'csv')).to.equal('2019-01-02 17:40:00 UTC');
+		
+		});
+		
 	});
 	describe('stringNoSpaces', function() {
 	
