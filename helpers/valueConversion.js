@@ -197,7 +197,7 @@ module.exports = {
 	
 	cleanBool: function cleanBool(value, defaultValue, format) {
 	
-		if ('undefined' === defaultValue) {
+		if ('undefined' === typeof defaultValue) {
 		
 			defaultValue = false;
 		
@@ -205,6 +205,11 @@ module.exports = {
 		else if (defaultValue && defaultValue !== 'false' && defaultValue !== '0') {
 		
 			defaultValue = true;
+		
+		}
+		if ('undefined' === typeof value || null === value || '' === value || ('string' !== typeof value && value.toString() === "NaN")) {
+		
+			value = defaultValue;
 		
 		}
 		value = (value && value !== 'false' && value !== '0') ? true : false;

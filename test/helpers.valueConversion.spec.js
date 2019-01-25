@@ -378,7 +378,441 @@ describe('valueConversion.js', function() {
 		});
 		it('should return false if passed no arguments', function() {
 		
+			expect(sanitize.cleanBool()).to.be.false;
 		
+		});
+		it('should return false if value argument is false, "false", 0, or "0"', function() {
+		
+			expect(sanitize.cleanBool(false)).to.be.false;
+			expect(sanitize.cleanBool('false')).to.be.false;
+			expect(sanitize.cleanBool(0)).to.be.false;
+			expect(sanitize.cleanBool('0')).to.be.false;
+		
+		});
+		it('should return false if value argument is undefined, null, "", or NaN when defaultValue is undefined', function() {
+		
+			expect(sanitize.cleanBool(null)).to.be.false;
+			expect(sanitize.cleanBool('')).to.be.false;
+			expect(sanitize.cleanBool(parseInt('jellyfishnose'))).to.be.false;
+			var args = [];
+			expect(sanitize.cleanBool(...args)).to.be.false;
+		
+		})
+		it('should return true if value argument is NOT false, "false", 0, "0", undefined, null, "", or NaN', function() {
+		
+			expect(sanitize.cleanBool(true)).to.be.true;
+			expect(sanitize.cleanBool('true')).to.be.true;
+			expect(sanitize.cleanBool(1)).to.be.true;
+			expect(sanitize.cleanBool(parseInt('9000'))).to.be.true;
+			expect(sanitize.cleanBool('veritas')).to.be.true;
+			expect(sanitize.cleanBool('null')).to.be.true;
+			expect(sanitize.cleanBool([])).to.be.true;
+			expect(sanitize.cleanBool(['0'])).to.be.true;
+			expect(sanitize.cleanBool({})).to.be.true;
+			expect(sanitize.cleanBool({isTrue: false})).to.be.true;
+		
+		});
+		it('should return false if value argument is undefined, null, "", or NaN when defaultValue is false, "false", 0, "0", null, "", or NaN', function() {
+		
+			expect(sanitize.cleanBool(null, false)).to.be.false;
+			expect(sanitize.cleanBool(null, 'false')).to.be.false;
+			expect(sanitize.cleanBool(null, 0)).to.be.false;
+			expect(sanitize.cleanBool(null, '0')).to.be.false;
+			expect(sanitize.cleanBool(null, null)).to.be.false;
+			expect(sanitize.cleanBool(null, '')).to.be.false;
+			expect(sanitize.cleanBool(null, parseInt('preposterousness'))).to.be.false;
+			
+			expect(sanitize.cleanBool('', false)).to.be.false;
+			expect(sanitize.cleanBool('', 'false')).to.be.false;
+			expect(sanitize.cleanBool('', 0)).to.be.false;
+			expect(sanitize.cleanBool('', '0')).to.be.false;
+			expect(sanitize.cleanBool('', null)).to.be.false;
+			expect(sanitize.cleanBool('', '')).to.be.false;
+			expect(sanitize.cleanBool('', parseInt('preposterousness'))).to.be.false;
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), false)).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'false')).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 0)).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '0')).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), null)).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '')).to.be.false;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('preposterousness'))).to.be.false;
+			
+			var args = [];
+			args[1] = false;
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = 'false';
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = 0;
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = '0';
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = null;
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = '';
+			expect(sanitize.cleanBool(...args)).to.be.false;
+			args[1] = parseInt('preposterousness');
+			expect(sanitize.cleanBool(...args)).to.be.false;
+		
+		});
+		it('should return true if value argument is undefined, null, "", or NaN when defaultValue is NOT false, "false", 0, "0", null, "", or NaN', function() {
+		
+			expect(sanitize.cleanBool(null, true)).to.be.true;
+			expect(sanitize.cleanBool(null, 'true')).to.be.true;
+			expect(sanitize.cleanBool(null, 1)).to.be.true;
+			expect(sanitize.cleanBool(null, '1')).to.be.true;
+			expect(sanitize.cleanBool(null, 'null')).to.be.true;
+			expect(sanitize.cleanBool(null, 'theAnswer')).to.be.true;
+			expect(sanitize.cleanBool(null, parseInt('42'))).to.be.true;
+			expect(sanitize.cleanBool(null, 'theAnswer')).to.be.true;
+			expect(sanitize.cleanBool(null, [])).to.be.true;
+			expect(sanitize.cleanBool(null, ['0'])).to.be.true;
+			expect(sanitize.cleanBool(null, {})).to.be.true;
+			expect(sanitize.cleanBool(null, {isTrue: false})).to.be.true;
+			
+			expect(sanitize.cleanBool('', true)).to.be.true;
+			expect(sanitize.cleanBool('', 'true')).to.be.true;
+			expect(sanitize.cleanBool('', 1)).to.be.true;
+			expect(sanitize.cleanBool('', '1')).to.be.true;
+			expect(sanitize.cleanBool('', 'null')).to.be.true;
+			expect(sanitize.cleanBool('', 'theAnswer')).to.be.true;
+			expect(sanitize.cleanBool('', parseInt('42'))).to.be.true;
+			expect(sanitize.cleanBool('', [])).to.be.true;
+			expect(sanitize.cleanBool('', ['0'])).to.be.true;
+			expect(sanitize.cleanBool('', {})).to.be.true;
+			expect(sanitize.cleanBool('', {isTrue: false})).to.be.true;
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), true)).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'true')).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 1)).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '1')).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'null')).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'theAnswer')).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('42'))).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), [])).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), ['0'])).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {})).to.be.true;
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {isTrue: false})).to.be.true;
+			
+			var args = [];
+			args[1] = true;
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = 'true';
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = 1;
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = '1';
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = 'null';
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = 'theAnswer';
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = parseInt('42');
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = [];
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = ['0'];
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = {};
+			expect(sanitize.cleanBool(...args)).to.be.true;
+			args[1] = {isTrue: false};
+			expect(sanitize.cleanBool(...args)).to.be.true;
+		
+		});
+		it('should return 1 if format==="db" and cleanBool would otherwise return true', function() {
+		
+			var args = [];
+			args[2] = 'db';
+			args[0] = true;
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = 'true';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = 1;
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = parseInt('9000');
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = 'veritas';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = 'null';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = [];
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = ['0'];
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = {};
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[0] = {isTrue: false};
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			
+			delete args[0];
+			args[1] = true;
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = 'true';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = 1;
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = '1';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = 'null';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = 'theAnswer';
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = parseInt('42');
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = [];
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = ['0'];
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = {};
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			args[1] = {isTrue: false};
+			expect(sanitize.cleanBool(...args)).to.equal(1);
+			
+			expect(sanitize.cleanBool(null, true, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, 'true', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, 1, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, '1', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, 'null', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, 'theAnswer', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, parseInt('42'), 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, 'theAnswer', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, [], 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, ['0'], 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, {}, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(null, {isTrue: false}, 'db')).to.equal(1);
+			
+			expect(sanitize.cleanBool('', true, 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', 'true', 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', 1, 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', '1', 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', 'null', 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', 'theAnswer', 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', parseInt('42'), 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', [], 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', ['0'], 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', {}, 'db')).to.equal(1);
+			expect(sanitize.cleanBool('', {isTrue: false}, 'db')).to.equal(1);
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), true, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'true', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 1, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '1', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'null', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'theAnswer', 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('42'), 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), [], 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), ['0'], 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {}, 'db')).to.equal(1);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {isTrue: false}, 'db')).to.equal(1);
+		
+		});
+		it('should return 0 if format==="db" and cleanBool would otherwise return false', function() {
+		
+			var args = [];
+			args[2] = 'db';
+			args[0] = false;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = 'false';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = 0;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = '0';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = null;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = '';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[0] = parseInt('jellyfishnose');
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			
+			delete args[0];
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = false;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = 'false';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = 0;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = '0';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = null;
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = '';
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			args[1] = parseInt('preposterousness');
+			expect(sanitize.cleanBool(...args)).to.equal(0);
+			
+			expect(sanitize.cleanBool(null, false, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, 'false', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, 0, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, '0', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, null, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, '', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(null, parseInt('preposterousness'), 'db')).to.equal(0);
+			
+			expect(sanitize.cleanBool('', false, 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', 'false', 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', 0, 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', '0', 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', null, 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', '', 'db')).to.equal(0);
+			expect(sanitize.cleanBool('', parseInt('preposterousness'), 'db')).to.equal(0);
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), false, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'false', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 0, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '0', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), null, 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '', 'db')).to.equal(0);
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('preposterousness'), 'db')).to.equal(0);
+		
+		});
+		it('should return "true" if format==="csv" and cleanBool would otherwise return true', function() {
+		
+			var args = [];
+			args[2] = 'csv';
+			args[0] = true;
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = 'true';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = 1;
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = parseInt('9000');
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = 'veritas';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = 'null';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = [];
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = ['0'];
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = {};
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[0] = {isTrue: false};
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			
+			delete args[0];
+			args[1] = true;
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = 'true';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = 1;
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = '1';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = 'null';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = 'theAnswer';
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = parseInt('42');
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = [];
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = ['0'];
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = {};
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			args[1] = {isTrue: false};
+			expect(sanitize.cleanBool(...args)).to.equal('true');
+			
+			expect(sanitize.cleanBool(null, true, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, 'true', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, 1, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, '1', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, 'null', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, 'theAnswer', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, parseInt('42'), 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, 'theAnswer', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, [], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, ['0'], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, {}, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(null, {isTrue: false}, 'csv')).to.equal('true');
+			
+			expect(sanitize.cleanBool('', true, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', 'true', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', 1, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', '1', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', 'null', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', 'theAnswer', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', parseInt('42'), 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', [], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', ['0'], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', {}, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool('', {isTrue: false}, 'csv')).to.equal('true');
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), true, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'true', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 1, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '1', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'null', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'theAnswer', 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('42'), 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), [], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), ['0'], 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {}, 'csv')).to.equal('true');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), {isTrue: false}, 'csv')).to.equal('true');
+		
+		});
+		it('should return "false" if format==="csv" and cleanBool would otherwise return false', function() {
+		
+			var args = [];
+			args[2] = 'csv';
+			args[0] = false;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = 'false';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = 0;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = '0';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = null;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = '';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[0] = parseInt('jellyfishnose');
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			
+			delete args[0];
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = false;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = 'false';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = 0;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = '0';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = null;
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = '';
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			args[1] = parseInt('preposterousness');
+			expect(sanitize.cleanBool(...args)).to.equal('false');
+			
+			expect(sanitize.cleanBool(null, false, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, 'false', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, 0, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, '0', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, null, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, '', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(null, parseInt('preposterousness'), 'csv')).to.equal('false');
+			
+			expect(sanitize.cleanBool('', false, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', 'false', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', 0, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', '0', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', null, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', '', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool('', parseInt('preposterousness'), 'csv')).to.equal('false');
+			
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), false, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 'false', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), 0, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '0', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), null, 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), '', 'csv')).to.equal('false');
+			expect(sanitize.cleanBool(parseInt('faaaaaaake'), parseInt('preposterousness'), 'csv')).to.equal('false');
 		
 		});
 	
