@@ -975,6 +975,36 @@ describe('valueConversion.js', function() {
 			expect(sanitize.arrayOfStringsOrEmpty).to.be.a('function');
 		
 		});
+		it('should return an empty array if passed no arguments', function() {
+		
+			expect(sanitize.arrayOfStringsOrEmpty()).to.deep.equal([]);
+		
+		});
+		it('should return an empty array if value argument is not an array or if the first array element is not a string', function() {
+		
+			expect(sanitize.arrayOfStringsOrEmpty([1,2,3])).to.deep.equal([]);
+			expect(sanitize.arrayOfStringsOrEmpty(null)).to.deep.equal([]);
+			expect(sanitize.arrayOfStringsOrEmpty('[1,2,3]')).to.deep.equal([]);
+			expect(sanitize.arrayOfStringsOrEmpty(new Date())).to.deep.equal([]);
+			expect(sanitize.arrayOfStringsOrEmpty([42, 'heresy', new Error('excommunicated.'), new Date()])).to.deep.equal([]);
+		
+		});
+		it('should return an array with the same elements as the value argument if it is an array that only has strings as elements', function() {
+		
+			var strArray = ['come', 'at', 'me', 'bro'];
+			expect(sanitize.arrayOfStringsOrEmpty(strArray)).to.deep.equal(strArray);
+		
+		});
+		it('should return an array with the same elements as the value argument, replacing any non-string members with empty strings, if it is an array that has an string as its first element', function() {
+		
+			var strArray = ['come', 'at', 'me', 'bro'];
+			var testArraywGarbage = Array.from(strArray);
+			var testArraywEmpties = Array.from(strArray);
+			testArraywGarbage.push(testValues.date, testValues.number, testValues.boolean);
+			testArraywEmpties.push('', '', '');
+			expect(sanitize.arrayOfStringsOrEmpty(testArraywGarbage)).to.deep.equal(testArraywEmpties);
+		
+		});
 	
 	});
 
