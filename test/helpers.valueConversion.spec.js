@@ -258,6 +258,115 @@ describe('valueConversion.js', function() {
 			expect(sanitize.cleanFloat).to.be.a('function');
 		
 		});
+		it('should return 0 if passed no arguments', function() {
+		
+			expect(sanitize.cleanFloat()).to.equal(0);
+		
+		});
+		it('should return the value argument if parseFloat(value) is a positive number or 0', function() {
+		
+			expect(sanitize.cleanFloat(144)).to.equal(144);
+			expect(sanitize.cleanFloat(0)).to.equal(0);
+			expect(sanitize.cleanFloat('7', 8)).to.equal(7);
+			expect(sanitize.cleanFloat('144', 8)).to.equal(144);
+		
+		});
+		it('should return the value argument if parseFloat(value) is a negative number', function() {
+		
+			expect(sanitize.cleanFloat(-144)).to.equal(-144);
+			expect(sanitize.cleanFloat('-7', 8)).to.equal(-7);
+		
+		});
+		it('should return an float limited to 4 decimal places parsed from the value argument if parseFloat(value) is a Number', function() {
+		
+			expect(sanitize.cleanFloat(144.44175)).to.equal(144.4418);
+			expect(sanitize.cleanFloat('-144.4418')).to.equal(-144.4418);
+		
+		});
+		it('should return 0 if value argument is null', function() {
+		
+			expect(sanitize.cleanFloat(null)).to.equal(0);
+		
+		});
+		it('should return 0 if parseFloat(value) is NaN and defaultValue arg is undefined', function() {
+		
+			expect(sanitize.cleanFloat('miniscule')).to.equal(0);
+		
+		});
+		it('should return defaultValue argument if parseFloat(value) is NaN and defaultValue arg is defined', function() {
+		
+			expect(sanitize.cleanFloat('miniscule', 8)).to.equal(8);
+		
+		});
+		it('should return value argument if parseFloat(value) is a number and defaultValue is not a number', function() {
+		
+			expect(sanitize.cleanFloat('7', '8')).to.equal(7);
+			expect(sanitize.cleanFloat(144, 'horsefeathers')).to.equal(144);
+			expect(sanitize.cleanFloat(-42, '42')).to.equal(-42);
+		
+		});
+		it('should return 0 if format==="db" and value===null', function() {
+		
+			expect(sanitize.cleanFloat(null, null, 'db')).to.equal(0);
+		
+		});
+		it('should return parseFloat(value) if format==="db" and parseFloat(value) is a positive number', function() {
+		
+			expect(sanitize.cleanFloat(144, null, 'db')).to.equal(144);
+			expect(sanitize.cleanFloat(144, 8, 'db')).to.equal(144);
+		
+		});
+		it('should return defaultValue if format==="db" and parseFloat(value) is NaN and defaultValue is a Number', function() {
+		
+			expect(sanitize.cleanFloat('balderdash', 8, 'db')).to.equal(8);
+		
+		});
+		it('should return 0 if format==="db" and parseFloat(value) is NaN and defaultValue is not a Number', function() {
+		
+			expect(sanitize.cleanFloat('horsefeathers', 'falwell', 'db')).to.equal(0);
+			expect(sanitize.cleanFloat('picayune', null, 'db')).to.equal(0);
+		
+		});
+		it('should return 0 if format==="db" and parseFloat(value) is NaN and defaultValue is undefined', function() {
+		
+			var args = [
+				'fantasy',
+				'cantor',
+				'db'
+			];
+			delete args[1];
+			expect(sanitize.cleanFloat(...args)).to.equal(0);
+		
+		});
+		it('should return an empty string if format==="csv" and value===null', function() {
+		
+			expect(sanitize.cleanFloat(null, null, 'csv')).to.equal('');
+		
+		});
+		it('should return parseFloat(value).toString() to four decimals if format==="csv" and parseFloat(value) is a number', function() {
+		
+			expect(sanitize.cleanFloat(144, null, 'csv')).to.equal('144.0000');
+			expect(sanitize.cleanFloat(144.27, 8, 'csv')).to.equal('144.2700');
+		
+		});
+		it('should return defaultValue.toString() if format==="csv" and parseFloat(value) is NaN and defaultValue is a Number', function() {
+		
+			expect(sanitize.cleanFloat('balderdash', 8, 'csv')).to.equal('8.0000');
+		
+		});
+		it('should return "0.0000" if format==="csv" and parseFloat(value) is NaN and defaultValue is not a Number', function() {
+		
+			expect(sanitize.cleanFloat('picayune', null, 'csv')).to.equal('0.0000');
+			expect(sanitize.cleanFloat('horsefeathers', 'falwell', 'csv')).to.equal('0.0000');
+			var args = [
+				'fantasy',
+				'cantor',
+				'csv'
+			];
+			delete args[1];
+			expect(sanitize.cleanFloat(...args)).to.equal('0.0000');
+		
+		});
 	
 	});
 	describe('cleanBool', function() {
@@ -265,6 +374,11 @@ describe('valueConversion.js', function() {
 		it('should be a function', function() {
 		
 			expect(sanitize.cleanBool).to.be.a('function');
+		
+		});
+		it('should return false if passed no arguments', function() {
+		
+		
 		
 		});
 	

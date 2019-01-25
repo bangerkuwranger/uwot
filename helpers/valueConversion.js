@@ -153,13 +153,14 @@ module.exports = {
 	
 	cleanFloat: function cleanFloat(value, defaultValue, format) {
 	
-		if ('number' !== defaultValue) {
+		if ('number' !== typeof defaultValue) {
 		
 			defaultValue = 0.0000;
 		
 		}
-		var valueFloat = ('number' === typeof value && !(isNaN(parseFloat(value)))) ? parseFloat(value) : defaultValue;
-		value = (isNaN(valueFloat)) ? defaultValue : parseFloat(valueFloat.toFixed(4));
+		var useNull = value === null;
+		var valueFloat = ('number' === typeof value || !(isNaN(parseFloat(value)))) ? parseFloat(value) : defaultValue;
+		value = (isNaN(valueFloat)) ? parseFloat(defaultValue.toFixed(4)) : parseFloat(valueFloat.toFixed(4));
 		if ('string' !== typeof format) {
 		
 			return value;
@@ -170,19 +171,10 @@ module.exports = {
 			switch (format) {
 			
 				case 'db':
-					if (null === value) {
-					
-						return null;
-					
-					}
-					else {
-					
-						return ('string' == typeof value) ? parseFloat(value) : value;
-					
-					}
+					return ('string' == typeof value) ? parseFloat(value) : value;
 					break;
 				case 'csv':
-					if (null === value) {
+					if (useNull) {
 					
 						return '';
 					
@@ -190,7 +182,7 @@ module.exports = {
 					else {
 					
 						value = ('number' == typeof value) ? value.toFixed(4) : value.toString();
-						return (defaultValue === value || defaultValue.toFixed(4) === value) ? null: value;
+						return (null === value || 'null' === value) ? '': value;
 					
 					}
 					break;
