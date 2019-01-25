@@ -157,6 +157,98 @@ describe('valueConversion.js', function() {
 			expect(sanitize.cleanInt('miniscule')).to.equal(0);
 		
 		});
+		it('should return defaultValue argument if parseInt(value) is NaN and defaultValue arg is defined', function() {
+		
+			expect(sanitize.cleanInt('miniscule', 8)).to.equal(8);
+		
+		});
+		it('should return defaultValue argument if parseInt(value) is a positive integer that is less than defaultValue, and defaultValue is a number', function() {
+		
+			expect(sanitize.cleanInt('7', 8)).to.equal(8);
+			expect(sanitize.cleanInt('-7', 8)).to.equal(8);
+		
+		});
+		it('should return value argument if parseInt(value) is a positive integer that is greater than than defaultValue, and defaultValue is a number', function() {
+		
+			expect(sanitize.cleanInt('144', 8)).to.equal(144);
+		
+		});
+		it('should return value argument if parseInt(value) is a positive integer and defaultValue is not a number', function() {
+		
+			expect(sanitize.cleanInt('7', '8')).to.equal(7);
+			expect(sanitize.cleanInt(144, 'horsefeathers')).to.equal(144);
+		
+		});
+		it('should return null if format==="db" and value===null', function() {
+		
+			expect(sanitize.cleanInt(null, null, 'db')).to.be.null;
+		
+		});
+		it('should return parseInt(value) if format==="db" and parseInt(value) is a positive integer that is greater than defaultValue', function() {
+		
+			expect(sanitize.cleanInt(144, null, 'db')).to.equal(144);
+			expect(sanitize.cleanInt(144, 8, 'db')).to.equal(144);
+		
+		});
+		it('should return defaultValue if format==="db" and parseInt(value) is NaN and defaultValue is null or a Number', function() {
+		
+			expect(sanitize.cleanInt('picayune', null, 'db')).to.equal(null);
+			expect(sanitize.cleanInt('balderdash', 8, 'db')).to.equal(8);
+		
+		});
+		it('should return 0 if format==="db" and parseInt(value) is NaN and defaultValue is not null or a Number', function() {
+		
+			expect(sanitize.cleanInt('horsefeathers', 'falwell', 'db')).to.equal(0);
+		
+		});
+		it('should return 0 if format==="db" and parseInt(value) is NaN and defaultValue is undefined', function() {
+		
+			var args = [
+				'fantasy',
+				'cantor',
+				'db'
+			];
+			delete args[1];
+			expect(sanitize.cleanInt(...args)).to.equal(0);
+		
+		});
+		it('should return an empty string if format==="csv" and value===null', function() {
+		
+			expect(sanitize.cleanInt(null, null, 'csv')).to.equal('');
+		
+		});
+		it('should return parseInt(value).toString() if format==="csv" and parseInt(value) is a positive integer that is greater than defaultValue', function() {
+		
+			expect(sanitize.cleanInt(144, null, 'csv')).to.equal('144');
+			expect(sanitize.cleanInt(144, 8, 'csv')).to.equal('144');
+		
+		});
+		it('should return defaultValue.toString() if format==="csv" and parseInt(value) is NaN and defaultValue is a Number', function() {
+		
+			expect(sanitize.cleanInt('balderdash', 8, 'csv')).to.equal('8');
+		
+		});
+		it('should return an empty string if format==="csv" and parseInt(value) is NaN and defaultValue is null', function() {
+		
+			expect(sanitize.cleanInt('picayune', null, 'csv')).to.equal('');
+		
+		});
+		it('should return "0" if format==="csv" and parseInt(value) is NaN and defaultValue is not null or a Number', function() {
+		
+			expect(sanitize.cleanInt('horsefeathers', 'falwell', 'csv')).to.equal('0');
+		
+		});
+		it('should return "0" if format==="csv" and parseInt(value) is NaN and defaultValue is undefined', function() {
+		
+			var args = [
+				'fantasy',
+				'cantor',
+				'csv'
+			];
+			delete args[1];
+			expect(sanitize.cleanInt(...args)).to.equal('0');
+		
+		});
 	
 	});
 	describe('cleanFloat', function() {

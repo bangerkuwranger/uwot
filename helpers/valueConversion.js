@@ -136,8 +136,9 @@ module.exports = {
 					}
 					else {
 					
+						defaultValue = null === defaultValue ? '' : defaultValue;
 						value = ('number' == typeof value) ? value.toString() : value;
-						return (defaultValue === value || defaultValue.toString() === value) ? null: value;
+						return ('string' === typeof value) ? value : defaultValue;
 					
 					}
 					break;
