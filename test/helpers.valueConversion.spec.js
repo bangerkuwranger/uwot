@@ -6,6 +6,7 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
 var sanitize = require('../helpers/valueConversion');
+require('../helpers/stringMethods');
 
 describe('valueConversion.js', function() {
 	const testValues = {};
@@ -886,6 +887,42 @@ describe('valueConversion.js', function() {
 		it('should be a function', function() {
 		
 			expect(sanitize.stringNoSpaces).to.be.a('function');
+		
+		});
+		it('should return an empty string if passed no arguments', function() {
+		
+			expect(sanitize.stringNoSpaces()).to.equal('');
+		
+		});
+		it('should return an empty string if value argument is null', function() {
+		
+			expect(sanitize.stringNoSpaces(null)).to.equal('');
+		
+		});
+		it('should return the value argument as a string with all leading and following whitespace removed and all internal spaces replaced by camelCapping (non-alpha chars are removed) if it is passed as a string and format!=="us"', function() {
+		
+			expect(sanitize.stringNoSpaces(testValues.string)).to.equal(testString.trim().split(' ').join('_').toCamel());
+		
+		});
+		it('should return the value argument as a string with all leading and following whitespace removed and all internal spaces replaced by single underscores, and all characters after each underscore in lowercase (non-alpha/non-underscore chars are removed) if it is passed as a string and format==="us"', function() {
+		
+			expect(sanitize.stringNoSpaces(testValues.string, 'us')).to.equal(testString.trim().split(' ').join('_').toUnderscore());
+		
+		});
+		it('should return the value argument as a string with all leading and following whitespace removed and all internal spaces replaced by camelCapping (non-alpha chars are removed) if value is not a string, null, or undefined, and format!=="us"', function() {
+		
+			expect(sanitize.stringNoSpaces(testValues.number)).to.equal(testNumber.toString().trim().split(' ').join('_').toCamel());
+			expect(sanitize.stringNoSpaces(testValues.boolean)).to.equal(testBool.toString().trim().split(' ').join('_').toCamel());
+			expect(sanitize.stringNoSpaces(testValues.date)).to.equal(testDate.toString().trim().split(' ').join('_').toCamel());
+			expect(sanitize.stringNoSpaces(testValues.array)).to.equal(testArray.toString().trim().split(' ').join('_').toCamel());
+		
+		});
+		it('should return the value argument as a string with all leading and following whitespace removed and internal spaces replaced by single underscores, and all characters after each underscore in lowercase  (non-alpha/non-underscore chars are removed) if value is not a string, null, or undefined, and format==="us"', function() {
+		
+			expect(sanitize.stringNoSpaces(testValues.number, 'us')).to.equal(testNumber.toString().trim().split(' ').join('_').toUnderscore());
+			expect(sanitize.stringNoSpaces(testValues.boolean, 'us')).to.equal(testBool.toString().trim().split(' ').join('_').toUnderscore());
+			expect(sanitize.stringNoSpaces(testValues.date, 'us')).to.equal(testDate.toString().trim().split(' ').join('_').toUnderscore());
+			expect(sanitize.stringNoSpaces(testValues.array, 'us')).to.equal(testArray.toString().trim().split(' ').join('_').toUnderscore());
 		
 		});
 	

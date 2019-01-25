@@ -5,7 +5,12 @@ module.exports = {
 
 	stringNoSpaces: function stringNoSpaces(value, format) {
 	
-		if ('string' !== typeof value) {
+		if ('undefined' == typeof value || null === value) {
+		
+			return '';
+		
+		}
+		else if ('string' !== typeof value) {
 		
 			value = value.toString().trim();
 		
@@ -15,12 +20,14 @@ module.exports = {
 			value = value.trim();
 		
 		}
+		// these trims and space subs are superfluous now that stringMethods perform them
 		value = value.split(' ').join('_');
 		if ('string' !== typeof format) {
 		
 			format = 'cc';
 		
 		}
+		//these stringMethods should probably provide bool to turn on nums...
 		switch(format) {
 		
 			case 'us':
