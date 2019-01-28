@@ -65,7 +65,7 @@ module.exports = {
 		else {
 		
 			var loadedThemes = Object.keys(global.Uwot.Themes);
-			return loadedThemes.indexOf(themeName.trim()) != -1;
+			return loadedThemes.indexOf(themeName.trim()) !== -1;
 		
 		}
 	

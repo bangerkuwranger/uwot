@@ -412,12 +412,13 @@ class UwotConfigBase {
 		filePath
 	) {
 	
-		this.filePath = sanitize.cleanString(filePath);
+		this.filePath = sanitize.cleanString(filePath, 255);
 		nconf.file(
 			'local',
 			this.filePath
 		);
 		nconf.defaults(confDefaults);
+		this.nconf = nconf;
 	
 	}
 	
@@ -699,7 +700,7 @@ class UwotConfigBase {
 	
 		if ('function' != typeof callback) {
 		
-			throw new TypeError('invalid callback passed to setArrVal.');
+			throw new TypeError('invalid callback passed to addArrVal.');
 		
 		}
 		else if ('string' != typeof cat || 'string' != typeof key || 'string' != typeof value) {
