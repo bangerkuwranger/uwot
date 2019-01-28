@@ -619,15 +619,15 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			if ('object' == typeof catVal && null !== catVal && 'string' == typeof key) {
+			if ('object' == typeof catVal && null !== catVal) {
 			
 				var valIsSet = false;
-				if ('true' === val.toString().trim().toLowerCase()) {
+				if ('true' === value.toString().trim().toLowerCase()) {
 				
 					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), true);
 				
 				}
-				else if ('false' === val.toString().trim().toLowerCase()) {
+				else if ('false' === value.toString().trim().toLowerCase()) {
 				
 					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), false);
 				

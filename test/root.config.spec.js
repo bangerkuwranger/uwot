@@ -661,7 +661,7 @@ describe('config.js', function() {
 			});
 			it('should return a RangeError if cat argument does not match an existing category', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
 				
 					return undefined;
 				
@@ -675,6 +675,115 @@ describe('config.js', function() {
 				});
 			
 			})
+			it('should return a Error if nconf cannot set the value', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return false;
+				
+				});
+				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('unable to set value for users:allowGuest.');
+					done();
+				
+				});
+			
+			});
+			it('should return a Error to callback if nconf cannot save the change', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				
+					return callback(new Error('test nconf.save error'))
+				
+				});
+				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('test nconf.save error');
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, true) if value was set and saved.', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				
+					expect(error).to.be.false;
+					expect(isSaved).to.be.true;
+					done();
+				
+				});
+			
+			});
+			it('should cast value to a boolean if it is a string that, after trim() and toLowerCase(), === "true" or "false"', function(done) {
+			
+				var savedValues = {};
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					savedValues[key] = value;
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				
+					expect(error).to.be.false;
+					expect(isSaved).to.be.true;
+					config.setStrVal('users', 'allowShellFunctions', 'false', function(error, isSaved) {
+					
+						expect(error).to.be.false;
+						expect(isSaved).to.be.true;
+						expect(savedValues['users:allowGuest']).to.equal(true);
+						expect(savedValues['users:allowShellFunctions']).to.equal(false);
+						done();
+					
+					});
+				
+				});
+			
+			});
 		
 		});
 		describe('setArrVal', function() {
