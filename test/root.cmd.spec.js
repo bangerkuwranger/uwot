@@ -137,7 +137,7 @@ describe('cmd.js', function() {
 				];
 				cmd.execute(args, null, this, function(error, result) {
 				
-					expect(result).to.be.a('string').that.includes('mary had lamb little');
+					expect(result).to.be.a('string').that.includes('"mary" "had" "lamb" "little"');
 					done();
 				
 				});
@@ -157,7 +157,7 @@ describe('cmd.js', function() {
 				];
 				cmd.execute(args, opts, this, function(error, result) {
 				
-					expect(result).to.be.a('string').that.includes('mary had lamb little -s --recursive');
+					expect(result).to.be.a('string').that.includes('"mary" "had" "lamb" "little" -s --recursive');
 					done();
 				
 				});
