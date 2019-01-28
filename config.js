@@ -651,7 +651,7 @@ class UwotConfigBase {
 			}
 			else {
 			
-				return callback(new RangeError('invalid cat passed to setArrVal.'), false);
+				return callback(new RangeError('invalid cat passed to setStrVal.'), false);
 			
 			}
 
@@ -678,7 +678,7 @@ class UwotConfigBase {
 			
 				try {
 				
-					var valIsSet = nconf.set(cat + ':' + key.sanitize.cleanString(key), arrayMembersToClass(value, cat + ':' + key.sanitize.cleanString(key)));
+					var valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), this.utilities.arrayMembersToClass(value, cat + ':' + sanitize.cleanString(key)));
 				
 				}
 				catch(error) {
@@ -700,7 +700,7 @@ class UwotConfigBase {
 			}
 			else {
 			
-				return callback(new Error('invalid cat passed to setArrVal.'), false);
+				return callback(new RangeError('invalid cat passed to setArrVal.'), false);
 			
 			}
 
@@ -739,7 +739,7 @@ class UwotConfigBase {
 				}
 				else {
 					
-					var newValue = arrayMembersToClass([newObj], cat + ':' + key);
+					var newValue = this.utilities.arrayMembersToClass([newObj], cat + ':' + key);
 					var updatedArr = currArr.concat(newValue);
 					if (nconf.set(cat + ':' + sanitize.cleanString(key), updatedArr)) {
 				

@@ -88,9 +88,52 @@ describe('config.js', function() {
 			it('should set the utilities property to an object with properties for each utility function', function() {
 			
 				expect(config.utilities).to.be.an('object');
-				expect(config.utilities).to.have.own.property('mergeMaps').that.is.a('function');
-				expect(config.utilities).to.have.own.property('isArrayKey').that.is.a('function');
-				expect(config.utilities).to.have.own.property('arrayMembersToClass').that.is.a('function');
+				expect(config.utilities).to.have.own.property('mergeMaps');
+				expect(config.utilities).to.have.own.property('isArrayKey');
+				expect(config.utilities).to.have.own.property('arrayMembersToClass');
+			
+			});
+		
+		});
+		describe('utilities', function() {
+		
+			describe('mergeMaps', function() {
+			
+				it('should be a function', function() {
+				
+					expect(config.utilities.mergeMaps).to.be.a('function');
+				
+				});
+				it('should throw a TypeError if the oldMap argument is not a Map object');
+				it('should throw a TypeError if the newMap argument is not a Map object');
+				it('should throw a TypeError if the catName argument is not a string');
+				it('should throw a TypeError if the catName argument is not a valid config category');
+				it('should return a Map object with all keys found in both oldMap and newMap set to the values in newMap');
+				it('should return a Map object with all keys found only in oldMap set to the values in oldMap');
+				it('should return a Map object with all keys found only in newMap set to the values in newMap');
+			
+			});
+			describe('isArrayKey', function() {
+			
+				it('should be a function', function() {
+				
+					expect(config.utilities.isArrayKey).to.be.a('function');
+				
+				});
+				it('should return false if keyString is not a string or an empty string');
+				it('should return false if keyString does not exist in the arrayKeys Array defined in config.js');
+				it('should return true if keyString does exist in the arrayKeys Array defined in config.js');
+			
+			});
+			describe('arrayMembersToClass', function() {
+			
+				it('should be a function', function() {
+				
+					expect(config.utilities.arrayMembersToClass).to.be.a('function');
+				
+				});
+				it('should throw a TypeError if the arrayOfObjs argument is not an Array');
+				it('should throw an Error if the arrayKey argument is not a valid array key string');
 			
 			});
 		
@@ -669,7 +712,7 @@ describe('config.js', function() {
 				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
 				
 					expect(error).to.be.an.instanceof(RangeError);
-					expect(error.message).to.equal('invalid cat passed to setArrVal.');
+					expect(error.message).to.equal('invalid cat passed to setStrVal.');
 					done();
 				
 				});
@@ -734,12 +777,12 @@ describe('config.js', function() {
 					return true;
 				
 				});
-				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
 				
 					return callback(false, true);
 				
 				});
-				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				config.setStrVal('users', 'allowGuest', 'yes', function(error, isSaved) {
 				
 					expect(error).to.be.false;
 					expect(isSaved).to.be.true;
@@ -788,17 +831,183 @@ describe('config.js', function() {
 		});
 		describe('setArrVal', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if callback argument is not a function');
-			it('should return a TypeError to callback if cat argument is not a string');
-			it('should return a TypeError to callback if key argument is not a string');
-			it('should return a TypeError to callback if value argument is not an Array');
+			it('should be a function', function() {
+			
+				expect(config.setArrVal).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback argument is not a function', function() {
+			
+				expect(config.setArrVal).to.throw(TypeError, 'invalid callback passed to setArrVal.');
+			
+			});
+			it('should return a TypeError to callback if cat argument is not a string', function(done) {
+			
+				config.setArrVal(null, 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to setArrVal.');
+					done();
+				
+				});
+			
+			});
+			it('should return a TypeError to callback if key argument is not a string', function(done) {
+			
+				config.setArrVal('themes', null, ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to setArrVal.');
+					done();
+				
+				});
+			
+			});
+			it('should return a TypeError to callback if value argument is not an Array', function(done) {
+			
+				config.setArrVal('themes', 'external', 'ugly', function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to setArrVal.');
+					done();
+				
+				});
+			
+			});
+			it('should return a RangeError if cat argument does not match an existing category', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return undefined;
+				
+				});
+				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(RangeError);
+					expect(error.message).to.equal('invalid cat passed to setArrVal.');
+					done();
+				
+				});
+			
+			});
+			it('should return an Error to callback if arrayMembersToClass throws an error', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				var arrayMembersToClassStub = sinon.stub(config.utilities, 'arrayMembersToClass').callsFake(function throwError(arr, key, returnAsClass) {
+				
+					throw new Error('test arrayMembersToClass error');
+				
+				});
+				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('test arrayMembersToClass error');
+					done();
+				
+				});
+			
+			});
+			it('should return a Error if nconf cannot set the value', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return false;
+				
+				});
+				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('unable to set value for themes:external.');
+					done();
+				
+				});
+			
+			});
+			it('should return a Error to callback if nconf cannot save the change', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				
+					return callback(new Error('test nconf.save error'))
+				
+				});
+				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('test nconf.save error');
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, true) if value was set and saved.', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return stubDefaults[cat];
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
+				
+					expect(error).to.be.false;
+					expect(isSaved).to.be.true;
+					done();
+				
+				});
+			
+			});
 		
 		});
 		describe('addArrVal', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if callback argument is not a function');
+			it('should be a function', function() {
+			
+				expect(config.addArrVal).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback argument is not a function', function() {
+			
+				expect(config.addArrVal).to.throw(TypeError, 'invalid callback passed to addArrVal.');
+			
+			});
 			it('should return a TypeError to callback if cat argument is not a string');
 			it('should return a TypeError to callback if key argument is not a string');
 			it('should return a TypeError to callback if value argument is not a string');
@@ -832,7 +1041,16 @@ describe('config.js', function() {
 	
 		describe('constructor', function() {
 		
-		
+			it('should not be available outside of UwotConfigBase methods', function() {
+			
+				function instantiate() {
+				
+					return new ExternalBinPath();
+				
+				};
+				expect(instantiate).to.throw(ReferenceError, 'ExternalBinPath is not defined');
+			
+			});
 		
 		});
 	
@@ -841,7 +1059,16 @@ describe('config.js', function() {
 	
 		describe('constructor', function() {
 		
-		
+			it('should not be available outside of UwotConfigBase methods', function() {
+			
+				function instantiate() {
+				
+					return new ExternalTheme();
+				
+				};
+				expect(instantiate).to.throw(ReferenceError, 'ExternalTheme is not defined');
+			
+			});
 		
 		});
 	
@@ -850,7 +1077,16 @@ describe('config.js', function() {
 	
 		describe('constructor', function() {
 		
-		
+			it('should not be available outside of UwotConfigBase methods', function() {
+			
+				function instantiate() {
+				
+					return new ReverseProxyBin();
+				
+				};
+				expect(instantiate).to.throw(ReferenceError, 'ReverseProxyBin is not defined');
+			
+			});
 		
 		});
 	
