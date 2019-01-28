@@ -419,6 +419,11 @@ class UwotConfigBase {
 		);
 		nconf.defaults(confDefaults);
 		this.nconf = nconf;
+		this.utilities = {
+			mergeMaps: mergeMaps,
+			isArrayKey: isArrayKey,
+			arrayMembersToClass: arrayMembersToClass
+		};
 	
 	}
 	
@@ -457,24 +462,22 @@ class UwotConfigBase {
 				return confVal;	
 			
 			}
-			else if ('undefined' == typeof excludeArrays || excludeArrays) {
+			else if ('object' == typeof catVal && null !== catVal) {
 			
-				arrayKeys.forEach(function(ak) {
+				if ('undefined' == typeof excludeArrays || excludeArrays) {
+			
+					arrayKeys.forEach(function(ak) {
 				
-					let thisAk = ak.split(':', 2);
-					if (cat == thisAk[0]) {
+						let thisAk = ak.split(':', 2);
+						if (cat == thisAk[0]) {
 					
-						delete catVal[thisAk[1]];
+							delete catVal[thisAk[1]];
 					
-					}
+						}
 				
-				});
-				
-				return catVal;
+					});
 			
-			}
-			else if ('object' == typeof catVal) {
-			
+				}
 				var catKeys = Object.keys(catVal);
 				catKeys.forEach(function(key) {
 				
@@ -528,16 +531,19 @@ class UwotConfigBase {
 		}
 		else if (-1 === this.getCats().indexOf(cat)) {
 		
-			return callback(new Error('invalid category passed to updateCatStrVals.'), false);
+			return callback(new RangeError('invalid category passed to updateCatStrVals.'), false);
 		
 		}
 		else {
 		
+			var savedKeys = [];
+			var i = 0;
+			var currentVals, updatedVals;
 			try {
-				var currentVals = new Map(Object.entries(this.get(cat, null, false)));
-				var updatedVals = mergeMaps(currentVals, values, cat);
-				var savedKeys = [];
-				var i = 0;
+			
+				currentVals = new Map(Object.entries(this.get(cat, null, false)));
+				updatedVals = this.utilities.mergeMaps(currentVals, values, cat);
+				
 			}
 			catch(e) {
 			
@@ -546,24 +552,25 @@ class UwotConfigBase {
 			}
 			updatedVals.forEach(function(val, key) {
 			
+				var newVal;
+				if ('true' === val.toString().trim().toLowerCase()) {
 				
-				if (val !== currentVals.get(key)) {
+					newVal = true;
 				
-					if ('true' === val.toString().trim().toLowerCase()) {
-					
-						nconf.set(cat + ':' + key, true);
-					
-					}
-					else if ('false' === val.toString().trim().toLowerCase()) {
-					
-						nconf.set(cat + ':' + key, false);
-					
-					}
-					else {
-					
-						nconf.set(cat + ':' + key, val);
-					
-					}
+				}
+				else if ('false' === val.toString().trim().toLowerCase()) {
+				
+					newVal = false;
+				
+				}
+				else {
+				
+					newVal = val.toString().trim();
+				
+				}
+				if (newVal !== currentVals.get(key)) {
+				
+					nconf.set(cat + ':' + key, newVal);
 					savedKeys.push(key);
 				
 				}
@@ -574,6 +581,11 @@ class UwotConfigBase {
 						if (error) {
 						
 							return callback(error, savedKeys);
+						
+						}
+						else if (!isSaved) {
+						
+							return callback(false, false);
 						
 						}
 						else {
@@ -639,7 +651,7 @@ class UwotConfigBase {
 			}
 			else {
 			
-				return callback(new Error('invalid cat passed to setArrVal.'), false);
+				return callback(new RangeError('invalid cat passed to setArrVal.'), false);
 			
 			}
 
