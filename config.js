@@ -729,18 +729,27 @@ class UwotConfigBase {
 				var currArr = catVal[key];
 				if ('object' !== typeof currArr || !(Array.isArray(currArr))) {
 				
-					return callback(new Error('value for ' + cat + ':' + key + ' is not an array.'), false);
+					return callback(new TypeError('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
 				else if (!newObj || 'object' != typeof newObj) {
 				
-					return callback(new Error('new value for ' + cat + ':' + key + ' is not a JSON encoded object.'), false);
+					return callback(new TypeError('new value for ' + cat + ':' + key + ' is not a JSON encoded object.'), false);
 				
 				}
 				else {
 					
-					var newValue = this.utilities.arrayMembersToClass([newObj], cat + ':' + key);
-					var updatedArr = currArr.concat(newValue);
+					var newValue;
+					var updatedArr;
+					try {
+						newValue = this.utilities.arrayMembersToClass([newObj], cat + ':' + key);
+						updatedArr = currArr.concat(newValue);
+					}
+					catch(e) {
+					
+						return callback(e, newObj);
+					
+					}
 					if (nconf.set(cat + ':' + sanitize.cleanString(key), updatedArr)) {
 				
 						return nconf.save(null, callback);
@@ -757,7 +766,7 @@ class UwotConfigBase {
 			}
 			else {
 			
-				return callback(new Error('invalid cat passed to addArrVal.'), false);
+				return callback(new RangeError('invalid cat passed to addArrVal.'), false);
 			
 			}
 
