@@ -4,12 +4,11 @@
 @import '../../_partial/ansi';
 // @error mapGet($theme-colors, 'ansi', 'black');
 
+@include ansi(mapGet($theme-colors, 'ansi'));
+
 body {
 
 	#uwot {
-	
-		
-		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
 			color: mapGet($theme-colors, 'tag', 'text');
@@ -45,10 +44,6 @@ body {
 			
 					.field {
 				
-						&:before {
-					
-						}
-				
 						input,
 						input:focus,
 						input:active {						
@@ -63,6 +58,59 @@ body {
 	
 		}
 	
+	}
+
+}
+
+@media (prefers-color-scheme: dark) {
+
+	body {
+
+		#uwot {
+		
+			.terminal {
+				color: mapGet($ansi-colors, 'white');
+				background-color: mapGet($ansi-colors, 'black');
+				
+				a {
+					color: mapGet($ansi-colors, 'blue');
+	
+					&:hover,
+					&:active {
+						color: mapGet($ansi-colors, 'cyan');
+					}
+	
+				}
+				
+				
+				.header {
+					border-color: mapGet($ansi-colors, 'white');
+					background: mapGet($ansi-colors, 'black');
+				}
+				
+				.cli {
+					border-color: mapGet($ansi-colors, 'white');
+				
+					form {
+			
+						.field {
+				
+							input,
+							input:focus,
+							input:active {						
+								color: mapGet($ansi-colors, 'cyan');
+							}
+			
+						}
+		
+					}
+				
+				}
+			
+			}
+		
+		}
+		
 	}
 
 }

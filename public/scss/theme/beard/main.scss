@@ -65,6 +65,56 @@ body{
 	}
 
 }
+@media (prefers-color-scheme: dark) {
+
+	body {
+
+		#uwot {
+		
+			.terminal {
+				color: #00aa00;
+				
+				a {
+					color: #0000aa;
+	
+					&:hover,
+					&:active {
+						color: #00cccc;
+					}
+	
+				}
+				
+				
+				.header {
+					border-color: #00aa00;
+				}
+				
+				.cli {
+					border-color: #00aa00;
+				
+					form {
+			
+						.field {
+				
+							input,
+							input:focus,
+							input:active {						
+								color: #00cc00;
+							}
+			
+						}
+		
+					}
+				
+				}
+			
+			}
+		
+		}
+		
+	}
+
+}
 
 @media (min-width: 642px) {
 

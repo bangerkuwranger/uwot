@@ -66,6 +66,60 @@ body{
 
 }
 
+@media (prefers-color-scheme: dark) {
+
+	body {
+
+		#uwot {
+		
+			.terminal {
+				color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+				background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
+				
+				a {
+					color: mapGet($ansi-colors, 'blue');
+	
+					&:hover,
+					&:active {
+						color: mapGet($ansi-colors, 'cyan');
+					}
+	
+				}
+				
+				
+				.header {
+					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
+					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
+				}
+				
+				.cli {
+					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
+					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
+				
+					form {
+			
+						.field {
+				
+							input,
+							input:focus,
+							input:active {						
+								color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+							}
+			
+						}
+		
+					}
+				
+				}
+			
+			}
+		
+		}
+		
+	}
+
+}
+
 @media (min-width: 642px) {
 
 	body {

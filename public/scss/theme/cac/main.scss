@@ -76,6 +76,63 @@ body{
 
 }
 
+@media (prefers-color-scheme: dark) {
+
+	body {
+
+		#uwot {
+		
+			.terminal {
+				color: #00ca12;
+				background-color: #1c1c1c;
+				
+				a {
+					color: #9d0d00;
+	
+					&:hover,
+					&:active {
+						color: #bd0d00;
+					}
+	
+				}
+				
+				.output {
+					background-image: url("/scss/theme/cac/img/wotcacbg_dark.png");
+				}
+				
+				.header {
+					border-color: #9d0d00;
+					background-color: #1c1c1c;
+				}
+				
+				.cli {
+					border-color: #9d0d00;
+					background-color: #1c1c1c;
+				
+					form {
+			
+						.field {
+				
+							input,
+							input:focus,
+							input:active {						
+								color: #00ca12;
+							}
+			
+						}
+		
+					}
+				
+				}
+			
+			}
+		
+		}
+		
+	}
+
+}
+
 @media (min-width: 642px) {
 
 	body {

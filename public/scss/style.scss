@@ -239,6 +239,21 @@ body {
 	
 }
 
+@media (prefers-color-scheme: dark) {
+
+	body {
+	
+		#uwot {
+		
+			color: white;
+			background-color: black;
+		
+		}
+		
+	}
+
+}
+
 @media (min-width: 648px) {
 
 	body {

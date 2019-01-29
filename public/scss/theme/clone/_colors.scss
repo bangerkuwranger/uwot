@@ -7,24 +7,24 @@
 $ansi-colors: (
 
 	// Standard
-	'black': #2C3836,
+	'black': #18191E,
 	'red': #FB5233,
 	'green': #31CE38,
 	'yellow': #DED979,
 	'blue': #55B9F2,
 	'magenta': #D492E5,
 	'cyan': #3AFCFE,
-	'white': #f8f7f7,
+	'white': #596c59,
 
 	// Bright
-	'bright-black': #33423F,
+	'bright-black': #262934,
 	'bright-red': #FF4431,
 	'bright-green': #3DF93D,
 	'bright-yellow': #FFF78D,
 	'bright-blue': #40CEFF,
 	'bright-magenta': #D266FF,
 	'bright-cyan': #00FCF5,
-	'bright-white': #efefef
+	'bright-white': #e5e4e2
 
 );
 
@@ -41,7 +41,7 @@ $scheme-colors: (
 	'primary': (
 	
 		'fg': map-get($ansi-colors, 'black'),
-		'bg': map-get($ansi-colors, 'white')
+		'bg': map-get($ansi-colors, 'bright-white')
 	
 	),
 	// Secondary Colors
