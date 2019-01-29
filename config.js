@@ -794,7 +794,7 @@ class UwotConfigBase {
 				var currArr = catVal[key];
 				if ('object' !== typeof currArr || !(Array.isArray(currArr))) {
 				
-					return callback(new Error('value for ' + cat + ':' + key + ' is not an array.'), false);
+					return callback(new TypeError('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
 				else if(currArr[index] == undefined) {
@@ -820,7 +820,7 @@ class UwotConfigBase {
 			}
 			else {
 			
-				return callback(new Error('invalid cat passed to removeArrIdx.'), false);
+				return callback(new RangeError('invalid cat passed to removeArrIdx.'), false);
 			
 			}
 

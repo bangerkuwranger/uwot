@@ -1151,7 +1151,7 @@ describe('config.js', function() {
 				
 					expect(error).to.be.an.instanceof(Error);
 					expect(error.message).to.equal('unable to set value for themes:external.');
-					expect(isSaved).to.deep.equal(false);
+					expect(isSaved).to.equal(false);
 					done();
 				
 				});
@@ -1234,16 +1234,216 @@ describe('config.js', function() {
 				});
 			
 			});
-			it('should return a TypeError to callback if key argument is not a string');
-			it('should return a TypeError to callback if index argument is not parseable to an integer');
+			it('should return a TypeError to callback if key argument is not a string', function(done) {
+			
+				config.removeArrIdx('themes', null, 0, function(error, idxRemoved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to removeArrIdx.');
+					done();
+				
+				});
+			
+			});
+			it('should return a TypeError to callback if index argument is not an integer', function(done) {
+			
+				config.removeArrIdx('themes', 'external', '0', function(error, idxRemoved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to removeArrIdx.');
+					done();
+				
+				});
+			
+			});
+			it('should return a RangeError if cat argument does not match an existing category', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return undefined;
+				
+				});
+				config.removeArrIdx('themes', 'external', 0, function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(RangeError);
+					expect(error.message).to.equal('invalid cat passed to removeArrIdx.');
+					done();
+				
+				});
+			
+			});
+			it('should return a TypeError if key does not reference an array value', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return {external: 'general'};
+				
+				});
+				config.removeArrIdx('themes', 'external', 0, function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(TypeError);
+					expect(error.message).to.equal('value for themes:external is not an array.');
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false,false) if index value is undefined in setting array', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return {external: []};
+				
+				});
+				config.removeArrIdx('themes', 'external', 0, function(error, isSaved) {
+				
+					expect(error).to.be.false;
+					expect(isSaved).to.be.false;
+					done();
+				
+				});
+			
+			});
+			it('should return an Error to callback if nconf cannot set the value', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return {external: [{
+						"name": "juniper",
+						"path": "themes/juniper"
+					}]};
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnFalse(key, value) {
+				
+					return false;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				config.removeArrIdx('themes', 'external', 0, function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('unable to set value for themes:external.');
+					expect(isSaved).to.equal(false);
+					done();
+				
+				});
+			
+			});
+			it('should return a Error to callback if nconf cannot save the change', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return {external: [{
+						"name": "juniper",
+						"path": "themes/juniper"
+					}]};
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnTrue(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
+				
+					return callback(new Error('test nconf.save error'));
+				
+				});
+				config.removeArrIdx('themes', 'external', 0, function(error, isSaved) {
+				
+					expect(error).to.be.an.instanceof(Error);
+					expect(error.message).to.equal('test nconf.save error');
+					done();
+				
+				});
+			
+			});
+			it('should return a callback(false, true) if value was successfully added to array and saved', function(done) {
+			
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				
+					return {external: [{
+						"name": "juniper",
+						"path": "themes/juniper"
+					}]};
+				
+				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnTrue(key, value) {
+				
+					return true;
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
+				
+					return callback(false, true);
+				
+				});
+				config.addArrVal('themes', 'external', '{"name":"sawtooth","path":"themes/sawtooth"}', function(error, isSaved) {
+				
+					expect(error).to.be.false;
+					expect(isSaved).to.be.true;
+					done();
+				
+				});
+			
+			});
 		
 		});
 		describe('resetToDefault', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if callback argument is not a function');
-			it('should return a TypeError to callback if cat argument is not a string');
-			it('should return a TypeError to callback if key argument is not a string');
+			it('should be a function', function() {
+			
+				expect(config.resetToDefault).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback argument is not a function', function() {
+			
+				expect(config.resetToDefault).to.throw(TypeError, 'invalid callback passed to resetToDefault.');
+			
+			});
+			it('should return a TypeError to callback if cat argument is not a string', function(done) {
+			
+				config.resetToDefault(null, 'external', function(error, isReset) {
+				
+					expect(error).to.be.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to resetToDefault.');
+					done();
+				
+				});
+			
+			});
+			it('should return a TypeError to callback if key argument is not a string', function(done) {
+			
+				config.resetToDefault('themes', null, function(error, isReset) {
+				
+					expect(error).to.be.instanceof(TypeError);
+					expect(error.message).to.equal('invalid args passed to resetToDefault.');
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, true) if cat or key are not set', function(done) {
+			
+				var nconfGetStuf = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnUndefined(cat) {
+				
+					return undefined;
+				
+				});
+				config.resetToDefault('themes', 'external', function(error, isReset) {
+				
+					expect(error).to.equal(false);
+					expect(isReset).to.equal(true);
+					done();
+				
+				});
+			
+			});
 			
 		});
 		describe('getConfigServerOrigin', function() {
