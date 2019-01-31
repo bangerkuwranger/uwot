@@ -104,13 +104,210 @@ describe('config.js', function() {
 					expect(config.utilities.mergeMaps).to.be.a('function');
 				
 				});
-				it('should throw a TypeError if the oldMap argument is not a Map object');
-				it('should throw a TypeError if the newMap argument is not a Map object');
-				it('should throw a TypeError if the catName argument is not a string');
-				it('should throw a TypeError if the catName argument is not a valid config category');
-				it('should return a Map object with all keys found in both oldMap and newMap set to the values in newMap');
-				it('should return a Map object with all keys found only in oldMap set to the values in oldMap');
-				it('should return a Map object with all keys found only in newMap set to the values in newMap');
+				it('should throw a TypeError if the oldMap argument is not a Map object', function() {
+				
+					expect(config.utilities.mergeMaps).to.throw(TypeError, 'oldMap and newMap args must be instances of Map for mergeMaps');
+					function passNullOldMap() {
+					
+						return config.utilities.mergeMaps(null, new Map(), 'users');
+					
+					};
+					expect(passNullOldMap).to.throw(TypeError, 'oldMap and newMap args must be instances of Map for mergeMaps');
+				
+				});
+				it('should throw a TypeError if the newMap argument is not a Map object', function() {
+				
+					function passNullNewMap() {
+					
+						return config.utilities.mergeMaps(new Map(), null, 'users');
+					
+					};
+					function passStringNewMap() {
+					
+						return config.utilities.mergeMaps(new Map(), 'map', 'users');
+					
+					};
+					expect(passNullNewMap).to.throw(TypeError, 'oldMap and newMap args must be instances of Map for mergeMaps');
+					expect(passStringNewMap).to.throw(TypeError, 'oldMap and newMap args must be instances of Map for mergeMaps');
+				
+				});
+				it('should throw a TypeError if the catName argument is not a string', function() {
+				
+					function passNullCat() {
+					
+						return config.utilities.mergeMaps(new Map(), new Map(), null);
+					
+					};
+					expect(passNullCat).to.throw(TypeError, 'invalid category name passed to mergeMaps');
+				
+				});
+				it('should throw a TypeError if the catName argument is not a valid config category', function() {
+				
+					function passInvalidCat() {
+					
+						return config.utilities.mergeMaps(new Map(), new Map(), 'hens');
+					
+					};
+					expect(passInvalidCat).to.throw(TypeError, 'invalid category name passed to mergeMaps');
+				
+				});
+				it('should return a Map object with all keys found in both oldMap and newMap set to the values in newMap', function() {
+				
+					var usersDefaultsObj = testConfigDefaults().users;
+					var oldMap = new Map();
+					var newMap = new Map();
+					var testNewMap = new Map();
+					var testOldMap = new Map();
+					var userKeys = Object.keys(usersDefaultsObj);
+					userKeys.forEach(function (key) {
+					
+						if (usersDefaultsObj[key]) {
+						
+							oldMap.set(key, true);
+							newMap.set(key, false);
+							testOldMap.set(key, true);
+							testNewMap.set(key, false);
+						
+						}
+						else {
+						
+							oldMap.set(key, false);
+							newMap.set(key, true);
+							testOldMap.set(key, false);
+							testNewMap.set(key, true);
+						
+						}
+					
+					});
+					var mergedMap = config.utilities.mergeMaps(oldMap, newMap, 'users');
+					mergedMap.forEach(function(value,key) {
+					
+						expect(value).to.equal(testNewMap.get(key));
+					
+					});
+				
+				});
+				it('should return a Map object with all keys found only in oldMap set to the values in oldMap', function() {
+				
+					var usersDefaultsObj = testConfigDefaults().users;
+					var oldMap = new Map();
+					var newMap = new Map();
+					var testNewMap = new Map();
+					var testOldMap = new Map();
+					var userKeys = Object.keys(usersDefaultsObj);
+					userKeys.forEach(function (key) {
+					
+						if (usersDefaultsObj[key]) {
+						
+							oldMap.set(key, true);
+							newMap.set(key, false);
+							testOldMap.set(key, true);
+							testNewMap.set(key, false);
+						
+						}
+						else {
+						
+							oldMap.set(key, false);
+							newMap.set(key, true);
+							testOldMap.set(key, false);
+							testNewMap.set(key, true);
+						
+						}
+					
+					});
+					newMap.delete('homeWritable');
+					testNewMap.delete('homeWritable');
+					var mergedMap = config.utilities.mergeMaps(oldMap, newMap, 'users');
+					expect(mergedMap.get('homeWritable')).to.equal(testOldMap.get('homeWritable'));
+				
+				});
+				it('should return a Map object with all keys found only in newMap set to the values in newMap', function() {
+				
+					var usersDefaultsObj = testConfigDefaults().users;
+					var oldMap = new Map();
+					var newMap = new Map();
+					var testNewMap = new Map();
+					var testOldMap = new Map();
+					var userKeys = Object.keys(usersDefaultsObj);
+					userKeys.forEach(function (key) {
+					
+						if (usersDefaultsObj[key]) {
+						
+							oldMap.set(key, true);
+							newMap.set(key, false);
+							testOldMap.set(key, true);
+							testNewMap.set(key, false);
+						
+						}
+						else {
+						
+							oldMap.set(key, false);
+							newMap.set(key, true);
+							testOldMap.set(key, false);
+							testNewMap.set(key, true);
+						
+						}
+					
+					});
+					oldMap.delete('homeWritable');
+					testOldMap.delete('homeWritable');
+					var mergedMap = config.utilities.mergeMaps(oldMap, newMap, 'users');
+					expect(mergedMap.get('homeWritable')).to.equal(testNewMap.get('homeWritable'));
+				
+				});
+				it('should not return a map containing any array key values', function() {
+				
+					var binpathDefaultsObj = testConfigDefaults().binpath;
+					var oldMap = new Map();
+					var newMap = new Map();
+					var testNewMap = new Map();
+					var testOldMap = new Map();
+					var userKeys = Object.keys(binpathDefaultsObj);
+					userKeys.forEach(function (key) {
+					
+						if ('boolean' != typeof binpathDefaultsObj[key]) {
+						
+							oldMap.set(key, binpathDefaultsObj[key]);
+							newMap.set(key, binpathDefaultsObj[key]);
+							testOldMap.set(key, binpathDefaultsObj[key]);
+							testNewMap.set(key, binpathDefaultsObj[key]);
+						
+						}
+						else if (binpathDefaultsObj[key]) {
+						
+							oldMap.set(key, true);
+							newMap.set(key, false);
+							testOldMap.set(key, true);
+							testNewMap.set(key, false);
+						
+						}
+						else {
+						
+							oldMap.set(key, false);
+							newMap.set(key, true);
+							testOldMap.set(key, false);
+							testNewMap.set(key, true);
+						
+						}
+					
+					});
+					var mergedMap = config.utilities.mergeMaps(oldMap, newMap, 'binpath');
+					testNewMap.forEach(function(value,key) {
+					
+						if ('boolean' == typeof value) {
+						
+							expect(value).to.equal(mergedMap.get(key));
+						
+						}
+						else {
+						
+							expect(mergedMap.get(key)).to.be.undefined;
+						
+						}
+					
+					});
+				
+				});
 			
 			});
 			describe('isArrayKey', function() {
@@ -1428,11 +1625,75 @@ describe('config.js', function() {
 				});
 			
 			});
-			it('should return callback(false, true) if cat or key are not set', function(done) {
+			it('should return callback(false, true) if cat does not exist', function(done) {
 			
-				var nconfGetStuf = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnUndefined(cat) {
+				var nconfGetStub = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnUndefined(cat) {
 				
 					return undefined;
+				
+				});
+				config.resetToDefault('themes', 'external', function(error, isReset) {
+				
+					expect(error).to.equal(false);
+					expect(isReset).to.equal(true);
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, true) if cat:key does not exist', function(done) {
+			
+				var nconfGetStub = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnUnset(cat) {
+				
+					return {
+						useLocal: true,
+						useExternal: false,
+						showTheme: true,
+						allowUserSwitch: false,
+						defaultTheme: 'default'
+					};
+				
+				});
+				config.resetToDefault('themes', 'external', function(error, isReset) {
+				
+					expect(error).to.equal(false);
+					expect(isReset).to.equal(true);
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, false) if changes cannot be saved', function(done) {
+			
+				var nconfGetStub = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnDefault(cat) {
+				
+					return testConfigDefaults()[cat];
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnFalse(dummy, callback) {
+				
+					return callback(false, false);
+				
+				});
+				config.resetToDefault('themes', 'external', function(error, isReset) {
+				
+					expect(error).to.equal(false);
+					expect(isReset).to.equal(false);
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, true) if changes are saved successfully', function(done) {
+			
+				var nconfGetStub = sinon.stub(config.nconf.stores.local, 'get').callsFake(function returnDefault(cat) {
+				
+					return testConfigDefaults()[cat];
+				
+				});
+				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnFalse(dummy, callback) {
+				
+					return callback(false, true);
 				
 				});
 				config.resetToDefault('themes', 'external', function(error, isReset) {
@@ -1448,7 +1709,90 @@ describe('config.js', function() {
 		});
 		describe('getConfigServerOrigin', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(config.getConfigServerOrigin).to.be.a('function');
+			
+			});
+			it('should return defaults if nconf.get cannot retrieve saved value', function() {
+			
+				var testOrigin = 'http://localhost/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnUndefined(){
+				
+					return undefined;
+				
+				});
+				var udOrigin = config.getConfigServerOrigin();
+				expect(udOrigin).to.equal(testOrigin);
+			
+			});
+			it('should force transport to "https" and port to "443" if config server:secure is true', function() {
+			
+				var testOrigin = 'https://localhost/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaultSecure(){
+				
+					var defaultOrigin = testConfigDefaults().server;
+					defaultOrigin.secure = true;
+					return defaultOrigin;
+				
+				});
+				expect(config.getConfigServerOrigin()).to.equal(testOrigin);
+			
+			});
+			it('should return a string without a port if transport is http and port is 80', function() {
+			
+				var testOrigin = 'http://localhost/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaultSecure(){
+				
+					var defaultOrigin = testConfigDefaults().server;
+					return defaultOrigin;
+				
+				});
+				expect(config.getConfigServerOrigin()).to.equal(testOrigin);
+			
+			});
+			it('should return a string without a port if transport is https and port is 443', function() {
+			
+				var testOrigin = 'https://localhost/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaultSecure(){
+				
+					var defaultOrigin = testConfigDefaults().server;
+					defaultOrigin.transport = 'https';
+					defaultOrigin.port = '443';
+					return defaultOrigin;
+				
+				});
+				expect(config.getConfigServerOrigin()).to.equal(testOrigin);
+			
+			});
+			it('should return a string with a port if transport is http and port is not 80', function() {
+			
+				var testOrigin = 'http://localhost:8080/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaultSecure(){
+				
+					var defaultOrigin = testConfigDefaults().server;
+					defaultOrigin.transport = 'http';
+					defaultOrigin.port = '8080';
+					return defaultOrigin;
+				
+				});
+				expect(config.getConfigServerOrigin()).to.equal(testOrigin);
+			
+			});
+			it('should return a string with a port if transport is http and port is not 80', function() {
+			
+				var testOrigin = 'https://localhost:8080/';
+				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaultSecure(){
+				
+					var defaultOrigin = testConfigDefaults().server;
+					defaultOrigin.transport = 'https';
+					defaultOrigin.port = '8080';
+					return defaultOrigin;
+				
+				});
+				expect(config.getConfigServerOrigin()).to.equal(testOrigin);
+			
+			});
 		
 		});
 	

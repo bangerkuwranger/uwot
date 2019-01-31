@@ -4,40 +4,44 @@ const fs = require('fs');
 const nconf = require('nconf');
 const sanitize = require('./helpers/valueConversion');
 const fileLog = require('./logger').all;
-const confDefaults = {
-	server: {
-		siteName: 'UWOT',
-		showVersion: true,
-		domain: 'localhost',
-		secure: false,
-		port: '80',
-		transport: 'http',
-		pubDir: path.resolve('fs/var/www/html'),
-		userDir: path.resolve('fs/home')
-	},
-	users: {
-		allowGuest: false,
-		sudoFullRoot: false,
-		createHome: false,
-		homeWritable: false,
-		allowShellFunctions: false,
-		allowGuestShellFunctions: false
-	},
-	binpath: {
-		useLocal: true,
-		useExternal: false,
-		useReverseProxies: false,
-		external: [],
-		reverseProxies: []
-	},
-	themes: {
-		useLocal: true,
-		useExternal: false,
-		showTheme: true,
-		external: [],
-		allowUserSwitch: false,
-		defaultTheme: 'default'
-	}
+const confDefaults = function() {
+
+	return {
+		server: {
+			siteName: 'UWOT',
+			showVersion: true,
+			domain: 'localhost',
+			secure: false,
+			port: '80',
+			transport: 'http',
+			pubDir: path.resolve('fs/var/www/html'),
+			userDir: path.resolve('fs/home')
+		},
+		users: {
+			allowGuest: false,
+			sudoFullRoot: false,
+			createHome: false,
+			homeWritable: false,
+			allowShellFunctions: false,
+			allowGuestShellFunctions: false
+		},
+		binpath: {
+			useLocal: true,
+			useExternal: false,
+			useReverseProxies: false,
+			external: [],
+			reverseProxies: []
+		},
+		themes: {
+			useLocal: true,
+			useExternal: false,
+			showTheme: true,
+			external: [],
+			allowUserSwitch: false,
+			defaultTheme: 'default'
+		}
+	};
+
 };
 
 class ExternalBinPath{
@@ -262,10 +266,10 @@ function mergeMaps(oldMap, newMap, catName) {
 
 	if ('object' !== typeof oldMap || !(oldMap instanceof Map) || 'object' !== typeof newMap || !(newMap instanceof Map)) {
 	
-		throw new TypeError('args must be instances of Map for mergeMaps');
+		throw new TypeError('oldMap and newMap args must be instances of Map for mergeMaps');
 	
 	}
-	else if ('string' != typeof catName || -1 == Object.keys(confDefaults).indexOf(catName)) {
+	else if ('string' != typeof catName || -1 == Object.keys(confDefaults()).indexOf(catName)) {
 	
 		throw new TypeError('invalid category name passed to mergeMaps');
 	
@@ -277,7 +281,7 @@ function mergeMaps(oldMap, newMap, catName) {
 		
 			if (!isArrayKey(catName + ':' + oldKey)) {
 			
-				if ('undefined' !== newMap.get(oldKey)) {
+				if ('undefined' !== typeof newMap.get(oldKey)) {
 				
 					finalMap.set(oldKey, newMap.get(oldKey));
 					newMap.delete(oldKey);
@@ -417,7 +421,7 @@ class UwotConfigBase {
 			'local',
 			this.filePath
 		);
-		nconf.defaults(confDefaults);
+		nconf.defaults(confDefaults());
 		this.nconf = nconf;
 		this.utilities = {
 			mergeMaps: mergeMaps,
@@ -861,26 +865,34 @@ class UwotConfigBase {
 	
 	isArrayKey(keyString) {
 	
-		return isArrayKey(keyString);
+		return this.utilities.isArrayKey(keyString);
 	
 	}
 	
 	getConfigServerOrigin() {
 	
-		var serverCnf = nconf.get('server');
-		var cnfTransport = serverCnf.transport;
-		var cnfPort = serverCnf.port.toString();
-		if (serverCnf.secure) {
+		let cnfTransport, cnfPort, cnfDomain, cnfSecure;
+		let serverCnf = this.nconf.get('server');
+		let defaults = confDefaults();
+		cnfTransport = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.transport ? serverCnf.transport : defaults.server.transport;
+		cnfDomain = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.domain ? serverCnf.domain : defaults.server.domain;
+		cnfPort = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.port ? serverCnf.port : defaults.server.port.toString();
+		cnfSecure = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && ('string' == typeof serverCnf.transport || 'boolean' == typeof serverCnf.transport) ? sanitize.cleanBool(serverCnf.secure) : false;
+		if ('boolean' == typeof cnfSecure && cnfSecure) {
 			cnfPort = '443';
 			cnfTransport = 'https';
 		}
-		var confOrigin = cnfTransport + '://' + serverCnf.domain;
-		if (cnfPort !== '80' && cnfPort !== '443') {
-		
-			confOrigin += ':' + cnfPort;
+		var confOrigin = cnfTransport + '://' + cnfDomain;
+		if ((cnfPort === '80' && cnfTransport === 'http') || (cnfPort === '443' & cnfTransport === 'https')) {
+	
+			confOrigin += '/';
 		
 		}
-		confOrigin += '/';
+		else {
+		
+			confOrigin += ':' + cnfPort + '/';
+	
+		}
 		return confOrigin;
 	
 	}
