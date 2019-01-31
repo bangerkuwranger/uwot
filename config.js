@@ -57,7 +57,7 @@ class ExternalBinPath{
 			var argsObj = Object.assign(pathName);
 			pathName = argsObj.hasOwnProperty('pathName') ? argsObj.pathName : null;
 			dirPath = argsObj.hasOwnProperty('dirPath') ? argsObj.dirPath : null;
-			isSudoOnly = argsObj.hasOwnProperty('isSudoOnly') ? argsObj.isSudoOnly : null;
+			isSudoOnly = argsObj.hasOwnProperty('isSudoOnly') ? argsObj.isSudoOnly : true;
 		
 		}
 		this.pathName = sanitize.cleanString(pathName);
@@ -107,7 +107,7 @@ class ExternalBinPath{
 				else {
 				
 					var fileList = [];
-					fs.readdir(self.pathName, function(error, files) {
+					fs.readdir(self.dirPath, function(error, files) {
 											
 						if (error) {
 				
@@ -126,7 +126,7 @@ class ExternalBinPath{
 							
 								if (files[i].endsWith('.js')) {
 								
-									fileList.push(path.resolve(self.pathName, files[i]));
+									fileList.push(path.resolve(self.dirPath, files[i]));
 								
 								}
 								if (++j >= fileLength) {
@@ -337,7 +337,7 @@ function arrayMembersToClass(
 	}
 	else if (!(isArrayKey(arrayKey))) {
 	
-		throw new Error('Config setting "' + arrayKey + '" does not accept array values.');
+		throw new Error('config setting "' + arrayKey + '" does not accept array values.');
 	
 	}
 	else {

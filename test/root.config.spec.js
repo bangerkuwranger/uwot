@@ -317,9 +317,23 @@ describe('config.js', function() {
 					expect(config.utilities.isArrayKey).to.be.a('function');
 				
 				});
-				it('should return false if keyString is not a string or an empty string');
-				it('should return false if keyString does not exist in the arrayKeys Array defined in config.js');
-				it('should return true if keyString does exist in the arrayKeys Array defined in config.js');
+				it('should return false if keyString is not a string or an empty string', function() {
+				
+					expect(config.utilities.isArrayKey()).to.be.false;
+					expect(config.utilities.isArrayKey(null)).to.be.false;
+					expect(config.utilities.isArrayKey('')).to.be.false;
+				
+				});
+				it('should return false if keyString does not exist in the arrayKeys Array defined in config.js', function() {
+				
+					expect(config.utilities.isArrayKey('themes:useExternal')).to.be.false;
+				
+				});
+				it('should return true if keyString does exist in the arrayKeys Array defined in config.js', function() {
+				
+					expect(config.utilities.isArrayKey('themes:external')).to.be.true;
+				
+				});
 			
 			});
 			describe('arrayMembersToClass', function() {
@@ -329,8 +343,68 @@ describe('config.js', function() {
 					expect(config.utilities.arrayMembersToClass).to.be.a('function');
 				
 				});
-				it('should throw a TypeError if the arrayOfObjs argument is not an Array');
-				it('should throw an Error if the arrayKey argument is not a valid array key string');
+				it('should throw a TypeError if the arrayOfObjs argument is not an Array', function() {
+				
+					expect(config.utilities.arrayMembersToClass).to.throw(TypeError, 'first argument must be an array of objects.');
+				
+				});
+				it('should throw an Error if the arrayKey argument is not a valid array key string', function() {
+				
+					function passNullArrayKey() {
+					
+						return config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth']], null);
+						
+					}
+					expect(passNullArrayKey).to.throw(Error, 'config setting "null" does not accept array values.')
+				
+				});
+				it('should not return any array members that are not objects or === null', function() {
+				
+					var passInvalidValues = config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth'], {name: 'precience', path:'themes/precience'}, null, 'temptress'], 'themes:external');
+					expect(passInvalidValues).to.be.an('array');
+					expect(passInvalidValues[0]).to.deep.equal({name: 'sawtooth', path:'themes/sawtooth'});
+					expect(passInvalidValues[1]).to.deep.equal({name: 'precience', path:'themes/precience'});
+					expect(passInvalidValues[2]).to.be.undefined;
+					expect(passInvalidValues[3]).to.be.undefined;
+				
+				});
+				it('should not return any array members cause the class constructor to throw an error', function() {
+				
+					var passInvalidConstArgs = config.utilities.arrayMembersToClass([{name: 'precience', path:'themes/precience'}], 'binpath:external');
+					expect(passInvalidConstArgs).to.be.an('array');
+					expect(passInvalidConstArgs[0]).to.be.undefined;
+				
+				});
+				it('should return valid members as generic objects if returnClassObj is undefined, falsey, or === "false"', function() {
+				
+					var passFalseReturnClass = config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth'], {name: 'precience', path:'themes/precience'}], 'themes:external', false);
+					expect(passFalseReturnClass).to.be.an('array');
+					expect(passFalseReturnClass[0].constructor.name).to.equal('Object');
+					expect(passFalseReturnClass[1].constructor.name).to.equal('Object');
+					var passZeroReturnClass = config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth'], {name: 'precience', path:'themes/precience'}], 'themes:external', 0);
+					expect(passZeroReturnClass).to.be.an('array');
+					expect(passZeroReturnClass[0].constructor.name).to.equal('Object');
+					expect(passZeroReturnClass[1].constructor.name).to.equal('Object');
+					var passFalseStringReturnClass = config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth'], {name: 'precience', path:'themes/precience'}], 'themes:external', 'false');
+					expect(passFalseStringReturnClass).to.be.an('array');
+					expect(passFalseStringReturnClass[0].constructor.name).to.equal('Object');
+					expect(passFalseStringReturnClass[1].constructor.name).to.equal('Object');
+				
+				});
+				it('should return valid members as instances of correct associated object if returnClassObj is true', function() {
+				
+					var expectExternalTheme = config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth'], {name: 'precience', path:'themes/precience'}], 'themes:external', true);
+					expect(expectExternalTheme).to.be.an('array');
+					expect(expectExternalTheme[0].constructor.name).to.equal('ExternalTheme');
+					expect(expectExternalTheme[1].constructor.name).to.equal('ExternalTheme');
+					var expectExternalBinPath = config.utilities.arrayMembersToClass([{pathName: 'precience', dirPath:path.resolve(global.Uwot.Constants.appRoot, 'routes/bin')}], 'binpath:external', true);
+					expect(expectExternalBinPath).to.be.an('array');
+					expect(expectExternalBinPath[0].constructor.name).to.equal('ExternalBinPath');
+					var expectReverseProxyBin = config.utilities.arrayMembersToClass([{name: 'precience', url: 'https://www.chadacarino.com/', isLocal: false, isConsole: true}], 'binpath:reverseProxies', true);
+					expect(expectReverseProxyBin).to.be.an('array');
+					expect(expectReverseProxyBin[0].constructor.name).to.equal('ReverseProxyBin');
+				
+				});
 			
 			});
 		
