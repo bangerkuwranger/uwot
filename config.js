@@ -60,7 +60,7 @@ class ExternalBinPath{
 			isSudoOnly = argsObj.hasOwnProperty('isSudoOnly') ? argsObj.isSudoOnly : true;
 		
 		}
-		this.pathName = sanitize.cleanString(pathName);
+		this.pathName = sanitize.cleanString(pathName, 255);
 		this.dirPath = sanitize.cleanString(dirPath, 1024);
 		this.isSudoOnly = sanitize.cleanBool(isSudoOnly);
 		this.pathFiles = [];
@@ -176,7 +176,7 @@ class ExternalTheme{
 			path = argsObj.hasOwnProperty('path') ? argsObj.path : null;
 		
 		}
-		this.name = sanitize.cleanString(name);
+		this.name = sanitize.cleanString(name, 255);
 		this.path = sanitize.cleanString(path, 1024)
 	
 	}
@@ -210,7 +210,7 @@ class ReverseProxyBin{
 			isConsole = argsObj.hasOwnProperty('isConsole') ? argsObj.isConsole : false;
 		
 		}
-		this.name = sanitize.cleanString(name);
+		this.name = sanitize.cleanString(name, 255);
 		this.url = sanitize.cleanString(url, 1024);
 		this.isLocal = 'undefined' == typeof isLocal ? false : sanitize.cleanBool(isLocal);
 		this.isConsole = 'undefined' == typeof isConsole ? false : sanitize.cleanBool(isConsole);
