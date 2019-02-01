@@ -1873,6 +1873,20 @@ describe('config.js', function() {
 	});
 	describe('ExternalBinPath', function() {
 	
+		var stubDefaults;
+		beforeEach(function() {
+		
+			config = new Config(
+				testConfigPathDev
+			);
+			stubDefaults = testConfigDefaults();
+		
+		});
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
@@ -1916,6 +1930,20 @@ describe('config.js', function() {
 	});
 	describe('ExternalTheme', function() {
 	
+		var stubDefaults;
+		beforeEach(function() {
+		
+			config = new Config(
+				testConfigPathDev
+			);
+			stubDefaults = testConfigDefaults();
+		
+		});
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
@@ -1928,27 +1956,139 @@ describe('config.js', function() {
 				expect(instantiate).to.throw(ReferenceError, 'ExternalTheme is not defined');
 			
 			});
-			it('should accept two strings as arguments, and set the first to name property and the second to path property');
-			it('should accept a single object argument, and assign the name and path properties of that argument to itself');
-			it('should truncate name at 255 characters');
-			it('should truncate path at 1024 characters');
-			it('should assign null to the name and path property if no arguments are passed');
-			it('should assign null to name and the second arg to path if first argument is not a string and second argument is a string')
-			it('should assign the first argument to name and null to path if the first argument is a string and the second undefined, or not a string');
-			it('should assign null to name and the path property of the first arg to path if first arg is an object with a string path property, and undefined/non-string name property');
-			it('should assign the first argument to name and null to path if the first argument is an object with a string name property and undefined/non-string path property');
+			it('should accept two strings as arguments, and set the first to name property and the second to path property', function() {
+			
+				var amtcArgs = [['testName', 'testPath']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('testName');
+				expect(testET.path).to.equal('testPath');
+			
+			});
+			it('should accept a single object argument, and assign the name and path properties of that argument to itself', function() {
+			
+				var amtcArgs = [{name: 'testName', path: 'testPath'}];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('testName');
+				expect(testET.path).to.equal('testPath');
+			
+			});
+			it('should truncate name at 255 characters', function() {
+			
+				var amtcArgs = [['Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.', 'testPath']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nas');
+				expect(testET.path).to.equal('testPath');
+			
+			});
+			it('should truncate path at 1024 characters', function() {
+			
+				var amtcArgs = [['testName', 'Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('testName');
+				expect(testET.path).to.equal('Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur blandit tempus porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cum so');
+			
+			});
+			it('should assign null to the name and path property if no arguments are passed', function() {
+			
+				var amtcArgs = [[undefined, undefined]];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.be.null;
+				expect(testET.path).to.be.null;
+			
+			});
+			it('should assign null to name and the second arg to path if first argument is not a string and second argument is a string', function() {
+			
+				var amtcArgs = [[null, 'testPath']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.be.null;
+				expect(testET.path).to.equal('testPath');
+			
+			});
+			it('should assign the first argument to name and null to path if the first argument is a string and the second undefined, or not a string', function() {
+			
+				var amtcArgs = [['testName']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('testName');
+				expect(testET.path).to.be.null;
+			
+			});
+			it('should assign null to name and the path property of the first arg to path if first arg is an object with a string path property, and undefined/non-string name property', function() {
+			
+				var amtcArgs = [{path: 'testPath'}];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.be.null;
+				expect(testET.path).to.equal('testPath');
+			
+			});
+			it('should assign the first argument to name and null to path if the first argument is an object with a string name property and undefined/non-string path property', function() {
+			
+				var amtcArgs = [{name: 'testName'}];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.name).to.equal('testName');
+				expect(testET.path).to.be.null;
+			
+			});
 		
 		});
 		describe('getGeneric', function() {
 		
-			it('should be a function');
-			it('should return a new object with name and path properties matching that of the instance, and constructor name "Object" rather than "ExternalTheme"');
+			it('should be a function', function() {
+			
+				var amtcArgs = [['testName', 'testPath']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.getGeneric).to.be.a('function');
+			
+			});
+			it('should return a new object with name and path properties matching that of the instance, and constructor name "Object" rather than "ExternalTheme"', function() {
+			
+				var amtcArgs = [['testName', 'testPath']];
+				var testET = config.utilities.arrayMembersToClass(amtcArgs, 'themes:external', true)[0];
+				expect(testET).to.be.an('object').that.is.not.null;
+				expect(testET.constructor.name).to.equal('ExternalTheme');
+				expect(testET.getGeneric()).to.deep.equal({name: 'testName', path: 'testPath'});
+				expect(testET.getGeneric().constructor.name).to.equal('Object');
+			
+			});
 		
 		});
 	
 	});
 	describe('ReverseProxyBin', function() {
 	
+		var stubDefaults;
+		beforeEach(function() {
+		
+			config = new Config(
+				testConfigPathDev
+			);
+			stubDefaults = testConfigDefaults();
+		
+		});
+		afterEach(function() {
+
+			sinon.restore();
+
+		});
 		describe('constructor', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
@@ -1961,22 +2101,181 @@ describe('config.js', function() {
 				expect(instantiate).to.throw(ReferenceError, 'ReverseProxyBin is not defined');
 			
 			});
-			it('should accept four arguments: name(string), url(string), isLocal(bool/string), and isConsole(bool/string), assigning each to a respective property');
-			it('should accept a single object as an argument, assigning name, url, isLocal, and isConsole properties from arg to respective object properties');
-			it('should assign null to name property if arg is undefined or not defined as property of first arg');
-			it('should assign null to url property if arg is undefined or not defined as property of first arg');
-			it('should assign false to isLocal property if arg is undefined or not defined as property of first arg');
-			it('should assign false to isConsole property if arg is undefined or not defined as property of first arg');
-			it('should truncate name property after first 255 characters');
-			it('should truncate url property after first 1024 characters');
-			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isLocal property');
-			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isConsole property');
+			it('should accept four arguments: name(string), url(string), isLocal(bool/string), and isConsole(bool/string), assigning each to a respective property', function() {
+			
+				var amtcArgs = [['testName', 'testUrl', true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+			
+			});
+			it('should accept a single object as an argument, assigning name, url, isLocal, and isConsole properties from arg to respective object properties', function() {
+			
+				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.false;
+				expect(testRPB.isConsole).to.be.true;
+			
+			});
+			it('should assign null to name property if arg is undefined or not defined as property of first arg', function() {
+			
+				var amtcArgs = [[undefined, 'testUrl', true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.be.null;
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+				var amtcArgsTwo = [{url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
+				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
+				expect(testRPBTwo).to.be.an('object').that.is.not.null;
+				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPBTwo.name).to.be.null
+				expect(testRPBTwo.url).to.equal('testUrl');
+				expect(testRPBTwo.isLocal).to.be.false;
+				expect(testRPBTwo.isConsole).to.be.true;
+			
+			});
+			it('should assign null to url property if arg is undefined or not defined as property of first arg', function() {
+			
+				var amtcArgs = [['testName', undefined, true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.be.null;
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+				var amtcArgsTwo = [{name: 'testName', isConsole: 'true', isLocal: 'false'}];
+				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
+				expect(testRPBTwo).to.be.an('object').that.is.not.null;
+				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.be.null;
+				expect(testRPBTwo.isLocal).to.be.false;
+				expect(testRPBTwo.isConsole).to.be.true;
+			
+			});
+			it('should assign false to isLocal property if arg is undefined or not defined as property of first arg', function() {
+			
+				var amtcArgs = [['testName', 'testUrl', undefined, 'true']];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.false;
+				expect(testRPB.isConsole).to.be.true;
+				var amtcArgsTwo = [{name: 'testName', url: 'testUrl', isConsole: true}];
+				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
+				expect(testRPBTwo).to.be.an('object').that.is.not.null;
+				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPBTwo.isLocal).to.be.false;
+				expect(testRPBTwo.isConsole).to.be.true;
+			
+			});
+			it('should assign false to isConsole property if arg is undefined or not defined as property of first arg', function() {
+			
+				var amtcArgs = [['testName', 'testUrl', 'true']];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+				var amtcArgsTwo = [{name: 'testName', url: 'testUrl', isLocal: true}];
+				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
+				expect(testRPBTwo).to.be.an('object').that.is.not.null;
+				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPBTwo.isLocal).to.be.true;
+				expect(testRPBTwo.isConsole).to.be.false;
+			
+			});
+			it('should truncate name property after first 255 characters', function() {
+			
+				var amtcArgs = [['Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', 'testUrl', true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed cons');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+			
+			});
+			it('should truncate url property after first 1024 characters', function() {
+			
+				var amtcArgs = [['testName', 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bib');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+			
+			});
+			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isLocal property', function() {
+			
+				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 'true', isLocal: 0}];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.false;
+				expect(testRPB.isConsole).to.be.true;
+			
+			});
+			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isConsole property', function() {
+			
+				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+			
+			});
 		
 		});
 		describe('getGeneric', function() {
 		
-			it('should be a function');
-			it('should return a new object with name and path properties matching that of the instance, and constructor name "Object" rather than "ReverseProxyBin"');
+			it('should be a function', function() {
+			
+				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.getGeneric).to.be.a('function');
+			
+			});
+			it('should return a new object with name and path properties matching that of the instance, and constructor name "Object" rather than "ReverseProxyBin"', function() {
+			
+				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.getGeneric()).to.deep.equal({name: 'testName', url: 'testUrl', isConsole: false, isLocal: true});
+				expect(testRPB.getGeneric().constructor.name).to.equal('Object');
+			
+			});
 		
 		});
 	
