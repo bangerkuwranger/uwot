@@ -203,11 +203,11 @@ class UwotFs {
 		if ('string' === cwd) {
 		
 			// distinct from process.cwd; this is 'virtual' fs cwd
-// 			this.cwd = cwd;
+			this.cwd = cwd;
 			// TBD
 			// check if current user can access dir at cwd
 			// it's possible that a session can set a cwd and maintain that value for another user, or that perms change between access periods.
-			this.changeCwd(cwd);
+// 			this.changeCwd(cwd);
 		
 		}
 		// var userInterface = new Users();
@@ -233,7 +233,7 @@ class UwotFs {
 		}
 		else {
 		
-			userInterface.findById(userId, function(error, user) {
+			global.Uwot.Users.findById(userId, function(error, user) {
 			
 				if (error) {
 				
@@ -242,7 +242,7 @@ class UwotFs {
 				}
 				else if (!user) {
 				
-					userInterface.getGuest(function(error, user) {
+					global.Uwot.Users.getGuest(function(error, user) {
 			
 						if (error) {
 				
@@ -293,7 +293,7 @@ class UwotFs {
 			exists: function () { fs.existsSync(path.resolve(this.pubDir.path)) }
 		};
 		this.userDir = this.user.uName === 'guest' ? null : {
-			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), user.uName),
+			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), this.user.uName),
 			r: true,
 			w: global.Uwot.Config.get('server', 'homeWritable'),
 			x: false,
@@ -302,7 +302,8 @@ class UwotFs {
 		if ('string' !== this.cwd) {
 		
 			var defaultcwd = null !== this.userDir ? this.userDir.path : this.pubDir.path;
-			this.changeCwd(defaultcwd);
+// 			this.changeCwd(defaultcwd);
+			this.cwd = defaultcwd;
 		
 		}
 	
@@ -329,7 +330,7 @@ class UwotFs {
 		else {
 		
 			// set null args to empty array
-			if (null === argArr) {
+			if (null === argArr || !Array.isArray(argArr)) {
 			
 				argArr = [];
 			
@@ -432,7 +433,17 @@ class UwotFs {
 		else {
 			
 			//resolve
-			var absPth = this.resolvePath(pth);
+			try {
+			
+				var absPth = this.resolvePath(pth);
+			
+			}
+			catch(e) {
+			
+				//return error objects
+				return e;
+			
+			}
 			//return error objects
 			if('string' !== typeof absPth) {
 			
@@ -580,7 +591,7 @@ class UwotFs {
 		}
 		else {
 		
-			return false;
+			return systemError.EACCES({'path': pth, 'syscall': 'write'});
 		
 		}
 	

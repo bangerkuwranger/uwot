@@ -37,7 +37,7 @@ describe('globalSetup.js', function() {
 		expect(global.Uwot).to.have.property('Bin').that.is.not.null;
 
 	});
-	describe('uninitialize', function() {
+	describe('uninitialize()', function() {
 	
 		it('should be a function', function() {
 		
@@ -52,7 +52,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initGlobalObjects', function() {
+	describe('initGlobalObjects()', function() {
 	
 		it('should be a function', function() {
 		
@@ -74,7 +74,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initConstants', function() {
+	describe('initConstants()', function() {
 	
 		beforeEach(function() {
 		
@@ -141,7 +141,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initEnvironment', function() {
+	describe('initEnvironment()', function() {
 	
 		var initialEnv;
 		before(function() {
@@ -194,7 +194,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initExports', function() {
+	describe('initExports()', function() {
 	
 		before(function() {
 		
@@ -232,7 +232,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initThemes', function() {
+	describe('initThemes()', function() {
 	
 		before(function() {
 		
@@ -327,7 +327,7 @@ describe('globalSetup.js', function() {
 		});
 	
 	});
-	describe('initBins', function() {
+	describe('initBins()', function() {
 	
 		before(function() {
 		

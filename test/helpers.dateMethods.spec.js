@@ -20,7 +20,7 @@ describe('dateMethods.js', function() {
 		sinon.restore();
 
 	});
-	describe('Date.toMySqlString', function() {
+	describe('Date.toMySqlString()', function() {
 	
 		var asMySqlString = '2019-01-02 17:40:00';
 		it('should be a property of a Date', function() {
@@ -46,7 +46,7 @@ describe('dateMethods.js', function() {
 		
 	
 	});
-	describe('Array.toCsvString', function() {
+	describe('Array.toCsvString()', function() {
 	
 		var asCsvString = '2019-01-02 17:40:00 UTC';
 		it('should be a property of a Date', function() {

@@ -18,7 +18,7 @@ describe('stringMethods.js', function() {
 	before(function() {
 		console.log('\x1b[36m%s\x1b[0m', '	"  is thatAll there_is   ?  "');
 	});
-	describe('toCamel', function() {
+	describe('toCamel()', function() {
 	
 		it('should be a function', function() {
 		
@@ -53,7 +53,7 @@ describe('stringMethods.js', function() {
 		});
 	
 	});
-	describe('toUnderscore', function() {
+	describe('toUnderscore()', function() {
 	
 		it('should be a function', function() {
 		
@@ -88,7 +88,7 @@ describe('stringMethods.js', function() {
 		});
 	
 	});
-	describe('toCrArray', function() {
+	describe('toCrArray()', function() {
 	
 		it('should be a function', function() {
 		

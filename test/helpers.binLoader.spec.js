@@ -20,7 +20,7 @@ const testLocalBinPathFiles = [
 
 describe('binLoader.js', function() {
 
-	describe('loadLocalPath', function() {
+	describe('loadLocalPath()', function() {
 		
 		afterEach(function() {
 
@@ -83,7 +83,7 @@ describe('binLoader.js', function() {
 		});
 	
 	});
-	describe('loadExternalPath', function() {
+	describe('loadExternalPath(pathObj)', function() {
 	
 		it('should be a function', function() {
 		

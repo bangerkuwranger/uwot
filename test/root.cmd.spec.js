@@ -70,7 +70,7 @@ describe('cmd.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(command, options, path)', function() {
 		
 			it('should be a function', function() {
 			
@@ -105,7 +105,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('execute', function() {
+		describe('execute(args, options, app, callback, isSudo)', function() {
 		
 			it('should be a function', function() {
 			
@@ -200,7 +200,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('help', function() {
+		describe('help(callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -383,7 +383,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('matchOpt', function() {
+		describe('matchOpt(opt)', function() {
 		
 			it('should be a function', function() {
 			
@@ -561,7 +561,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('parsePre', function() {
+		describe('parsePre(preString)', function() {
 		
 			it('should be a function', function() {
 			
@@ -623,7 +623,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('escapeHtml', function() {
+		describe('escapeHtml(str)', function() {
 		
 			it('should be a function', function() {
 			
@@ -658,7 +658,7 @@ describe('cmd.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(name, description, requiredArguments, optionalArguments)', function() {
 		
 			var testCommand;
 			beforeEach(function() {
@@ -800,7 +800,7 @@ describe('cmd.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(description, shortOpt, longOpt, requiredArguments, optionalArguments)', function() {
 		
 			var testOptions;
 			beforeEach(function() {

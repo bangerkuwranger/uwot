@@ -24,7 +24,7 @@ describe('users.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor()', function() {
 	
 			it('creates an object with a db property', function() {
 			
@@ -78,7 +78,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('getGuest', function() {
+		describe('getGuest(callback)', function() {
 	
 			it('should be a function', function() {
 		
@@ -174,7 +174,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('findById', function() {
+		describe('findById(uId, callback)', function() {
 	
 			it('should be a function', function() {
 		
@@ -288,7 +288,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('findByName', function() {
+		describe('findByName(uName, callback)', function() {
 	
 			it('should be a function', function() {
 		
@@ -402,7 +402,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('createNew', function() {
+		describe('createNew(uObj, callback)', function() {
 	
 			it('should be a function', function() {
 		
@@ -630,7 +630,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('remove', function() {
+		describe('remove(uId, callback)', function() {
 	
 			it('should be a function', function() {
 		
@@ -731,7 +731,7 @@ describe('users.js', function() {
 			});
 	
 		});
-		describe('changePw', function() {
+		describe('changePw(uId, oldPw, newPw, callback)', function() {
 		
 			it('should be a function', function() {
 		
@@ -951,7 +951,7 @@ describe('users.js', function() {
 			});
 			
 		});
-		describe('changeName', function() {
+		describe('changeName(uId, fName, lName, callback)', function() {
 		
 			it('should be a function', function() {
 		
@@ -1089,7 +1089,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('changeSudo', function() {
+		describe('changeSudo(uId, maySudo, callback)', function() {
 		
 			it('should be a function', function() {
 		
@@ -1269,7 +1269,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('validate', function() {
+		describe('validate(uId, pw, callback)', function() {
 		
 			this.timeout(10000);
 			it('should be a function', function() {
@@ -1416,7 +1416,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('listUsers', function() {
+		describe('listUsers(callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1502,7 +1502,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('isUnique', function() {
+		describe('isUnique(username, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1600,7 +1600,7 @@ describe('users.js', function() {
 
 	});
 
-	describe('User', function() {
+	describe('User(_id, fName, lName, uName, createdAt, updatedAt, password, salt, sudoer)', function() {
 
 		var testUser;
 		beforeEach('getting fresh User instance as testUser', function(done) {
@@ -1645,7 +1645,7 @@ describe('users.js', function() {
 			expect(returnNewUser).to.throw(ReferenceError, 'User is not defined');
 	
 		});
-		describe('saltPass', function() {
+		describe('saltPass(password)', function() {
 		
 			this.timeout(10000);
 			it('should throw an error if "password" is not a string', function() {
@@ -1686,7 +1686,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('verifyPassword', function() {
+		describe('verifyPassword(password)', function() {
 		
 			this.timeout(15000);
 			beforeEach('generating password', function() {
@@ -1739,7 +1739,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('maySudo', function() {
+		describe('maySudo()', function() {
 		
 			it('should return false if sudoer property is not a boolean', function() {
 			
@@ -1761,7 +1761,7 @@ describe('users.js', function() {
 			});
 		
 		});
-		describe('fullName', function() {
+		describe('fullName(format)', function() {
 		
 			it('should return a string in format "lName, fName" with no arguments provided', function() {
 			

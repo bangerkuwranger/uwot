@@ -68,7 +68,7 @@ describe('config.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(filePath)', function() {
 		
 			it('should be a function', function() {
 			
@@ -97,7 +97,7 @@ describe('config.js', function() {
 		});
 		describe('utilities', function() {
 		
-			describe('mergeMaps', function() {
+			describe('mergeMaps(oldMap, newMap, catName)', function() {
 			
 				it('should be a function', function() {
 				
@@ -310,7 +310,7 @@ describe('config.js', function() {
 				});
 			
 			});
-			describe('isArrayKey', function() {
+			describe('isArrayKey(keyString)', function() {
 			
 				it('should be a function', function() {
 				
@@ -336,7 +336,7 @@ describe('config.js', function() {
 				});
 			
 			});
-			describe('arrayMembersToClass', function() {
+			describe('arrayMembersToClass(arrayOfObjs, arrayKey, returnClassObj)', function() {
 			
 				it('should be a function', function() {
 				
@@ -409,7 +409,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('get', function() {
+		describe('get(cat, key, excludeArrays)', function() {
 		
 			it('should be a function', function() {
 			
@@ -641,7 +641,7 @@ describe('config.js', function() {
 			})
 		
 		});
-		describe('getCats', function() {
+		describe('getCats()', function() {
 		
 			it('should be a function', function() {
 			
@@ -662,7 +662,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('updateCatStrVals', function() {
+		describe('updateCatStrVals(cat, values, callback)', function() {
 		
 			var testCatStrValueMap;
 			beforeEach(function() {
@@ -928,7 +928,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('setStrVal', function() {
+		describe('setStrVal(cat, key, value, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1100,7 +1100,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('setArrVal', function() {
+		describe('setArrVal(cat, key, value, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1267,7 +1267,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('addArrVal', function() {
+		describe('addArrVal(cat, key, value, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1482,7 +1482,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('removeArrIdx', function() {
+		describe('removeArrIdx(cat, key, index, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1665,7 +1665,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('resetToDefault', function() {
+		describe('resetToDefault(cat, key, callback)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1781,7 +1781,7 @@ describe('config.js', function() {
 			});
 			
 		});
-		describe('getConfigServerOrigin', function() {
+		describe('getConfigServerOrigin()', function() {
 		
 			it('should be a function', function() {
 			
@@ -1887,7 +1887,7 @@ describe('config.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(pathName, dirPath, isSudoOnly)', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
 			
@@ -1962,7 +1962,6 @@ describe('config.js', function() {
 				var testEBP = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:external', true)[0];
 				expect(testEBP).to.be.an('object').that.is.not.null;
 				expect(testEBP.dirPath).to.equal('routes/bin');
-				console.log(testEBP.pathFiles);
 				expect(testEBP.pathFiles).to.be.an('array');
 				expect(testEBP.pathFiles[0]).to.include('routes/bin/builtin.js');
 				expect(testEBP.pathFiles[1]).to.include('routes/bin/theme.js');
@@ -1982,7 +1981,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('getGeneric', function() {
+		describe('getGeneric()', function() {
 		
 			it('should be a function', function() {
 			
@@ -2004,7 +2003,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('getPathFiles', function() {
+		describe('getPathFiles()', function() {
 		
 			it('should be a function', function() {
 			
@@ -2040,7 +2039,7 @@ describe('config.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(name, path)', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
 			
@@ -2144,7 +2143,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('getGeneric', function() {
+		describe('getGeneric()', function() {
 		
 			it('should be a function', function() {
 			
@@ -2185,7 +2184,7 @@ describe('config.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor', function() {
+		describe('constructor(name, url, isLocal, isConsole)', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
 			
@@ -2351,7 +2350,7 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('getGeneric', function() {
+		describe('getGeneric()', function() {
 		
 			it('should be a function', function() {
 			

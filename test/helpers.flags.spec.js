@@ -95,7 +95,7 @@ describe('flags.js', function() {
 
 		});
 	
-		describe('constructor', function() {
+		describe('constructor(flags)', function() {
 		
 			it('should be a function', function() {
 			
@@ -158,7 +158,7 @@ describe('flags.js', function() {
 			});
 		
 		});
-		describe('addFlag', function() {
+		describe('addFlag(flagObj)', function() {
 		
 			it('should be a function', function() {
 			
@@ -172,7 +172,7 @@ describe('flags.js', function() {
 			});
 		
 		});
-		describe('removeFlag', function() {
+		describe('removeFlag(flagString)', function() {
 		
 			it('should be a function', function() {
 			
@@ -186,7 +186,7 @@ describe('flags.js', function() {
 			});
 		
 		});
-		describe('parseFlags', function() {
+		describe('parseFlags(flagsToParse)', function() {
 		
 			it('should be a function', function() {
 			
@@ -225,7 +225,7 @@ describe('flags.js', function() {
 			expect(returnNewFlag).to.throw(ReferenceError, 'Flag is not defined');
 	
 		});
-		describe('constructor', function() {
+		describe('constructor(flagString, type, name, defaultVal)', function() {
 		
 			it('should be a function', function() {
 			
@@ -269,7 +269,7 @@ describe('flags.js', function() {
 			});
 		
 		});
-		describe('parseFromString', function() {
+		describe('parseFromString(stringValue)', function() {
 		
 			it('should be a function', function() {
 			

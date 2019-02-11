@@ -58,7 +58,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('cleanString', function() {
+	describe('cleanString(value, length, defaultValue)', function() {
 	
 		it('should be a function', function() {
 		
@@ -114,7 +114,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('cleanInt', function() {
+	describe('cleanInt(value, defaultValue, format)', function() {
 	
 		it('should be a function', function() {
 		
@@ -252,7 +252,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('cleanFloat', function() {
+	describe('cleanFloat(value, defaultValue, format)', function() {
 	
 		it('should be a function', function() {
 		
@@ -370,7 +370,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('cleanBool', function() {
+	describe('cleanBool(value, defaultValue, format)', function() {
 	
 		it('should be a function', function() {
 		
@@ -818,7 +818,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('cleanDate', function() {
+	describe('cleanDate(value, format)', function() {
 	
 		it('should be a function', function() {
 		
@@ -882,7 +882,7 @@ describe('valueConversion.js', function() {
 		});
 		
 	});
-	describe('stringNoSpaces', function() {
+	describe('stringNoSpaces(value, format)', function() {
 	
 		it('should be a function', function() {
 		
@@ -927,7 +927,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('arrayOfObjectsOrEmpty', function() {
+	describe('arrayOfObjectsOrEmpty(value)', function() {
 	
 		it('should be a function', function() {
 		
@@ -968,7 +968,7 @@ describe('valueConversion.js', function() {
 		});
 	
 	});
-	describe('arrayOfStringsOrEmpty', function() {
+	describe('arrayOfStringsOrEmpty(value)', function() {
 	
 		it('should be a function', function() {
 		

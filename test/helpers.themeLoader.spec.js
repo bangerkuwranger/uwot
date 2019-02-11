@@ -13,7 +13,7 @@ var themeLoader = require('../helpers/themeLoader');
 
 describe('themeLoader.js', function() {
 
-	describe('loadLocalPath', function() {
+	describe('loadLocalPath()', function() {
 		
 		afterEach(function() {
 
@@ -68,7 +68,7 @@ describe('themeLoader.js', function() {
 		});
 	
 	});
-	describe('loadExternalPath', function() {
+	describe('loadExternalPath(pathObj)', function() {
 	
 		afterEach(function() {
 
@@ -88,7 +88,7 @@ describe('themeLoader.js', function() {
 		});
 	
 	});
-	describe('isValidTheme', function() {
+	describe('isValidTheme(themeName)', function() {
 	
 		var loadedThemes;
 		before(function() {
