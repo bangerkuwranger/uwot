@@ -63,87 +63,76 @@ class ExternalBinPath{
 		this.pathName = sanitize.cleanString(pathName, 255);
 		this.dirPath = sanitize.cleanString(dirPath, 1024);
 		this.isSudoOnly = sanitize.cleanBool(isSudoOnly);
-		this.pathFiles = [];
-		this.getPathFiles(function(error, pathFiles) {
+		var pathFiles = this.getPathFiles();
+		if (pathFiles instanceof Error) {
 		
-			if (error) {
-			
-				throw error;
-			
-			}
-			else {
-			
-				this.pathFiles = pathFiles;
-			
-			}
-		
-		}.bind(this));
-	
-	}
-	
-	getPathFiles(callback) {
-	
-		if ('function' !== typeof callback) {
-		
-			throw new TypeError('invald callback passed to getPathFiles');
+			throw pathFiles;
 		
 		}
 		else {
 		
-			var self = this;
-			self.gpsCallback = callback;
-			fs.stat(this.dirPath, function(error, stats) {
+			this.pathFiles = pathFiles;
+		
+		}
+	
+	}
+	
+	getPathFiles() {
+		
+		var dirPathStats;
+		try {
 			
-				if (error) {
+			dirPathStats = fs.statSync(this.dirPath);
+		
+		}
+		catch(error) {
+		
+			return error;
+		
+		}
+		if (!dirPathStats.isDirectory()) {
+			
+			return new Error('this.dirPath is not a directory');
+			
+		}
+		else {
+			
+			var fileList = [];
+			var dirFiles;
+			try {
+			
+				dirFiles = fs.readdirSync(this.dirPath);
+			
+			}						
+			catch(error) {
+	
+				return error;
+	
+			}
+			if (dirFiles.length < 1) {
+			
+				return fileList;
+			
+			}
+			else {
+			
+				var fileLength = dirFiles.length, j = 0;
+				for (let i = 0; i < fileLength; i++) {
 				
-					return self.gpsCallback(error, null);
-				
-				}
-				else if (!stats.isDirectory()) {
-				
-					return self.gpsCallback(new Error('this.dirPath is not a directory'), null);
-				
-				}
-				else {
-				
-					var fileList = [];
-					fs.readdir(self.dirPath, function(error, files) {
-											
-						if (error) {
-				
-							return self.gpsCallback(error, null);
-				
-						}
-						else if (files.length < 1) {
-						
-							return self.gpsCallback(false, fileList);
-						
-						}
-						else {
-						
-							var fileLength = files.length, j = 0;
-							for (let i = 0; i < fileLength; i++) {
-							
-								if (files[i].endsWith('.js')) {
-								
-									fileList.push(path.resolve(self.dirPath, files[i]));
-								
-								}
-								if (++j >= fileLength) {
-								
-									return self.gpsCallback(false, fileList);
-								
-								}
-							
-							}
-						
-						}
+					if (dirFiles[i].endsWith('.js')) {
 					
-					});
+						fileList.push(path.resolve(this.dirPath, dirFiles[i]));
+					
+					}
+					if (++j >= fileLength) {
+					
+						return fileList;
+					
+					}
 				
 				}
 			
-			});
+			}
 		
 		}
 	
