@@ -40,7 +40,7 @@ describe('filesystem.js', function() {
 			});
 			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
 		});
-		describe('constructor', function() {
+		describe('constructor(userId, cwd)', function() {
 		
 			it('should be a function', function() {
 			
@@ -54,7 +54,7 @@ describe('filesystem.js', function() {
 			it('should set this.cwd to value of cwd arg if it is a string');
 		
 		});
-		describe('setDirs', function() {
+		describe('setDirs()', function() {
 		
 			it('should be a function');
 			it('should create object this.root and assign global appRoot constant + "/fs" to this.root.path');
@@ -63,7 +63,7 @@ describe('filesystem.js', function() {
 			it('should create object this.userDir and assign global config userDir + "/{this.user.uName}" to this.userDir.path if user is not a guest.');
 		
 		});
-		describe('cmd', function() {
+		describe('cmd(cmdName, argArr, callback, isSudo)', function() {
 		
 			it('should be a function');
 			it('should throw a TypeError if callback arg is not a function');
@@ -84,7 +84,7 @@ describe('filesystem.js', function() {
 			it('should return output from the requested command process');
 		
 		});
-		describe('changeCwd', function() {
+		describe('changeCwd(pth)', function() {
 		
 			it('should be a function');
 			it('should throw a TypeError if pth arg is not a string');
@@ -94,21 +94,21 @@ describe('filesystem.js', function() {
 			it('should return true and set this.cwd to resolved path within VFS if resolved path is readable by user');
 		
 		});
-		describe('getVcwd', function() {
+		describe('getVcwd()', function() {
 		
 			it('should be a function');
 			it('should return a string if this.cwd is a string');
 			it('should return "/" if this.cwd. is not set or not a string');
 		
 		});
-		describe('getCwd', function() {
+		describe('getCwd()', function() {
 		
 			it('should be a function');
 			it('should return the absolute path of this.cwd if this.cwd is a string');
 			it('should return absolute path to "fs" if this.cwd. is not set or not a string');
 		
 		});
-		describe('append', function() {
+		describe('append(pth, data)', function() {
 		
 			it('should be a function');
 			it('should return an error if this.isWritable(pth) throws an error');
@@ -117,7 +117,7 @@ describe('filesystem.js', function() {
 			it('should return true and append data arg to file at pth if path is writable and appendFileSync is successful');
 		
 		});
-		describe('copy', function() {
+		describe('copy(source, target)', function() {
 		
 			it('should be a function');
 			it('should return an error if this.isReadable(source) returns an error');
@@ -128,7 +128,7 @@ describe('filesystem.js', function() {
 			it('should return true and copy contents of file at source to location of target if source is readable by user, target is writable by user, and copyFileSync executes without error');
 		
 		});
-		describe('createDir', function() {
+		describe('createDir(pth)', function() {
 		
 			it('should be a function');
 			it('should return an error if this.isWritable throws an error');
@@ -137,7 +137,7 @@ describe('filesystem.js', function() {
 			it('should return true and create a new directory at pth if user is allowed to write to location at pth and mkdirSync completes without error');
 		
 		});
-		describe('readDir', function() {
+		describe('readDir(pth)', function() {
 		
 			it('should be a function');
 			it('should return an error if isReadable throws an error');
@@ -146,7 +146,7 @@ describe('filesystem.js', function() {
 			it('should return an array of file names of files in dir at pth if user is allowed to read location at pth');
 		
 		});
-		describe('readFile', function() {
+		describe('readFile(pth)', function() {
 		
 			it('should be a function');
 			it('should return an error if isReadable throws an error');
@@ -155,7 +155,7 @@ describe('filesystem.js', function() {
 			it('should return the content of the file if user is allowed to read location at pth and readFileSynce executes without error');
 		
 		});
-		describe('moveFile', function() {
+		describe('moveFile(pth, newPath)', function() {
 		
 			it('should be a function');
 			it('should return an error if isReadable(pth) throws an error');
@@ -168,7 +168,7 @@ describe('filesystem.js', function() {
 			it('should return true and move file from pth to newPath if user has proper permissions and renameSync executes without error');
 		
 		});
-		describe('removeDir', function() {
+		describe('removeDir(pth)', function() {
 		
 			it('should be a function');
 			it('should return an error if isWritable throws an error');
@@ -177,7 +177,7 @@ describe('filesystem.js', function() {
 			it('should return true and remove directory at pth if user has proper permissions and rmdirSync executes without error');
 		
 		});
-		describe('removeFile', function() {
+		describe('removeFile(pth)', function() {
 		
 			it('should be a function');
 			it('should return an error if isWritable throws an error');
@@ -186,9 +186,12 @@ describe('filesystem.js', function() {
 			it('should return true and remove file at pth if user has proper permissions and unlinkSync executes without error');
 		
 		});
-		describe('stat', function() {
+		describe('stat(pth)', function() {
 		
 			it('should be a function');
+			it('should return an error if isReadable throws an error');
+			it('should return a systemError if user is not allowed to read location at pth');
+			it('should return a Stats object if user has proper permissions and statSynce executes without error');
 		
 		});
 		describe('write', function() {
