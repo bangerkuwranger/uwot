@@ -338,5 +338,46 @@ describe('filesystem.js', function() {
 		});
 	
 	});
+	describe('UwotFsPermissions', function() {
+	
+		describe('constructor(permissions)', function() {
+		
+			it('should not be able to be called outside of UwotFs methods');
+			it('should be a function');
+			it('should throw a TypeError if permissions arg is not an object');
+			it('should assign DEFAULT_OWNER to owner property and DEFAULT_ALLOWED to allowed property if permisssions === null');
+			it('should assign permissions.owner to owner property if permissions.owner is a string');
+			it('should assign permissions.allowed to the allowed property if permissions.allowed is an array');
+			it('should assign DEFAULT_ALLOWED to the allowed property if permissions.allowed is not an array');
+			it('should assign any other properties that are not owner or allowed to itself, if the property name matches a userId from the DB and the property value is an array containing only any or none of ["r", "w", "x"]');
+		
+		});
+		describe('toGeneric()', function() {
+		
+			it('should be a function');
+			it('should return an object with constructor.name === "Object"');
+			it('should set owner to DEFAULT_OWNER if owner property is not a string');
+			it('should set owner to own owner property if it is a string');
+			it('should set allowed property to own allowed property');
+			it('should set any user specific permission properties');
+		
+		});
+		describe('toJSON()', function() {
+		
+			it('should be a function');
+			it('should return a JSON string representing the value of this.toGeneric()');
+		
+		});
+		describe('concatPerms(otherPerms)', function() {
+		
+			it('should be a function');
+			it('should throw a TypeError if otherPerms is not an object');
+			it('should return this if otherPerms is null');
+			it('should return a new object with all property values of otherPerms unless this has a different value for any key');
+			it('should return an object with constructor.name === "UwotFsPermissions"');
+		
+		})
+	
+	});
 
 });

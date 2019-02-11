@@ -48,13 +48,17 @@ class UwotFsPermissions {
 			if ('string' == typeof permissions.owner) {
 			
 				this.owner = sanitize.cleanString(permissions.owner);
-				delete permissions.owner;
 			
 			}
+			else{
+			
+				this.owner = DEFAULT_OWNER;
+			
+			}
+			delete permissions.owner;
 			if ('object' == typeof permissions.allowed && Array.isArray(permissions.allowed)) {
 			
 				this.allowed = permissions.allowed;
-				delete permissions.allowed;
 			
 			}
 			else {
@@ -62,6 +66,7 @@ class UwotFsPermissions {
 				this.allowed = DEFAULT_ALLOWED;
 			
 			}
+			delete permissions.allowed;
 			var permUsers = Object.keys(permissions);
 			if (0 < permUsers.length) {
 			
