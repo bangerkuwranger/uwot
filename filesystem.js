@@ -93,7 +93,7 @@ class UwotFsPermissions {
 								}
 							
 							}
-							this.thisId = userPerms;
+							this[thisId] = userPerms;
 						
 						}
 			
@@ -102,6 +102,12 @@ class UwotFsPermissions {
 				}.bind(this));
 			
 			}
+		
+		}
+		else {
+		
+			this.owner = DEFAULT_OWNER;
+			this.allowed = DEFAULT_ALLOWED;
 		
 		}
 	
@@ -140,6 +146,11 @@ class UwotFsPermissions {
 		if ('object' !== typeof otherPerms) {
 		
 			throw new TypeError('argument passed to concatPerms must be an object');
+		
+		}
+		else if (null === otherPerms) {
+		
+			return this;
 		
 		}
 		else {
@@ -203,11 +214,11 @@ class UwotFs {
 		if ('string' === cwd) {
 		
 			// distinct from process.cwd; this is 'virtual' fs cwd
-			this.cwd = cwd;
+// 			this.cwd = cwd;
 			// TBD
 			// check if current user can access dir at cwd
 			// it's possible that a session can set a cwd and maintain that value for another user, or that perms change between access periods.
-// 			this.changeCwd(cwd);
+			this.changeCwd(cwd);
 		
 		}
 		// var userInterface = new Users();
@@ -302,8 +313,8 @@ class UwotFs {
 		if ('string' !== this.cwd) {
 		
 			var defaultcwd = null !== this.userDir ? this.userDir.path : this.pubDir.path;
-// 			this.changeCwd(defaultcwd);
-			this.cwd = defaultcwd;
+			this.changeCwd(defaultcwd);
+// 			this.cwd = defaultcwd;
 		
 		}
 	
@@ -836,14 +847,15 @@ class UwotFs {
 	
 	isInUser(pth, userId) {
 	
-		if (null === this.userDir || !this.userDir.exists()) {
 		
-			return false;
-		
-		}
-		else if ('string' !== typeof pth) {
+		if ('string' !== typeof pth) {
 		
 			return new TypeError('path passed to isInUser must be a string');
+		
+		}
+		else if (null === this.userDir || !this.userDir.exists()) {
+		
+			return false;
 		
 		}
 		else {
@@ -871,14 +883,14 @@ class UwotFs {
 	
 	isInPub(pth) {
 	
-		if (null === this.pubDir || !this.pubDir.exists()) {
-		
-			return false;
-		
-		}
-		else if ('string' !== typeof pth) {
+		if ('string' !== typeof pth) {
 		
 			return new TypeError('path passed to isInPub must be a string');
+		
+		}
+		else if (null === this.pubDir || !this.pubDir.exists()) {
+		
+			return false;
 		
 		}
 		else {
@@ -892,14 +904,14 @@ class UwotFs {
 	
 	isInRoot(pth) {
 	
-		if (null === this.root || !this.root.exists()) {
-		
-			return false;
-		
-		}
-		else if ('string' !== typeof pth) {
+		if ('string' !== typeof pth) {
 		
 			return new TypeError('path passed to isInRoot must be a string');
+		
+		}
+		else if (null === this.root || !this.root.exists()) {
+		
+			return false;
 		
 		}
 		else {
@@ -913,21 +925,13 @@ class UwotFs {
 	
 	
 	tildeExpand(pth) {
-	
-		if (this.userDir === null) {
+			
+		if ('string' === typeof pth && pth.startsWith('~')) {
 		
-			return pth;
+			return null !== this.userDir ? path.resolve(pth.replace('~', this.userDir.path + path.sep)) : path.resolve(pth.replace('~', path.sep));
 		
 		}
-		else {
-		
-			if (pth.startsWith('~')) {
-			
-				return path.resolve(pth.replace('~', this.userDir.path + path.sep));
-			
-			}
-			return pth;
-		}	
+		return pth;
 	
 	}
 	
@@ -951,29 +955,50 @@ class UwotFs {
 		}
 		if (path.isAbsolute(pth)) {
 		
-			pth = pth.replace(path.sep, '');
-		
-		}
-		var fromCwd = path.resolve(this.cwd, pth);
-		try {
-		
-			var fromCwdStats = fs.statSync(fromCwd);
-			return fromCwd;
-		
-		}
-		catch(e) {
-		
-			var fromRoot = path.resolve(this.root.path, pth);
 			try {
 			
-				var fromRootStats = fs.statSync(fromRoot);
-				return fromRoot;
+				var pthInRoot = this.isInRoot(pth);
+				if (pthInRoot instanceof Error) {
+				
+					throw pthInRoot;
+				
+				}
+				var absPth = path.resolve(this.root.path, pth);
+				var pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);
+				return pthInRoot ? pth : absPth;
 			
 			}
-			catch(err) {
+			catch(error) {
 			
-				return err;
+				return error;
 			
+			}
+		
+		}
+		else {
+		
+			var fromCwd = path.resolve('string' === typeof this.cwd ? this.getCwd() : this.root.path, pth);
+			try {
+		
+				var fromCwdStats = fs.statSync(fromCwd);
+				return fromCwd;
+		
+			}
+			catch(e) {
+		
+				var fromRoot = path.resolve(this.root.path, pth);
+				try {
+			
+					var fromRootStats = fs.statSync(fromRoot);
+					return fromRoot;
+			
+				}
+				catch(err) {
+			
+					return err;
+			
+				}
+		
 			}
 		
 		}
@@ -1007,7 +1032,7 @@ class UwotFs {
 			vfsReadable = (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot'));
 		
 		}
-		else if (this.sudo) {
+		else if (this.isInUser(fullPath, this.user['_id'])) {
 		
 			vfsReadable = true;
 		
@@ -1057,7 +1082,11 @@ class UwotFs {
 			}
 		
 		}
-		return systemError.EACCES({'path': pth, 'syscall': 'stat'});;
+		else {
+		
+			return systemError.EACCES({'path': pth, 'syscall': 'stat'});
+		
+		}
 	
 	}
 	
@@ -1129,7 +1158,11 @@ class UwotFs {
 			}
 		
 		}
-		return systemError.EACCES({'path': pth, 'syscall': 'stat'});
+		else {
+		
+			return systemError.EACCES({'path': pth, 'syscall': 'stat'});
+		
+		}
 	
 	}
 	
@@ -1144,7 +1177,7 @@ class UwotFs {
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
 		}
-		else if (!inAllowed && !(this.sudo || (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
+		else if (inRoot && !inAllowed && !(this.sudo || (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
@@ -1220,12 +1253,12 @@ class UwotFs {
 	
 	setPermissions(pth, userId, permissions) {
 	
-		if (!this.sudo) {
+		if (!this.sudo || 'string' !== typeof pth) {
 		
 			return systemError.EPERM({path: pth, syscall: 'chmod'});
 		
 		}
-		else if ('string' !== userId || 'object' !== typeof permissions) {
+		else if ('string' !== userId || 'object' !== typeof permissions || null === permissions) {
 		
 			return new TypeError('invalid user or permissions');
 		
@@ -1275,27 +1308,27 @@ class UwotFs {
 			
 			}
 			var currentPermissions = this.getPermissions(fullPath);
-			if (currentPermissions instanceof Error) {
+			if (currentPermissions instanceof Error || !currentPermissions) {
 			
 				currentPermissions = new UwotFsPermissions(null);
 			
 			}
 			var newPermissions = new UwotFsPermissions(permissions);
-			if (currentPermissions.allowed !== DEFAULT_ALLOWED) {
+			if (currentPermissions.allowed !== DEFAULT_ALLOWED && ('object' !== typeof newPermissions.allowed || null === newPermissions.allowed || !Array.isArray(newPermissions.allowed))) {
 			
 				newPermissions.allowed = currentPermissions.allowed;
 			
 			}
-			if (isOwned && DEFAULT_OWNER === currentPermissions.owner) {
+			if (isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== newPermissions.owner) {
 			
 				newPermissions.owner = this.user['_id'];
 			
 			}
 			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+			var permPath;
 			try {
 			
 				var pthStats = fs.statSync(fullPath);
-				var permPath;
 				if (pthStats.isDirectory()) {
 				
 					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
@@ -1315,7 +1348,7 @@ class UwotFs {
 			}
 			try {
 			
-				fs.writeFileSync(fullPath, updatedPermissions);
+				fs.writeFileSync(permPath, updatedPermissions);
 				return true;
 			
 			}
@@ -1339,7 +1372,7 @@ class UwotFs {
 		}
 		else if ('string' !== userId) {
 		
-			return new TypeError('invalid user or permissions');
+			return new TypeError('invalid user');
 		
 		}
 // 		var userInterface = new Users();
@@ -1399,10 +1432,10 @@ class UwotFs {
 			
 			}
 			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+			var permPath;
 			try {
 			
 				var pthStats = fs.statSync(fullPath);
-				var permPath;
 				if (pthStats.isDirectory()) {
 				
 					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
@@ -1422,7 +1455,7 @@ class UwotFs {
 			}
 			try {
 			
-				fs.writeFileSync(fullPath, updatedPermissions);
+				fs.writeFileSync(permPath, updatedPermissions);
 				return true;
 			
 			}

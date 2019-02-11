@@ -194,59 +194,146 @@ describe('filesystem.js', function() {
 			it('should return a Stats object if user has proper permissions and statSynce executes without error');
 		
 		});
-		describe('write', function() {
+		describe('write(pth, data)', function() {
 		
 			it('should be a function');
+			it('should return an eroor if isWritable throws an error');
+			it('should return a systemError if user is not allowed to write to location at pth');
+			it('should return an error if writeFileSync throws an error');
+			it('should return true and write data to beginning of file at pth if user has proper permissions and writeFileSync executes without error');
 		
 		});
-		describe('isInUser', function() {
+		describe('isInUser(pth, userId)', function() {
 		
 			it('should be a function');
+			it('should return a TypeError if pth is not a string');
+			it('should return false if this.userDir is null or if this.userDir.exists returns false');
+			it('should return false if userId is not provided and pth is not inside the config user directory');
+			it('should return true if userId is not provided and pth is inside the config user directory');
+			it('should return false if userId matches instance user and pth is not inside the instance user\'s directory');
+			it('should return true if userId matches instance user and pth is inside the instance user\'s directory');
+			it('should return false if userId does not matche instance user and pth is not inside the given user\'s directory');
+			it('should return true if userId does not match instance user and pth is inside the given user\'s directory');
 		
 		});
-		describe('isInPub', function() {
+		describe('isInPub(pth)', function() {
 		
 			it('should be a function');
+			it('should return a TypeError if pth is not a string');
+			it('should return false if this.pubDir is null or this.pubDir.exists returns false');
+			it('should return false if pth is not inside of this.pubDir.path');
+			it('should return true if pth is inside of this.pubDir.path');
 		
 		});
-		describe('isInRoot', function() {
+		describe('isInRoot(pth)', function() {
 		
 			it('should be a function');
+			it('should return a TypeError if pth is not a string');
+			it('should return false if this.root is null or this.root.exists returns false');
+			it('should return false if pth is not inside of this.root.path');
+			it('should return true if pth is inside of this.root.path');
 		
 		});
-		describe('tildeExpand', function() {
+		describe('tildeExpand(pth)', function() {
 		
 			it('should be a function');
+			it('should return pth unchanged if pth is not a string starting with "~"');
+			it('should replace the leading tilde with the absolute path to the instance user\'s directory if path is a string starting with "~" and this.userDir !== null');
+			it('should replace the leading tilde with "/" if path is a string starting with "~" and this.userDir === null');
 		
 		});
-		describe('resolvePath', function() {
+		describe('resolvePath(pth)', function() {
 		
 			it('should be a function');
+			it('should return a TypeError if pth is not a string');
+			it('should return a systemError if pth points to a permissions file');
+			it('should return the path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path');
+			it('should return pth if pth is absolute, within root, and extant');
+			it('should return this.root.path + pth if pth is absolute, and extant from root');
+			it('should return an error if pth is absolute and isInRoot throws an error');
+			it('should return an error if pth is absolute and path.resolve throws an error');
+			it('should return absolute path from VCWD to pth if this.cwd is a string and absolute path is extant');
+			it('should return absolute path from Vroot to pth if this.cwd is not a string and absolute path is extant');
+			it('should return absolute path from Vroot to pth if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path is extant');
+			it('should return an error if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path from Vroot to path is not extant');
 		
 		});
-		describe('isReadable', function() {
+		describe('isReadable(pth)', function() {
 		
 			it('should be a function');
+			it('should return a systemError if pth is not a string');
+			it('should return a systemError if pth points to a permissions file');
+			it('should return a systemError if pth resolves to an absolute path outside of VFS as configured');
+			it('should return true if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is true in config and this.sudo is true, and file is readable by fs');
+			it('should return a systemError if pth resolves to a file that is not readable by fs');
+			it('should return false if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is false in config or this.sudo is false');
+			it('should return true if is in instance userDir and is readable by fs');
+			it('should return an error if getPermissions throws an error');
+			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is set as owner of directory in permissions, and file is readable by fs');
+			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and owner of directory in permissions file is not instance user');
+			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is granted read permissions in permissions file, and file is readable by fs');
+			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and permissions are set, and instance user is not granted read permissions in permissions file');
+			it('should return true if pth resolves to absolute path in this.pubDir.path, permissions file is not set, and file is readable by fs');
+			it('should return an error if accessSync throws an error');
 		
 		});
-		describe('isWritable', function() {
+		describe('isWritable(pth)', function() {
 		
 			it('should be a function');
+			it('should return a systemError if pth is not a string');
+			it('should return a systemError if pth points to a permissions file');
+			it('should return a systemError if pth resolves to an absolute path outside of root, pubDir, or userDir');
+			it('should return a systemError if pth resolves to a file that fs cannot write to');
+			it('should return true if this.sudo is true, users:sudoFullRoot is true in config, file is in root or users, and writable by fs');
+			it('should return true if pth resolves to a path in instance userDir, users:homeWritable and users:createHome is true in config, and file is writable by fs');
 		
 		});
-		describe('getPermissions', function() {
+		describe('getPermissions(pth)', function() {
 		
 			it('should be a function');
+			it('should return a permissions object with owner:"root" and allowed:[] if pth is not in root or users');
+			it('should return a permissions object with owner:"root" and allowed:[] if is in root, not in pub or instance userDir, and either this.sudo === false or user:sudoFullRoot is false in config');
+			it('should return an error if pth points to a non-extant path');
+			it('should return false if pth points to a directory and there is not valid JSON permissions data in the permissions file');
+			it('should return a permissions object with the content of the permissions file in the directory if pth points to a directory and the permissions file contains valid JSON');
+			it('should return an error if pth points to a directory and readFileSync throws an error trying to read the permissions file');
+			it('should return false if pth points to a file and there is not valid JSON permissions data in the permissions file of its enclosing directory');
+			it('should return a permissions object with the content of the permissions file in the directory if pth points to a file and the permissions file in the enclosing directory contains valid JSON');
+			it('should return an error if pth points to a file and readFileSync throws an error trying to read the permissions file in the enclosing directory');
 		
 		});
-		describe('setPermissions', function() {
+		describe('setPermissions(pth, userId, permissions)', function() {
 		
 			it('should be a function');
+			it('should return a systemError if !this.sudo or pth is not a string');
+			it('should return a TypeError if userId is not a string or permissions is not a non-null object');
+			it('should return a systemError if listUsers throws an error');
+			it('should return an Error if userId does not match a user in the user db');
+			it('should return a systemError if pth resolves to a path outside of root or users directory');
+			it('should return an error if absolute path to permissions file cannot be resolved');
+			it('should return an error if pth does not resolve to an extant path')
+			it('should return an error if permissions file cannot be written');
+			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userId matches a user in db, path is extant and a directory, and permissions file does not exist');
+			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userId matches a user in db, path is extant and a file, and permissions file does not exist');
+			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set');
+			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir');
+			it('should maintain any user specific permissions if any were previously set');
 		
 		});
-		describe('changeOwner', function() {
+		describe('changeOwner(pth, userId)', function() {
 		
 			it('should be a function');
+			it('should return a systemError if !this.sudo');
+			it('should return a TypeError if userId is not a string');
+			it('should return a systemError if listUsers returns an error');
+			it('should return an error if userId does not match a user in the db');
+			it('should return a systemError if pth does not resolve to a path inside of root or users');
+			it('should return an error if pth resolves to a non-extant path');
+			it('should return an error if fs cannot write to the permissions file at pth');
+			it('should write a new JSON object with owner: "{userId}" to a permissions file at pth if pth resolves to a directory in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
+			it('should write only updated owner: "{userId}" in the JSON for the permissions file at pth if pth resolves to a directory in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
+			it('should write a new JSON object with owner: "{userId}" to a permissions file in the enclosing dir of pth if pth resolves to a file in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
+			it('should write only updated owner: "{userId}" in the JSON for the permissions file in the enclosing directory of pth if pth resolves to a file in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
 		
 		});
 	
