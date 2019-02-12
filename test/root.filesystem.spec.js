@@ -330,28 +330,138 @@ describe('filesystem.js', function() {
 		});
 		describe('isInPub(pth)', function() {
 		
-			it('should be a function');
-			it('should return a TypeError if pth is not a string');
-			it('should return false if this.pubDir is null or this.pubDir.exists returns false');
-			it('should return false if pth is not inside of this.pubDir.path');
-			it('should return true if pth is inside of this.pubDir.path');
+			it('should be a function', function() {
+			
+				expect(filesystem.isInPub).to.be.a('function');
+			
+			});
+			it('should return a TypeError if pth is not a string', function() {
+			
+				expect(filesystem.isInPub()).to.be.an.instanceof(TypeError).with.property('message').that.includes('path passed to isInPub must be a string');
+			
+			});
+			it('should return false if this.pubDir is null or this.pubDir.exists returns false', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnFalse() {
+			
+					return false;
+			
+				});
+				var existsFalse = filesystem.isInPub(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(existsFalse).to.be.false;
+				filesystem.userDir = null;
+				var pubDirIsNull = filesystem.isInPub(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(pubDirIsNull).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return false if pth is not inside of this.pubDir.path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var notInPath = filesystem.isInPub(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/run/testpath'));
+				expect(notInPath).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return true if pth is inside of this.pubDir.path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var isInPath = filesystem.isInPub(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(isInPath).to.be.true;
+				existsSyncStub.restore();
+			
+			});
 		
 		});
 		describe('isInRoot(pth)', function() {
 		
-			it('should be a function');
-			it('should return a TypeError if pth is not a string');
-			it('should return false if this.root is null or this.root.exists returns false');
-			it('should return false if pth is not inside of this.root.path');
-			it('should return true if pth is inside of this.root.path');
+			it('should be a function', function() {
+			
+				expect(filesystem.isInRoot).to.be.a('function');
+			
+			});
+			it('should return a TypeError if pth is not a string', function() {
+			
+				expect(filesystem.isInRoot()).to.be.an.instanceof(TypeError).with.property('message').that.includes('path passed to isInRoot must be a string');
+			
+			});
+			it('should return false if this.root is null or this.root.exists returns false', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnFalse() {
+			
+					return false;
+			
+				});
+				var existsFalse = filesystem.isInRoot(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(existsFalse).to.be.false;
+				filesystem.userDir = null;
+				var RootDirIsNull = filesystem.isInRoot(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(RootDirIsNull).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return false if pth is not inside of this.root.path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var notInPath = filesystem.isInRoot(path.resolve(global.Uwot.Constants.appRoot, '/var/run/testpath'));
+				expect(notInPath).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return true if pth is inside of this.root.path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var isInPath = filesystem.isInRoot(path.resolve(global.Uwot.Constants.appRoot, 'fs/var/www/html/testpath'));
+				expect(isInPath).to.be.true;
+				existsSyncStub.restore();
+			
+			});
 		
 		});
 		describe('tildeExpand(pth)', function() {
 		
-			it('should be a function');
-			it('should return pth unchanged if pth is not a string starting with "~"');
-			it('should replace the leading tilde with the absolute path to the instance user\'s directory if path is a string starting with "~" and this.userDir !== null');
-			it('should replace the leading tilde with "/" if path is a string starting with "~" and this.userDir === null');
+			it('should be a function', function() {
+			
+				expect(filesystem.tildeExpand).to.be.a('function');
+			
+			});
+			it('should return pth unchanged if pth is not a string starting with "~"', function() {
+			
+				var testPath = '/fs/doc/';
+				expect(filesystem.tildeExpand(testPath)).to.equal(testPath);
+			
+			});
+			it('should replace the leading tilde with this.userDir.path if path is a string starting with "~" and this.userDir !== null', function() {
+			
+				var testPath = '~/doc/';
+				filesystem.userDir.path = '/fs/home/fuser';	//faking it out w/ an absolute path; this will return full path from server root at runtime
+				expect(filesystem.tildeExpand(testPath)).to.equal('/fs/home/fuser/doc/');
+			
+			});
+			it('should replace the leading tilde with this.root.path if path is a string starting with "~" and this.userDir === null', function() {
+			
+				var testPath = '~/doc/';
+				filesystem.userDir = null;
+				filesystem.root.path = '/fs';	//faking it out w/ an absolute path; this will return full path from server root at runtime
+				expect(filesystem.tildeExpand(testPath)).to.equal('/fs/doc/');
+			
+			});
 		
 		});
 		describe('resolvePath(pth)', function() {

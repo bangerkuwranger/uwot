@@ -925,7 +925,7 @@ class UwotFs {
 			return new TypeError('path passed to isInRoot must be a string');
 		
 		}
-		else if (null === this.root || !this.root.exists()) {
+		else if (null === this.root || !fs.existsSync(this.root.path)) {
 		
 			return false;
 		
@@ -944,7 +944,8 @@ class UwotFs {
 			
 		if ('string' === typeof pth && pth.startsWith('~')) {
 		
-			return null !== this.userDir ? path.resolve(pth.replace('~', this.userDir.path + path.sep)) : path.resolve(pth.replace('~', path.sep));
+			
+			return null !== this.userDir ? path.join(this.userDir.path, pth.replace('~', '')) : path.join(this.root.path, pth.replace('~', ''));
 		
 		}
 		return pth;
