@@ -298,22 +298,19 @@ class UwotFs {
 			path: path.resolve(global.Uwot.Constants.appRoot, 'fs'),
 			r: true,
 			w: false,
-			x: false,
-			exists: function () { fs.existsSync(this.root.path) }
+			x: false
 		};
 		this.pubDir = {
 			path: global.Uwot.Config.get('server', 'pubDir'),
 			r: true,
 			w: false,
-			x: false,
-			exists: function () { fs.existsSync(path.resolve(this.pubDir.path)) }
+			x: false
 		};
 		this.userDir = this.user.uName === 'guest' ? null : {
 			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), this.user.uName),
 			r: true,
-			w: global.Uwot.Config.get('server', 'homeWritable'),
-			x: false,
-			exists: function () { fs.existsSync(path.resolve(this.userDir.path)) }
+			w: global.Uwot.Config.get('users', 'homeWritable'),
+			x: false
 		};
 		if ('string' !== this.cwd) {
 		
@@ -850,7 +847,11 @@ class UwotFs {
 	
 	}
 	
-	isInUser(pth, userId) {
+	// path must be a string or will return an error
+	// if userName undefined or non-string, will check against this.userDir.path (which must exist!)
+	// if userName === "*", will check against the entire user directory path
+	// if userName is a string matching an existing user, will check against that user's directory path (which must exist!)
+	isInUser(pth, userName) {
 	
 		
 		if ('string' !== typeof pth) {
@@ -858,7 +859,7 @@ class UwotFs {
 			return new TypeError('path passed to isInUser must be a string');
 		
 		}
-		else if (null === this.userDir || !this.userDir.exists()) {
+		else if ('string' !== typeof userName && (null === this.userDir || !fs.existsSync(this.userDir.path))) {
 		
 			return false;
 		
@@ -866,19 +867,29 @@ class UwotFs {
 		else {
 		
 			var fullPath = path.resolve(this.tildeExpand(pth));
-			if ('string' !== typeof userId) {
-			
-				return pathIsInside(fullPath, global.Uwot.Config.get('server', 'userDir'))
-			
-			}
-			else if (userId === this.user['_id']) {
+			if ('string' !== typeof userName) {
 			
 				return pathIsInside(fullPath, this.userDir.path);
+			
+			}
+			else if (userName === "*") {
+			
+				return pathIsInside(fullPath, path.resolve(global.Uwot.Config.get('server', 'userDir')));
 		
 			}
 			else {
-			
-				return pathIsInside(fullPath, path.resolve(global.Uwot.Config.get('server', 'userDir'), userId));
+
+				var thisUserDirPath = path.resolve(global.Uwot.Config.get('server', 'userDir'), userName);
+				if (fs.existsSync(thisUserDirPath)) {
+		
+					return pathIsInside(fullPath, thisUserDirPath);
+				
+				}
+				else {
+		
+					return false;
+		
+				}
 			
 			}
 		
@@ -893,7 +904,7 @@ class UwotFs {
 			return new TypeError('path passed to isInPub must be a string');
 		
 		}
-		else if (null === this.pubDir || !this.pubDir.exists()) {
+		else if (null === this.pubDir || !fs.existsSync(this.pubDir.path)) {
 		
 			return false;
 		
@@ -1024,8 +1035,8 @@ class UwotFs {
 		
 		}
 		var fullPath = this.resolvePath(pth);
-		var inUsers = this.isInUser(fullPath);
-		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath, this.user['_id']));
+		var inUsers = this.isInUser(fullPath, "*");
+		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
 		var inRoot = this.isInRoot(fullPath);
 		if (!inRoot && !inAllowed && !inUsers) {
 		
@@ -1037,7 +1048,7 @@ class UwotFs {
 			vfsReadable = (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot'));
 		
 		}
-		else if (this.isInUser(fullPath, this.user['_id'])) {
+		else if (this.isInUser(fullPath)) {
 		
 			vfsReadable = true;
 		
@@ -1110,9 +1121,9 @@ class UwotFs {
 		
 		}
 		var fullPath = this.resolvePath(pth);
-		var inUsers = this.isInUser(fullPath);
+		var inUsers = this.isInUser(fullPath, "*");
 		var inPub = this.isInPub(fullPath);
-		var inHome = this.isInUser(fullPath, this.user['_id']);
+		var inHome = this.isInUser(fullPath);
 		var inRoot = this.isInRoot(fullPath);
 		if (!inRoot && !inPub && !inUsers) {
 		
@@ -1175,8 +1186,8 @@ class UwotFs {
 	
 		var fullPath = this.resolvePath(pth);
 		var inRoot = this.isInRoot(fullPath);
-		var inUsers = this.isInUser(fullPath);
-		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath, this.user['_id']));
+		var inUsers = this.isInUser(fullPath, "*");
+		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
 		if (!inRoot && !inUsers && !inAllowed) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
@@ -1304,9 +1315,9 @@ class UwotFs {
 			}
 			var fullPath = this.resolvePath(pth);
 			var inRoot = this.isInRoot(fullPath);
-			var inUsers = this.isInUser(fullPath);
-			var isOwned = this.isInUser(fullPath, this.user['_id']);
-			var inAllowed = (this.isInPub(fullPath) || this.isOwned);
+			var inUsers = this.isInUser(fullPath, "*");
+			var isOwned = this.isInUser(fullPath);
+			var inAllowed = (this.isInPub(fullPath) || isOwned);
 			if (!inRoot && !inUsers && !inAllowed) {
 			
 				return systemError.ENOENT({path: pth, syscall: 'chmod'});
@@ -1416,9 +1427,9 @@ class UwotFs {
 			}
 			var fullPath = this.resolvePath(pth);
 			var inRoot = this.isInRoot(fullPath);
-			var inUsers = this.isInUser(fullPath);
-			var isOwned = this.isInUser(fullPath, this.user['_id']);
-			var inAllowed = (this.isInPub(fullPath) || this.isOwned);
+			var inUsers = this.isInUser(fullPath, "*");
+			var isOwned = this.isInUser(fullPath);
+			var inAllowed = (this.isInPub(fullPath) || isOwned);
 			if (!inRoot && !inUsers && !inAllowed) {
 			
 				return systemError.ENOENT({path: pth, syscall: 'chown'});

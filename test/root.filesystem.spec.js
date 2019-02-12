@@ -12,6 +12,33 @@ const expect = chai.expect;
 const FileSystem = require('../filesystem');
 var filesystem;
 
+const instanceUser = {
+	"fName": "Found",
+	"lName": "User",
+	"uName": "fuser",
+	"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+	"sudoer": true,
+	"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+	"createdAt": new Date(1546450800498),
+	"updatedAt": new Date(1546450800498),
+	"_id": "CDeOOrH0gOg791cZ",
+	"verifyPassword": function(pass) {return true;},
+	"maySudo": function() {return this.sudoer;}
+};
+const altUser = {
+	"fName": "Mortimer",
+	"lName": "Hemp",
+	"uName": "mortimerhemp",
+	"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+	"sudoer": true,
+	"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+	"createdAt": new Date(1546450800498),
+	"updatedAt": new Date(1546450800498),
+	"_id": "123fourfive678ninetenELEVENTWELVE",
+	"verifyPassword": function(pass) {return true;},
+	"maySudo": function() {return this.sudoer;}
+}
+
 describe('filesystem.js', function() {
 
 	describe('UwotFs', function() {
@@ -20,25 +47,24 @@ describe('filesystem.js', function() {
 		
 			const dbFindStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnUserDoc(id, callback) {
 		
-				return callback(
-					false, 
-					{
-						"fName": "Found",
-						"lName": "User",
-						"uName": "fuser",
-						"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
-						"sudoer": true,
-						"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
-						"createdAt": new Date(1546450800498),
-						"updatedAt": new Date(1546450800498),
-						"_id": "CDeOOrH0gOg791cZ",
-						"verifyPassword": function(pass) {return true;},
-						"maySudo": function() {return this.sudoer;}
-					}
-				);
+				if (id === altUser['_id']) {
+				
+					return callback(false, altUser);
+				
+				}
+				else{
+				
+					return callback(false, instanceUser);
+				
+				}
 	
 			});
 			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
+		});
+		afterEach(function() {
+		
+			sinon.restore();
+		
 		});
 		describe('constructor(userId, cwd)', function() {
 		
@@ -203,17 +229,103 @@ describe('filesystem.js', function() {
 			it('should return true and write data to beginning of file at pth if user has proper permissions and writeFileSync executes without error');
 		
 		});
-		describe('isInUser(pth, userId)', function() {
+		describe('isInUser(pth, userName)', function() {
 		
-			it('should be a function');
-			it('should return a TypeError if pth is not a string');
-			it('should return false if this.userDir is null or if this.userDir.exists returns false');
-			it('should return false if userId is not provided and pth is not inside the config user directory');
-			it('should return true if userId is not provided and pth is inside the config user directory');
-			it('should return false if userId matches instance user and pth is not inside the instance user\'s directory');
-			it('should return true if userId matches instance user and pth is inside the instance user\'s directory');
-			it('should return false if userId does not matche instance user and pth is not inside the given user\'s directory');
-			it('should return true if userId does not match instance user and pth is inside the given user\'s directory');
+			it('should be a function', function() {
+			
+				expect(filesystem.isInUser).to.be.a('function');
+			
+			});
+			it('should return a TypeError if pth is not a string', function() {
+			
+				var fnResult = filesystem.isInUser();
+				expect(fnResult).to.be.instanceof(TypeError).with.property('message').that.includes('path passed to isInUser must be a string');
+			
+			});
+			it('should return false if userName arg is not a string and either this.userDir is null or if this.userDir.exists returns false', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnFalse() {
+			
+					return false;
+			
+				});
+				var existsFalse = filesystem.isInUser(path.resolve(global.Uwot.Constants.appRoot, 'fs/home/fuser/testpath'));
+				expect(existsFalse).to.be.false;
+				filesystem.userDir = null;
+				var userDirIsNull = filesystem.isInUser(path.resolve(global.Uwot.Constants.appRoot, 'fs/home/fuser/testpath'));
+				expect(userDirIsNull).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return false if userName is not a string, pth is not inside the instance userDir.path, and the directory at userDir.path exists', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var notInPath = filesystem.isInUser('fs/var/testpath');
+				expect(notInPath).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return true if userName is not a string, pth is inside the instance userDir.path, and the directory at userDir.path exists', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrue() {
+			
+					return true;
+			
+				});
+				var isInPath = filesystem.isInUser('fs/home/fuser/testpath');
+				expect(isInPath).to.be.true;
+				existsSyncStub.restore();
+			
+			});
+			it('should return false if userName === "*" and pth is not inside the config server:userDir path', function() {
+			
+				var notInPath = filesystem.isInUser('fs/var/testpath', "*");
+				expect(notInPath).to.be.false;
+			
+			});
+			it('should return true if userName === "*" and pth is inside the config server:userDir path', function() {
+			
+				var isInPath = filesystem.isInUser('fs/home/testpath', "*");
+				expect(isInPath).to.be.true;
+			
+			});
+			it('should return false if userName is a string matching a user\'s existing home directory name and pth is not inside that directory\'s path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrueIfTestUser(userPath) {
+			
+					return -1 !== userPath.indexOf(altUser['uName']);
+			
+				});
+				expect(filesystem.isInUser('fs/home/testpath', altUser['uName'])).to.be.false;
+				existsSyncStub.restore();
+			
+			});
+			it('should return true if userName is a string matching a user\'s existing home directory name and pth is inside that directory\'s path', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnTrueIfTestUser(userPath) {
+			
+					return -1 !== userPath.indexOf(altUser['uName']);
+			
+				});
+				expect(filesystem.isInUser('fs/home/mortimerhemp/testpath', altUser['uName'])).to.be.true;
+				existsSyncStub.restore();
+			
+			});
+			it('should return false if userName is a string that does not match a user\'s existing home directory name', function() {
+			
+				var existsSyncStub = sinon.stub(fs, 'existsSync').callsFake(function returnFalse(userPath) {
+			
+					return false;
+			
+				});
+				expect(filesystem.isInUser('fs/home/mortimerhemp/testpath', altUser['uName'])).to.be.false;
+				existsSyncStub.restore();
+			
+			});
 		
 		});
 		describe('isInPub(pth)', function() {
@@ -244,7 +356,11 @@ describe('filesystem.js', function() {
 		});
 		describe('resolvePath(pth)', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(filesystem.resolvePath).to.be.a('function');
+			
+			});
 			it('should return a TypeError if pth is not a string');
 			it('should return a systemError if pth points to a permissions file');
 			it('should return the path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path');
