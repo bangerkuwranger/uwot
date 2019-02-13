@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs');
+const SystemError = require('../helpers/systemError');
 const globalSetupHelper = require('../helpers/globalSetup');
 globalSetupHelper.initConstants();
 globalSetupHelper.initEnvironment();
@@ -37,7 +38,9 @@ const altUser = {
 	"_id": "123fourfive678ninetenELEVENTWELVE",
 	"verifyPassword": function(pass) {return true;},
 	"maySudo": function() {return this.sudoer;}
-}
+};
+
+const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
 
 describe('filesystem.js', function() {
 
@@ -471,8 +474,17 @@ describe('filesystem.js', function() {
 				expect(filesystem.resolvePath).to.be.a('function');
 			
 			});
-			it('should return a TypeError if pth is not a string');
-			it('should return a systemError if pth points to a permissions file');
+			it('should return a TypeError if pth is not a string', function() {
+			
+				expect(filesystem.resolvePath()).to.be.an.instanceof(TypeError).with.property('message').that.includes('path passed to resolvePath must be a string');
+			
+			});
+			it('should return a systemError if pth points to a permissions file', function() {
+			
+				var permFilePath = '/etc/' + UWOT_HIDDEN_PERMISSIONS_FILENAME;
+				expect(filesystem.resolvePath(permFilePath)).to.be.an.instanceof(Error).with.property('code');
+			
+			});
 			it('should return the path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path');
 			it('should return pth if pth is absolute, within root, and extant');
 			it('should return this.root.path + pth if pth is absolute, and extant from root');

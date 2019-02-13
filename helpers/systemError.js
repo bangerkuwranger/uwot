@@ -580,7 +580,7 @@ Error.captureStackTrace(this, SystemError)
 
   	get name() {
   
-    	return `SystemError [${this[kCode]}]`;
+    	return `SystemError ${this['kCode']}`;
     
   	}
 
@@ -644,8 +644,7 @@ Error.captureStackTrace(this, SystemError)
 
 	get path() {
 	
-		return this[kInfo].path !== undefined ?
-	  		this[kInfo].path.toString() : undefined;
+		return this[kInfo].path !== undefined ? this[kInfo].path.toString() : undefined;
 	
 	}
 
