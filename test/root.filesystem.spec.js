@@ -485,15 +485,130 @@ describe('filesystem.js', function() {
 				expect(filesystem.resolvePath(permFilePath)).to.be.an.instanceof(Error).with.property('code');
 			
 			});
-			it('should return the path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path');
-			it('should return pth if pth is absolute, within root, and extant');
-			it('should return this.root.path + pth if pth is absolute, and extant from root');
-			it('should return an error if pth is absolute and isInRoot throws an error');
-			it('should return an error if pth is absolute and path.resolve throws an error');
-			it('should return absolute path from VCWD to pth if this.cwd is a string and absolute path is extant');
-			it('should return absolute path from Vroot to pth if this.cwd is not a string and absolute path is extant');
-			it('should return absolute path from Vroot to pth if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path is extant');
-			it('should return an error if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path from Vroot to path is not extant');
+			it('should return the resolved path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
+			
+					return true;
+				
+				});
+				var testPath = '~/doc/';
+				filesystem.userDir.path = '/fs/home/fuser';	//faking it out w/ an absolute path; this will return full path from server root at runtime
+				expect(filesystem.resolvePath(testPath)).to.equal('/fs/home/fuser/doc');
+			
+			});
+			it('should return pth if pth is absolute, within root, and extant', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
+			
+					return true;
+				
+				});
+				var testPath = '/var/doc';
+				expect(filesystem.resolvePath(testPath)).to.equal(testPath);
+			
+			});
+			it('should return this.root.path + pth if pth is absolute, and extant from root', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
+			
+					return true;
+				
+				});
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/doc';
+				expect(filesystem.resolvePath(testPath)).to.equal(testPath);
+			
+			});
+			it('should return an error if pth is absolute and isInRoot throws an error', function() {
+			
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(function returnError() {
+			
+					return new Error('test isInRoot error');
+				
+				});
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/doc';
+				expect(filesystem.resolvePath(testPath)).to.be.an.instanceof(Error).with.property('message').that.includes('test isInRoot error');
+			
+			});
+			it('should return an error if pth is absolute and path.resolve throws an error', function() {
+			
+				var resolveStub = sinon.stub(path, 'resolve').callsFake(function throwError() {
+			
+					throw new Error('test resolve error');
+				
+				});
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/doc';
+				expect(filesystem.resolvePath(testPath)).to.be.an.instanceof(Error).with.property('message').that.includes('test resolve error');
+			
+			});
+			it('should return an error if pth is absolute and fs.statSync throws an error', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function throwError() {
+			
+					throw new Error('test statSync error')
+				
+				});
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/doc';
+				expect(filesystem.resolvePath(testPath)).to.be.an.instanceof(Error).with.property('message').that.includes('test statSync error');
+			
+			});
+			it('should return absolute path from VCWD to pth if this.cwd is a string and absolute path is extant', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
+			
+					return true;
+				
+				});
+				filesystem.cwd = "var/www";
+				var testPath = 'html';
+				var resolvedPath = path.resolve(filesystem.root.path, filesystem.cwd, testPath);
+				expect(filesystem.resolvePath(testPath)).to.equal(resolvedPath);
+			
+			});
+			it('should return absolute path from Vroot to pth if this.cwd is not a string and absolute path is extant', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
+			
+					return true;
+				
+				});
+				filesystem.cwd = null;
+				var testPath = 'html';
+				var resolvedPath = path.resolve(filesystem.root.path, testPath);
+				expect(filesystem.resolvePath(testPath)).to.equal(resolvedPath);
+			
+			});
+			it('should return absolute path from Vroot to pth if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path is extant', function() {
+			
+				filesystem.cwd = "var";
+				var testPath = 'etc';
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrueOrThrow(pth) {
+			
+					if (-1 === pth.indexOf("var/etc")) {
+					
+						return true;
+					
+					}
+					throw new Error('"/var/etc" does not exist');
+				
+				});
+				var resolvedPath = path.resolve(filesystem.root.path, testPath);
+				expect(filesystem.resolvePath(testPath)).to.equal(resolvedPath);
+			
+			});
+			it('should return an error if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path from Vroot to path is not extant', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFalse() {
+			
+					throw SystemError.ENOENT({syscall: 'stat', path: "/baklava"});
+				
+				});
+				filesystem.cwd = '/var/eat/';
+				var testPath = 'baklava';
+				var shouldBeError = filesystem.resolvePath(testPath);
+				expect(shouldBeError).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
 		
 		});
 		describe('isReadable(pth)', function() {

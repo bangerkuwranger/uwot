@@ -445,10 +445,15 @@ class UwotFs {
 		}
 		else {
 			
+			if (-1 === pth.indexOf(this.root.path)) {
+			
+				pth = pth.replace(/^\/+/g, '');
+			
+			}
 			//resolve
 			try {
 			
-				var absPth = this.resolvePath(pth);
+				var absPth = path.resolve(this.root.path, pth);
 			
 			}
 			catch(e) {
@@ -472,7 +477,7 @@ class UwotFs {
 			}
 			else if (canRead) {
 			
-				this.cwd = absPth.replace(this.root.path, '');
+				this.cwd = absPth.replace(this.root.path + path.sep, '');
 				return true;
 			
 			}
@@ -492,7 +497,7 @@ class UwotFs {
 	// check if user can access that dir
 	getVcwd() {
 	
-		return 'string' == typeof this.cwd ? this.cwd : path.sep;
+		return 'string' == typeof this.cwd ? path.sep + this.cwd : path.sep;
 	
 	}
 	

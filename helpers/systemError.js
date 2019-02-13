@@ -580,7 +580,8 @@ Error.captureStackTrace(this, SystemError)
 
   	get name() {
   
-    	return `SystemError ${this['kCode']}`;
+//     	return `SystemError ${this['kCode']}`;
+		return 'Error';
     
   	}
 
@@ -614,57 +615,57 @@ Error.captureStackTrace(this, SystemError)
 
 	get info() {
 	
-		return this[kInfo];
+		return this['kInfo'];
 	
 	}
 
 	get errno() {
 	
-		return this[kInfo].errno;
+		return this['kInfo'].errno;
 	
 	}
 
 	set errno(val) {
 	
-		this[kInfo].errno = val;
+		this['kInfo'].errno = val;
 	
 	}
 
 	get syscall() {
 	
-		return this[kInfo].syscall;
+		return this['kInfo'].syscall;
 	
 	}
 
 	set syscall(val) {
 	
-		this[kInfo].syscall = val;
+		this['kInfo'].syscall = val;
 	
 	}
 
 	get path() {
 	
-		return this[kInfo].path !== undefined ? this[kInfo].path.toString() : undefined;
+		return this['kInfo'].path !== undefined ? this['kInfo'].path.toString() : undefined;
 	
 	}
 
 	set path(val) {
 	
-		this[kInfo].path = val ?
+		this['kInfo'].path = val ?
 	  		lazyBuffer().from(val.toString()) : undefined;
 	
 	}
 
 	get dest() {
 	
-		return this[kInfo].path !== undefined ?
-	  		this[kInfo].dest.toString() : undefined;
+		return this['kInfo'].path !== undefined ?
+	  		this['kInfo'].dest.toString() : undefined;
 	
 	}
 
 	set dest(val) {
 	
-		this[kInfo].dest = val ?
+		this['kInfo'].dest = val ?
 			lazyBuffer().from(val.toString()) : undefined;
 	
 	}
