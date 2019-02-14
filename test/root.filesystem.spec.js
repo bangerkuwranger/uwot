@@ -316,11 +316,38 @@ describe('filesystem.js', function() {
 		});
 		describe('setDirs()', function() {
 		
-			it('should be a function');
-			it('should create object this.root and assign global appRoot constant + "/fs" to this.root.path');
-			it('should create object this.pubDir and assign global config setting for pubDir to this.pubDir.path');
-			it('should assign null to this.userDir if this.user is a guest');
-			it('should create object this.userDir and assign global config userDir + "/{this.user.uName}" to this.userDir.path if user is not a guest.');
+			it('should be a function', function() {
+			
+				expect(filesystem.setDirs).to.be.a('function');
+			
+			});
+			it('should create object this.root and assign global appRoot constant + "/fs" to this.root.path', function() {
+			
+				expect(filesystem.root).to.be.an('object').with.property('path').that.equals(global.Uwot.Constants.appRoot + "/fs");
+			
+			});
+			it('should create object this.pubDir and assign global config setting for pubDir to this.pubDir.path', function() {
+			
+				expect(filesystem.pubDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.get('server', 'pubDir'));
+			
+			});
+			it('should assign null to this.userDir if this.user is a guest', function(done) {
+			
+				global.Uwot.Users.getGuest(function(error, guestUser) {
+				
+					filesystem.user = guestUser;
+					filesystem.setDirs();
+					expect(filesystem.userDir).to.be.null;
+					done();
+				
+				});
+			
+			});
+			it('should create object this.userDir and assign global config userDir + "/{this.user.uName}" to this.userDir.path if user is not a guest.', function() {
+			
+				expect(filesystem.userDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.get('server', 'userDir') + path.sep + instanceUser.uName);
+			
+			});
 		
 		});
 		describe('cmd(cmdName, argArr, callback, isSudo)', function() {
