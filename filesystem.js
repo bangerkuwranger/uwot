@@ -1138,7 +1138,7 @@ class UwotFs {
 		}
 		else if (inHome && global.Uwot.Config.get('users', 'homeWritable') && global.Uwot.Config.get('users', 'createHome')) {
 		
-			vfsWritable;
+			vfsWritable = true;
 		
 		}
 		else if (inPub) {
@@ -1151,12 +1151,12 @@ class UwotFs {
 			}	
 			else if (permissions && 'object' == typeof permissions) {
 				
-				if ('string' == typeof permissions.owner && this.user['_id'] === permissions.owner) { 
+				if ('string' == typeof permissions.owner && this.user['uName'] === permissions.owner) { 
 				
 					vfsWritable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && permissions[this.user['uName']].indexOf('w')) {
+				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('w')) {
 				
 					vfsWritable = true;
 				
@@ -1209,9 +1209,10 @@ class UwotFs {
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
 		}
+		var pthStats, permFile, permissions;
 		try {
 		
-			var pthStats = fs.statSync(fullPath);
+			pathStats = fs.statSync(fullPath);
 		
 		}
 		catch (e) {
@@ -1223,8 +1224,8 @@ class UwotFs {
 			
 			try{
 		
-				var permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
-				var permissions = global.Uwot.Constants.tryParseJSON(permFile);
+				permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
+				permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
 					return new UwotFsPermissions(permissions).toGeneric();
@@ -1239,7 +1240,7 @@ class UwotFs {
 			}
 			catch(e) {
 			
-				return e;
+				return false;
 			
 			}
 		
@@ -1249,8 +1250,8 @@ class UwotFs {
 			var thisDir = path.dirname(fullPath);
 			try{
 		
-				var permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
-				var permissions = global.Uwot.Constants.tryParseJSON(permFile);
+				permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
+				permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
 					return new UwotFsPermissions(permissions).toGeneric();
@@ -1265,7 +1266,7 @@ class UwotFs {
 			}
 			catch(e) {
 			
-				return e;
+				return false;
 			
 			}
 		
