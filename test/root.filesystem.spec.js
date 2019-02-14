@@ -482,7 +482,7 @@ describe('filesystem.js', function() {
 			it('should return a systemError if pth points to a permissions file', function() {
 			
 				var permFilePath = '/etc/' + UWOT_HIDDEN_PERMISSIONS_FILENAME;
-				expect(filesystem.resolvePath(permFilePath)).to.be.an.instanceof(Error).with.property('code');
+				expect(filesystem.resolvePath(permFilePath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
 			it('should return the resolved path with tilde expansion if pth is a string starting with a tilde and tilde expansion points to an extant path', function() {
@@ -613,32 +613,260 @@ describe('filesystem.js', function() {
 		});
 		describe('isReadable(pth)', function() {
 		
-			it('should be a function');
-			it('should return a systemError if pth is not a string');
-			it('should return a systemError if pth points to a permissions file');
-			it('should return a systemError if pth resolves to an absolute path outside of VFS as configured');
-			it('should return true if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is true in config and this.sudo is true, and file is readable by fs');
-			it('should return a systemError if pth resolves to a file that is not readable by fs');
-			it('should return false if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is false in config or this.sudo is false');
-			it('should return true if is in instance userDir and is readable by fs');
-			it('should return an error if getPermissions throws an error');
-			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is set as owner of directory in permissions, and file is readable by fs');
-			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and owner of directory in permissions file is not instance user');
-			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is granted read permissions in permissions file, and file is readable by fs');
-			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and permissions are set, and instance user is not granted read permissions in permissions file');
-			it('should return true if pth resolves to absolute path in this.pubDir.path, permissions file is not set, and file is readable by fs');
-			it('should return an error if accessSync throws an error');
+			it('should be a function', function() {			
+			
+				expect(filesystem.isReadable).to.be.a('function');
+			
+			});
+			it('should return a systemError if pth is not a string', function() {
+			
+				expect(filesystem.isReadable()).to.be.an.instanceof(Error).with.property('code').that.includes('EINVAL');
+			
+			});
+			it('should return a systemError if pth points to a permissions file', function() {
+			
+				var permFilePath = '/etc/' + UWOT_HIDDEN_PERMISSIONS_FILENAME;
+				expect(filesystem.isReadable(permFilePath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return a systemError if pth resolves to an absolute path outside of VFS as configured', function() {
+			
+				function returnFalse(pth) {
+			
+					return false;
+				
+				}
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(returnFalse);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').callsFake(returnFalse);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').callsFake(returnFalse);
+				var testPath = "Users/elfo/lifeblood";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return true if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is true in config and this.sudo is true, and file is readable by fs', function() {
+			
+				function returnFalse(pth) {
+			
+					return false;
+				
+				}
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(function trueIfPathNotHome(pth) {
+				
+					return -1 === pth.indexOf('fs/home/');
+				
+				});
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').callsFake(function trueIfPathIsHome(pth) {
+				
+					return -1 !== pth.indexOf('fs/home/');
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').callsFake(returnFalse);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').callsFake(function returnTrue(path, mode) {
+				
+					return true;
+				
+				});
+				var testPath = "etc/elfo/lifeblood/conf.d";
+				var testPathTwo = "home/elfo/cage";
+				expect(filesystem.isReadable(testPath)).to.be.true;
+				expect(filesystem.isReadable(testPathTwo)).to.be.true;
+			
+			});
+			it('should return a systemError if pth resolves to a file that is not readable by fs', function() {
+			
+				function returnFalse(pth) {
+			
+					return false;
+				
+				}
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(function trueIfPathNotHome(pth) {
+				
+					return -1 === pth.indexOf('fs/home/');
+				
+				});
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').callsFake(function trueIfPathIsHome(pth) {
+				
+					return -1 !== pth.indexOf('fs/home/');
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').callsFake(returnFalse);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').callsFake(function throwError(path, mode) {
+				
+					throw SystemError.EACCES({syscall: "read", path: path});
+				
+				});
+				var testPath = "etc/elfo/lifeblood/conf.d";
+				var testPathTwo = "home/elfo/cage";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				expect(filesystem.isReadable(testPathTwo)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return a SystemError if pth resolves to an absolute path in either root or users directory, but not in pubDir or instance userDir, and users:sudoFullRoot is false in config or this.sudo is false', function() {
+			
+				function returnFalse(pth) {
+			
+					return false;
+				
+				}
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(function trueIfPathNotHome(pth) {
+				
+					return -1 === pth.indexOf('fs/home/');
+				
+				});
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').callsFake(function trueIfPathIsHome(pth, uName) {
+				
+					return -1 !== pth.indexOf('fs/home/') && 'string' == typeof uName;
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').callsFake(returnFalse);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				filesystem.sudo = true;
+				var testPath = "etc/david/lifeblood/conf.d";
+				var testPathTwo = "home/david/toadstool";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
+				filesystem.sudo = false;
+				expect(filesystem.isReadable(testPathTwo)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
+			
+			});
+			it('should return true if is in instance userDir and is readable by fs', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(true);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var testPath = "home/elfo/cage";
+				expect(filesystem.isReadable(testPath)).to.be.true;
+			
+			});
+			it('should return an error if getPermissions returns an error', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.ENOENT({syscall: 'stat'}));
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is set as owner of directory in permissions, and file is readable by fs', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: instanceUser.uName});
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.true;
+			
+			});
+			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, instance user is not granted read permissions in permissions file, and owner of directory in permissions file is not instance user', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: altUser.uName});
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is granted read permissions in permissions file, and file is readable by fs', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var testPerms = {owner: altUser.uName};
+				testPerms[instanceUser.uName] = ['r'];
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.true;
+			
+			});
+			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and permissions are set, and instance user is not granted read permissions in permissions file', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var testPerms = {};
+				testPerms[instanceUser.uName] = ['w'];
+				testPerms[altUser.uName] = ['r'];
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return true if pth resolves to absolute path in this.pubDir.path, permissions file is not set, and file is readable by fs', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.true;
+			
+			});
+			it('should return an error if accessSync throws an error', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').throws(SystemError.EACCES({syscall: 'stat'}));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var testPath = "var/www/html/elfo/unrequieted";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
 		
 		});
 		describe('isWritable(pth)', function() {
 		
-			it('should be a function');
-			it('should return a systemError if pth is not a string');
-			it('should return a systemError if pth points to a permissions file');
-			it('should return a systemError if pth resolves to an absolute path outside of root, pubDir, or userDir');
-			it('should return a systemError if pth resolves to a file that fs cannot write to');
-			it('should return true if this.sudo is true, users:sudoFullRoot is true in config, file is in root or users, and writable by fs');
+			it('should be a function', function() {
+			
+				expect(filesystem.isWritable).to.be.a('function');
+			
+			});
+			it('should return a systemError if pth is not a string', function() {
+			
+				expect(filesystem.isWritable()).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+			
+			});
+			it('should return a systemError if pth points to a permissions file', function() {
+			
+				var permFilePath = '/etc/' + UWOT_HIDDEN_PERMISSIONS_FILENAME;
+				expect(filesystem.isWritable(permFilePath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return a systemError if pth resolves to an absolute path outside of root, pubDir, or userDir', function() {
+			
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var testPath = "Users/elfo/lifeblood";
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
 			it('should return true if pth resolves to a path in instance userDir, users:homeWritable and users:createHome is true in config, and file is writable by fs');
+			it('should return true if pth resolves to a path in this.pubDir, instance user is set to owner in permissions file, and is writable by fs');
+			it('should return true if pth resolves to a path in this.pubDir, instance user is not set to owner in permissions file but is granted write access, and is writable by fs');
+			it('should return true if this.sudo is true, users:sudoFullRoot is true in config, file is in root, and writable by fs');
+			it('should return a systemError if pth resolves to a file that fs cannot write to');
 		
 		});
 		describe('getPermissions(pth)', function() {

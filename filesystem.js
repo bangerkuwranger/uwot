@@ -1069,12 +1069,12 @@ class UwotFs {
 			}	
 			else if (permissions && 'object' == typeof permissions) {
 				
-				if ('string' == typeof permissions.owner && this.user['_id'] === permissions.owner) { 
+				if ('string' == typeof permissions.owner && this.user['uName'] === permissions.owner) { 
 				
 					vfsReadable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['_id']] && Array.isArray(permissions[this.user['_id']]) && -1 !== permissions[this.user['_id']].indexOf('r')) {
+				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('r')) {
 				
 					vfsReadable = true;
 				
@@ -1136,13 +1136,13 @@ class UwotFs {
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		else if (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot')) {
-		
-			vfsWritable = true;
-		
-		}
 		else if (inHome && global.Uwot.Config.get('users', 'homeWritable') && global.Uwot.Config.get('users', 'createHome')) {
 		
+			vfsWritable;
+		
+		}
+		else if (inPub) {
+
 			var permissions = this.getPermissions(fullPath);
 			if (permissions instanceof Error) {
 			
@@ -1156,13 +1156,18 @@ class UwotFs {
 					vfsWritable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['_id']] && Array.isArray(permissions[this.user['_id']]) && permissions[this.user['_id']].indexOf('w')) {
+				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && permissions[this.user['uName']].indexOf('w')) {
 				
 					vfsWritable = true;
 				
 				}
 			
 			}
+		
+		}
+		else if (inRoot && this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot')) {
+		
+			vfsWritable = true;
 		
 		}
 		if (vfsWritable) {
