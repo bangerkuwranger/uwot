@@ -216,7 +216,7 @@ class UwotFs {
 
 	constructor(userId, cwd) {
 	
-		if ('string' === cwd) {
+		if ('string' === typeof cwd) {
 		
 			// distinct from process.cwd; this is 'virtual' fs cwd
 // 			this.cwd = cwd;

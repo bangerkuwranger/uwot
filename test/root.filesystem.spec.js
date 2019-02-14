@@ -39,6 +39,32 @@ const altUser = {
 	"verifyPassword": function(pass) {return true;},
 	"maySudo": function() {return this.sudoer;}
 };
+const notFoundUser = {
+	"fName": "Mighty",
+	"lName": "Mouse",
+	"uName": "mightymouse",
+	"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+	"sudoer": false,
+	"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+	"createdAt": new Date(1546450800498),
+	"updatedAt": new Date(1546450800498),
+	"_id": "mightymouse",
+	"verifyPassword": function(pass) {return true;},
+	"maySudo": function() {return this.sudoer;}
+};
+const errorUser = {
+	"fName": "drop",
+	"lName": "all",
+	"uName": "drop all",
+	"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+	"sudoer": false,
+	"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+	"createdAt": new Date(1546450800498),
+	"updatedAt": new Date(1546450800498),
+	"_id": "()",
+	"verifyPassword": function(pass) {return true;},
+	"maySudo": function() {return this.sudoer;}
+};
 
 const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
 
@@ -55,7 +81,17 @@ describe('filesystem.js', function() {
 					return callback(false, altUser);
 				
 				}
-				else{
+				else if (id === notFoundUser['_id']) {
+				
+					return callback(false, false);
+				
+				}
+				else if (id === errorUser['_id']) {
+				
+					return callback(new Error('test findById error'), null);
+				
+				}
+				else {
 				
 					return callback(false, instanceUser);
 				
@@ -76,11 +112,206 @@ describe('filesystem.js', function() {
 				expect(FileSystem).to.be.a('function');
 			
 			});
-			it('should assign guest to this.user and assign "/" to this.cwd if given no arguments');
-			it('should assign guest to this.user and assign "/" to this.cwd  if userId arg is not a string and cwd arg is not a string');
-			it('should assign guest to this.user and assign "/" to this.cwd  if userId does no match existing user and cwd arg is not a string');
-			it('should assign user matching given userId arg to this.user and assign user directory to this.cwd if userId arg is a string matching an existing user and cwd arg is not a string');
-			it('should set this.cwd to value of cwd arg if it is a string');
+			it('should assign guest to this.user and assign "" to this.cwd if given no arguments', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				filesystem = new FileSystem();
+				expect(filesystem.user.uName).to.equal('guest');
+				expect(filesystem.cwd).to.equal('');
+			
+			});
+			it('should assign guest to this.user and assign "/" to this.cwd if userId arg is not a string and cwd arg is not a string', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				filesystem = new FileSystem(null, null);
+				expect(filesystem.user.uName).to.equal('guest');
+				expect(filesystem.cwd).to.equal('');
+			
+			});
+			it('should assign guest to this.user and assign "/" to this.cwd if userId does not match existing user and cwd arg is not a string', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				filesystem = new FileSystem(notFoundUser["_id"], null);
+				expect(filesystem.user.uName).to.equal('guest');
+				expect(filesystem.cwd).to.equal('');
+			
+			});
+			it('should assign user matching given userId arg to this.user and assign user directory to this.cwd if userId arg is a string matching an existing user and cwd arg is not a string', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = 'string' == typeof this_userDir_path ? this_userDir_path : '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				var this_userDir_path = "home/" + instanceUser.uName;
+				filesystem = new FileSystem(instanceUser["_id"], null);
+				expect(filesystem.user.uName).to.equal(instanceUser["uName"]);
+				expect(filesystem.cwd).to.equal(this_userDir_path);
+			
+			});
+			it('should set this.cwd to value of cwd arg if it is a string', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.changeCwd('guest' !== typeof this.user.uName ? 'home/' + this.user.uName : '');
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				var testCwd = 'var';
+				filesystem = new FileSystem(instanceUser["_id"], testCwd);
+				expect(filesystem.user.uName).to.equal(instanceUser["uName"]);
+				expect(filesystem.cwd).to.equal(testCwd);
+				filesystem = new FileSystem(notFoundUser["_id"], testCwd);
+				expect(filesystem.user.uName).to.equal('guest');
+				expect(filesystem.cwd).to.equal(testCwd);
+			
+			});
+			it('should throw an Error if global.Uwot.Users.getGuest returns an error via callback', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				var getGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function hasError(cb) {
+				
+					return cb(new Error('test getGuest error'), null);
+				
+				});
+				function throwError() {
+				
+					filesystem = new FileSystem();
+					return filesystem;
+				
+				}
+				expect(throwError).to.throw(Error, 'test getGuest error');
+			
+			});
+			it('should throw an Error if global.Uwot.Users.findById returns an error via callback', function() {
+			
+				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
+				
+					if ('string' !== typeof this.cwd) {
+					
+						this.cwd = '';
+					
+					}
+				
+				});
+				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
+				
+					if ('string' === typeof pth) {
+					
+						this.cwd = pth;
+						return true;
+					
+					}
+				
+				});
+				function throwError() {
+				
+					filesystem = new FileSystem(errorUser["_id"]);
+					return filesystem;
+				
+				}
+				expect(throwError).to.throw(Error, 'test findById error');
+			
+			});
 		
 		});
 		describe('setDirs()', function() {
