@@ -862,6 +862,24 @@ describe('filesystem.js', function() {
 				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
+			it('should return a SystemError if pth resolves to a path in instance userDir, and either users:homeWritable or users:createHome is false in config', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(true);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var testPath = "home/elfo/lifeblood.txt";
+				global.Uwot.Config.nconf.set('users:homeWritable', true);
+				global.Uwot.Config.nconf.set('users:createHome', false);
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
+				global.Uwot.Config.nconf.set('users:homeWritable', false);
+				global.Uwot.Config.nconf.set('users:createHome', true);
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
+				global.Uwot.Config.nconf.set('users:homeWritable', false);
+				global.Uwot.Config.nconf.set('users:createHome', false);
+			
+			});
 			it('should return true if pth resolves to a path in instance userDir, users:homeWritable and users:createHome is true in config, and file is writable by fs', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
@@ -877,7 +895,31 @@ describe('filesystem.js', function() {
 				global.Uwot.Config.nconf.set('users:createHome', false);
 			
 			});
-			it('should return true if pth resolves to a path in this.pubDir, instance user is set to owner in permissions file, and is writable by fs', function() {
+			it('should return an error if getPermissions returns an error', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.ENOENT({syscall: 'stat'}));
+				var testPath = "Users/elfo/lifeblood.txt";
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');;
+			
+			});
+			it('should return a SystemError if pth resolves to a path in this.pubDir, instance user is not set to owner or granted write permissions in permissions file', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: altUser.uName});
+				var testPath = "Users/elfo/lifeblood.txt";
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
+			
+			});
+			it('should return truw if pth resolves to a path in this.pubDir, instance user is set to owner in permissions file, and is writable by fs', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
@@ -886,7 +928,7 @@ describe('filesystem.js', function() {
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: instanceUser.uName});
 				var testPath = "Users/elfo/lifeblood.txt";
-				expect(filesystem.isWritable(testPath)).to.true;
+				expect(filesystem.isWritable(testPath)).to.be.true;
 			
 			});
 			it('should return true if pth resolves to a path in this.pubDir, instance user is not set to owner in permissions file but is granted write access, and is writable by fs', function() {
@@ -900,7 +942,24 @@ describe('filesystem.js', function() {
 				testPerms[instanceUser.uName] = ['w']
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testPath = "Users/david/lifeblood.txt";
-				expect(filesystem.isWritable(testPath)).to.true;
+				expect(filesystem.isWritable(testPath)).to.be.true;
+			
+			});
+			it('should return a SystemError if this.sudo is false or users:sudoFullRoot is false in config, file is in root', function() {
+			
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
+				var testPath = "var/elfo/cage/config.d";
+				filesystem.sudo = true;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
+				filesystem.sudo = false;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
+				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
 			
 			});
 			it('should return true if this.sudo is true, users:sudoFullRoot is true in config, file is in root, and writable by fs', function() {
