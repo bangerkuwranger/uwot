@@ -467,11 +467,45 @@ describe('filesystem.js', function() {
 		});
 		describe('append(pth, data)', function() {
 		
-			it('should be a function');
-			it('should return an error if this.isWritable(pth) throws an error');
-			it('should return a systemError if pth arg points to a location that is not writable by user');
-			it('should return an error if path is writable but appendFileSync throws an error');
-			it('should return true and append data arg to file at pth if path is writable and appendFileSync is successful');
+			it('should be a function', function() {
+			
+				expect(filesystem.append).to.be.a('function');
+			
+			});
+			it('should return an error if this.isWritable(pth) returns an error', function() {
+			
+				var testPath = 'var/run/marathon2/kytoto.term';
+				var testData = 'The candles burn out for you; I am free.';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'write', path: testPath}));
+				expect(filesystem.append(testPath, testData)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if pth arg points to a location that is not writable by user', function() {
+			
+				var testPath = 'var/run/marathon2/kytoto.term';
+				var testData = 'The candles burn out for you; I am free.';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.append(testPath, testData)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if path is writable but appendFileSync throws an error', function() {
+			
+				var testPath = 'var/run/marathon2/kytoto.term';
+				var testData = 'The candles burn out for you; I am free.';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').throws(new Error('test appendFileSync error'));
+				expect(filesystem.append(testPath, testData)).to.be.an.instanceof(Error).with.property('message').that.equals('test appendFileSync error');
+			
+			});
+			it('should return true and append data arg to file at pth if path is writable and appendFileSync is successful', function() {
+			
+				var testPath = 'var/run/marathon2/kytoto.term';
+				var testData = 'The candles burn out for you; I am free.';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				expect(filesystem.append(testPath, testData)).to.be.true;
+			
+			});
 		
 		});
 		describe('copy(source, target)', function() {
