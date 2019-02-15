@@ -415,16 +415,54 @@ describe('filesystem.js', function() {
 		});
 		describe('getVcwd()', function() {
 		
-			it('should be a function');
-			it('should return a string if this.cwd is a string');
-			it('should return "/" if this.cwd. is not set or not a string');
+			it('should be a function', function() {
+			
+				expect(filesystem.getVcwd).to.be.a('function');
+			
+			});
+			it('should return a string === "/" + this.cwd if this.cwd is a string', function() {
+			
+				filesystem.cwd = "var/run/marathon2";
+				expect(filesystem.getVcwd()).to.equal("/var/run/marathon2");
+			
+			});
+			it('should return "/" if this.cwd. is not set, empty string, or not a string', function() {
+			
+				delete filesystem.cwd;
+				expect(filesystem.getVcwd()).to.equal("/");
+				filesystem.cwd = "";
+				expect(filesystem.getVcwd()).to.equal("/");
+				filesystem.cwd = null;
+				expect(filesystem.getVcwd()).to.equal("/");
+			
+			});
 		
 		});
 		describe('getCwd()', function() {
 		
-			it('should be a function');
-			it('should return the absolute path of this.cwd if this.cwd is a string');
-			it('should return absolute path to "fs" if this.cwd. is not set or not a string');
+			it('should be a function', function() {
+			
+				expect(filesystem.getCwd).to.be.a('function');
+			
+			});
+			it('should return the absolute path of this.cwd if this.cwd is a string', function() {
+			
+				var testRootDir = global.Uwot.Constants.appRoot + "/fs";
+				filesystem.cwd = "var/run/marathon2";
+				expect(filesystem.getCwd()).to.equal(testRootDir + "/var/run/marathon2");
+			
+			});
+			it('should return absolute path to this.rootDir.path if this.cwd is not set, an empty string, or not a string', function() {
+			
+				var testRootDir = global.Uwot.Constants.appRoot + "/fs";
+				delete filesystem.cwd;
+				expect(filesystem.getCwd()).to.equal(testRootDir);
+				filesystem.cwd = "";
+				expect(filesystem.getCwd()).to.equal(testRootDir);
+				filesystem.cwd = null;
+				expect(filesystem.getCwd()).to.equal(testRootDir);
+			
+			});
 		
 		});
 		describe('append(pth, data)', function() {
