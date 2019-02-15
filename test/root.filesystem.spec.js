@@ -373,12 +373,44 @@ describe('filesystem.js', function() {
 		});
 		describe('changeCwd(pth)', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if pth arg is not a string');
-			it('should return an error if path cannot be resolved');
-			it('should return an error if this.isReadable throws an error');
-			it('should return a systemError if resolved path is not readable by user');
-			it('should return true and set this.cwd to resolved path within VFS if resolved path is readable by user');
+			it('should be a function', function() {
+			
+				expect(filesystem.changeCwd).to.be.a('function');
+			
+			});
+			it('should return a TypeError if pth arg is not a string', function() {
+			
+				expect(filesystem.changeCwd()).to.be.an.instanceof(TypeError).with.property('message').that.equals('path must be a string');
+			
+			});
+			it('should return a TypeError if path cannot be resolved', function() {
+			
+				var pathResolveStub = sinon.stub(path, 'resolve').returns(new TypeError('test resolve error'));
+				expect(filesystem.changeCwd('/var')).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+			
+			});
+			it('should return an error if this.isReadable returns an error', function() {
+			
+				var testPath = '/var';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: "read", path: testPath}));
+				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if resolved path is not readable by user', function() {
+			
+				var testPath = '/var';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return true and set this.cwd to resolved relative path from VFS root if resolved path is readable by user', function() {
+			
+				var testPath = '/var/toad/hole';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				expect(filesystem.changeCwd(testPath)).to.be.true;
+				expect(filesystem.cwd).to.equal('var/toad/hole');
+			
+			});
 		
 		});
 		describe('getVcwd()', function() {

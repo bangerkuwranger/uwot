@@ -462,7 +462,8 @@ class UwotFs {
 				return e;
 			
 			}
-			//return error objects
+			//return error objects if resolve returns an error,
+			//unlikely to happen since it throws errors...
 			if('string' !== typeof absPth) {
 			
 				return absPth;
