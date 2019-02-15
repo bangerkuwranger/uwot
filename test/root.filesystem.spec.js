@@ -385,7 +385,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return a TypeError if path cannot be resolved', function() {
 			
-				var pathResolveStub = sinon.stub(path, 'resolve').returns(new TypeError('test resolve error'));
+				var pathResolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'));
 				expect(filesystem.changeCwd('/var')).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
 			
 			});
