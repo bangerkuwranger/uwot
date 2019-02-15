@@ -510,13 +510,66 @@ describe('filesystem.js', function() {
 		});
 		describe('copy(source, target)', function() {
 		
-			it('should be a function');
-			it('should return an error if this.isReadable(source) returns an error');
-			it('should return an systemError if user is not allowed to read file at source');
-			it('should return an error if this.isWriteable(target) throws an error');
-			it('should return a systemError if user is not allowed to write to location of target');
-			it('should return an error if copyFileSync(source, target) throws an error');
-			it('should return true and copy contents of file at source to location of target if source is readable by user, target is writable by user, and copyFileSync executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.copy).to.be.a('function');
+			
+			});
+			it('should return an error if this.isReadable(source) returns an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'read', path: testReadPath}));
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an systemError if user is not allowed to read file at source', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if this.isWriteable(target) throws an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.EIO({syscall: 'write', path: testWritePath}));
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should return a systemError if user is not allowed to write to location of target', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if copyFileSync(source, target) throws an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').throws(SystemError.ENOENT({syscall: 'copyfile', path: testReadPath, dest: testWritePath}));
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return true and copy contents of file at source to location of target if source is readable by user, target is writable by user, and copyFileSync executes without error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.true;
+			
+			});
 		
 		});
 		describe('createDir(pth)', function() {
