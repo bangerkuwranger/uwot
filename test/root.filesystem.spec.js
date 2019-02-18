@@ -478,6 +478,15 @@ describe('filesystem.js', function() {
 				expect(filesystem.append).to.be.a('function');
 			
 			});
+			it('should return an error if pth is relative or absolute but not resolved to VFS root and this.resolvePath(pth, false) returns an error', function() {
+			
+				var testPath = 'var/run/marathon2/kytoto.term';
+				var testData = 'The candles burn out for you; I am free.';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'));
+				expect(filesystem.append(testPath, testData)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+				expect(filesystem.append("/" + testPath, testData)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+			
+			});
 			it('should return an error if this.isWritable(pth) returns an error', function() {
 			
 				var testPath = 'var/run/marathon2/kytoto.term';
@@ -521,6 +530,48 @@ describe('filesystem.js', function() {
 				expect(filesystem.copy).to.be.a('function');
 			
 			});
+			it('should return an error if source is relative or is an absolute path that does not resolve to VFS root, and this.resolvePath(source, false) returns an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = 'etc/daemon/belial.cfg';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').callsFake(function returnErrorOrPath(pth) {
+					
+					if ('string' == typeof pth && -1 === pth.indexOf('belial')) {
+					
+						return SystemError.ENOENT({syscall: 'read', path: testReadPath});
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path, pth);
+					
+					}
+				
+				});
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an error if target is relative or is an absolute path that does not resolve to VFS root, and this.resolvePath(target, false) returns an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = 'etc/daemon/belial.cfg';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').callsFake(function returnErrorOrPath(pth) {
+					
+					if ('string' == typeof pth && -1 === pth.indexOf('diablo')) {
+					
+						return SystemError.ENOENT({syscall: 'read', path: testWritePath});
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path, pth);
+					
+					}
+				
+				});
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
 			it('should return an error if this.isReadable(source) returns an error', function() {
 			
 				var testReadPath = '/etc/daemon/diablo.cfg';
@@ -538,7 +589,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.copy(testReadPath, testWritePath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 			
 			});
-			it('should return an error if this.isWriteable(target) throws an error', function() {
+			it('should return an error if this.isWriteable(target) returns an error', function() {
 			
 				var testReadPath = '/etc/daemon/diablo.cfg';
 				var testWritePath = '/etc/daemon/belial.cfg';
@@ -585,12 +636,12 @@ describe('filesystem.js', function() {
 				expect(filesystem.createDir).to.be.a('function');
 			
 			});
-			it('should return an error if pth is relative and path.resolve returns an error', function() {
+			it('should return an error if pth is relative and this.resolvePath(pth, false) returns an error', function() {
 			
 				var testPath = "var/run/marathon2";
-				var resolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'))
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'))
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'write', path: testPath}));
-				expect(filesystem.createDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+				expect(filesystem.createDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
 			
 			});
 			it('should return an error if this.isWritable returns an error', function() {
@@ -617,16 +668,19 @@ describe('filesystem.js', function() {
 			});
 			it('should return true and create a new directory at pth if pth is absolute,  user is allowed to write to location at pth and mkdirSync completes without error', function() {
 			
-				var testPath = path.resolve(global.Uwot.Constants.appRoot + "/fs/var/run/marathon2");
+				var testPath = "/var/run/marathon2";
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
-				expect(filesystem.createDir(testPath)).to.equal(testPath);
+				expect(filesystem.createDir(testPath)).to.equal(path.resolve(filesystem.root.path, testPath));
 			
 			});
 			it('should return true and create a directory at path VFS root + pth if pth is relative, user is allowed to write at location of pth, and mkDirSync completes without error', function() {
 			
 				var testPath = "var/run/marathon2";
-				var fullPath = path.resolve(global.Uwot.Constants.appRoot + "/fs/" + testPath);
+				console.log(filesystem.root.path);
+				console.log(testPath);
+				var fullPath = path.resolve(filesystem.root.path, testPath);
+				console.log(fullPath);
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
 				expect(filesystem.createDir(testPath)).to.equal(fullPath);
@@ -641,11 +695,11 @@ describe('filesystem.js', function() {
 				expect(filesystem.readDir).to.be.a('function');
 			
 			});
-			it('should return an error if path is not absolute and path.resolve throws an error', function() {
+			it('should return an error if path is not absolute and this.resolvePath(pth, false) throws an error', function() {
 			
 				var testPath = "var/run/marathon2/level4";
-				var resolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'));
-				expect(filesystem.readDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').throws(new TypeError('test resolvePath error'));
+				expect(filesystem.readDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
 			
 			});
 			it('should return an error if isReadable returns an error', function() {

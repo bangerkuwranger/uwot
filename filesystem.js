@@ -514,7 +514,25 @@ class UwotFs {
 	
 	append(pth, data) {
 	
-		var canWrite = this.isWritable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
+			
+				return fullPath;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canWrite = this.isWritable(fullPath);
 		if (canWrite instanceof Error) {
 		
 			return canWrite;
@@ -524,7 +542,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.appendFileSync(pth, data);
+				fs.appendFileSync(path.join(fullPath, fileName), data);
 				return true;
 			
 			}
@@ -545,8 +563,43 @@ class UwotFs {
 	
 	copy(source, target) {
 		
-		var canRead = this.isReadable(source);
-		var canWrite = this.isWritable(target);
+		var fullPathSource, fullPathTarget;
+		var fileNameSource = path.basename(source);
+		var fileNameTarget = path.basename(target);
+		if (path.isAbsolute(source) && -1 !== source.indexOf(this.root.path)) {
+		
+			fullPathSource = source;
+		
+		}
+		else {
+		
+			fullPathSource = this.resolvePath(source, false);
+			if ('string' !== typeof fullPathSource) {
+			
+				return fullPathSource;
+			
+			}
+		
+		}
+		if (path.isAbsolute(target) && -1 !== target.indexOf(this.root.path)) {
+		
+			fullPathTarget = target;
+		
+		}
+		else {
+		
+			fullPathTarget = this.resolvePath(target, false);
+			if ('string' !== typeof fullPathTarget) {
+			
+				return fullPathTarget;
+			
+			}
+		
+		}
+		fullPathSource = path.dirname(fullPathSource);
+		fullPathTarget = path.dirname(fullPathTarget);
+		var canRead = this.isReadable(fullPathSource);
+		var canWrite = this.isWritable(fullPathTarget);
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -561,7 +614,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.copyFileSync(source, target);
+				fs.copyFileSync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget));
 				return true;
 			
 			}
@@ -572,7 +625,7 @@ class UwotFs {
 			}
 		
 		}
-		else if (!canRead){
+		else if (!canRead) {
 		
 			return systemError.EACCES({'path': source, 'syscall': 'open'});
 		
@@ -589,21 +642,17 @@ class UwotFs {
 	
 		var fullPath;
 		var dirName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
 		}
 		else {
 		
-			try {
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
 			
-				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPath;
 			
 			}
 		
@@ -641,7 +690,7 @@ class UwotFs {
 	readDir(pth) {
 	
 		var fullPath;
-		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -650,7 +699,7 @@ class UwotFs {
 		
 			try {
 			
-				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
+				fullPath = this.resolvePath(pth, false);
 			
 			}
 			catch(err) {
@@ -692,7 +741,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -701,7 +750,7 @@ class UwotFs {
 		
 			try {
 			
-				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
+				fullPath = this.resolvePath(pth, false);
 			
 			}
 			catch(err) {
@@ -740,11 +789,54 @@ class UwotFs {
 	
 	}
 	
-	moveFile(pth, newPath) {
+	moveFile(source, target) {
 	
-		var canRead = this.isReadable(pth);
-		var canWrite = this.isWritable(pth);
-		var canWriteNew = this.isWritable(newPath);
+		var fullPathSource, fullPathTarget;
+		var fileNameSource = path.basename(source);
+		var fileNameTarget = path.basename(target);
+		if (path.isAbsolute(source) && -1 !== source.indexOf(this.root.path)) {
+		
+			fullPathSource = source;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPathSource = this.resolvePath(source, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		if (path.isAbsolute(target) && -1 === target.indexOf(this.root.path)) {
+		
+			fullPathTarget = target;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPathTarget = this.resolvePath(target, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPathSource = path.dirname(fullPathSource);
+		fullPathTarget = path.dirname(fullPathTarget);
+		var canRead = this.isReadable(fullPathSource);
+		var canWrite = this.isWritable(fullPathSource);
+		var canWriteNew = this.isWritable(fullPathTarget);
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -764,7 +856,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.renameSync(pth, newPath);
+				fs.renameSync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget));
 				return true;
 			
 			}
@@ -795,7 +887,29 @@ class UwotFs {
 	
 	removeDir(pth) {
 	
-		var canWrite = this.isWritable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = this.resolvePath(pth, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canWrite = this.isWritable(fullPath);
 		if (canWrite instanceof Error) {
 		
 			return canWrite;
@@ -805,7 +919,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.rmdirSync(pth);
+				fs.rmdirSync(path.join(fullPath, fileName));
 				return true;
 			
 			}
@@ -826,7 +940,29 @@ class UwotFs {
 	
 	removeFile(pth) {
 	
-		var canWrite = this.isWritable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = this.resolvePath(pth, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canWrite = this.isWritable(fullPath);
 		if (canWrite instanceof Error) {
 		
 			return canWrite;
@@ -836,7 +972,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.unlinkSync(pth);
+				fs.unlinkSync(path.join(fullPath, fileName));
 				return true;
 			
 			}
@@ -857,7 +993,29 @@ class UwotFs {
 	
 	stat(pth) {
 	
-		var canRead = this.isReadable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = this.resolvePath(pth, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canRead = this.isReadable(fullPath);
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -867,7 +1025,7 @@ class UwotFs {
 			
 			try {
 		
-				var stats = fs.statSync(pth);
+				var stats = fs.statSync(path.join(fullPath, fileName));
 				return stats;
 		
 			}
@@ -888,7 +1046,29 @@ class UwotFs {
 	
 	write(pth, data) {
 	
-		var canWrite = this.isWritable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = this.resolvePath(pth, false);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canWrite = this.isWritable(fullPath);
 		if (canWrite instanceof Error) {
 		
 			return canWrite;
@@ -898,7 +1078,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.writeFileSync(pth, data);
+				fs.writeFileSync(path.join(fullPath, fileName), data);
 				return true;
 			
 			}
@@ -1022,9 +1202,15 @@ class UwotFs {
 	
 	}
 	
-	// resolves path w/ expansion, using this.cwd
-	resolvePath(pth) {
 	
+	// resolves path w/ expansion, using this.cwd
+	resolvePath(pth, checkIfExists) {
+	
+		if('boolean' != typeof checkIfExists) {
+		
+			checkIfExists = true;
+		
+		}
 		if ('string' != typeof pth) {
 		
 			return new TypeError('path passed to resolvePath must be a string');
@@ -1051,7 +1237,11 @@ class UwotFs {
 				
 				}
 				var absPth = path.resolve(this.root.path, pth);
-				var pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);
+				if (checkIfExists) {
+				
+					var pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);
+				
+				}
 				return pthInRoot ? pth : absPth;
 			
 			}
@@ -1076,7 +1266,11 @@ class UwotFs {
 				var fromRoot = path.resolve(this.root.path, pth);
 				try {
 			
-					var fromRootStats = fs.statSync(fromRoot);
+					if (checkIfExists) {
+					
+						var fromRootStats = fs.statSync(fromRoot);
+						
+					}
 					return fromRoot;
 			
 				}
