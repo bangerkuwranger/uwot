@@ -704,11 +704,66 @@ describe('filesystem.js', function() {
 		});
 		describe('readFile(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if isReadable throws an error');
-			it('should return a systemError if user is not allowed to read location at pth');
-			it('should return an error if readFileSync throws an error');
-			it('should return the content of the file if user is allowed to read location at pth and readFileSynce executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.readFile).to.be.a('function');
+			
+			});
+			it('should return an error if path is relative and does not contain the root path and path.resolve throws an error', function() {
+			
+				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
+				var pathResolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'));
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+			
+			});
+			it('should return an error if isReadable throws an error', function() {
+			
+				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
+				var testResolvedPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', testPath);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'read', path: testPath}));
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to read location at pth', function() {
+			
+				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
+				var testResolvedPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', testPath);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if readFileSync throws an error', function() {
+			
+				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
+				var testResolvedPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', testPath);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').throws(SystemError.EISDIR({syscall: 'read', path: testPath}));
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.be.an.instanceof(Error).with.property('code').that.equals('EISDIR');
+			
+			});
+			it('should return the content of the file at this.root + pth if pth is relative and does not contain the VFS root path, user is allowed to read location at pth, and readFileSync executes without error', function() {
+			
+				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
+				var testResolvedPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', testPath);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returnsArg(0);
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.equal(testResolvedPath);
+			
+			});
+			it('should return the content of the file at pth if pth is absolute and does not contain the VFS root path user is allowed to read location at pth and readFileSync executes without error', function() {
+			
+				var testPath = path.join('/var/run/marathon2/level4', readdirFileArray[0]);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returnsArg(0);
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.equal(testPath);
+			
+			});
 		
 		});
 		describe('moveFile(pth, newPath)', function() {

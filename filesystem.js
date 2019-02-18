@@ -690,7 +690,29 @@ class UwotFs {
 	
 	readFile(pth) {
 	
-		var canRead = this.isReadable(pth);
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canRead = this.isReadable(fullPath);
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -700,7 +722,7 @@ class UwotFs {
 		
 			try {
 			
-				return fs.readFileSync(pth);
+				return fs.readFileSync(path.join(fullPath, fileName));
 			
 			}
 			catch(e) {
