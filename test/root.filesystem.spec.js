@@ -684,7 +684,7 @@ describe('filesystem.js', function() {
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
 				expect(filesystem.createDir(testPath)).to.equal(fullPath);
-				expect(filesystem.createDir(fullpath)).to.equal(fullPath);
+				expect(filesystem.createDir(fullPath)).to.equal(fullPath);
 			
 			});
 		
