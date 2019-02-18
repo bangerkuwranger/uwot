@@ -677,10 +677,7 @@ describe('filesystem.js', function() {
 			it('should return true and create a directory at path VFS root + pth if pth is relative, user is allowed to write at location of pth, and mkDirSync completes without error', function() {
 			
 				var testPath = "var/run/marathon2";
-				console.log(filesystem.root.path);
-				console.log(testPath);
 				var fullPath = path.resolve(filesystem.root.path, testPath);
-				console.log(fullPath);
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
 				expect(filesystem.createDir(testPath)).to.equal(fullPath);

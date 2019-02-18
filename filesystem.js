@@ -516,7 +516,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -642,7 +642,7 @@ class UwotFs {
 	
 		var fullPath;
 		var dirName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -690,7 +690,7 @@ class UwotFs {
 	readDir(pth) {
 	
 		var fullPath;
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -741,7 +741,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -813,7 +813,7 @@ class UwotFs {
 			}
 		
 		}
-		if (path.isAbsolute(target) && -1 === target.indexOf(this.root.path)) {
+		if (path.isAbsolute(target) && -1 !== target.indexOf(this.root.path)) {
 		
 			fullPathTarget = target;
 		
@@ -889,7 +889,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -942,7 +942,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -995,7 +995,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
@@ -1048,7 +1048,7 @@ class UwotFs {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 === pth.indexOf(this.root.path)) {
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
 		
