@@ -589,7 +589,7 @@ class UwotFs {
 	
 		var fullPath;
 		var dirName = path.basename(pth);
-		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
 		
 			fullPath = pth;
 		
@@ -641,7 +641,7 @@ class UwotFs {
 	readDir(pth) {
 	
 		var fullPath;
-		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		if (path.isAbsolute(pth) && -1 === pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
 		
 			fullPath = pth;
 		
