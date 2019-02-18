@@ -666,17 +666,38 @@ describe('filesystem.js', function() {
 			
 				var testPath = "var/run/marathon2/level4";
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
-				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(SystemError.EIO({syscall: 'read', path: testPath}));
+				var readdirSyncStub = sinon.stub(fs, 'readdirSync').throws(SystemError.EIO({syscall: 'read', path: testPath}));
 				expect(filesystem.readDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
 			
 			});
-			it('should return an array of file names of files in dir at pth if user is allowed to read location at pth', function() {
+			it('should return an array of file names of files in dir at pth if path is absolute and user is allowed to read location at pth', function() {
 			
 				var testPath = "var/run/marathon2/level4";
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(readdirFileArray);
 				var testReaddir = filesystem.readDir(testPath);
 				expect(testReaddir).to.be.an('array').that.includes(readdirFileArray[0], readdirFileArray[1], readdirFileArray[2]);
+			
+			});
+			it('should return an array of file names of files in dir at appRoot + "/fs/" + pth if path is relative and user is allowed to read location at pth', function() {
+			
+				var testPath = "/var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readdirFileArrayAbs = [];
+				var readdirSyncStub = sinon.stub(fs, 'readdirSync').callsFake(function returnAbsolute(pth) {
+				
+					for (let i = 0; i < readdirFileArray.length; i++) {
+					
+						readdirFileArrayAbs[i] = 'absolute_' + readdirFileArray[i];
+					
+					}
+					return readdirFileArrayAbs;
+					
+				});
+				var testReaddir = filesystem.readDir(testPath);
+				expect(testReaddir[0]).to.equal(readdirFileArrayAbs[0]);
+				expect(testReaddir[1]).to.equal(readdirFileArrayAbs[1]);
+				expect(testReaddir[2]).to.equal(readdirFileArrayAbs[2]);
 			
 			});
 		
