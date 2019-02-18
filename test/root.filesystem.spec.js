@@ -519,6 +519,7 @@ describe('filesystem.js', function() {
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
 				expect(filesystem.append(testPath, testData)).to.be.true;
+				expect(filesystem.append(path.resolve(filesystem.root.path + '/', testPath), testData)).to.be.true;
 			
 			});
 		
@@ -625,6 +626,8 @@ describe('filesystem.js', function() {
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
 				expect(filesystem.copy(testReadPath, testWritePath)).to.be.true;
+				expect(filesystem.copy(path.resolve(filesystem.root.path, testReadPath), testWritePath)).to.be.true;
+				expect(filesystem.copy(testReadPath, path.resolve(filesystem.root.path, testWritePath))).to.be.true;
 			
 			});
 		
@@ -671,16 +674,17 @@ describe('filesystem.js', function() {
 				var testPath = "/var/run/marathon2";
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
-				expect(filesystem.createDir(testPath)).to.equal(path.resolve(filesystem.root.path, testPath));
+				expect(filesystem.createDir(testPath)).to.equal(path.resolve(filesystem.root.path, testPath.replace(/^\/+/g, '')));
 			
 			});
-			it('should return true and create a directory at path VFS root + pth if pth is relative, user is allowed to write at location of pth, and mkDirSync completes without error', function() {
+			it('should return true and create a directory at path VFS root + pth if pth is relative or an absolute path not containing this.root.path, user is allowed to write at location of pth, and mkDirSync completes without error', function() {
 			
 				var testPath = "var/run/marathon2";
 				var fullPath = path.resolve(filesystem.root.path, testPath);
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
 				expect(filesystem.createDir(testPath)).to.equal(fullPath);
+				expect(filesystem.createDir(fullpath)).to.equal(fullPath);
 			
 			});
 		
@@ -806,9 +810,18 @@ describe('filesystem.js', function() {
 				expect(testReadFile).to.equal(testResolvedPath);
 			
 			});
-			it('should return the content of the file at pth if pth is absolute and does not contain the VFS root path user is allowed to read location at pth and readFileSync executes without error', function() {
+			it('should return the content of the file at this.root.path + pth if pth is absolute and does not contain the VFS root path, user is allowed to read location at pth, and readFileSync executes without error', function() {
 			
 				var testPath = path.join('/var/run/marathon2/level4', readdirFileArray[0]);
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returnsArg(0);
+				var testReadFile = filesystem.readFile(testPath);
+				expect(testReadFile).to.equal(filesystem.root.path + testPath);
+			
+			});
+			it('should return the content of the file at pth if pth is absolute and does contain the VFS root path, user is allowed to read location at pth, and readFileSync executes without error', function() {
+			
+				var testPath = path.join(filesystem.root.path + '/var/run/marathon2/level4', readdirFileArray[0]);
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returnsArg(0);
 				var testReadFile = filesystem.readFile(testPath);
@@ -817,17 +830,193 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('moveFile(pth, newPath)', function() {
+		describe('moveFile(source, target)', function() {
 		
-			it('should be a function');
-			it('should return an error if isReadable(pth) throws an error');
-			it('should return an error if isWritable(pth) throws an error');
-			it('should return an error if isWritable(newPath) throws an error');
-			it('should return a systemError if user is not allowed to read file at pth');
-			it('should return a systemError if user is not allowed to write file at pth');
-			it('should return a systemError if user is not allowed to write file at newPath');
-			it('should return an error if renameSync throws an error');
-			it('should return true and move file from pth to newPath if user has proper permissions and renameSync executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.moveFile).to.be.a('function');
+			
+			});
+			it('should return an error if source is either relative or does not contain this.root.path and this.resolvePath(source, false) returns an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolve source error'));
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve source error');
+				expect(filesystem.moveFile("/" + testPathSource, testPathTarget)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve source error');
+			
+			});
+			it('should return an error if target is either relative or does not contain this.root.path and this.resolvePath(target, false) returns an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').callsFake(function returnErrorIfTarg(pth, checkExists) {
+				
+					if (-1 !== pth.indexOf('usr/local/bin')) {
+					
+						return new TypeError('test resolve target error');
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path + pth);
+					
+					}
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve target error');
+				expect(filesystem.moveFile(testPathSource, "/" + testPathTarget)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve target error');
+			
+			});
+			it('should return an error if isReadable(source) returns an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'read', path: testPathSource}));
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an error if isWritable(source) returns an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').callsFake(function returnErrorIfNotTarg(pth) {
+				
+					if (-1 === pth.indexOf('usr/local/bin')) {
+					
+						return SystemError.ENOENT({syscall: 'write', path: testPathSource});
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path + pth);
+					
+					}
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an error if isWritable(target) returns an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').callsFake(function returnErrorIfTarg(pth) {
+				
+					if (-1 !== pth.indexOf('usr/local/bin')) {
+					
+						return SystemError.ENOENT({syscall: 'write', path: testPathTarget});
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path + pth);
+					
+					}
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to read file at source', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return a systemError if user is not allowed to write file at source', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').callsFake(function returnErrorIfNotTarg(pth) {
+				
+					if (-1 === pth.indexOf('usr/local/bin')) {
+					
+						return false
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path + pth);
+					
+					}
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return a systemError if user is not allowed to write file at target', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').callsFake(function returnErrorIfTarg(pth) {
+				
+					if (-1 !== pth.indexOf('usr/local/bin')) {
+					
+						return false
+					
+					}
+					else {
+					
+						return path.resolve(filesystem.root.path + pth);
+					
+					}
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if renameSync throws an error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var renameSyncStub = sinon.stub(fs, 'renameSync').throws(SystemError.EIO({syscall: 'rename', path: testPathSource}));
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should return true and move file from source to target if user has proper permissions and renameSync executes without error', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var finalPaths = {new:'', old:''};
+				var renameSyncStub = sinon.stub(fs, 'renameSync').callsFake(function setFinalPaths(o, n) {
+				
+					finalPaths.new = n;
+					finalPaths.old = o;
+					return finalPaths;
+				
+				});
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+				expect(filesystem.moveFile("/" + testPathSource, testPathTarget)).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+				expect(filesystem.moveFile("/" + testPathSource, "/" + testPathTarget)).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+				expect(filesystem.moveFile(testPathSource, "/" + testPathTarget)).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+				expect(filesystem.moveFile(path.resolve(filesystem.root.path, testPathSource), testPathTarget)).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+				expect(filesystem.moveFile(testPathSource, path.resolve(filesystem.root.path, testPathTarget))).to.be.true;
+				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
+				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
+			
+			});
 		
 		});
 		describe('removeDir(pth)', function() {
@@ -1126,11 +1315,10 @@ describe('filesystem.js', function() {
 				
 				});
 				var testPath = '~/doc/';
-				filesystem.userDir.path = '/fs/home/fuser';	//faking it out w/ an absolute path; this will return full path from server root at runtime
-				expect(filesystem.resolvePath(testPath)).to.equal('/fs/home/fuser/doc');
+				expect(filesystem.resolvePath(testPath)).to.equal(filesystem.userDir.path + '/doc/');
 			
 			});
-			it('should return pth if pth is absolute, within root, and extant', function() {
+			it('should return this.root.path + pth if pth is absolute, resolves within root, and extant', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
 			
@@ -1138,7 +1326,7 @@ describe('filesystem.js', function() {
 				
 				});
 				var testPath = '/var/doc';
-				expect(filesystem.resolvePath(testPath)).to.equal(testPath);
+				expect(filesystem.resolvePath(testPath)).to.equal(filesystem.root.path + testPath);
 			
 			});
 			it('should return this.root.path + pth if pth is absolute, and extant from root', function() {
