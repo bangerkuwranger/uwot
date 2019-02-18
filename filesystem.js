@@ -801,14 +801,10 @@ class UwotFs {
 		}
 		else {
 		
-			try {
+			fullPathSource = this.resolvePath(source, false);
+			if ('string' !== typeof fullPathSource) {
 			
-				fullPathSource = this.resolvePath(source, false);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPathSource;
 			
 			}
 		
@@ -820,14 +816,10 @@ class UwotFs {
 		}
 		else {
 		
-			try {
+			fullPathTarget = this.resolvePath(target, false);
+			if ('string' !== typeof fullPathTarget) {
 			
-				fullPathTarget = this.resolvePath(target, false);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPathTarget;
 			
 			}
 		
@@ -869,17 +861,17 @@ class UwotFs {
 		}
 		else if (!canRead) {
 		
-			return systemError.EACCES({'path': pth, 'syscall': 'read'});
+			return systemError.EACCES({'path': source, 'syscall': 'read'});
 		
 		}
 		else if (!canWrite) {
 		
-			return systemError.EACCES({'path': pth, 'syscall': 'unlink'});
+			return systemError.EACCES({'path': source, 'syscall': 'unlink'});
 		
 		}
 		else {
 		
-			return systemError.EACCES({'path': newPath, 'syscall': 'write'});
+			return systemError.EACCES({'path': target, 'syscall': 'write'});
 		
 		}
 	
@@ -1228,15 +1220,21 @@ class UwotFs {
 		}
 		if (path.isAbsolute(pth)) {
 		
+			var pthInRoot;
+			var absPth = pth; 
 			try {
 			
-				var pthInRoot = this.isInRoot(pth);
+				pthInRoot = this.isInRoot(pth);
 				if (pthInRoot instanceof Error) {
 				
 					throw pthInRoot;
 				
 				}
-				var absPth = path.resolve(this.root.path, pth);
+				else if (!pthInRoot) {
+				
+					absPth = path.resolve(this.root.path, pth.replace(/^\/+/g, ''));
+				
+				}
 				if (checkIfExists) {
 				
 					var pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);

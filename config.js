@@ -14,8 +14,8 @@ const confDefaults = function() {
 			secure: false,
 			port: '80',
 			transport: 'http',
-			pubDir: path.resolve('fs/var/www/html'),
-			userDir: path.resolve('fs/home')
+			pubDir: path.resolve(global.Uwot.Constants.appRoot + '/fs/var/www/html'),
+			userDir: path.resolve(global.Uwot.Constants.appRoot + '/fs/home')
 		},
 		users: {
 			allowGuest: false,
