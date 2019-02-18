@@ -626,8 +626,8 @@ describe('filesystem.js', function() {
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
 				expect(filesystem.copy(testReadPath, testWritePath)).to.be.true;
-				expect(filesystem.copy(path.resolve(filesystem.root.path, testReadPath), testWritePath)).to.be.true;
-				expect(filesystem.copy(testReadPath, path.resolve(filesystem.root.path, testWritePath))).to.be.true;
+				expect(filesystem.copy(path.resolve(filesystem.root.path, testReadPath.replace(/^\/+/g, '')), testWritePath)).to.be.true;
+				expect(filesystem.copy(testReadPath, path.resolve(filesystem.root.path, testWritePath.replace(/^\/+/g, '')))).to.be.true;
 			
 			});
 		
