@@ -672,16 +672,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return an array of file names of files in dir at pth if path is absolute and user is allowed to read location at pth', function() {
 			
-				var testPath = "var/run/marathon2/level4";
-				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
-				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(readdirFileArray);
-				var testReaddir = filesystem.readDir(testPath);
-				expect(testReaddir).to.be.an('array').that.includes(readdirFileArray[0], readdirFileArray[1], readdirFileArray[2]);
-			
-			});
-			it('should return an array of file names of files in dir at appRoot + "/fs/" + pth if path is relative and user is allowed to read location at pth', function() {
-			
-				var testPath = "/var/run/marathon2/level4";
+				var testPath = path.join(global.Uwot.Constants.appRoot, "/fs/var/run/marathon2/level4");
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var readdirFileArrayAbs = [];
 				var readdirSyncStub = sinon.stub(fs, 'readdirSync').callsFake(function returnAbsolute(pth) {
@@ -698,6 +689,15 @@ describe('filesystem.js', function() {
 				expect(testReaddir[0]).to.equal(readdirFileArrayAbs[0]);
 				expect(testReaddir[1]).to.equal(readdirFileArrayAbs[1]);
 				expect(testReaddir[2]).to.equal(readdirFileArrayAbs[2]);
+			
+			});
+			it('should return an array of file names of files in dir at appRoot + "/fs/" + pth if path is relative and user is allowed to read location at pth', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(readdirFileArray);
+				var testReaddir = filesystem.readDir(testPath);
+				expect(testReaddir).to.be.an('array').that.includes(readdirFileArray[0], readdirFileArray[1], readdirFileArray[2]);
 			
 			});
 		
