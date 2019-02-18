@@ -68,6 +68,12 @@ const errorUser = {
 
 const UWOT_HIDDEN_PERMISSIONS_FILENAME = '.uwotprm';
 
+const readdirFileArray = [
+	'kyoto.term',
+	'water_plant.map',
+	'phor.texture'
+];
+
 describe('filesystem.js', function() {
 
 	describe('UwotFs', function() {
@@ -630,11 +636,49 @@ describe('filesystem.js', function() {
 		});
 		describe('readDir(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if isReadable throws an error');
-			it('should return a systemError if user is not allowed to read location at pth');
-			it('should return an error if readdirSync throws an error');
-			it('should return an array of file names of files in dir at pth if user is allowed to read location at pth');
+			it('should be a function', function() {
+			
+				expect(filesystem.readDir).to.be.a('function');
+			
+			});
+			it('should return an error if path is not absolute and path.resolve throws an error', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var resolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'));
+				expect(filesystem.readDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+			
+			});
+			it('should return an error if isReadable returns an error', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.readDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to read location at pth', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				expect(filesystem.readDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if readdirSync throws an error', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(SystemError.EIO({syscall: 'read', path: testPath}));
+				expect(filesystem.readDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should return an array of file names of files in dir at pth if user is allowed to read location at pth', function() {
+			
+				var testPath = "var/run/marathon2/level4";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(readdirFileArray);
+				var testReaddir = filesystem.readDir(testPath);
+				expect(testReaddir).to.be.an('array').that.includes(readdirFileArray[0], readdirFileArray[1], readdirFileArray[2]);
+			
+			});
 		
 		});
 		describe('readFile(pth)', function() {

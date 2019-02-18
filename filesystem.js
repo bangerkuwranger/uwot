@@ -588,7 +588,6 @@ class UwotFs {
 	createDir(pth) {
 	
 		var fullPath;
-		var dirName;
 		var dirName = path.basename(pth);
 		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
 		
@@ -641,7 +640,27 @@ class UwotFs {
 	
 	readDir(pth) {
 	
-		var canRead = this.isReadable(pth);
+		var fullPath;
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		var canRead = this.isReadable(fullPath);
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -651,7 +670,7 @@ class UwotFs {
 		
 			try {
 			
-				return fs.readdirSync(pth);
+				return fs.readdirSync(fullPath);
 			
 			}
 			catch(e) {
