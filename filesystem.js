@@ -587,7 +587,30 @@ class UwotFs {
 	
 	createDir(pth) {
 	
-		var canWrite = this.isWritable(pth);
+		var fullPath;
+		var dirName;
+		var dirName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(global.Uwot.Constants.appRoot + '/fs')) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			try {
+			
+				fullPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', pth);
+			
+			}
+			catch(err) {
+			
+				return err;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var canWrite = this.isWritable(fullPath);
 		if (canWrite instanceof Error) {
 		
 			return canWrite;
@@ -597,8 +620,8 @@ class UwotFs {
 		
 			try {
 			
-				fs.mkdirSync(pth);
-				return true;
+				fs.mkdirSync(path.join(fullPath, dirName));
+				return path.join(fullPath, dirName);
 			
 			}
 			catch(e) {

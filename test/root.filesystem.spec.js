@@ -574,11 +574,58 @@ describe('filesystem.js', function() {
 		});
 		describe('createDir(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if this.isWritable throws an error');
-			it('should return a systemError if user is not allowed to write to location at pth');
-			it('should return an error if mkdirSync throws an error');
-			it('should return true and create a new directory at pth if user is allowed to write to location at pth and mkdirSync completes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.createDir).to.be.a('function');
+			
+			});
+			it('should return an error if pth is relative and path.resolve returns an error', function() {
+			
+				var testPath = "var/run/marathon2";
+				var resolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'))
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'write', path: testPath}));
+				expect(filesystem.createDir(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+			
+			});
+			it('should return an error if this.isWritable returns an error', function() {
+			
+				var testPath = "var/run/marathon2";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'write', path: testPath}));
+				expect(filesystem.createDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals("ENOENT");
+			
+			});
+			it('should return a systemError if user is not allowed to write to location at pth', function() {
+			
+				var testPath = "var/run/marathon2";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.createDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals("EACCES");
+			
+			});
+			it('should return an error if mkdirSync throws an error', function() {
+			
+				var testPath = "var/run/marathon2";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').throws(SystemError.EACCES({syscall: 'write', path: testPath}));
+				expect(filesystem.createDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals("EACCES");
+			
+			});
+			it('should return true and create a new directory at pth if pth is absolute,  user is allowed to write to location at pth and mkdirSync completes without error', function() {
+			
+				var testPath = path.resolve(global.Uwot.Constants.appRoot + "/fs/var/run/marathon2");
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				expect(filesystem.createDir(testPath)).to.equal(testPath);
+			
+			});
+			it('should return true and create a directory at path VFS root + pth if pth is relative, user is allowed to write at location of pth, and mkDirSync completes without error', function() {
+			
+				var testPath = "var/run/marathon2";
+				var fullPath = path.resolve(global.Uwot.Constants.appRoot + "/fs/" + testPath);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				expect(filesystem.createDir(testPath)).to.equal(fullPath);
+			
+			});
 		
 		});
 		describe('readDir(pth)', function() {
