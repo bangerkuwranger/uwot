@@ -1021,11 +1021,50 @@ describe('filesystem.js', function() {
 		});
 		describe('removeDir(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if isWritable throws an error');
-			it('should return a systemError if user is not allowed to write to location at pth');
-			it('should return an error if rmdirSync throws an error');
-			it('should return true and remove directory at pth if user has proper permissions and rmdirSync executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.removeDir).to.be.a('function');
+			
+			});
+			it('should return an error if path is relative or absolute and not resolved to root, and resolvePath returns an error', function() {
+			
+				var testPath = 'two/roads/diverged';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.removeDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an error if isWritable throws an error', function() {
+			
+				var testPath = 'two/roads/diverged';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'rmdir', path: testPath}));
+				expect(filesystem.removeDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to write to location at pth', function() {
+			
+				var testPath = 'two/roads/diverged';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.removeDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if rmdirSync throws an error', function() {
+			
+				var testPath = 'two/roads/diverged';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var rmdirSyncStub = sinon.stub(fs, 'rmdirSync').throws(SystemError.ENOTDIR({syscall: 'rmdir', path: testPath}));
+				expect(filesystem.removeDir(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOTDIR');
+			
+			});
+			it('should return true and remove directory at pth if user has proper permissions and rmdirSync executes without error', function() {
+			
+				var testPath = 'two/roads/diverged';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var rmdirSyncStub = sinon.stub(fs, 'rmdirSync').returns(true);
+				expect(filesystem.removeDir(testPath)).to.be.true;
+				expect(filesystem.removeDir("/" + testPath)).to.be.true;
+				expect(filesystem.removeDir(path.join(filesystem.root.path + "/", testPath))).to.be.true;
+			
+			});
 		
 		});
 		describe('removeFile(pth)', function() {

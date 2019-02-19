@@ -888,14 +888,10 @@ class UwotFs {
 		}
 		else {
 		
-			try {
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
 			
-				fullPath = this.resolvePath(pth, false);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPath;
 			
 			}
 		
