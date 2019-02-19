@@ -12,6 +12,7 @@ const expect = chai.expect;
 
 const FileSystem = require('../filesystem');
 var filesystem;
+var testStats;
 
 const instanceUser = {
 	"fName": "Found",
@@ -74,6 +75,46 @@ const readdirFileArray = [
 	'phor.texture'
 ];
 
+const getTestStats = function() {
+
+	var thisTestStats = new fs.Stats(
+		{
+			dev: 2114,
+			ino: 48064969,
+			mode: 33188,
+			nlink: 1,
+			uid: 85,
+			gid: 100,
+			rdev: 0,
+			size: 527,
+			blksize: 4096,
+			blocks: 8,
+			atimeMs: 1318289051000.1,
+			mtimeMs: 1318289051000.1,
+			ctimeMs: 1318289051000.1,
+			birthtimeMs: 1318289051000.1,
+			atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+			mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+			ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+			birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+		}
+	);
+	thisTestStats.isDirectory = function() { return false };
+	thisTestStats.isFile = function() { return false };
+	return thisTestStats;
+
+};
+
+const getTestPerms = function() {
+
+	return JSON.stringify({
+		owner: 'root',
+		allowed: ['r'],
+		fuser: ['r', 'w']
+	});
+
+};
+
 describe('filesystem.js', function() {
 
 	describe('UwotFs', function() {
@@ -105,6 +146,7 @@ describe('filesystem.js', function() {
 	
 			});
 			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
+			testStats = getTestStats();
 		});
 		afterEach(function() {
 		
@@ -1155,28 +1197,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = 'etc/nginx/conf.d';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(new fs.Stats(
-					{
-						dev: 2114,
-						ino: 48064969,
-						mode: 33188,
-						nlink: 1,
-						uid: 85,
-						gid: 100,
-						rdev: 0,
-						size: 527,
-						blksize: 4096,
-						blocks: 8,
-						atimeMs: 1318289051000.1,
-						mtimeMs: 1318289051000.1,
-						ctimeMs: 1318289051000.1,
-						birthtimeMs: 1318289051000.1,
-						atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
-						mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
-						ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
-						birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
-					}
-				));
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				expect(filesystem.stat(testPath)).to.be.an.instanceof(fs.Stats);
 				expect(filesystem.stat("/" + testPath)).to.be.an.instanceof(fs.Stats);
 				expect(filesystem.stat(path.join(filesystem.root.path + "/", testPath))).to.be.an.instanceof(fs.Stats);
@@ -2063,16 +2084,126 @@ describe('filesystem.js', function() {
 		});
 		describe('getPermissions(pth)', function() {
 		
-			it('should be a function');
-			it('should return a permissions object with owner:"root" and allowed:[] if pth is not in root or users');
-			it('should return a permissions object with owner:"root" and allowed:[] if is in root, not in pub or instance userDir, and either this.sudo === false or user:sudoFullRoot is false in config');
-			it('should return an error if pth points to a non-extant path');
-			it('should return false if pth points to a directory and there is not valid JSON permissions data in the permissions file');
-			it('should return a permissions object with the content of the permissions file in the directory if pth points to a directory and the permissions file contains valid JSON');
-			it('should return an error if pth points to a directory and readFileSync throws an error trying to read the permissions file');
-			it('should return false if pth points to a file and there is not valid JSON permissions data in the permissions file of its enclosing directory');
-			it('should return a permissions object with the content of the permissions file in the directory if pth points to a file and the permissions file in the enclosing directory contains valid JSON');
-			it('should return an error if pth points to a file and readFileSync throws an error trying to read the permissions file in the enclosing directory');
+			it('should be a function', function() {
+			
+				expect(filesystem.getPermissions).to.be.a('function');
+			
+			});
+			it('should return a generic permissions object with owner:"root" and allowed:[] if pth is not in root or users', function() {
+			
+				var testPath = '/Users/tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult.owner).to.equal('root');
+				expect(testResult.allowed).to.be.an('array').that.is.empty;
+			
+			});
+			it('should return a generic permissions object with owner:"root" and allowed:[] if is in root, not in pub or instance userDir, and either this.sudo === false or user:sudoFullRoot is false in config', function() {
+			
+				var testPath = path.resolve(filesystem.root.path + '/', 'tmp/dropBox');
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				filesystem.sudo = true;
+				global.Uwot.Config.nconf.set("user:sudoFullRoot", false);
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult.owner).to.equal('root');
+				expect(testResult.allowed).to.be.an('array').that.is.empty;
+				filesystem.sudo = false;
+				global.Uwot.Config.nconf.set("user:sudoFullRoot", true);
+				testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult.owner).to.equal('root');
+				expect(testResult.allowed).to.be.an('array').that.is.empty;
+				global.Uwot.Config.nconf.set("user:sudoFullRoot", false);
+			
+			});
+			it('should return an error if pth points to a non-extant path', function() {
+			
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return false if pth points to a directory and there is not valid JSON permissions data in the permissions file', function() {
+			
+				testStats.isDirectory = function() { return true; };
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns('["test" : 123]');
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.false;
+			
+			});
+			it('should return a generic permissions object with the content of the permissions file in the directory if pth points to a directory and the permissions file contains valid JSON', function() {
+			
+				testStats.isDirectory = function() { return true; };
+				var thesePerms = getTestPerms();
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
+				var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+					return cb(false, [
+						instanceUser,
+						altUser,
+						notFoundUser,
+						errorUser
+					]);
+				});
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
+			
+			});
+			it('should return false if pth points to a directory and readFileSync throws an error trying to read the permissions file', function() {
+			
+				testStats.isDirectory = function() { return true; };
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').throws(SystemError.EISDIR({syscall: 'read', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.false;
+			
+			});
+			it('should return false if pth points to a file and there is not valid JSON permissions data in the permissions file of its enclosing directory', function() {
+			
+				testStats.isFile = function() { return true; };
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns('["test" : 123]');
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.false;
+			
+			});
+			it('should return a permissions object with the content of the permissions file in the directory if pth points to a file and the permissions file in the enclosing directory contains valid JSON', function() {
+			
+				testStats.isFile = function() { return true; };
+				var thesePerms = getTestPerms();
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
+				var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+					return cb(false, [
+						instanceUser,
+						altUser,
+						notFoundUser,
+						errorUser
+					]);
+				});
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
+			
+			});
+			it('should return an error if pth points to a file and readFileSync throws an error trying to read the permissions file in the enclosing directory', function() {
+			
+				testStats.isFile = function() { return true; };
+				var testPath = 'tmp/dropBox';
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').throws(SystemError.EISDIR({syscall: 'read', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.false;
+			
+			});
 		
 		});
 		describe('setPermissions(pth, userId, permissions)', function() {

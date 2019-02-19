@@ -73,32 +73,32 @@ class UwotFsPermissions {
 				// var userInterface = new Users();
 				global.Uwot.Users.listUsers(function(error, userList) {
 			
-					for (let i = 0; i < permUsers.length; i++) {
+					for (let i = 0; i < userList.length; i++) {
 			
-						var thisId = userList[i];
-						if (-1 !== permUsers.indexOf(thisId) && permissions.hasOwnProperty(thisId)) {
+						var thisName = userList[i].uName;
+						if (-1 !== permUsers.indexOf(thisName) && permissions.hasOwnProperty(thisName)) {
 						
 							let userPerms = [];
-							if ('object' == typeof permissions[thisId] && Array.isArray(permissions[thisId])) {
+							if ('object' == typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
 							
-								if (-1 !== permissions[thisId].indexOf('r')) {
+								if (-1 !== permissions[thisName].indexOf('r')) {
 								
 									userPerms.push('r');
 								
 								}
-								if (-1 !== permissions[thisId].indexOf('w')) {
+								if (-1 !== permissions[thisName].indexOf('w')) {
 								
 									userPerms.push('w');
 								
 								}
-								if (-1 !== permissions[thisId].indexOf('x')) {
+								if (-1 !== permissions[thisName].indexOf('x')) {
 								
 									userPerms.push('x');
 								
 								}
 							
 							}
-							this[thisId] = userPerms;
+							this[thisName] = userPerms;
 						
 						}
 			
@@ -1504,7 +1504,7 @@ class UwotFs {
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
 		}
-		else if (inRoot && !inAllowed && !(this.sudo || (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
+		else if (inRoot && !inAllowed && !(this.sudo && (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
 		
@@ -1512,7 +1512,7 @@ class UwotFs {
 		var pthStats, permFile, permissions;
 		try {
 		
-			pathStats = fs.statSync(fullPath);
+			pthStats = fs.statSync(fullPath);
 		
 		}
 		catch (e) {
