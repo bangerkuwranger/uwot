@@ -1186,11 +1186,55 @@ describe('filesystem.js', function() {
 		});
 		describe('write(pth, data)', function() {
 		
-			it('should be a function');
-			it('should return an eroor if isWritable throws an error');
-			it('should return a systemError if user is not allowed to write to location at pth');
-			it('should return an error if writeFileSync throws an error');
-			it('should return true and write data to beginning of file at pth if user has proper permissions and writeFileSync executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.write).to.be.a('function');
+			
+			});
+			it('should return an error if pth is relative or an absolute path not resolved to this.root.path, and resolvePath returns an error', function() {
+			
+				var testPath = 'var/run/marathon2/level4/kyoto.term';
+				var testData = "....n 15 ~~~~~~Be~rn border of the Roman Empire to the Danube \n\r River.  During a skirmish with barbarians in Raetiain the \n\r mountains near the borof modern France and Switzerland), 117 \n\r men under Gaius Licinius MarcW#&I~?f/f/xxfxfff`~~~ \n\r THM@#%!@# \n\r 233nce of weird and frightening monsters under his control, \n\r many successful raidsecty the fall of the Roman Empire and \n\r remained unmolested until the ninth un~~~ \n\r written ls into the lex vita.  Clovis moved the settlement \n\r farther south i the mountains, nearer the spring, to escape \n\r Clovis remain```` \n\r ~fxf´f`~Fxff´xf~~~~ \n\r however, carried out reforms before their deaths which slowly \n\r integrated their people secretly into world society, which are \n\r now scattered all over the globe- to meet only once every \n\r seven years in southeast France~FFFffxfffffF?F?FF?Ff must \n\r be chosen.";
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'));
+				expect(filesystem.write(testPath, testData)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+			
+			});
+			it('should return an error if isWritable returns an error', function() {
+			
+				var testPath = 'var/run/marathon2/level4/kyoto.term';
+				var testData = "....n 15 ~~~~~~Be~rn border of the Roman Empire to the Danube \n\r River.  During a skirmish with barbarians in Raetiain the \n\r mountains near the borof modern France and Switzerland), 117 \n\r men under Gaius Licinius MarcW#&I~?f/f/xxfxfff`~~~ \n\r THM@#%!@# \n\r 233nce of weird and frightening monsters under his control, \n\r many successful raidsecty the fall of the Roman Empire and \n\r remained unmolested until the ninth un~~~ \n\r written ls into the lex vita.  Clovis moved the settlement \n\r farther south i the mountains, nearer the spring, to escape \n\r Clovis remain```` \n\r ~fxf´f`~Fxff´xf~~~~ \n\r however, carried out reforms before their deaths which slowly \n\r integrated their people secretly into world society, which are \n\r now scattered all over the globe- to meet only once every \n\r seven years in southeast France~FFFffxfffffF?F?FF?Ff must \n\r be chosen.";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.EPERM({syscall: 'write', path: testPath}));
+				expect(filesystem.write(testPath, testData)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a systemError if user is not allowed to write to location at pth', function() {
+			
+				var testPath = 'var/run/marathon2/level4/kyoto.term';
+				var testData = "....n 15 ~~~~~~Be~rn border of the Roman Empire to the Danube \n\r River.  During a skirmish with barbarians in Raetiain the \n\r mountains near the borof modern France and Switzerland), 117 \n\r men under Gaius Licinius MarcW#&I~?f/f/xxfxfff`~~~ \n\r THM@#%!@# \n\r 233nce of weird and frightening monsters under his control, \n\r many successful raidsecty the fall of the Roman Empire and \n\r remained unmolested until the ninth un~~~ \n\r written ls into the lex vita.  Clovis moved the settlement \n\r farther south i the mountains, nearer the spring, to escape \n\r Clovis remain```` \n\r ~fxf´f`~Fxff´xf~~~~ \n\r however, carried out reforms before their deaths which slowly \n\r integrated their people secretly into world society, which are \n\r now scattered all over the globe- to meet only once every \n\r seven years in southeast France~FFFffxfffffF?F?FF?Ff must \n\r be chosen.";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.write(testPath, testData)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if writeFileSync throws an error', function() {
+			
+				var testPath = 'var/run/marathon2/level4/kyoto.term';
+				var testData = "....n 15 ~~~~~~Be~rn border of the Roman Empire to the Danube \n\r River.  During a skirmish with barbarians in Raetiain the \n\r mountains near the borof modern France and Switzerland), 117 \n\r men under Gaius Licinius MarcW#&I~?f/f/xxfxfff`~~~ \n\r THM@#%!@# \n\r 233nce of weird and frightening monsters under his control, \n\r many successful raidsecty the fall of the Roman Empire and \n\r remained unmolested until the ninth un~~~ \n\r written ls into the lex vita.  Clovis moved the settlement \n\r farther south i the mountains, nearer the spring, to escape \n\r Clovis remain```` \n\r ~fxf´f`~Fxff´xf~~~~ \n\r however, carried out reforms before their deaths which slowly \n\r integrated their people secretly into world society, which are \n\r now scattered all over the globe- to meet only once every \n\r seven years in southeast France~FFFffxfffffF?F?FF?Ff must \n\r be chosen.";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').throws(SystemError.EPERM({syscall: 'write', path: testPath}));
+				expect(filesystem.write(testPath, testData)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return true and write data to beginning of file at pth if user has proper permissions and writeFileSync executes without error', function() {
+			
+				var testPath = 'var/run/marathon2/level4/kyoto.term';
+				var testData = "....n 15 ~~~~~~Be~rn border of the Roman Empire to the Danube \n\r River.  During a skirmish with barbarians in Raetiain the \n\r mountains near the borof modern France and Switzerland), 117 \n\r men under Gaius Licinius MarcW#&I~?f/f/xxfxfff`~~~ \n\r THM@#%!@# \n\r 233nce of weird and frightening monsters under his control, \n\r many successful raidsecty the fall of the Roman Empire and \n\r remained unmolested until the ninth un~~~ \n\r written ls into the lex vita.  Clovis moved the settlement \n\r farther south i the mountains, nearer the spring, to escape \n\r Clovis remain```` \n\r ~fxf´f`~Fxff´xf~~~~ \n\r however, carried out reforms before their deaths which slowly \n\r integrated their people secretly into world society, which are \n\r now scattered all over the globe- to meet only once every \n\r seven years in southeast France~FFFffxfffffF?F?FF?Ff must \n\r be chosen.";
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').returns(true);
+				expect(filesystem.write(testPath, testData)).to.be.true;
+				expect(filesystem.write("/" + testPath, testData)).to.be.true;
+				expect(filesystem.write(path.join(filesystem.root.path + "/", testPath), testData)).to.be.true;
+			
+			});
 		
 		});
 		describe('isInUser(pth, userName)', function() {
