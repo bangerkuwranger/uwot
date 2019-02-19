@@ -1638,7 +1638,7 @@ describe('filesystem.js', function() {
 			it('should replace this.userDir.path with an absolute path from VFS root to users directory in pth and return if pth is an absolute path resolved to a user directory', function() {
 			
 				var testPath = path.resolve(filesystem.userDir.path, 'shunter2/burnward');
-				var testResult = '/home/shunter2/burnward';
+				var testResult = '/home/fuser/shunter2/burnward';
 				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
 			
 			});
@@ -1655,9 +1655,9 @@ describe('filesystem.js', function() {
 				var testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
 				var testResult = filesystem.getVcwd() + '/shunter2/burnward';
 				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
-				filesystem.cwd = 'home'
-				testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
-				testResult = filesystem.getVcwd() + '/shunter2/burnward';
+				filesystem.cwd = 'home/fuser'
+				testPath = path.resolve(filesystem.getCwd(), 'burnward');
+				testResult = filesystem.getVcwd() + '/burnward';
 				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
 				filesystem.cwd = 'var/www/html/userPages'
 				testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');

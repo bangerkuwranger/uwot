@@ -1278,7 +1278,7 @@ class UwotFs {
 		}
 		else if (path.isAbsolute(pth) && null !== this.userDir && 'string' == typeof this.userDir.path && -1 !== pth.indexOf(this.userDir.path)) {
 		
-			var udPre = '/home';
+			var udPre = '/home/' + this.user.uName;
 			return pth.replace(this.userDir.path, udPre);
 		
 		}
@@ -1293,7 +1293,7 @@ class UwotFs {
 			var cwdPre;
 			if (null !== this.userDir && 'string' === typeof this.userDir.path && -1 !== thisCwd.indexOf(this.userDir.path)) {
 			
-				cwdPre = thisCwd.replace(this.userDir.path, '/home');
+				cwdPre = thisCwd.replace(this.userDir.path, '/home/' + this.user.uName);
 			
 			}
 			else if (null !== this.pubDir && 'string' === typeof this.pubDir.path && -1 !== thisCwd.indexOf(this.pubDir.path)) {
