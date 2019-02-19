@@ -1278,17 +1278,40 @@ class UwotFs {
 		}
 		else if (path.isAbsolute(pth) && null !== this.userDir && 'string' == typeof this.userDir.path && -1 !== pth.indexOf(this.userDir.path)) {
 		
-			return pth.replace(this.userDir.path, '');
+			var udPre = '/home';
+			return pth.replace(this.userDir.path, udPre);
 		
 		}
 		else if (path.isAbsolute(pth) && null !== this.pubDir && 'string' == typeof this.pubDir.path && -1 !== pth.indexOf(this.pubDir.path)) {
 		
-			return pth.replace(this.pubDir.path, '');
+			var pdPre = '/var/www/html';
+			return pth.replace(this.pubDir.path, pdPre);
 		
 		}
 		else if (path.isAbsolute(pth) && 'string' === typeof thisCwd && -1 !== pth.indexOf(thisCwd)) {
 		
-			return pth.replace(thisCwd, '');
+			var cwdPre;
+			if (null !== this.userDir && 'string' === typeof this.userDir.path && -1 !== thisCwd.indexOf(this.userDir.path)) {
+			
+				cwdPre = thisCwd.replace(this.userDir.path, '/home');
+			
+			}
+			else if (null !== this.pubDir && 'string' === typeof this.pubDir.path && -1 !== thisCwd.indexOf(this.pubDir.path)) {
+			
+				cwdPre = thisCwd.replace(this.pubDir.path, '/var/www/html');
+			
+			}
+			else if (-1 !== thisCwd.indexOf(this.root.path)) {
+			
+				cwdPre = thisCwd.replace(this.root.path, '');
+			
+			}
+			else {
+			
+				cwdPre = '';
+			
+			}
+			return pth.replace(thisCwd, cwdPre);
 		
 		}
 		else if (path.isAbsolute(pth) && 'string' === typeof this.root.path && -1 !== pth.indexOf(this.root.path)) {

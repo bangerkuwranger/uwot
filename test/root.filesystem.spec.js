@@ -1617,7 +1617,65 @@ describe('filesystem.js', function() {
 		});
 		describe('dissolvePath(pth)', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(filesystem.dissolvePath).to.be.a('function');
+			
+			});
+			it('should return pth unchanged if pth is not a string', function() {
+			
+				expect(filesystem.dissolvePath(null)).to.be.null;
+			
+			});
+			it('should return pth unchanged if pth is relative or an absolute path that cannot be resolved to VFS root, pubdir, CWD, or userDir.', function() {
+			
+				var pthOne = 'var/run/marathon2';
+				var pthTwo = '/Users/shunter2/burnward';
+				expect(filesystem.dissolvePath(pthOne)).to.equal(pthOne);
+				expect(filesystem.dissolvePath(pthTwo)).to.equal(pthTwo);
+			
+			});
+			it('should replace this.userDir.path with an absolute path from VFS root to users directory in pth and return if pth is an absolute path resolved to a user directory', function() {
+			
+				var testPath = path.resolve(filesystem.userDir.path, 'shunter2/burnward');
+				var testResult = '/home/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+			
+			});
+			it('should replace this.pubDir.path with an absolute path from VFS root to public directory in pth and return if pth is an absolute path resolved to public directory', function() {
+			
+				var testPath = path.resolve(filesystem.pubDir.path, 'shunter2/burnward');
+				var testResult = '/var/www/html/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+			
+			});
+			it('should replace this.getCwd() value with an absolute path from VFS root to the CWD in pth and return if pth is an absolute path resolved to the current CWD', function() {
+			
+				filesystem.cwd = 'var/run'
+				var testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
+				var testResult = filesystem.getVcwd() + '/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+				filesystem.cwd = 'home'
+				testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
+				testResult = filesystem.getVcwd() + '/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+				filesystem.cwd = 'var/www/html/userPages'
+				testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
+				testResult = filesystem.getVcwd() + '/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+				filesystem.cwd = ''
+				testPath = path.resolve(filesystem.getCwd(), 'shunter2/burnward');
+				testResult = '/shunter2/burnward';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+			
+			});
+			it('should remove this.root.path from pth and return if pth is an absolute path that resolves to root but no other variable named directory locations', function() {
+			
+				var testPath = filesystem.root.path + '/etc/comp/so/gnat/hus';
+				var testResult = '/etc/comp/so/gnat/hus';
+				expect(filesystem.dissolvePath(testPath)).to.equal(testResult);
+			
+			});
 		
 		});
 		describe('isReadable(pth)', function() {
