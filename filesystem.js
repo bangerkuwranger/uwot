@@ -937,14 +937,10 @@ class UwotFs {
 		}
 		else {
 		
-			try {
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
 			
-				fullPath = this.resolvePath(pth, false);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPath;
 			
 			}
 		
@@ -1275,6 +1271,42 @@ class UwotFs {
 				}
 		
 			}
+		
+		}
+	
+	}
+	
+	dissolvePath(pth) {
+	
+		var thisCwd = this.getCwd();
+		if ('string' !== typeof pth) {
+		
+			return pth;
+		
+		}
+		else if (path.isAbsolute(pth) && null !== this.userDir && 'string' == typeof this.userDir.path && -1 !== pth.indexOf(this.userDir.path)) {
+		
+			return pth.replace(this.userDir.path, '');
+		
+		}
+		else if (path.isAbsolute(pth) && null !== this.pubDir && 'string' == typeof this.pubDir.path && -1 !== pth.indexOf(this.pubDir.path)) {
+		
+			return pth.replace(this.pubDir.path, '');
+		
+		}
+		else if (path.isAbsolute(pth) && 'string' === typeof thisCwd && -1 !== pth.indexOf(thisCwd)) {
+		
+			return pth.replace(thisCwd, '');
+		
+		}
+		else if (path.isAbsolute(pth) && 'string' === typeof this.root.path && -1 !== pth.indexOf(this.root.path)) {
+		
+			return pth.replace(this.root.path, '');
+		
+		}
+		else {
+		
+			return pth;
 		
 		}
 	

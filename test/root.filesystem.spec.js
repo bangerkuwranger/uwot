@@ -1069,11 +1069,50 @@ describe('filesystem.js', function() {
 		});
 		describe('removeFile(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if isWritable throws an error');
-			it('should return a systemError if user is not allowed to write to location at pth');
-			it('should return an error if unlinkSync throws an error');
-			it('should return true and remove file at pth if user has proper permissions and unlinkSync executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.removeFile).to.be.a('function');
+			
+			});
+			it('should return an error if pth is relative or an absolute path that does not contain the this.root.path, and resolvePath throws an error', function() {
+			
+				var testPath = 'two/roads/diverged/inAWood.txt';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'));
+				expect(filesystem.removeFile(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+			
+			});
+			it('should return an error if isWritable throws an error', function() {
+			
+				var testPath = 'two/roads/diverged/inAWood.txt';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.removeFile(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to write to location at pth', function() {
+			
+				var testPath = 'two/roads/diverged/inAWood.txt';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.removeFile(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an error if unlinkSync throws an error', function() {
+			
+				var testPath = 'two/roads/diverged/inAWood.txt';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var unlinkSyncStub = sinon.stub(fs, 'unlinkSync').throws(SystemError.EROFS({syscall: 'unlink', path: testPath}));
+				expect(filesystem.removeFile(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EROFS');
+			
+			});
+			it('should return true and remove file at pth if user has proper permissions and unlinkSync executes without error', function() {
+			
+				var testPath = 'two/roads/diverged/inAWood.txt';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var unlinkSyncStub = sinon.stub(fs, 'unlinkSync').returns(true);
+				expect(filesystem.removeFile(testPath)).to.be.true;
+				expect(filesystem.removeFile("/" + testPath)).to.be.true;
+				expect(filesystem.removeFile(path.join(filesystem.root.path + "/", testPath))).to.be.true;
+			
+			});
 		
 		});
 		describe('stat(pth)', function() {
@@ -1469,6 +1508,11 @@ describe('filesystem.js', function() {
 				expect(shouldBeError).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
+		
+		});
+		describe('dissolvePath(pth)', function() {
+		
+			it('should be a function');
 		
 		});
 		describe('isReadable(pth)', function() {
