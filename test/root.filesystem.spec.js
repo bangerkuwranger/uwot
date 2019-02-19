@@ -2205,6 +2205,24 @@ describe('filesystem.js', function() {
 				expect(testResult).to.be.false;
 			
 			});
+			it('should return an ENOENT SystemError if pth is extant and in an allowed path, but points to neither a file nor a directory', function() {
+			
+				var testPath = 'tmp/dropBox';
+				var thesePerms = getTestPerms();
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
+				var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+					return cb(false, [
+						instanceUser,
+						altUser,
+						notFoundUser,
+						errorUser
+					]);
+				});
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
 		
 		});
 		describe('setPermissions(pth, userId, permissions)', function() {
