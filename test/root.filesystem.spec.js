@@ -1117,10 +1117,71 @@ describe('filesystem.js', function() {
 		});
 		describe('stat(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if isReadable throws an error');
-			it('should return a systemError if user is not allowed to read location at pth');
-			it('should return a Stats object if user has proper permissions and statSynce executes without error');
+			it('should be a function', function() {
+			
+				expect(filesystem.stat).to.be.a('function');
+			
+			});
+			it('should return an error if pth is relative or an absolute path not resolved to this.root.path, and resolvePath returns an error', function() {
+			
+				var testPath = 'etc/nginx/conf.d';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'));
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+			
+			});
+			it('should return an error if isReadable returns an error', function() {
+			
+				var testPath = 'etc/nginx/conf.d';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if user is not allowed to read location at pth', function() {
+			
+				var testPath = 'etc/nginx/conf.d';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an Error if fs.statSync throws an error', function() {
+			
+				var testPath = 'etc/nginx/conf.d';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.EPERM({syscall: 'stat', path: testPath}));
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a Stats object if user has proper permissions and statSync executes without error', function() {
+			
+				var testPath = 'etc/nginx/conf.d';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(new fs.Stats(
+					{
+						dev: 2114,
+						ino: 48064969,
+						mode: 33188,
+						nlink: 1,
+						uid: 85,
+						gid: 100,
+						rdev: 0,
+						size: 527,
+						blksize: 4096,
+						blocks: 8,
+						atimeMs: 1318289051000.1,
+						mtimeMs: 1318289051000.1,
+						ctimeMs: 1318289051000.1,
+						birthtimeMs: 1318289051000.1,
+						atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+					}
+				));
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(fs.Stats);
+				expect(filesystem.stat("/" + testPath)).to.be.an.instanceof(fs.Stats);
+				expect(filesystem.stat(path.join(filesystem.root.path + "/", testPath))).to.be.an.instanceof(fs.Stats);
+			
+			});
 		
 		});
 		describe('write(pth, data)', function() {
