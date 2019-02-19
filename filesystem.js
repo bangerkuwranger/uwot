@@ -986,14 +986,10 @@ class UwotFs {
 		}
 		else {
 		
-			try {
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
 			
-				fullPath = this.resolvePath(pth, false);
-			
-			}
-			catch(err) {
-			
-				return err;
+				return fullPath;
 			
 			}
 		
@@ -1644,12 +1640,12 @@ class UwotFs {
 				var pthStats = fs.statSync(fullPath);
 				if (pthStats.isDirectory()) {
 				
-					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 				else {
 				
-					permPath = path.resolve(path.dirname(fullpath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 			
@@ -1751,12 +1747,12 @@ class UwotFs {
 				var pthStats = fs.statSync(fullPath);
 				if (pthStats.isDirectory()) {
 				
-					permPath = path.resolve(fullpath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 				else {
 				
-					permPath = path.resolve(path.dirname(fullpath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 			
