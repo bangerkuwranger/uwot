@@ -2089,9 +2089,10 @@ describe('filesystem.js', function() {
 				expect(filesystem.getPermissions).to.be.a('function');
 			
 			});
-			it('should return a generic permissions object with owner:"root" and allowed:[] if pth is not in root or users', function() {
+			it('should return a generic permissions object with owner:"root" and allowed:[] if pth is not in root, pubDir or userDir', function() {
 			
 				var testPath = '/Users/tmp/dropBox';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var testResult = filesystem.getPermissions(testPath);
 				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
