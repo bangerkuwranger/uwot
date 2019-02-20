@@ -216,6 +216,21 @@ class UwotFs {
 
 	constructor(userId, cwd) {
 	
+		this.sudo = false;
+		global.Uwot.Users.listUsers(function(error, userList) {
+		
+			if (error) {
+			
+				throw error;
+			
+			}
+			else {
+			
+				this.validUsers = userList;
+			
+			}
+		
+		}.bind(this));
 		if ('string' === typeof cwd) {
 		
 			// distinct from process.cwd; this is 'virtual' fs cwd
@@ -288,7 +303,7 @@ class UwotFs {
 			}.bind(this));
 		
 		}
-		this.sudo = false;
+		
 	
 	}
 	
@@ -1586,107 +1601,78 @@ class UwotFs {
 			return systemError.EPERM({path: pth, syscall: 'chmod'});
 		
 		}
-		else if ('string' !== userName || 'object' !== typeof permissions || null === permissions) {
+		else if ('string' !== typeof userName || 'object' !== typeof permissions || null === permissions) {
 		
 			return new TypeError('invalid user or permissions');
 		
 		}
-// 		var userInterface = new Users();
-		global.Uwot.Users.listUsers(function(error, userList){
 		
-			var userExists = false;
-			if (error) {
+		var userExists = this.isValidUserName(userName);
+		if (!userExists) {
+		
+			return new Error(userName + ': illegal user name');
+		
+		}
+		var fullPath = this.resolvePath(pth);
+		var inRoot = this.isInRoot(fullPath);
+		var inUsers = this.isInUser(fullPath, "*");
+		var isOwned = this.isInUser(fullPath);
+		var inAllowed = (this.isInPub(fullPath) || isOwned);
+		if (!inRoot && !inUsers && !inAllowed) {
+		
+			return systemError.ENOENT({path: pth, syscall: 'chmod'});
+		
+		}
+		var currentPermissions = this.getPermissions(fullPath);
+		if (currentPermissions instanceof Error || !currentPermissions) {
+		
+			currentPermissions = new UwotFsPermissions(null);
+		
+		}
+		var newPermissions = new UwotFsPermissions(permissions);
+		if (currentPermissions.allowed !== DEFAULT_ALLOWED && ('object' !== typeof newPermissions.allowed || null === newPermissions.allowed || !Array.isArray(newPermissions.allowed))) {
+		
+			newPermissions.allowed = currentPermissions.allowed;
+		
+		}
+		if (isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== newPermissions.owner) {
+		
+			newPermissions.owner = this.user['uName'];
+		
+		}
+		var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+		var permPath;
+		try {
+		
+			var pthStats = fs.statSync(fullPath);
+			if (pthStats.isDirectory()) {
 			
-				return systemError.UNKOWN({path: pth, syscall: 'chmod'});
-			
-			}
-			else if (userName !== this.user['uName']) {
-			
-				userExists = false;
-				for (let i = 0; i < userList.length; i++) {
-				
-					if (userName === userList[i]['uName']) {
-					
-						userExists = true;
-						i = userList.length;
-					
-					}
-				
-				}
+				permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 			else {
 			
-				userExists = true;
-			
-			}
-			if (!userExists) {
-			
-				return new Error(userName + ': illegal user name');
-			
-			}
-			var fullPath = this.resolvePath(pth);
-			var inRoot = this.isInRoot(fullPath);
-			var inUsers = this.isInUser(fullPath, "*");
-			var isOwned = this.isInUser(fullPath);
-			var inAllowed = (this.isInPub(fullPath) || isOwned);
-			if (!inRoot && !inUsers && !inAllowed) {
-			
-				return systemError.ENOENT({path: pth, syscall: 'chmod'});
-			
-			}
-			var currentPermissions = this.getPermissions(fullPath);
-			if (currentPermissions instanceof Error || !currentPermissions) {
-			
-				currentPermissions = new UwotFsPermissions(null);
-			
-			}
-			var newPermissions = new UwotFsPermissions(permissions);
-			if (currentPermissions.allowed !== DEFAULT_ALLOWED && ('object' !== typeof newPermissions.allowed || null === newPermissions.allowed || !Array.isArray(newPermissions.allowed))) {
-			
-				newPermissions.allowed = currentPermissions.allowed;
-			
-			}
-			if (isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== newPermissions.owner) {
-			
-				newPermissions.owner = this.user['uName'];
-			
-			}
-			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
-			var permPath;
-			try {
-			
-				var pthStats = fs.statSync(fullPath);
-				if (pthStats.isDirectory()) {
-				
-					permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
-				
-				}
-				else {
-				
-					permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
-				
-				}
-			
-			}
-			catch(e) {
-			
-				return e;
-			
-			}
-			try {
-			
-				fs.writeFileSync(permPath, updatedPermissions);
-				return true;
-			
-			}
-			catch(e) {
-			
-				return e;
+				permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 		
-		}.bind(this));
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		try {
+		
+			fs.writeFileSync(permPath, updatedPermissions);
+			return true;
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
 	
 	}
 	
@@ -1871,6 +1857,27 @@ class UwotFs {
 			}
 		
 		}.bind(this));
+	
+	}
+	
+	isValidUserName(userName) {
+	
+		var userExists = false;
+		for (let i = 0; i < this.validUsers.length; i++) {
+		
+			if (userName === this.validUsers[i]['uName']) {
+			
+				userExists = true;
+				i = this.validUsers.length;
+			
+			}
+			if ((i + 1) >= this.validUsers.length) {
+			
+				return isValidUserName;
+			
+			}
+		
+		}
 	
 	}
 

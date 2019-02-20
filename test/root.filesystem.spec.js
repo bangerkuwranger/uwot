@@ -108,9 +108,9 @@ const getTestStats = function() {
 const getTestPerms = function() {
 
 	return JSON.stringify({
-		owner: 'root',
-		allowed: ['r'],
-		fuser: ['r', 'w']
+		owner: 'mortimerhemp',
+		allowed: ['r','x'],
+		fuser: ['r', 'w', 'x']
 	});
 
 };
@@ -145,7 +145,18 @@ describe('filesystem.js', function() {
 				}
 	
 			});
+			var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+		
+				return cb(false, [
+					instanceUser,
+					altUser,
+					notFoundUser,
+					errorUser
+				]);
+		
+			});
 			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
+			listUsersStub.restore();
 			testStats = getTestStats();
 		});
 		afterEach(function() {
@@ -158,6 +169,32 @@ describe('filesystem.js', function() {
 			it('should be a function', function() {
 			
 				expect(FileSystem).to.be.a('function');
+			
+			});
+			it('should throw an error if listUsers returns an error to callback', function() {
+			
+				var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+		
+					return cb(new Error('test listUsers error'), null);
+		
+				});
+				function throwListUsersError() {
+				
+					return new FileSystem('CDeOOrH0gOg791cZ');
+				
+				}
+				expect(throwListUsersError).to.throw(Error, 'test listUsers error');
+			
+			});
+			it('should assign the array of user objects returned to callback of listUsers to this.validUsers if listUsers executes without error', function() {
+			
+				var users = [
+					instanceUser,
+					altUser,
+					notFoundUser,
+					errorUser
+				];
+				expect(filesystem.validUsers).to.deep.equal(users);
 			
 			});
 			it('should assign guest to this.user and assign "" to this.cwd if given no arguments', function() {
@@ -2232,10 +2269,37 @@ describe('filesystem.js', function() {
 				expect(filesystem.setPermissions).to.be.a('function');
 			
 			});
-			it('should return a systemError if !this.sudo or pth is not a string');
-			it('should return a TypeError if userName is not a string or permissions is not a non-null object');
-			it('should return a systemError if listUsers throws an error');
-			it('should return an Error if userName does not match a user in the user db');
+			it('should return a systemError if !this.sudo or pth is not a string', function() {
+			
+				var testPath = '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(null, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+				filesystem.sudo = false;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a TypeError if userName is not a string or permissions is not a non-null object', function() {
+			
+				var testPath = '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, null, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user or permissions');
+				expect(filesystem.setPermissions(testPath, testUName, null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user or permissions');
+			
+			});
+			it('should return an Error if userName does not match a user in the user db', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(false);
+				var testPath = '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('message').that.includes(': illegal user name');
+			
+			});
 			it('should return a systemError if pth resolves to a path outside of root or users directory');
 			it('should return an error if absolute path to permissions file cannot be resolved');
 			it('should return an error if pth does not resolve to an extant path')
