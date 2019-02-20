@@ -2227,7 +2227,11 @@ describe('filesystem.js', function() {
 		});
 		describe('setPermissions(pth, userName, permissions)', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(filesystem.setPermissions).to.be.a('function');
+			
+			});
 			it('should return a systemError if !this.sudo or pth is not a string');
 			it('should return a TypeError if userName is not a string or permissions is not a non-null object');
 			it('should return a systemError if listUsers throws an error');
@@ -2241,6 +2245,22 @@ describe('filesystem.js', function() {
 			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set');
 			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir');
 			it('should maintain any user specific permissions if any were previously set');
+		
+		});
+		describe('changeAllowed(pth, allowed)', function() {
+		
+			it('should be a function');
+			it('should return a SystemError if !this.sudo or pth is not a string');
+			it('should return a TypeErro if allowed is not an object or is null');
+			it('should return a SystemError if pth resolves outside of root, users, or public directories');
+			it('should return an error if UwotFsPermissions constructor throws an error');
+			it('should return an error if absolute path to permissions file cannot be resolved');
+			it('should return an error if pth does not resolve to an extant path');
+			it('should return an error if permissions file cannot be written');
+			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, pth is extant and a file, and permissions file does not exist');
+			it('should maintain the current owner if owner was previously set');
+			it('should maintain any user specific permissions if any were previously set');
+			it('should change the permissions allowed value to value of allowed argument');
 		
 		});
 		describe('changeOwner(pth, userName)', function() {
