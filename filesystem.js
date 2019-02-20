@@ -1579,14 +1579,14 @@ class UwotFs {
 	
 	}
 	
-	setPermissions(pth, userId, permissions) {
+	setPermissions(pth, userName, permissions) {
 	
 		if (!this.sudo || 'string' !== typeof pth) {
 		
 			return systemError.EPERM({path: pth, syscall: 'chmod'});
 		
 		}
-		else if ('string' !== userId || 'object' !== typeof permissions || null === permissions) {
+		else if ('string' !== userName || 'object' !== typeof permissions || null === permissions) {
 		
 			return new TypeError('invalid user or permissions');
 		
@@ -1600,12 +1600,12 @@ class UwotFs {
 				return systemError.UNKOWN({path: pth, syscall: 'chmod'});
 			
 			}
-			else if (userId !== this.user['_id']) {
+			else if (userName !== this.user['uName']) {
 			
 				userExists = false;
 				for (let i = 0; i < userList.length; i++) {
 				
-					if (userId === userList[i]['_id']) {
+					if (userName === userList[i]['uName']) {
 					
 						userExists = true;
 						i = userList.length;
@@ -1622,7 +1622,7 @@ class UwotFs {
 			}
 			if (!userExists) {
 			
-				return new Error(userId + ': illegal user name');
+				return new Error(userName + ': illegal user name');
 			
 			}
 			var fullPath = this.resolvePath(pth);
@@ -1649,7 +1649,7 @@ class UwotFs {
 			}
 			if (isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== newPermissions.owner) {
 			
-				newPermissions.owner = this.user['_id'];
+				newPermissions.owner = this.user['uName'];
 			
 			}
 			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
@@ -1691,14 +1691,14 @@ class UwotFs {
 	}
 	
 	// TBD
-	changeOwner(pth, userId) {
+	changeOwner(pth, userName) {
 	
 		if (!this.sudo) {
 		
 			return systemError.EPERM({path: pth, syscall: 'chmod'});
 		
 		}
-		else if ('string' !== userId) {
+		else if ('string' !== userName) {
 		
 			return new TypeError('invalid user');
 		
@@ -1712,12 +1712,12 @@ class UwotFs {
 				return systemError.UNKOWN({path: pth, syscall: 'chown'});
 			
 			}
-			else if (userId !== this.user['_id']) {
+			else if (userName !== this.user['uName']) {
 			
 				userExists = false;
 				for (let i = 0; i < userList.length; i++) {
 				
-					if (userId === userList[i]['_id']) {
+					if (userName === userList[i]['uName']) {
 					
 						userExists = true;
 						i = userList.length;
@@ -1734,7 +1734,7 @@ class UwotFs {
 			}
 			if (!userExists) {
 			
-				return new Error(userId + ': illegal user name');
+				return new Error(userName + ': illegal user name');
 			
 			}
 			var fullPath = this.resolvePath(pth);
@@ -1753,7 +1753,7 @@ class UwotFs {
 				currentPermissions = new UwotFsPermissions(null);
 			
 			}
-			var newPermissions = new UwotFsPermissions({owner: userId});
+			var newPermissions = new UwotFsPermissions({owner: userName});
 			if (currentPermissions.allowed !== DEFAULT_ALLOWED) {
 			
 				newPermissions.allowed = currentPermissions.allowed;

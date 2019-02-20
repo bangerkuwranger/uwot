@@ -2225,38 +2225,38 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('setPermissions(pth, userId, permissions)', function() {
+		describe('setPermissions(pth, userName, permissions)', function() {
 		
 			it('should be a function');
 			it('should return a systemError if !this.sudo or pth is not a string');
-			it('should return a TypeError if userId is not a string or permissions is not a non-null object');
+			it('should return a TypeError if userName is not a string or permissions is not a non-null object');
 			it('should return a systemError if listUsers throws an error');
-			it('should return an Error if userId does not match a user in the user db');
+			it('should return an Error if userName does not match a user in the user db');
 			it('should return a systemError if pth resolves to a path outside of root or users directory');
 			it('should return an error if absolute path to permissions file cannot be resolved');
 			it('should return an error if pth does not resolve to an extant path')
 			it('should return an error if permissions file cannot be written');
-			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userId matches a user in db, path is extant and a directory, and permissions file does not exist');
-			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userId matches a user in db, path is extant and a file, and permissions file does not exist');
+			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userName matches a user in db, path is extant and a directory, and permissions file does not exist');
+			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userName matches a user in db, path is extant and a file, and permissions file does not exist');
 			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set');
 			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir');
 			it('should maintain any user specific permissions if any were previously set');
 		
 		});
-		describe('changeOwner(pth, userId)', function() {
+		describe('changeOwner(pth, userName)', function() {
 		
 			it('should be a function');
 			it('should return a systemError if !this.sudo');
-			it('should return a TypeError if userId is not a string');
+			it('should return a TypeError if userName is not a string');
 			it('should return a systemError if listUsers returns an error');
-			it('should return an error if userId does not match a user in the db');
+			it('should return an error if userName does not match a user in the db');
 			it('should return a systemError if pth does not resolve to a path inside of root or users');
 			it('should return an error if pth resolves to a non-extant path');
 			it('should return an error if fs cannot write to the permissions file at pth');
-			it('should write a new JSON object with owner: "{userId}" to a permissions file at pth if pth resolves to a directory in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
-			it('should write only updated owner: "{userId}" in the JSON for the permissions file at pth if pth resolves to a directory in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
-			it('should write a new JSON object with owner: "{userId}" to a permissions file in the enclosing dir of pth if pth resolves to a file in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
-			it('should write only updated owner: "{userId}" in the JSON for the permissions file in the enclosing directory of pth if pth resolves to a file in root or users, this.sudo, userId matches a user in the db, and permissions were not previously set');
+			it('should write a new JSON object with owner: "{userName}" to a permissions file at pth if pth resolves to a directory in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
+			it('should write only updated owner: "{userName}" in the JSON for the permissions file at pth if pth resolves to a directory in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
+			it('should write a new JSON object with owner: "{userName}" to a permissions file in the enclosing dir of pth if pth resolves to a file in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
+			it('should write only updated owner: "{userName}" in the JSON for the permissions file in the enclosing directory of pth if pth resolves to a file in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
 		
 		});
 	
@@ -2272,7 +2272,7 @@ describe('filesystem.js', function() {
 			it('should assign permissions.owner to owner property if permissions.owner is a string');
 			it('should assign permissions.allowed to the allowed property if permissions.allowed is an array');
 			it('should assign DEFAULT_ALLOWED to the allowed property if permissions.allowed is not an array');
-			it('should assign any other properties that are not owner or allowed to itself, if the property name matches a userId from the DB and the property value is an array containing only any or none of ["r", "w", "x"]');
+			it('should assign any other properties that are not owner or allowed to itself, if the property name matches a userName from the DB and the property value is an array containing only any or none of ["r", "w", "x"]');
 		
 		});
 		describe('toGeneric()', function() {
