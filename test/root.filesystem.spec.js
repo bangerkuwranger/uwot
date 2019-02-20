@@ -2323,9 +2323,86 @@ describe('filesystem.js', function() {
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
-			it('should return an error if pth does not resolve to an extant path')
-			it('should return an error if permissions file cannot be written');
-			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userName matches a user in db, path is extant and a directory, and permissions file does not exist');
+			it('should return an error if pth cannot be resolved to a permissions file location', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var testStats = getTestStats();
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					if (pth === testPath) {
+					
+						return null;
+					
+					}
+					else {
+					
+						return pthObj.dir;
+					
+					}
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.includes('Path must be a string.');
+			
+			});
+			it('should return an error if permissions file cannot be written', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var testStats = getTestStats();
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').throws(SystemError.EIO({syscall: 'write', path: testPath}));
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('EIO');
+			
+			});
+			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userName matches a user in db, path is extant and a directory, and permissions file does not exist', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(getTestPerms()));
+				expect(finalPath).to.be.true;
+			
+			});
 			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userName matches a user in db, path is extant and a file, and permissions file does not exist');
 			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set');
 			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir');

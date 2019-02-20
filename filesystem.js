@@ -1640,7 +1640,7 @@ class UwotFs {
 			newPermissions.owner = this.user['uName'];
 		
 		}
-		var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+		var updatedPermissions = JSON.stringify(newPermissions.concatPerms(currentPermissions));
 		var permPath;
 		try {
 		
