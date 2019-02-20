@@ -1690,6 +1690,83 @@ class UwotFs {
 	
 	}
 	
+	changeAllowed(pth, allowed) {
+	
+		if (!this.sudo || 'string' !== typeof pth) {
+		
+			return systemError.EPERM({path: pth, syscall: 'chmod'});
+		
+		}
+		else if ('object' !== typeof allowed || null === allowed) {
+		
+			return new TypeError('invalid allowed');
+		
+		}
+		var fullPath = this.resolvePath(pth);
+		var inRoot = this.isInRoot(fullPath);
+		var inUsers = this.isInUser(fullPath, "*");
+		var isOwned = this.isInUser(fullPath);
+		var inAllowed = (this.isInPub(fullPath) || isOwned);
+		if (!inRoot && !inUsers && !inAllowed) {
+		
+			return systemError.ENOENT({path: pth, syscall: 'chmod'});
+		
+		}
+		var currentPermissions = this.getPermissions(fullPath);
+		if (currentPermissions instanceof Error || !currentPermissions) {
+		
+			currentPermissions = new UwotFsPermissions(null);
+		
+		}
+		var currentPermissionsGeneric = currentPermissions.getGeneric();
+		currentPermissionsGeneric.allowed = allowed;
+		var newPermissions;
+		try {
+		
+			newPermissions = new UwotFsPermissions(currentPermissionsGeneric);
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		var permPath;
+		try {
+		
+			var pthStats = fs.statSync(fullPath);
+			if (pthStats.isDirectory()) {
+			
+				permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			}
+			else {
+			
+				permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			}
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		try {
+		
+			fs.writeFileSync(permPath, newPermissions);
+			return true;
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		
+	
+	}
+	
 	// TBD
 	changeOwner(pth, userName) {
 	
