@@ -2300,8 +2300,29 @@ describe('filesystem.js', function() {
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('message').that.includes(': illegal user name');
 			
 			});
-			it('should return a systemError if pth resolves to a path outside of root or users directory');
-			it('should return an error if absolute path to permissions file cannot be resolved');
+			it('should return a systemError if pth resolves to a path outside of root or users directory', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return an error if pth target is not extant', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
 			it('should return an error if pth does not resolve to an extant path')
 			it('should return an error if permissions file cannot be written');
 			it('should write permissions arg data as JSON to permissions file at pth if this.sudo, userName matches a user in db, path is extant and a directory, and permissions file does not exist');
@@ -2341,6 +2362,13 @@ describe('filesystem.js', function() {
 			it('should write only updated owner: "{userName}" in the JSON for the permissions file at pth if pth resolves to a directory in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
 			it('should write a new JSON object with owner: "{userName}" to a permissions file in the enclosing dir of pth if pth resolves to a file in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
 			it('should write only updated owner: "{userName}" in the JSON for the permissions file in the enclosing directory of pth if pth resolves to a file in root or users, this.sudo, userName matches a user in the db, and permissions were not previously set');
+		
+		});
+		describe('isValidUserName(userName)', function() {
+		
+			it('should be a function');
+			it('should return false if userName !== any user.uName value in this.validUsers');
+			it('should return true if userName === any user.uName value in this.validUsers');
 		
 		});
 	
