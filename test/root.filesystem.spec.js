@@ -2674,6 +2674,7 @@ describe('filesystem.js', function() {
 				var testPath = filesystem.root.path + '/usr/local/bin';
 				var testAllowed = ['r', 'w', 'x'];
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				throw new Error('need to stub the UwotFsPermissions toGeneric method to return a string rather than a valid object to trigger error here.');
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
