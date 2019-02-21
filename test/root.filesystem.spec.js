@@ -2126,31 +2126,31 @@ describe('filesystem.js', function() {
 				expect(filesystem.getPermissions).to.be.a('function');
 			
 			});
-			it('should return a generic permissions object with owner:"root" and allowed:[] if pth is not in root, pubDir or userDir', function() {
+			it('should return a permissions object with owner:"root" and allowed:[] if pth is not in root, pubDir or userDir', function() {
 			
 				var testPath = '/Users/tmp/dropBox';
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var testResult = filesystem.getPermissions(testPath);
-				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
 			
 			});
-			it('should return a generic permissions object with owner:"root" and allowed:[] if is in root, not in pub or instance userDir, and either this.sudo === false or user:sudoFullRoot is false in config', function() {
+			it('should return a permissions object with owner:"root" and allowed:[] if is in root, not in pub or instance userDir, and either this.sudo === false or user:sudoFullRoot is false in config', function() {
 			
 				var testPath = path.resolve(filesystem.root.path + '/', 'tmp/dropBox');
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				filesystem.sudo = true;
 				global.Uwot.Config.nconf.set("user:sudoFullRoot", false);
 				var testResult = filesystem.getPermissions(testPath);
-				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
 				filesystem.sudo = false;
 				global.Uwot.Config.nconf.set("user:sudoFullRoot", true);
 				testResult = filesystem.getPermissions(testPath);
-				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
 				global.Uwot.Config.nconf.set("user:sudoFullRoot", false);
@@ -2436,7 +2436,7 @@ describe('filesystem.js', function() {
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
-			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set', function() {
+			it('should maintain the current allowed permission set if permissions arg does not have allowed property set and allowed value was previously set', function() {
 			
 				var jsonOutput;
 				var finalPath;
@@ -2448,6 +2448,15 @@ describe('filesystem.js', function() {
 				testPerms.allowed = null;
 				var testPrevPerms = JSON.parse(getTestPerms());
 				testPrevPerms.allowed = ['r', 'w'];
+				testPrevPerms.toGeneric = function() {
+				
+					return {
+						owner: this.owner,
+						allowed: this.allowed,
+						fuser: this.fuser
+					}
+				
+				};
 				var testResult = JSON.parse(getTestPerms());
 				testResult.allowed = ['r', 'w'];
 				var testStats = getTestStats();
@@ -2486,6 +2495,15 @@ describe('filesystem.js', function() {
 				testPerms.owner = null;
 				var testPrevPerms = JSON.parse(getTestPerms());
 				testPrevPerms.owner = 'fuser';
+				testPrevPerms.toGeneric = function() {
+				
+					return {
+						owner: this.owner,
+						allowed: this.allowed,
+						fuser: this.fuser
+					}
+				
+				};
 				var testResult = JSON.parse(getTestPerms());
 				testResult.owner = 'fuser';
 				var testStats = getTestStats();
@@ -2524,6 +2542,15 @@ describe('filesystem.js', function() {
 				delete testPerms.owner;
 				var testPrevPerms = JSON.parse(getTestPerms());
 				testPrevPerms.owner = 'root';
+				testPrevPerms.toGeneric = function() {
+				
+					return {
+						owner: this.owner,
+						allowed: this.allowed,
+						fuser: this.fuser
+					}
+				
+				};
 				var testResult = JSON.parse(getTestPerms());
 				testResult.owner = 'fuser';
 				var testStats = getTestStats();
@@ -2563,6 +2590,15 @@ describe('filesystem.js', function() {
 				delete testPerms[instanceUser.uName];
 				var testPrevPerms = JSON.parse(getTestPerms());
 				testPrevPerms[instanceUser.uName] = ['w', 'x'];
+				testPrevPerms.toGeneric = function() {
+				
+					return {
+						owner: this.owner,
+						allowed: this.allowed,
+						fuser: this.fuser
+					}
+				
+				};
 				var testResult = JSON.parse(getTestPerms());
 				testResult[notFoundUser.uName] = ['r'];
 				testResult[instanceUser.uName] = ['w', 'x'];
@@ -2622,8 +2658,25 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
 				
 			});
-			it('should return a SystemError if pth resolves outside of root, users, or public directories');
-			it('should return an error if UwotFsPermissions constructor throws an error');
+			it('should return a SystemError if pth resolves outside of root, users, or public directories', function() {
+			
+				filesystem.sudo = true;
+				var testPath = '/usr/local/bin';
+				var testAllowed = ['r', 'w', 'x'];
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an error if UwotFsPermissions constructor throws an error', function() {
+			
+// 				var UwotFsPermissionsConstructorStub = sinon.stub(UwotFsPermissions, 'constructor').throws(new TypeError('argument of UwotFsPermissions constructor must be an object'));
+				filesystem.sudo = true;
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testAllowed = ['r', 'w', 'x'];
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
 			it('should return an error if absolute path to permissions file cannot be resolved');
 			it('should return an error if pth does not resolve to an extant path');
 			it('should return an error if permissions file cannot be written');

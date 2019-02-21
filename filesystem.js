@@ -1571,12 +1571,12 @@ class UwotFs {
 		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
 		if (!inRoot && !inUsers && !inAllowed) {
 		
-			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
 		}
 		else if (inRoot && !inAllowed && !(this.sudo && (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
 		
-			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE}).toGeneric();
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
 		}
 		var pthStats, permFile, permissions;
@@ -1598,7 +1598,7 @@ class UwotFs {
 				permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
-					return new UwotFsPermissions(permissions).toGeneric();
+					return new UwotFsPermissions(permissions);
 			
 				}
 				else {
@@ -1624,7 +1624,7 @@ class UwotFs {
 				permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' == typeof permissions) {
 			
-					return new UwotFsPermissions(permissions).toGeneric();
+					return new UwotFsPermissions(permissions);
 			
 				}
 				else {
@@ -1695,7 +1695,7 @@ class UwotFs {
 			newPermissions.owner = this.user['uName'];
 		
 		}
-		var updatedPermissions = JSON.stringify(newPermissions.concatPerms(currentPermissions).toGeneric());
+		var updatedPermissions = JSON.stringify(newPermissions.concatPerms(currentPermissions.toGeneric()).toGeneric());
 		var permPath;
 		try {
 		
@@ -1759,7 +1759,7 @@ class UwotFs {
 			currentPermissions = new UwotFsPermissions(null);
 		
 		}
-		var currentPermissionsGeneric = currentPermissions.getGeneric();
+		var currentPermissionsGeneric = currentPermissions.toGeneric();
 		currentPermissionsGeneric.allowed = allowed;
 		var newPermissions;
 		try {
@@ -1877,7 +1877,7 @@ class UwotFs {
 				newPermissions.allowed = currentPermissions.allowed;
 			
 			}
-			var updatedPermissions = newPermissions.concatPerms(currentPermissions);
+			var updatedPermissions = newPermissions.concatPerms(currentPermissions.toGeneric());
 			var permPath;
 			try {
 			
