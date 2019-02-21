@@ -2443,9 +2443,21 @@ describe('filesystem.js', function() {
 		});
 		describe('isValidUserName(userName)', function() {
 		
-			it('should be a function');
-			it('should return false if userName !== any user.uName value in this.validUsers');
-			it('should return true if userName === any user.uName value in this.validUsers');
+			it('should be a function', function() {
+			
+				expect(filesystem.isValidUserName).to.be.a('function');
+			
+			});
+			it('should return false if userName !== any user.uName value in this.validUsers', function() {
+			
+				expect(filesystem.isValidUserName(instanceUser.uName)).to.be.true;
+			
+			});
+			it('should return true if userName === any user.uName value in this.validUsers', function() {
+			
+				expect(filesystem.isValidUserName(instanceUser.uName + 'notAUser')).to.be.false;
+			
+			});
 		
 		});
 	
