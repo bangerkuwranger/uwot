@@ -68,43 +68,39 @@ class UwotFsPermissions {
 			}
 			delete permissions.allowed;
 			var permUsers = Object.keys(permissions);
+			delete permUsers.validUsers;
 			if (0 < permUsers.length) {
-			
-// 				var userInterface = new Users();
-				global.Uwot.Users.listUsers(function(error, userList) {
-			
-					for (let i = 0; i < userList.length; i++) {
-			
-						var thisName = userList[i].uName;
-						if (-1 !== permUsers.indexOf(thisName) && permissions.hasOwnProperty(thisName)) {
+
+				for (let i = 0; i < permUsers.length; i++) {
+	
+					var thisName = permUsers[i];
+// 					if (this.isValidUserName(thisName)) {
+				
+						let userPerms = [];
+						if ('object' == typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
+					
+							if (-1 !== permissions[thisName].indexOf('r')) {
 						
-							let userPerms = [];
-							if ('object' == typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
-							
-								if (-1 !== permissions[thisName].indexOf('r')) {
-								
-									userPerms.push('r');
-								
-								}
-								if (-1 !== permissions[thisName].indexOf('w')) {
-								
-									userPerms.push('w');
-								
-								}
-								if (-1 !== permissions[thisName].indexOf('x')) {
-								
-									userPerms.push('x');
-								
-								}
-							
+								userPerms.push('r');
+						
 							}
-							this[thisName] = userPerms;
+							if (-1 !== permissions[thisName].indexOf('w')) {
 						
+								userPerms.push('w');
+						
+							}
+							if (-1 !== permissions[thisName].indexOf('x')) {
+						
+								userPerms.push('x');
+						
+							}
+					
 						}
-			
-					}
-		
-				}.bind(this));
+						this[thisName] = userPerms;
+				
+// 					}
+	
+				}
 			
 			}
 		
@@ -127,7 +123,7 @@ class UwotFsPermissions {
 		var permUsers = Object.keys(this);
 		for (let i = 0; i < permUsers.length; i++) {
 		
-			if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'object' == typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
+			if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'validUsers' !== permUsers[i] && 'object' == typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
 			
 				genericPermissionsObj[permUsers[i]] = this[permUsers[i]];
 			
@@ -141,6 +137,65 @@ class UwotFsPermissions {
 	toJSON() {
 	
 		return JSON.stringify(this.toGeneric());
+	
+	}
+	
+	isValidUserName(userName) {
+	
+		if ('object' != typeof this.validUsers || !Array.isArray(this.validUsers)) {
+		
+			global.Uwot.Users.listUsers(function(error, userList) {
+		
+				if (error) {
+			
+					return error;
+			
+				}
+				else {
+			
+					this.validUsers = userList;
+					var userExists = false;
+					for (let i = 0; i < this.validUsers.length; i++) {
+		
+						if (userName === this.validUsers[i]['uName']) {
+			
+							userExists = true;
+							i = this.validUsers.length;
+			
+						}
+						if ((i + 1) >= this.validUsers.length) {
+			
+							return userExists;
+			
+						}
+		
+					}
+			
+				}
+		
+			}.bind(this));
+		
+		}
+		else {
+			
+			var userExists = false;
+			for (let i = 0; i < this.validUsers.length; i++) {
+		
+				if (userName === this.validUsers[i]['uName']) {
+			
+					userExists = true;
+					i = this.validUsers.length;
+			
+				}
+				if ((i + 1) >= this.validUsers.length) {
+			
+					return userExists;
+			
+				}
+		
+			}
+		
+		}
 	
 	}
 	
@@ -1640,7 +1695,7 @@ class UwotFs {
 			newPermissions.owner = this.user['uName'];
 		
 		}
-		var updatedPermissions = JSON.stringify(newPermissions.concatPerms(currentPermissions));
+		var updatedPermissions = JSON.stringify(newPermissions.concatPerms(currentPermissions).toGeneric());
 		var permPath;
 		try {
 		

@@ -2400,7 +2400,7 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.true;
 				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(getTestPerms()));
-				expect(finalPath).to.be.true;
+				expect(finalPath).to.equal(testPath + path.sep + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
 			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userName matches a user in db, path is extant and a file, and permissions file does not exist');
