@@ -70,7 +70,7 @@ class UwotFsPermissions {
 			var permUsers = Object.keys(permissions);
 			if (0 < permUsers.length) {
 			
-				// var userInterface = new Users();
+// 				var userInterface = new Users();
 				global.Uwot.Users.listUsers(function(error, userList) {
 			
 					for (let i = 0; i < userList.length; i++) {
@@ -1873,7 +1873,7 @@ class UwotFs {
 			}
 			if ((i + 1) >= this.validUsers.length) {
 			
-				return isValidUserName;
+				return userExists;
 			
 			}
 		
