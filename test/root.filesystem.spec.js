@@ -2474,7 +2474,7 @@ describe('filesystem.js', function() {
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
-			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir', function() {
+			it('should keep the the owner value in the existing file if owner was not previously set to default, and permissions.user property is not set', function() {
 			
 				var jsonOutput;
 				var finalPath;
@@ -2486,6 +2486,44 @@ describe('filesystem.js', function() {
 				testPerms.owner = null;
 				var testPrevPerms = JSON.parse(getTestPerms());
 				testPrevPerms.owner = 'fuser';
+				var testResult = JSON.parse(getTestPerms());
+				testResult.owner = 'fuser';
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
+			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				delete testPerms.owner;
+				var testPrevPerms = JSON.parse(getTestPerms());
+				testPrevPerms.owner = 'root';
 				var testResult = JSON.parse(getTestPerms());
 				testResult.owner = 'fuser';
 				var testStats = getTestStats();
@@ -2556,9 +2594,34 @@ describe('filesystem.js', function() {
 		});
 		describe('changeAllowed(pth, allowed)', function() {
 		
-			it('should be a function');
-			it('should return a SystemError if !this.sudo or pth is not a string');
-			it('should return a TypeErro if allowed is not an object or is null');
+			it('should be a function', function() {
+			
+				expect(filesystem.changeAllowed).to.be.a('function');
+			
+			});
+			it('should return a SystemError if !this.sudo or pth is not a string', function() {
+			
+				filesystem.sudo = true;
+				var testPath = null;
+				var testAllowed = ['r', 'w', 'x'];
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+				filesystem.sudo = false;
+				testPath = '/usr/local/bin';
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a TypeError if allowed is not an object, is null, or is not an array', function() {
+			
+				filesystem.sudo = true;
+				var testPath = '/usr/local/bin';
+				var testAllowed = "['r', 'w', 'x']";
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
+				testAllowed = null;
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
+				testAllowed = {'r': true, 'w': true, 'x': true};
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
+				
+			});
 			it('should return a SystemError if pth resolves outside of root, users, or public directories');
 			it('should return an error if UwotFsPermissions constructor throws an error');
 			it('should return an error if absolute path to permissions file cannot be resolved');

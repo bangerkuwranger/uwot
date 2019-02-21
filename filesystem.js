@@ -1738,7 +1738,7 @@ class UwotFs {
 			return systemError.EPERM({path: pth, syscall: 'chmod'});
 		
 		}
-		else if ('object' !== typeof allowed || null === allowed) {
+		else if ('object' !== typeof allowed || null === allowed || !Array.isArray(allowed)) {
 		
 			return new TypeError('invalid allowed');
 		
