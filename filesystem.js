@@ -50,7 +50,7 @@ class UwotFsPermissions {
 				this.owner = sanitize.cleanString(permissions.owner);
 			
 			}
-			else{
+			else if ('undefined' !== typeof permissions.owner && null !== permissions.owner) {
 			
 				this.owner = DEFAULT_OWNER;
 			
@@ -61,7 +61,7 @@ class UwotFsPermissions {
 				this.allowed = permissions.allowed;
 			
 			}
-			else {
+			else if ('undefined' !== typeof permissions.allowed && null !== permissions.allowed) {
 			
 				this.allowed = DEFAULT_ALLOWED;
 			

@@ -2403,10 +2403,155 @@ describe('filesystem.js', function() {
 				expect(finalPath).to.equal(testPath + path.sep + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
-			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if this.sudo, userName matches a user in db, path is extant and a file, and permissions file does not exist');
-			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set');
-			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir');
-			it('should maintain any user specific permissions if any were previously set');
+			it('should write permissions arg data as JSON to permissions file at directory enclosing file at pth if pth points to a file, this.sudo, userName matches a user in db, path is extant and a file, and permissions file does not exist', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin/';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(getTestPerms()));
+				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
+			it('should maintain the current generic permission set if permissions arg does not have allowed property set and allowed value was previously set', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin/';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				testPerms.allowed = null;
+				var testPrevPerms = JSON.parse(getTestPerms());
+				testPrevPerms.allowed = ['r', 'w'];
+				var testResult = JSON.parse(getTestPerms());
+				testResult.allowed = ['r', 'w'];
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
+			it('should set the owner to the instance user if owner was previously set to default, permissions.user property is not set, and pth resolves to a path in instance userDir', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin/';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				testPerms.owner = null;
+				var testPrevPerms = JSON.parse(getTestPerms());
+				testPrevPerms.owner = 'fuser';
+				var testResult = JSON.parse(getTestPerms());
+				testResult.owner = 'fuser';
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
+			it('should maintain any user specific permissions if any were previously set and the same user\'s permissions are not set in permissions arg', function() {
+			
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin/';
+				var testUName = instanceUser.uName;
+				var testPerms = JSON.parse(getTestPerms());
+				testPerms[notFoundUser.uName] = ['r'];
+				delete testPerms[instanceUser.uName];
+				var testPrevPerms = JSON.parse(getTestPerms());
+				testPrevPerms[instanceUser.uName] = ['w', 'x'];
+				var testResult = JSON.parse(getTestPerms());
+				testResult[notFoundUser.uName] = ['r'];
+				testResult[instanceUser.uName] = ['w', 'x'];
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
+				
+					var pthObj = path.parse(pth);
+					return pthObj.dir;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function assignToVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return undefined;
+				
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
+				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
 		
 		});
 		describe('changeAllowed(pth, allowed)', function() {
