@@ -111,6 +111,8 @@ class User {
 
 };
 
+// TBD
+// implement allowRootUser function
 
 module.exports = class UwotUsers {
 

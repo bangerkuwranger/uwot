@@ -23,7 +23,8 @@ const confDefaults = function() {
 			createHome: false,
 			homeWritable: false,
 			allowShellFunctions: false,
-			allowGuestShellFunctions: false
+			allowGuestShellFunctions: false,
+			allowRootUser: false
 		},
 		binpath: {
 			useLocal: true,
