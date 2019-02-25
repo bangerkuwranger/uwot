@@ -1855,7 +1855,7 @@ class UwotFs {
 				newPermissions.allowed = currentPermissions.allowed;
 			
 			}
-			var updatedPermissions = newPermissions.concatPerms(currentPermissions.toGeneric());
+			var updatedPermissions = newPermissions.concatPerms(currentPermissions.toGeneric()).toJSON();
 			var permPath;
 			try {
 			
