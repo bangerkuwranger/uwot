@@ -3329,7 +3329,21 @@ describe('filesystem.js', function() {
 				expect(testPermissions.allowed).to.be.undefined;
 			
 			});
-			it('should assign any other properties that are not owner or allowed to itself, if the property name matches a userName from the DB and the property value is an array containing only any or none of ["r", "w", "x"]');
+			it('should assign any other properties that are not owner or allowed to itself, if the property value is an array containing only any or none of ["r", "w", "x"]', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissionsArgs = {owner: altUser.uName, allowed: ['r','x', 'y']};
+				testPermissionsArgs[notFoundUser.uName] = ['w', 'x', 'y', 'z'];
+				testPermissionsArgs[instanceUser.uName] = [];
+				var testPermissions = new testPermissionsObj.constructor(testPermissionsArgs);
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.deep.equal(['r', 'x']);
+				expect(testPermissions[notFoundUser.uName]).to.deep.equal(['w', 'x']);
+				expect(testPermissions[instanceUser.uName]).to.be.an('array').that.is.empty;
+			
+			});
 		
 		});
 		describe('toGeneric()', function() {
