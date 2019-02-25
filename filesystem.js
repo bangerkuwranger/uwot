@@ -1813,15 +1813,19 @@ class UwotFs {
 	
 		if (!this.sudo) {
 		
-			return systemError.EPERM({path: pth, syscall: 'chmod'});
+			return systemError.EPERM({path: pth, syscall: 'chown'});
 		
 		}
-		else if ('string' !== userName) {
+		else if ('string' !== typeof userName) {
 		
 			return new TypeError('invalid user');
 		
 		}
-// 		var userInterface = new Users();
+		else if ('string' !== typeof pth) {
+		
+			return new TypeError('invalid path');
+		
+		}
 		else if (!this.isValidUserName(userName)) {
 			
 			return new Error(userName + ': illegal user name');

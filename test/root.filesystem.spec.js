@@ -2916,8 +2916,30 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeOwner).to.be.a('function');
 			
 			});
-			it('should return a systemError if !this.sudo');
-			it('should return a TypeError if userName is not a string');
+			it('should return a systemError if !this.sudo', function() {
+			
+				var testPath = '/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = false;
+				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a TypeError if userName is not a string', function() {
+			
+				var testPath = '/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				expect(filesystem.changeOwner(testPath, null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user');
+			
+			});
+			it('should return a TypeError if pth is not a string', function() {
+			
+				var testPath = '/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				expect(filesystem.changeOwner(null, testUserName)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path');
+			
+			});
 			it('should return a systemError if listUsers returns an error');
 			it('should return an error if userName does not match a user in the db');
 			it('should return a systemError if pth does not resolve to a path inside of root or users');
