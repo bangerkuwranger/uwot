@@ -1822,39 +1822,13 @@ class UwotFs {
 		
 		}
 // 		var userInterface = new Users();
-		global.Uwot.Users.listUsers(function(error, userList){
+		else if (!this.isValidUserName(userName)) {
+			
+			return new Error(userName + ': illegal user name');
+			
+		}
+		else {
 		
-			var userExists = false;
-			if (error) {
-			
-				return systemError.UNKOWN({path: pth, syscall: 'chown'});
-			
-			}
-			else if (userName !== this.user['uName']) {
-			
-				userExists = false;
-				for (let i = 0; i < userList.length; i++) {
-				
-					if (userName === userList[i]['uName']) {
-					
-						userExists = true;
-						i = userList.length;
-					
-					}
-				
-				}
-			
-			}
-			else {
-			
-				userExists = true;
-			
-			}
-			if (!userExists) {
-			
-				return new Error(userName + ': illegal user name');
-			
-			}
 			var fullPath = this.resolvePath(pth);
 			var inRoot = this.isInRoot(fullPath);
 			var inUsers = this.isInUser(fullPath, "*");
@@ -1911,7 +1885,7 @@ class UwotFs {
 			
 			}
 		
-		}.bind(this));
+		}
 	
 	}
 	
