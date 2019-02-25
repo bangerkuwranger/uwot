@@ -158,65 +158,6 @@ class UwotFsPermissions {
 	
 	}
 	
-	isValidUserName(userName) {
-	
-		if ('object' != typeof this.validUsers || !Array.isArray(this.validUsers)) {
-		
-			global.Uwot.Users.listUsers(function(error, userList) {
-		
-				if (error) {
-			
-					return error;
-			
-				}
-				else {
-			
-					this.validUsers = userList;
-					var userExists = false;
-					for (let i = 0; i < this.validUsers.length; i++) {
-		
-						if (userName === this.validUsers[i]['uName']) {
-			
-							userExists = true;
-							i = this.validUsers.length;
-			
-						}
-						if ((i + 1) >= this.validUsers.length) {
-			
-							return userExists;
-			
-						}
-		
-					}
-			
-				}
-		
-			}.bind(this));
-		
-		}
-		else {
-			
-			var userExists = false;
-			for (let i = 0; i < this.validUsers.length; i++) {
-		
-				if (userName === this.validUsers[i]['uName']) {
-			
-					userExists = true;
-					i = this.validUsers.length;
-			
-				}
-				if ((i + 1) >= this.validUsers.length) {
-			
-					return userExists;
-			
-				}
-		
-			}
-		
-		}
-	
-	}
-	
 	// values of this override values of otherPerms if property matches
 	// returns new UwotFsPermissions object
 	concatPerms(otherPerms) {

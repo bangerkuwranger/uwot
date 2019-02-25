@@ -3234,7 +3234,6 @@ describe('filesystem.js', function() {
 			});
 			it('should be a function', function() {
 			
-				console.log(testPermissionsObj);
 				expect(testPermissionsObj.constructor).to.be.a('function');
 				expect(testPermissionsObj.constructor.name).to.equal('UwotFsPermissions');
 			
@@ -3348,18 +3347,63 @@ describe('filesystem.js', function() {
 		});
 		describe('toGeneric()', function() {
 		
-			it('should be a function');
-			it('should return an object with constructor.name === "Object"');
-			it('should set owner to DEFAULT_OWNER if owner property is not a string');
-			it('should set owner to own owner property if it is a string');
-			it('should set allowed property to own allowed property');
-			it('should set any user specific permission properties');
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.toGeneric).to.be.a('function');
+			
+			});
+			it('should return a new object with constructor.name === "Object"', function() {
+			
+				var testGenericPermissions = testPermissionsObj.toGeneric();
+				expect(testGenericPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+			
+			});
+			it('should set owner to DEFAULT_OWNER if owner property is not a string', function() {
+			
+				delete testPermissionsObj.owner;
+				var testGenericPermissions = testPermissionsObj.toGeneric();
+				expect(testGenericPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testGenericPermissions.owner).to.equal('root');
+			
+			});
+			it('should set owner to own owner property if it is a string', function() {
+			
+				testPermissionsObj.owner = instanceUser.uName;
+				var testGenericPermissions = testPermissionsObj.toGeneric();
+				expect(testGenericPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testGenericPermissions.owner).to.equal(instanceUser.uName);
+			
+			});
+			it('should set allowed property to own allowed property', function() {
+			
+				testPermissionsObj.allowed = ['r', 'x'];
+				var testGenericPermissions = testPermissionsObj.toGeneric();
+				expect(testGenericPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testGenericPermissions.allowed).to.deep.equal(['r', 'x']);
+			
+			});
+			it('should set any user specific permission properties', function() {
+			
+				testPermissionsObj[instanceUser.uName] = ['r', 'x'];
+				var testGenericPermissions = testPermissionsObj.toGeneric();
+				expect(testGenericPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(testGenericPermissions[instanceUser.uName]).to.deep.equal(['r', 'x']);
+			
+			});
 		
 		});
 		describe('toJSON()', function() {
 		
-			it('should be a function');
-			it('should return a JSON string representing the value of this.toGeneric()');
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.toJSON).to.be.a('function');
+			
+			});
+			it('should return a JSON string representing the value of this.toGeneric()', function() {
+			
+				expect(testPermissionsObj.toJSON()).to.equal(JSON.stringify(testPermissionsObj.toGeneric()));
+			
+			});
 		
 		});
 		describe('concatPerms(otherPerms)', function() {
