@@ -162,6 +162,9 @@ class UwotFsPermissions {
 	// returns new UwotFsPermissions object
 	concatPerms(otherPerms) {
 	
+		var thisOwner = this.owner;
+		var thisAllowed = this.allowed;
+		var otherOwner, otherAllowed;
 		if ('object' !== typeof otherPerms) {
 		
 			throw new TypeError('argument passed to concatPerms must be an object');
@@ -169,12 +172,58 @@ class UwotFsPermissions {
 		}
 		else if (null === otherPerms) {
 		
-			return this;
+			return new UwotFsPermissions(this.toGeneric());
+		
+		}
+		if ('string' == typeof otherPerms.owner) {
+		
+			otherOwner = otherPerms.owner;
+		
+		}
+		if('object' == typeof otherPerms.allowed && Array.isArray(otherPerms.allowed)) {
+		
+			otherAllowed = otherPerms.allowed;
+		
+		}
+		if('UwotFsPermissions' !== otherPerms.constructor.name) {
+		
+			try {
+			
+				var otherPermsClassObj = new UwotFsPermissions(otherPerms);
+				var newArg = Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric());
+				if ('undefined' == typeof thisOwner || null === thisOwner) {
+				
+					newArg.owner = otherOwner;
+				
+				}
+				if ('undefined' == typeof thisAllowed || null === thisAllowed) {
+				
+					newArg.allowed = otherAllowed;
+				
+				}
+				return new UwotFsPermissions(newArg);
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
 		
 		}
 		else {
 		
-			var newArg = Object.assign(otherPerms, this);
+			var newArg = Object.assign(otherPerms.toGeneric(), this.toGeneric());
+			if ('undefined' == typeof thisOwner || null === thisOwner) {
+			
+				newArg.owner = otherOwner;
+			
+			}
+			if ('undefined' == typeof thisAllowed || null === thisAllowed) {
+			
+				newArg.allowed = otherAllowed;
+			
+			}
 			return new UwotFsPermissions(newArg);
 		
 		}

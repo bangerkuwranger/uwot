@@ -3408,11 +3408,48 @@ describe('filesystem.js', function() {
 		});
 		describe('concatPerms(otherPerms)', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if otherPerms is not an object');
-			it('should return this if otherPerms is null');
-			it('should return a new object with all property values of otherPerms unless this has a different value for any key');
-			it('should return an object with constructor.name === "UwotFsPermissions"');
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.concatPerms).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if otherPerms is not an object', function() {
+			
+				function throwTypeError() {
+				
+					return testPermissionsObj.concatPerms();
+				
+				}
+				expect(throwTypeError).to.throw(TypeError, 'argument passed to concatPerms must be an object');
+			
+			});
+			it('should return a new object with properties matching this if otherPerms is null', function() {
+			
+				expect(testPermissionsObj.concatPerms(null)).to.deep.equal(testPermissionsObj);
+			
+			});
+			it('should return a new object with all property values of otherPerms unless this has a different value for any key', function() {
+			
+				var otherPerms = testPermissionsObj.concatPerms(null);
+				otherPerms.owner = instanceUser.uName;
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				otherPerms[altUser.uName] = ['r'];
+				var finalResult = testPermissionsObj.concatPerms(otherPerms);
+				expect(finalResult.owner).to.equal(testPermissionsObj.owner);
+				expect(finalResult.allowed).to.deep.equal(testPermissionsObj.allowed);
+				expect(finalResult[altUser.uName]).to.deep.equal(otherPerms[altUser.uName]);
+			
+			});
+			it('should return an object with constructor.name === "UwotFsPermissions"', function() {
+			
+				var otherPerms = testPermissionsObj.concatPerms(null);
+				otherPerms.owner = instanceUser.uName;
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				otherPerms[altUser.uName] = ['r'];
+				var finalResult = testPermissionsObj.concatPerms(otherPerms);
+				expect(finalResult.constructor.name).to.equal('UwotFsPermissions')
+			
+			});
 		
 		})
 	
