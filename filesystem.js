@@ -1793,9 +1793,10 @@ class UwotFs {
 			return e;
 		
 		}
+		var updatedPermissions = newPermissions.toJSON();
 		try {
 		
-			fs.writeFileSync(permPath, newPermissions);
+			fs.writeFileSync(permPath, updatedPermissions);
 			return true;
 		
 		}
@@ -1808,7 +1809,6 @@ class UwotFs {
 	
 	}
 	
-	// TBD
 	changeOwner(pth, userName) {
 	
 		if (!this.sudo) {
