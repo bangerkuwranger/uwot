@@ -58,7 +58,25 @@ class UwotFsPermissions {
 			delete permissions.owner;
 			if ('object' == typeof permissions.allowed && Array.isArray(permissions.allowed)) {
 			
-				this.allowed = permissions.allowed;
+// 				this.allowed = permissions.allowed;
+				this.allowed = [];
+				permissions.allowed.forEach(function(val) {
+				
+					switch(val) {
+					
+						case 'r':
+							this.allowed.push('r');
+							break;
+						case 'w':
+							this.allowed.push('w');
+							break;
+						case 'x':
+							this.allowed.push('x');
+							break;
+					
+					}
+				
+				}.bind(this));
 			
 			}
 			else if ('undefined' !== typeof permissions.allowed && null !== permissions.allowed) {

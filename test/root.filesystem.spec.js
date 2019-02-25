@@ -13,6 +13,7 @@ const expect = chai.expect;
 const FileSystem = require('../filesystem');
 var filesystem;
 var testStats;
+var testPermissionsObj;
 
 const instanceUser = {
 	"fName": "Found",
@@ -3176,15 +3177,158 @@ describe('filesystem.js', function() {
 	});
 	describe('UwotFsPermissions', function() {
 	
+		beforeEach(function() {
+		
+			const dbFindStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnUserDoc(id, callback) {
+		
+				if (id === altUser['_id']) {
+				
+					return callback(false, altUser);
+				
+				}
+				else if (id === notFoundUser['_id']) {
+				
+					return callback(false, false);
+				
+				}
+				else if (id === errorUser['_id']) {
+				
+					return callback(new Error('test findById error'), null);
+				
+				}
+				else {
+				
+					return callback(false, instanceUser);
+				
+				}
+	
+			});
+			var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
+		
+				return cb(false, [
+					instanceUser,
+					altUser,
+					notFoundUser,
+					errorUser
+				]);
+		
+			});
+			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
+			dbFindStub.restore();
+			listUsersStub.restore();
+			testStats = getTestStats();
+			testPermissionsObj = filesystem.getPermissions('usr');
+		
+		});
 		describe('constructor(permissions)', function() {
 		
-			it('should not be able to be called outside of UwotFs methods');
-			it('should be a function');
-			it('should throw a TypeError if permissions arg is not an object');
-			it('should assign DEFAULT_OWNER to owner property and DEFAULT_ALLOWED to allowed property if permisssions === null');
-			it('should assign permissions.owner to owner property if permissions.owner is a string');
-			it('should assign permissions.allowed to the allowed property if permissions.allowed is an array');
-			it('should assign DEFAULT_ALLOWED to the allowed property if permissions.allowed is not an array');
+			it('should not be able to be called outside of UwotFs methods', function() {
+			
+				function throwReferenceError() {
+				
+					return new UwotFsPermissions();
+				
+				}
+				expect(throwReferenceError).to.throw(ReferenceError, 'UwotFsPermissions is not defined');
+			
+			});
+			it('should be a function', function() {
+			
+				console.log(testPermissionsObj);
+				expect(testPermissionsObj.constructor).to.be.a('function');
+				expect(testPermissionsObj.constructor.name).to.equal('UwotFsPermissions');
+			
+			});
+			it('should throw a TypeError if permissions arg is not an object', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				function throwTypeError() {
+				
+					return new testPermissionsObj.constructor();
+				
+				}
+				expect(throwTypeError).to.throw(TypeError, 'argument of UwotFsPermissions constructor must be an object');
+			
+			});
+			it('should assign DEFAULT_OWNER to owner property and DEFAULT_ALLOWED to allowed property if permisssions === null', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor(null);
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal('root');
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+			
+			});
+			it('should assign permissions.owner to owner property if permissions.owner is a string', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: altUser.uName, allowed: 'nuthin'});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+			
+			});
+			it('should assign DEFAULT_OWNER to owner property if permissions.owner is not a string, undefined, or null', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: false, allowed: 'nuthin'});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal('root');
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+			
+			});
+			it('should not assign owner property if permissions.owner is undefined or null', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: null, allowed: 'nuthin'});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.be.undefined;
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+				testPermissions = new testPermissionsObj.constructor({allowed: 'nuthin'});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.be.undefined;
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+			
+			});
+			it('should assign elements of permissions.allowed to allowed property array if permissions.allowed is an array and elements === "r", "w", or "x"', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: altUser.uName, allowed: ['r','x', 'y']});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.deep.equal(['r', 'x']);
+			
+			});
+			it('should assign DEFAULT_ALLOWED to the allowed property if permissions.allowed is not an array, undefined, or null', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: altUser.uName, allowed: "['r','x', 'y']"});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.deep.equal(['r']);
+			
+			});
+			it('should not assign the allowed property if permissions.allowed is undefined or null', function() {
+			
+				delete testPermissionsObj.owner;
+				delete testPermissionsObj.allowed;
+				var testPermissions = new testPermissionsObj.constructor({owner: altUser.uName, allowed: null});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.be.undefined;
+				testPermissions = new testPermissionsObj.constructor({owner: altUser.uName});
+				expect(testPermissions).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testPermissions.owner).to.equal(altUser.uName);
+				expect(testPermissions.allowed).to.be.undefined;
+			
+			});
 			it('should assign any other properties that are not owner or allowed to itself, if the property name matches a userName from the DB and the property value is an array containing only any or none of ["r", "w", "x"]');
 		
 		});
