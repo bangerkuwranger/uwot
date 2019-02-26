@@ -704,6 +704,20 @@ describe('filesystem.js', function() {
 				}, true);
 			
 			});
+			it('should return an error to callback and set this.sudo to false if command process throws an error', function(done) {
+			
+				var testPath = '/usr/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').throws(SystemError.EIO({syscall: 'chdir', path: testPath}));
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(filesystem.sudo).to.be.false;
+					done();
+				
+				}, true);
+			
+			});
 			it('should return an error to callback and set this.sudo to false if command process returns an error', function(done) {
 			
 				var testPath = '/usr/var';
