@@ -438,23 +438,308 @@ describe('filesystem.js', function() {
 		});
 		describe('cmd(cmdName, argArr, callback, isSudo)', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if callback arg is not a function');
-			it('should return an systemError to callback if cmdName arg is not a string');
-			it('should return an systemError to callback if cmdName arg string does not match a valid command name');
-			it('should return a systemError to callback if argArr arg is not an object');
-			it('should perform this.changeCwd if cmdName arg === "cd"');
-			it('should perform this.readDir if cmdName arg === "ls"');
-			it('should perform this.getVcwd if cmdName arg === "pwd"');
-			it('should perform this.createDir if cmdName arg === "mkdir"');
-			it('should perform this.removeFile if cmdName arg === "rm"');
-			it('should perform this.removeDir if cmdName arg === "rmdir"');
-			it('should perform this.moveFile if cmdName arg === "mv"');
-			it('should perform this.copy if cmdName arg === "cp"');
-			it('should perform this.stat if cmdName arg === "stat"');
-			it('should perform this.append if cmdName arg === "touch"');
-			it('should return an error to callback if command process returns an error');
-			it('should return output from the requested command process');
+			it('should be a function', function() {
+			
+				expect(filesystem.cmd).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback arg is not a function', function() {
+			
+				expect(filesystem.cmd).to.throw(TypeError, 'invalid callback passed to cmd');
+			
+			});
+			it('should return an systemError to callback if cmdName arg is not a string', function(done) {
+			
+				filesystem.cmd(null, ['/usr/var'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals("EINVAL");
+					done();
+				
+				}, false);
+			
+			});
+			it('should return an systemError to callback if cmdName arg string does not match a valid command name', function(done) {
+			
+				filesystem.cmd('format', ['/usr/var'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals("EINVAL");
+					done();
+				
+				}, false);
+			
+			});
+			it('should return a systemError to callback if argArr arg is not an object', function(done) {
+			
+				filesystem.cmd('format', '/usr/var', function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals("EINVAL");
+					done();
+				
+				}, false);
+			
+			});
+			it('should set argArr to an empty array if it is passed as null or non-array object', function(done) {
+			
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnArgs() {
+				
+					return Array.from(arguments);
+				
+				});
+				filesystem.cmd('cd', null, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.be.an('array').that.is.empty;
+					filesystem.cmd('cd', {path: '/usr/var'}, function(error, result) {
+					
+						expect(result).to.be.an('array').that.is.empty;
+						done();
+					
+					});
+				
+				}, false);
+			
+			});
+			it('should set this.sudo to true if isSudo argument === true and this.user.maySudo() returns true', function(done) {
+			
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnSudo() {
+				
+					return this.sudo;
+				
+				});
+				filesystem.cmd('cd', null, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.be.true;
+					done();
+				
+				}, true);
+			
+			});
+			it('should set this.sudo to false if isSudo argument not a boolean, not true, or and this.user.maySudo() returns false', function(done) {
+			
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnSudo() {
+				
+					return this.sudo;
+				
+				});
+				filesystem.cmd('cd', null, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.be.false;
+					filesystem.cmd('cd', null, function(error, result) {
+				
+						expect(error).to.be.false;
+						expect(result).to.be.false;
+						filesystem.user.maySudo = function() { return false; };
+						filesystem.cmd('cd', null, function(error, result) {
+				
+							expect(error).to.be.false;
+							expect(result).to.be.false;
+							done();
+				
+						}, true);
+				
+					}, 1);
+				
+				}, false);
+			
+			});
+			it('should perform this.changeCwd if cmdName arg === "cd"', function(done) {
+			
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnCmd() {
+				
+					return 'changeCwd ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('cd', ['/usr/var'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('changeCwd /usr/var');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.readDir if cmdName arg === "ls"', function(done) {
+			
+				var readDirStub = sinon.stub(filesystem, 'readDir').callsFake(function returnCmd() {
+				
+					return 'readDir ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('ls', null, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('readDir ' + filesystem.cwd);
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.getVcwd if cmdName arg === "pwd"', function(done) {
+			
+				var getVcwdStub = sinon.stub(filesystem, 'getVcwd').callsFake(function returnCmd() {
+				
+					return 'getVcwd ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('pwd', null, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('getVcwd ');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.createDir if cmdName arg === "mkdir"', function(done) {
+			
+				var createDirStub = sinon.stub(filesystem, 'createDir').callsFake(function returnCmd() {
+				
+					return 'createDir ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('mkdir', ['/usr/var'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('createDir /usr/var');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.removeFile if cmdName arg === "rm"', function(done) {
+			
+				var removeFileStub = sinon.stub(filesystem, 'removeFile').callsFake(function returnCmd() {
+				
+					return 'removeFile ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('rm', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('removeFile /usr/var/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.removeDir if cmdName arg === "rmdir"', function(done) {
+			
+				var removeDirStub = sinon.stub(filesystem, 'removeDir').callsFake(function returnCmd() {
+				
+					return 'removeDir ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('rmdir', ['/usr/var'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('removeDir /usr/var');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.moveFile if cmdName arg === "mv"', function(done) {
+			
+				var moveFileStub = sinon.stub(filesystem, 'moveFile').callsFake(function returnCmd() {
+				
+					return 'moveFile ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('mv', ['/usr/var/tmpfile', '/home/' + filesystem.user.uName + '/permfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('moveFile /usr/var/tmpfile /home/' + filesystem.user.uName + '/permfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.copy if cmdName arg === "cp"', function(done) {
+			
+				var copyStub = sinon.stub(filesystem, 'copy').callsFake(function returnCmd() {
+				
+					return 'copy ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('cp', ['/usr/var/tmpfile', '/home/' + filesystem.user.uName + '/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('copy /usr/var/tmpfile /home/' + filesystem.user.uName + '/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.stat if cmdName arg === "stat"', function(done) {
+			
+				var statStub = sinon.stub(filesystem, 'stat').callsFake(function returnCmd() {
+				
+					return 'stat ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('stat', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('stat /usr/var/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.append if cmdName arg === "touch"', function(done) {
+			
+				var appendStub = sinon.stub(filesystem, 'append').callsFake(function returnCmd() {
+				
+					return 'append ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('touch', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('append /usr/var/tmpfile ');
+					done();
+				
+				}, true);
+			
+			});
+			it('should return an error to callback and set this.sudo to false if command process returns an error', function(done) {
+			
+				var testPath = '/usr/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnError() {
+				
+					return SystemError.EIO({syscall: 'chdir', path: testPath});
+				
+				});
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(filesystem.sudo).to.be.false;
+					done();
+				
+				}, true);
+			
+			});
+			it('should return output from the requested command process to the callback and set this.sudo to false if the command process does not return an error', function(done) {
+			
+				var testPath = '/usr/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnTrue() {
+				
+					return true;
+				
+				});
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.true;
+					expect(error).to.be.false;
+					expect(filesystem.sudo).to.be.false;
+					done();
+				
+				}, true);
+			
+			});
 		
 		});
 		describe('changeCwd(pth)', function() {

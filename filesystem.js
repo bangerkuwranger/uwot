@@ -432,8 +432,14 @@ class UwotFs {
 				this.sudo = true;
 			
 			}
+			else {
+			
+				this.sudo = false;
+			
+			}
 			var result;
 			try {
+			
 				//perform matching command, expanding argArr
 				switch(cmdName) {
 			
@@ -444,6 +450,7 @@ class UwotFs {
 						result = this.readDir(this.cwd);
 						// need to parse flags to format output...
 						// only supporting -l and -a
+						// need to parse args in case a path is provided
 						break;
 					case 'pwd':
 						result = this.getVcwd();
