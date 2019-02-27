@@ -663,6 +663,77 @@ describe('cmd.js', function() {
 			});
 		
 		});
+		describe('argsObjToNameArray(argsObj)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(cmd.argsObjToNameArray).to.be.a('function');
+			
+			});
+			it('should return argsObj unchanged if argsObj is neither an array nor an object', function() {
+			
+				expect(cmd.argsObjToNameArray(null)).to.be.null;
+				expect(cmd.argsObjToNameArray('name')).to.equal('name');
+			
+			});
+			it('should return an array of names, taken from the text property of each element in argsObj', function() {
+			
+				var testArray = [
+					{text: 'testOne', type: 'Word'},
+					{text: 'testTwo', type: 'Word'},
+					{text: 'testThree', type: 'Word'}
+				];
+				var testResult = cmd.argsObjToNameArray(testArray);
+				expect(testResult).to.be.an('array');
+				expect(testResult[0]).to.equal(testArray[0].text);
+				expect(testResult[1]).to.equal(testArray[1].text);
+				expect(testResult[2]).to.equal(testArray[2].text);
+			
+			});
+			it('should not include values from any element that is not an object in the resulting array', function() {
+			
+				var testArray = [
+					{text: 'testOne', type: 'Word'},
+					"{text: 'testTwo', type: 'Word'}",
+					{text: 'testThree', type: 'Word'}
+				];
+				var testResult = cmd.argsObjToNameArray(testArray);
+				expect(testResult).to.be.an('array');
+				expect(testResult[0]).to.equal(testArray[0].text);
+				expect(testResult[1]).to.equal(testArray[2].text);
+				expect(testResult[2]).to.be.undefined;
+			
+			});
+			it('should not include values from any element that is not an object with property text having a string value in the resulting array', function() {
+			
+				var testArray = [
+					{text: 'testOne', type: 'Word'},
+					{name: 'testTwo', type: 'Word'},
+					{text: ['testThree'], type: 'Word'}
+				];
+				var testResult = cmd.argsObjToNameArray(testArray);
+				expect(testResult).to.be.an('array');
+				expect(testResult[0]).to.equal(testArray[0].text);
+				expect(testResult[1]).to.be.undefined;
+				expect(testResult[2]).to.be.undefined;
+			
+			});
+			it('should not include values from any element that is not an object with a property type that === "Word" in the resulting array', function() {
+			
+				var testArray = [
+					{text: 'testOne', type: 'Word'},
+					{text: 'testTwo', type: 'Wrod'},
+					{text: 'testThree', type: 'Word'}
+				];
+				var testResult = cmd.argsObjToNameArray(testArray);
+				expect(testResult).to.be.an('array');
+				expect(testResult[0]).to.equal(testArray[0].text);
+				expect(testResult[1]).to.equal(testArray[2].text);
+				expect(testResult[2]).to.be.undefined;
+			
+			});
+		
+		});
 	
 	});
 	describe('UwotCmdCommand', function() {
