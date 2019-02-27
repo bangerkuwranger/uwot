@@ -2151,11 +2151,13 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var testPath = "etc/david/lifeblood/conf.d";
 				var testPathTwo = "home/david/toadstool";
+				var usersSudoFullRoot = global.Uwot.Config.nconf.get('users:sudoFullRoot');
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
 				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
 				filesystem.sudo = false;
 				expect(filesystem.isReadable(testPathTwo)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
-				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', usersSudoFullRoot);
 			
 			});
 			it('should return true if is in instance userDir and is readable by fs', function() {
