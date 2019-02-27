@@ -637,7 +637,7 @@ class UwotRuntimeCmds {
 						
 										try {
 							
-											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
 								
 												if (error) {
 									
@@ -680,8 +680,13 @@ class UwotRuntimeCmds {
 													j++;
 									
 												}
+												if ('object' == typeof result && null !== result && 'string' == typeof result.cwd) {
+												
+													results.cwd = result.cwd;
+												
+												}
 								
-											}.bind(this));
+											}.bind(this), exe.isSudo);
 							
 										}
 										catch(e) {
@@ -702,7 +707,7 @@ class UwotRuntimeCmds {
 										//attempt to output to map[exe.output]
 										try {
 							
-											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
 								
 												if (error) {
 									
@@ -724,7 +729,7 @@ class UwotRuntimeCmds {
 														delete result.redirect;
 													
 													} 
-													if ('object' == typeof result.cookies && Array.isArray(result.cookies) && result.cookies.length > 0) {
+													if ('object' == typeof result.cookies && result.cookies.length > 0) {
 													
 														results.cookies = results.cookies.concat(result.cookies);
 														delete result.cookies;
@@ -740,8 +745,13 @@ class UwotRuntimeCmds {
 													j++;
 									
 												}
+												if ('object' == typeof result && null !== result && 'string' == typeof result.cwd) {
+												
+													results.cwd = result.cwd;
+												
+												}
 								
-											}.bind(this));
+											}.bind(this), exe.isSudo);
 							
 										}
 										catch(e) {
@@ -775,7 +785,7 @@ class UwotRuntimeCmds {
 							
 											try {
 							
-												global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, function(error, result) {
+												global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
 								
 													if (error) {
 									
@@ -797,7 +807,7 @@ class UwotRuntimeCmds {
 															delete result.redirect;
 													
 														} 
-														if ('object' == typeof result.cookies && Array.isArray(result.cookies) && result.cookies.length > 0) {
+														if ('object' == typeof result.cookies && result.cookies.length > 0) {
 													
 															results.cookies = results.cookies.concat(result.cookies);
 															delete result.cookies;
@@ -813,8 +823,13 @@ class UwotRuntimeCmds {
 														j++;
 									
 													}
+													if ('object' == typeof result && null !== result && 'string' == typeof result.cwd) {
+												
+														results.cwd = result.cwd;
+												
+													}
 								
-												}.bind(this));
+												}.bind(this), exe.isSudo);
 							
 											}
 											catch(e) {
@@ -823,6 +838,7 @@ class UwotRuntimeCmds {
 												j++;
 							
 											}
+											
 							
 										}
 										else if ('string' == typeof exe.output) {

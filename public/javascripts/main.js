@@ -11,7 +11,12 @@ jQuery(document).ready(function($) {
 	else {
 		changePrompt(user);
 	}
-	
+	var initialCwd = '/';
+	var storedCwd = localStorage.getItem('UwotCwd');
+	if ('string' == typeof storedCwd) {
+		initialCwd = storedCwd;
+	}
+	changeCwd(initialCwd);
 	window.addEventListener('touchstart', function() {
 		if (!initTouchSupport) {
 			$.ajaxSetup({cache: true});
@@ -72,7 +77,8 @@ jQuery(document).ready(function($) {
 				'/bin',
 				{
 					cmd: op,
-					nonce: nonce
+					nonce: nonce,
+					cwd: localStorage.getItem('UwotCwd')
 				}
 			)
 			.done(function(data) {
@@ -185,6 +191,11 @@ function outputToMain(data, args) {
 			jQuery('#uwotheader-indicator').addClass('loading');
 			window.setTimeout(uwotClientRedirect(data.redirect), 250);
 		}
+		if ('string' == typeof data.cwd) {
+		
+			changeCwd(data.cwd);
+		
+		}
 	}
 // 	return;
 	//yucky bugs make yuckier things yucky
@@ -246,6 +257,7 @@ function changeCwd(cwdString) {
 			$headerCwd.text(cwdString);
 			onWidth();
 		}
+		localStorage.setItem('UwotCwd', cwdString);
 	return;
 }
 

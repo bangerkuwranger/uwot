@@ -249,6 +249,12 @@ module.exports = {
 	
 	},
 	
+	initFileSystems: function initFileSystems() {
+	
+		global.Uwot.FileSystems = {};
+	
+	},
+	
 	uninitialize: function uninitialize() {
 	
 		delete global.Uwot;

@@ -115,6 +115,11 @@ router.post(
 								resObj.redirect = Url.parse(req.body.runtime.results.redirect, global.Uwot.Config.getConfigServerOrigin());
 							
 							}
+							if ('string' == typeof req.body.runtime.results.cwd) {
+							
+								resObj.cwd = req.body.runtime.results.cwd;
+							
+							}
 						
 						}
 					

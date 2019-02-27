@@ -66,9 +66,32 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
-		return super.execute(args, options, app, callback, isSudo);
+		var argsArray = 'object' == typeof args ? this.argsObjToNameArray(args) : null;
+		global.Uwot.FileSystems[user._id].cmd('cd', argsArray, function(error, result) {
+		
+			if (error) {
+			
+				callback(error, null);
+			
+			}
+			else {
+			
+				var newCwd = global.Uwot.FileSystems[user._id].getVcwd();
+				var executeResult = {
+					output: '',
+					cwd: newCwd
+				};
+				var now = new Date();
+				var oneDayLater = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+				executeResult.output += 'changed directory to ' + newCwd;
+				return callback(false, executeResult);
+			
+			}
+		
+		}, isSudo);
+		// return super.execute(args, options, app, callback, isSudo);
 	
 	}
 	

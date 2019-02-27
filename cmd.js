@@ -122,7 +122,7 @@ class UwotCmd {
 	
 	// just says what it's sent. shouldn't be used outside of testing...
 	// subclasses should implement their own logic.
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -427,7 +427,38 @@ class UwotCmd {
 		.replace(/"/g, "&quot;")
 		.replace(/'/g, "&#039;");
 		
-	 }
+	}
+	
+	argsObjToNameArray(argsObj) {
+	
+		if ('object' !== typeof argsObj || !Array.isArray(argsObj)) {
+		
+			return argsObj;
+		
+		}
+		else {
+		
+			let i = 0;
+			var nameArray = [];
+			argsObj.forEach(function(argNode) {
+			
+				if ('object' == typeof argNode && 'string' == typeof argNode.text && 'Word' === argNode.type) {
+				
+					nameArray.push(argNode.text);
+				
+				}
+				if (++i >= argsObj.length) {
+				
+					return nameArray;
+				
+				}
+			
+			});
+			return nameArray;
+		
+		}
+	
+	}
 
 }
 

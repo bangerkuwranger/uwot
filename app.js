@@ -174,6 +174,10 @@ global.Uwot.Bin.sudo = {
 // global.UwotReserved.push(...Object.keys(global.UwotBin));
 globalSetupHelper.initBins();
 
+// create container for global FileSystems
+// TBD
+// need to restore filesystems for any active user sessions; otherwise they get dumped at app restart
+globalSetupHelper.initFileSystems();
 
 // set up sessions
 const sessionMs = global.Uwot.Constants.sessionHours * 3600000;

@@ -5,6 +5,7 @@ const nonceHandler = require('node-timednonce');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const validateTheme = require('../helpers/themeLoader').isValidTheme;
+const FileSystem = require('../filesystem');
 // const UserModel = require('../users');
 
 passport.use(
@@ -212,6 +213,7 @@ router.post(
 		}
 		else {
 		
+			global.Uwot.FileSystems[req.user._id] = new FileSystem(req.user._id);
 			res.json({error: false, user: req.user});
 		
 		}
@@ -252,6 +254,7 @@ router.post(
 		
 					var reqUser = req.user;
 					req.logout();
+					delete global.Uwot.FileSystems[reqUser._id];
 					res.json({error: false, user: reqUser});
 		
 				}

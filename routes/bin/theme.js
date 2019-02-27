@@ -16,7 +16,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
 		if ('function' !== typeof callback) {
 		
