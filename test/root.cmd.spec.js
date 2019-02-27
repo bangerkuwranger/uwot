@@ -52,6 +52,20 @@ const testCmdArgs = {
 	path: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js')
 };
 
+const instanceUser = {
+	"fName": "Found",
+	"lName": "User",
+	"uName": "fuser",
+	"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+	"sudoer": true,
+	"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+	"createdAt": new Date(1546450800498),
+	"updatedAt": new Date(1546450800498),
+	"_id": "CDeOOrH0gOg791cZ",
+	"verifyPassword": function(pass) {return true;},
+	"maySudo": function() {return this.sudoer;}
+};
+
 describe('cmd.js', function() {
 
 	describe('UwotCmd', function() {
@@ -105,7 +119,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('execute(args, options, app, callback, isSudo)', function() {
+		describe('execute(args, options, app, user, callback, isSudo)', function() {
 		
 			it('should be a function', function() {
 			
@@ -119,7 +133,7 @@ describe('cmd.js', function() {
 			});
 			it('should return a string if there are no args and no options', function(done) {
 			
-				cmd.execute(null, null, this, function(error, result) {
+				cmd.execute(null, null, this, instanceUser, function(error, result) {
 				
 					expect(result).to.be.a('string').that.includes(sanitize.stringNoSpaces(sanitize.cleanString(testCmdArgs.command.name), 'cc'));
 					done();
@@ -135,7 +149,7 @@ describe('cmd.js', function() {
 					'lamb',
 					'little'
 				];
-				cmd.execute(args, null, this, function(error, result) {
+				cmd.execute(args, null, this, instanceUser, function(error, result) {
 				
 					expect(result).to.be.a('string').that.includes('"mary" "had" "lamb" "little"');
 					done();
@@ -155,7 +169,7 @@ describe('cmd.js', function() {
 					{name: 's'},
 					{name: 'recursive', isLong: true}
 				];
-				cmd.execute(args, opts, this, function(error, result) {
+				cmd.execute(args, opts, this, instanceUser, function(error, result) {
 				
 					expect(result).to.be.a('string').that.includes('"mary" "had" "lamb" "little" -s --recursive');
 					done();
@@ -169,7 +183,7 @@ describe('cmd.js', function() {
 					{name: 's'},
 					{name: 'recursive', isLong: true}
 				];
-				cmd.execute(null, opts, this, function(error, result) {
+				cmd.execute(null, opts, this, instanceUser, function(error, result) {
 				
 					expect(result).to.be.a('string').that.includes('-s --recursive');
 					done();
@@ -188,7 +202,7 @@ describe('cmd.js', function() {
 					return callback(false, {content:['test help string']});
 				
 				});
-				cmd.execute(null, opts, this, function(error, result) {
+				cmd.execute(null, opts, this, instanceUser, function(error, result) {
 				
 					expect(result).to.be.an('object');
 					expect(result).to.not.be.null;
