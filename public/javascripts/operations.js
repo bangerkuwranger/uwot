@@ -83,7 +83,8 @@ class UwotCliOperations {
 						{
 							username: args[0],
 							password: args[1],
-							nonce: nonce
+							nonce: nonce,
+							cwd: localStorage.getItem('UwotCwd')
 						}
 					)
 					.done(function(data) {
@@ -96,6 +97,9 @@ class UwotCliOperations {
 							outputToMain('Successful login for user: ' + data.user.uName);
 							user = data.user.uName;
 							changePrompt(user);
+							if('string' == typeof data.cwd){
+								changeCwd(data.cwd);
+							}
 						}
 					})
 					.fail(function(obj, status, error) {
@@ -138,7 +142,8 @@ class UwotCliOperations {
 		$.post(
 			'/logout',
 			{
-				nonce: nonce
+				nonce: nonce,
+				cwd: localStorage.getItem('UwotCwd')
 			}
 		)
 		.done(function(data) {

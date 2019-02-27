@@ -232,11 +232,14 @@ function revertPrompt() {
 function changeCwd(cwdString) {
 		var cwdArray = cwdString.split('/');
 		var cwdLast;
+		var tinyCwd = false;
 		if (cwdString.trim() === '/') {
 			cwdLast = '/';
+			tinyCwd = true;
 		}
-		else if (cwdArray.length < 2) {
+		else if (cwdArray.length < 3) {
 			cwdLast = cwdString;
+			tinyCwd = true;
 		}
 		else {
 			cwdLast = cwdArray.pop();
@@ -255,6 +258,13 @@ function changeCwd(cwdString) {
 		var $headerCwd = jQuery('#uwotheader > h1 > .header-cwd .ellipsis-text');
 		if($headerCwd.length > 0) {
 			$headerCwd.text(cwdString);
+			if (tinyCwd) {
+				//dumb css is dumb
+				$headerCwd.addClass('reverse-path');
+			}
+			else {
+				$headerCwd.removeClass('reverse-path');
+			}
 			onWidth();
 		}
 		localStorage.setItem('UwotCwd', cwdString);

@@ -625,6 +625,11 @@ class UwotRuntimeCmds {
 								results.operations.push(exe);
 								j++;
 							}
+							else {
+							
+								j++;
+							
+							}
 				
 						}
 						else {
@@ -869,6 +874,11 @@ class UwotRuntimeCmds {
 								}
 					
 							}
+							else {
+							
+								j++;
+							
+							}
 				
 						}
 			
@@ -877,7 +887,7 @@ class UwotRuntimeCmds {
 			
 						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.get('users', 'allowGuest')) {
 			
-							results.output.push(this.outputLine(new Error('config does not allow guest users.'), outputType));
+							results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
 			
 						}
 						return results;

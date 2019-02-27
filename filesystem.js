@@ -280,6 +280,7 @@ class UwotFs {
 	constructor(userId, cwd) {
 	
 		this.sudo = false;
+		this.dirsSet = false;
 		global.Uwot.Users.listUsers(function(error, userList) {
 		
 			if (error) {
@@ -294,17 +295,8 @@ class UwotFs {
 			}
 		
 		}.bind(this));
-		if ('string' === typeof cwd) {
 		
-			// distinct from process.cwd; this is 'virtual' fs cwd
-// 			this.cwd = cwd;
-			// TBD
-			// check if current user can access dir at cwd
-			// it's possible that a session can set a cwd and maintain that value for another user, or that perms change between access periods.
-			this.changeCwd(cwd);
 		
-		}
-		// var userInterface = new Users();
 		if ('string' !== typeof userId) {
 		
 			global.Uwot.Users.getGuest(function(error, user) {
@@ -317,7 +309,7 @@ class UwotFs {
 				else {
 				
 					this.user = user;
-					this.setDirs();
+					this.setDirs(cwd);
 					return;
 				
 				}
@@ -347,7 +339,7 @@ class UwotFs {
 				
 							this.user = user;
 							this.user.maySudo = function() {return false;};
-							this.setDirs();
+							this.setDirs(cwd);
 							return;
 				
 						}
@@ -358,7 +350,7 @@ class UwotFs {
 				else {
 				
 					this.user = user;
-					this.setDirs();
+					this.setDirs(cwd);
 					return;
 				
 				}
@@ -370,7 +362,7 @@ class UwotFs {
 	
 	}
 	
-	setDirs() {
+	setDirs(userCwd) {
 	
 		this.root = {
 			path: path.resolve(global.Uwot.Constants.appRoot, 'fs'),
@@ -390,13 +382,24 @@ class UwotFs {
 			w: global.Uwot.Config.get('users', 'homeWritable'),
 			x: false
 		};
-		if ('string' !== this.cwd) {
+		var defaultcwd = null !== this.userDir ? this.userDir.path : this.pubDir.path;
+		if ('string' !== typeof userCwd) {
 		
-			var defaultcwd = null !== this.userDir ? this.userDir.path : this.pubDir.path;
 			this.changeCwd(defaultcwd);
-// 			this.cwd = defaultcwd;
 		
 		}
+		else {
+		
+			var isValidCwdForUser = this.changeCwd(userCwd);
+			if (!isValidCwdForUser) {
+			
+				this.changeCwd(defaultcwd);
+			
+			}
+		
+		}
+		this.dirsSet = true;
+		return this.dirsSet;
 	
 	}
 	
@@ -530,15 +533,16 @@ class UwotFs {
 		}
 		else {
 			
-			if (-1 === pth.indexOf(this.root.path)) {
-			
-				pth = pth.replace(/^\/+/g, '');
-			
-			}
+			// this.resolvePath does this already if necessary...
+// 			if (-1 === pth.indexOf(this.root.path)) {
+// 			
+// 				pth = pth.replace(/^\/+/g, '');
+// 			
+// 			}
 			//resolve
 			try {
 			
-				var absPth = path.resolve(this.root.path, pth);
+				var absPth = this.resolvePath(pth);
 			
 			}
 			catch(e) {
@@ -556,9 +560,32 @@ class UwotFs {
 			}
 			//check isReadable
 			var canRead = this.isReadable(absPth);
+			//check isDirectory
+			var pthIsDirectory;
+			try {
+			
+				pthIsDirectory = fs.statSync(absPth).isDirectory();
+			
+			}
+			catch(dirErr) {
+			
+				return dirErr;
+			
+			}
 			if (canRead instanceof Error) {
 			
 				return canRead;
+			
+			}
+			else if (!pthIsDirectory) {
+			
+				return systemError.ENOTDIR({syscall: 'stat', path: pth});
+			
+			}
+			else if (canRead && absPth === this.root.path) {
+			
+				this.cwd = '';
+				return true;
 			
 			}
 			else if (canRead) {
@@ -583,7 +610,7 @@ class UwotFs {
 	// check if user can access that dir
 	getVcwd() {
 	
-		return 'string' == typeof this.cwd ? path.sep + this.cwd : path.sep;
+		return 'string' == typeof this.cwd && '' !== this.cwd ? path.sep + this.cwd : path.sep;
 	
 	}
 	
@@ -593,7 +620,7 @@ class UwotFs {
 	// check if user can access that dir
 	getCwd() {
 	
-		return 'string' == typeof this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
+		return 'string' == typeof this.cwd && '' !== this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
 	
 	}
 	
@@ -1287,7 +1314,26 @@ class UwotFs {
 			pth = this.tildeExpand(pth);
 		
 		}
-		if (path.isAbsolute(pth)) {
+		if (pth === path.sep) {
+		
+			try {
+			
+				if (checkIfExists) {
+				
+					var pthStats = fs.statSync(this.root.path);
+				
+				}
+				return this.root.path;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		else if (path.isAbsolute(pth)) {
 		
 			var pthInRoot;
 			var absPth = pth; 
@@ -1324,28 +1370,34 @@ class UwotFs {
 			var fromCwd = path.resolve('string' === typeof this.cwd ? this.getCwd() : this.root.path, pth);
 			try {
 		
-				var fromCwdStats = fs.statSync(fromCwd);
+				if (checkIfExists) {
+				
+					var fromCwdStats = fs.statSync(fromCwd);
+				
+				}
 				return fromCwd;
 		
 			}
 			catch(e) {
 		
-				var fromRoot = path.resolve(this.root.path, pth);
-				try {
-			
-					if (checkIfExists) {
-					
-						var fromRootStats = fs.statSync(fromRoot);
-						
-					}
-					return fromRoot;
-			
-				}
-				catch(err) {
-			
-					return err;
-			
-				}
+				// this level of redundancy is nice in theory, but in practice it will result in nonsensical output to the user; relative paths, in general, should only be tested against the cwd and return an error if nonextant
+//				var fromRoot = path.resolve(this.root.path, pth);
+// 				try {
+// 			
+// 					if (checkIfExists) {
+// 					
+// 						var fromRootStats = fs.statSync(fromRoot);
+// 						
+// 					}
+// 					return fromRoot;
+// 			
+// 				}
+// 				catch(err) {
+// 			
+// 					return err;
+// 			
+// 				}
+				return e;
 		
 			}
 		

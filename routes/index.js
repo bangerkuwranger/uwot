@@ -213,8 +213,9 @@ router.post(
 		}
 		else {
 		
-			global.Uwot.FileSystems[req.user._id] = new FileSystem(req.user._id);
-			res.json({error: false, user: req.user});
+			global.Uwot.FileSystems[req.user._id] = new FileSystem(req.user._id, req.body.cwd);
+			var newCwd = global.Uwot.FileSystems[req.user._id].getVcwd();
+			res.json({error: false, user: req.user, cwd: newCwd});
 		
 		}
 	
