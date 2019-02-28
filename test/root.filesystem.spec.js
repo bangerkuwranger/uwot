@@ -1990,6 +1990,34 @@ describe('filesystem.js', function() {
 				expect(filesystem.resolvePath(testPath)).to.equal(filesystem.userDir.path + '/doc/');
 			
 			});
+			it('should return an error if pth arg value === path.sep, checkIfExists is true, and statSync of this.root.path throws an error', function() {
+			
+				var testPath = path.sep;
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.resolvePath(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return an error if pth arg value === path.sep, checkIfExists !== false, and statSync of this.root.path throws an error', function() {
+			
+				var testPath = path.sep;
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.resolvePath(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
+			
+			});
+			it('should return this.root.path if pth arg value === path.sep, checkIfExists !== false, and statSync of this.root.path executes without error', function() {
+			
+				var testPath = path.sep;
+				var testStats = getTestStats();
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				expect(filesystem.resolvePath(testPath)).to.equal(filesystem.root.path);
+			
+			});
+			it('should return this.root.path if pth arg value === path.sep and checkIfExists === false', function() {
+			
+				var testPath = path.sep;
+				expect(filesystem.resolvePath(testPath, false)).to.equal(filesystem.root.path);
+			
+			});
 			it('should return this.root.path + pth if pth is absolute, resolves within root, and extant', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrue() {
