@@ -17,7 +17,9 @@
     "test": "nyc --reporter=html --reporter=text npm-run-all -s -c test-unit-core test-unit",
     "test-unit-core": "NODE_ENV=development mocha 'test/helpers.globalSetup.js' --exit",
     "test-unit": "NODE_ENV=development mocha 'test/*.spec.js' --exit",
-    "test-codacy": "nyc --reporter=lcov --reporter=text npm-run-all -s -c test-unit-core test-unit && CTOKEN=$( cat ./codeacy.token ) && cat ./coverage/lcov.info | codacy-coverage -v --token $CTOKEN && rm -rf ./coverage/lcov.info ./coverage/lcov-report"
+    "test-codacy": "npm-run-all test-lcov send-codacy-coverage",
+    "test-lcov": "nyc --reporter=lcov --reporter=text npm-run-all -s -c test-unit-core test-unit",
+    "send-codacy-coverage": "CTOKEN=$( cat ./codeacy.token ) && cat ./coverage/lcov.info | codacy-coverage -v --token $CTOKEN"
   },
   "dependencies": {
     "bash-ast-traverser": "0.5.0",

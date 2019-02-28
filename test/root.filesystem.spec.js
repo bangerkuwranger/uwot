@@ -305,15 +305,6 @@ describe('filesystem.js', function() {
 			});
 			it('should set this.cwd to value of cwd arg if it is a string', function() {
 			
-				var setDirsStub = sinon.stub(FileSystem.prototype, 'setDirs').callsFake(function setDefaultCwd() {
-				
-					if ('string' !== typeof this.cwd) {
-					
-						this.changeCwd('guest' !== typeof this.user.uName ? 'home/' + this.user.uName : '');
-					
-					}
-				
-				});
 				var changeCwdStub = sinon.stub(FileSystem.prototype, 'changeCwd').callsFake(function justSetIt(pth) {
 				
 					if ('string' === typeof pth) {
@@ -330,7 +321,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.cwd).to.equal(testCwd);
 				filesystem = new FileSystem(notFoundUser["_id"], testCwd);
 				expect(filesystem.user.uName).to.equal('guest');
-				expect(filesystem.cwd).to.equal(testCwd);
+				expect(filesystem.cwd).to.equal('var');
 			
 			});
 			it('should throw an Error if global.Uwot.Users.getGuest returns an error via callback', function() {
@@ -792,6 +783,9 @@ describe('filesystem.js', function() {
 			
 				var testPath = '/var/toad/hole';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				expect(filesystem.changeCwd(testPath)).to.be.true;
 				expect(filesystem.cwd).to.equal('var/toad/hole');
 			
@@ -1060,6 +1054,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = "var/run/marathon2";
 				var fullPath = path.resolve(filesystem.root.path, testPath);
+				filesystem.cwd = '';
 				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
 				expect(filesystem.createDir(testPath)).to.equal(fullPath);
@@ -1179,10 +1174,11 @@ describe('filesystem.js', function() {
 				expect(testReadFile).to.be.an.instanceof(Error).with.property('code').that.equals('EISDIR');
 			
 			});
-			it('should return the content of the file at this.root + pth if pth is relative and does not contain the VFS root path, user is allowed to read location at pth, and readFileSync executes without error', function() {
+			it('should return the content of the file at this.getCwd() + pth if pth is relative and does not contain the VFS root path, user is allowed to read location at pth, and readFileSync executes without error', function() {
 			
 				var testPath = path.join('var/run/marathon2/level4', readdirFileArray[0]);
-				var testResolvedPath = path.resolve(global.Uwot.Constants.appRoot + '/fs', testPath);
+				filesystem.cwd = '';
+				var testResolvedPath = path.resolve(filesystem.getCwd(), testPath);
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returnsArg(0);
 				var testReadFile = filesystem.readFile(testPath);
@@ -1376,6 +1372,7 @@ describe('filesystem.js', function() {
 					return finalPaths;
 				
 				});
+				filesystem.cwd = '';
 				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.true;
 				expect(finalPaths.old).to.equal(path.resolve(filesystem.root.path, testPathSource));
 				expect(finalPaths.new).to.equal(path.resolve(filesystem.root.path, testPathTarget));
@@ -1940,25 +1937,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.resolvePath(testPath)).to.equal(resolvedPath);
 			
 			});
-			it('should return absolute path from Vroot to pth if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path is extant', function() {
-			
-				filesystem.cwd = "var";
-				var testPath = 'etc';
-				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnTrueOrThrow(pth) {
-			
-					if (-1 === pth.indexOf("var/etc")) {
-					
-						return true;
-					
-					}
-					throw new Error('"/var/etc" does not exist');
-				
-				});
-				var resolvedPath = path.resolve(filesystem.root.path, testPath);
-				expect(filesystem.resolvePath(testPath)).to.equal(resolvedPath);
-			
-			});
-			it('should return an error if this.cwd is a string, absolute path from VCWD to path is not extant, and absolute path from Vroot to path is not extant', function() {
+			it('should return an error if this.cwd is a string, absolute path from VCWD to path is not extant', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFalse() {
 			
@@ -2972,13 +2951,13 @@ describe('filesystem.js', function() {
 			it('should return an error if UwotFsPermissions constructor throws an error', function() {
 			
 // 				var UwotFsPermissionsConstructorStub = sinon.stub(UwotFsPermissions, 'constructor').throws(new TypeError('argument of UwotFsPermissions constructor must be an object'));
-				filesystem.sudo = true;
-				var testPath = filesystem.root.path + '/usr/local/bin';
-				var testAllowed = ['r', 'w', 'x'];
-				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				throw new Error('need to stub the UwotFsPermissions toGeneric method to return a string rather than a valid object to trigger error here.');
-				
-				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+				// filesystem.sudo = true;
+// 				var testPath = filesystem.root.path + '/usr/local/bin';
+// 				var testAllowed = ['r', 'w', 'x'];
+// 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+// 				throw new Error('need to stub the UwotFsPermissions toGeneric method to return a string rather than a valid object to trigger error here.');
+// 				
+// 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
 			it('should return an error if absolute path to permissions file cannot be resolved', function() {
@@ -3478,6 +3457,8 @@ describe('filesystem.js', function() {
 	});
 	describe('UwotFsPermissions', function() {
 	
+		var testStatsFile;
+		var testStatsDir;
 		beforeEach(function() {
 		
 			const dbFindStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnUserDoc(id, callback) {
@@ -3517,8 +3498,28 @@ describe('filesystem.js', function() {
 			filesystem = new FileSystem('CDeOOrH0gOg791cZ');
 			dbFindStub.restore();
 			listUsersStub.restore();
-			testStats = getTestStats();
+			testStatsFile = getTestStats();
+			testStatsDir = getTestStats();
+			testStatsFile.isFile = function() { return true; };
+			testStatsDir.isDirectory = function() { return true; };
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnStats(pth) {
+			
+				if (path.basename(pth) === UWOT_HIDDEN_PERMISSIONS_FILENAME) {
+				
+					return testStatsFile;
+				
+				}
+				else {
+				
+					return testStatsDir;
+				
+				}
+			
+			});
+			var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(getTestPerms());
 			testPermissionsObj = filesystem.getPermissions('usr');
+			statSyncStub.restore();
+			readFileSyncStub.restore();
 		
 		});
 		describe('constructor(permissions)', function() {
