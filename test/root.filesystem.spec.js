@@ -391,7 +391,7 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('setDirs()', function() {
+		describe('setDirs(cwd)', function() {
 		
 			it('should be a function', function() {
 			
@@ -425,6 +425,105 @@ describe('filesystem.js', function() {
 				expect(filesystem.userDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.get('server', 'userDir') + path.sep + instanceUser.uName);
 			
 			});
+			it('should set this.cwd to this.userDir.path if cwd is undefined and this.userDir is a non-null object', function() {
+			
+				var testPath = 'home/' + instanceUser.uName;
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
+				
+					this.cwd = pth.replace(this.root.path + '/', '');
+					return true;
+				
+				});
+				filesystem.setDirs();
+				expect(filesystem.cwd).to.equal(testPath);
+			
+			});
+			it('should set this.cwd to pubDir.path is cwd is undefined and this.userDir is null', function(done) {
+			
+				var testPath = global.Uwot.Config.get('server', 'pubDir').replace(filesystem.root.path + '/', '');
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
+				
+					this.cwd = pth.replace(this.root.path + '/', '');
+					return true;
+				
+				});
+				global.Uwot.Users.getGuest(function(error, guestUser) {
+				
+					filesystem.user = guestUser;
+					filesystem.setDirs();
+					expect(filesystem.cwd).to.equal(testPath);
+					done();
+				
+				});
+			
+			});
+			it('should set this.cwd to this.userDir.path if cwd is a string representing a path not readable by user and this.userDir is a non-null object', function() {
+			
+				var testPath = 'home/' + instanceUser.uName;
+				var testCwd = '/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
+				
+					if (pth === '/var') {
+					
+						return SystemError.EPERM({syscall: 'read', path: pth});
+					
+					}
+					else {
+					
+						this.cwd = pth.replace(this.root.path + '/', '');
+						return true;
+					
+					}
+				
+				});
+				filesystem.setDirs(testCwd);
+				expect(filesystem.cwd).to.equal(testPath);
+			
+			});
+			it('should set this.cwd to pubDir.path is cwd is a string representing a path not readable by user and this.userDir is null', function(done) {
+			
+				var testCwd = '/var';
+				var testPath = global.Uwot.Config.get('server', 'pubDir').replace(filesystem.root.path + '/', '');
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
+				
+					if (pth === '/var') {
+					
+						return SystemError.EPERM({syscall: 'read', path: pth});
+					
+					}
+					else {
+					
+						this.cwd = pth.replace(this.root.path + '/', '');
+						return true;
+					
+					}
+				
+				});
+				global.Uwot.Users.getGuest(function(error, guestUser) {
+				
+					filesystem.user = guestUser;
+					filesystem.setDirs();
+					expect(filesystem.cwd).to.equal(testPath);
+					done();
+				
+				});
+			
+			});
+			it('should set this.cwd to cwd value if cwd is a string representing a path readable by user', function() {
+			
+				var testPath = 'home/' + instanceUser.uName;
+				var testCwd = '/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
+							
+					this.cwd = pth.replace(this.root.path + '/', '');
+					return true;
+
+				});
+				filesystem.setDirs(testCwd);
+				expect(filesystem.cwd).to.equal(testCwd);
+			
+			});
+			
 		
 		});
 		describe('cmd(cmdName, argArr, callback, isSudo)', function() {
