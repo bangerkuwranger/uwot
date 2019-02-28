@@ -72,7 +72,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 							value: themeName,
 							expiry: oneYearLater
 						}
-					}
+					};
 			
 				}
 			

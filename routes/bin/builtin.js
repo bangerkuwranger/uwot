@@ -2,7 +2,7 @@
 const path = require('path');
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../../middleware/denyAllOthers');
-const filesystem = require('../../filesystem')
+const filesystem = require('../../filesystem');
 
 const validBuiltins = [
 	'cd',

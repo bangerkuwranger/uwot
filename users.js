@@ -18,16 +18,16 @@ var rules = require('password-rules');
  
 class User {
 
- 	constructor(
- 		_id,
- 		fName,
- 		lName,
- 		uName,
- 		createdAt,
- 		updatedAt,
- 		password,
- 		salt,
- 		sudoer
+	constructor(
+		_id,
+		fName,
+		lName,
+		uName,
+		createdAt,
+		updatedAt,
+		password,
+		salt,
+		sudoer
 	) {
 	
 		var clean_id = sanitize.cleanString(_id, null);

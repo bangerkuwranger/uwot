@@ -94,7 +94,7 @@ function ansi(obj) {
 		return this.json(obj);
 	}
 
-};
+}
 
 module.exports = function(args) {
 

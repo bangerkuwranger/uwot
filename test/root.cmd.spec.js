@@ -62,8 +62,8 @@ const instanceUser = {
 	"createdAt": new Date(1546450800498),
 	"updatedAt": new Date(1546450800498),
 	"_id": "CDeOOrH0gOg791cZ",
-	"verifyPassword": function(pass) {return true;},
-	"maySudo": function() {return this.sudoer;}
+	verifyPassword(pass) {return true;},
+	maySudo() {return this.sudoer;}
 };
 
 describe('cmd.js', function() {

@@ -99,130 +99,7 @@ var commandSets = {
 		"add"
 	]
 };
-var args = [];
-var i = 0;
-process.argv.slice(2).forEach(function (arg) {
 
-    args[i] = arg;
-    i++;
-
-});
-
-switch (args[0]) {
-
-	case 'db':
-		switch(args[1]) {
-			
-			case 'setup': 
-				setupDb(args[2]);
-				break;
-			case undefined:
-			case '-h':
-			case '--help':
-			case 'help':
-				commandSetHelp(args[0]);
-				break;
-			default:
-				unrecognizedAction(args[0], args[1]);
-		}
-		break;
-	case 'adminUser':
-		switch(args[1]) {
-		
-			case 'list':
-				listAdminUsers(args[2]);
-				break;
-			case 'add':
-				addAdminUser(args[2], args[3], args[4], args[5], args[6]);
-				break;
-			case 'delete':
-				deleteAdminUser(args[2]);
-				break;
-			case 'changePw':
-				changeAdminUserPassword(args[2], args[3], args[4]);
-				break;
-			case 'allowSudo':
-				allowAdminUserSudo(args[2]);
-				break;
-			case 'disallowSudo':
-				disallowAdminUserSudo(args[2]);
-				break;
-			case 'changeName':
-				changeAdminUserName(args[2], args[3], args[4]);
-				break;
-			case undefined:
-			case '-h':
-			case '--help':
-			case 'help':
-				commandSetHelp(args[0]);
-				break;
-			default:
-				unrecognizedAction(args[0], args[1]);
-		
-		}
-		break;
-	case 'setup':
-		let cs = args.shift();
-		let an = args.shift();
-		switch(an) {
-		
-			case 'list':
-			case 'initial':
-			case 'set':
-			case 'reset':
-			case 'add':
-			case 'remove':
-				setupConfigHandler(an, args.shift(), args)
-				break;
-			case undefined:
-			case '-h':
-			case '--help':
-			case 'help':
-				commandSetHelp(cs);
-				break;
-			default:
-				unrecognizedAction(cs, an);
-		
-		}
-		break;
-	case undefined:
-	case '-h':
-	case '--help':
-	case 'help':
-		titleBlock('help for shell.js');
-		console.log('Syntax for shell.js:');
-		console.log('	shell.js [Command Set] [Action] [arg1]...[arg(n)]');
-		console.log('	');
-		console.log('Available Command Sets & Actions:');
-		var help = Object.keys(commandSets);
-		for (let cSet in help) {
-		
-			if ('string' == typeof help[cSet]) {
-			
-				console.log('	' + help[cSet]);
-				if ('object' == typeof commandSets[help[cSet]]) {
-				
-					for (let cAction in commandSets[help[cSet]]) {
-					
-						if ('string' == typeof commandSets[help[cSet]][cAction]) {
-						
-							console.log('		' + commandSets[help[cSet]][cAction]);
-						
-						}
-					
-					}
-					
-				}
-			
-			}
-		
-		}
-		process.exit();
-		break;
-	default:
-		console.log('Unrecognized Command Set: "' + args[0] + '". (use shell.js -h for list of available Command Sets)');
-
-}
 
 //setup config handler
 //usage:
@@ -1260,6 +1137,133 @@ function titleBlock(title) {
 	console.log(titleLine);
 	console.log('*  ' + title + '  *');
 	console.log(titleLine);
+
+}
+
+// Parse args and execute commands
+
+var args = [];
+var i = 0;
+process.argv.slice(2).forEach(function (arg) {
+
+    args[i] = arg;
+    i++;
+
+});
+
+switch (args[0]) {
+
+	case 'db':
+		switch(args[1]) {
+			
+			case 'setup': 
+				setupDb(args[2]);
+				break;
+			case undefined:
+			case '-h':
+			case '--help':
+			case 'help':
+				commandSetHelp(args[0]);
+				break;
+			default:
+				unrecognizedAction(args[0], args[1]);
+		}
+		break;
+	case 'adminUser':
+		switch(args[1]) {
+		
+			case 'list':
+				listAdminUsers(args[2]);
+				break;
+			case 'add':
+				addAdminUser(args[2], args[3], args[4], args[5], args[6]);
+				break;
+			case 'delete':
+				deleteAdminUser(args[2]);
+				break;
+			case 'changePw':
+				changeAdminUserPassword(args[2], args[3], args[4]);
+				break;
+			case 'allowSudo':
+				allowAdminUserSudo(args[2]);
+				break;
+			case 'disallowSudo':
+				disallowAdminUserSudo(args[2]);
+				break;
+			case 'changeName':
+				changeAdminUserName(args[2], args[3], args[4]);
+				break;
+			case undefined:
+			case '-h':
+			case '--help':
+			case 'help':
+				commandSetHelp(args[0]);
+				break;
+			default:
+				unrecognizedAction(args[0], args[1]);
+		
+		}
+		break;
+	case 'setup':
+		let cs = args.shift();
+		let an = args.shift();
+		switch(an) {
+		
+			case 'list':
+			case 'initial':
+			case 'set':
+			case 'reset':
+			case 'add':
+			case 'remove':
+				setupConfigHandler(an, args.shift(), args)
+				break;
+			case undefined:
+			case '-h':
+			case '--help':
+			case 'help':
+				commandSetHelp(cs);
+				break;
+			default:
+				unrecognizedAction(cs, an);
+		
+		}
+		break;
+	case undefined:
+	case '-h':
+	case '--help':
+	case 'help':
+		titleBlock('help for shell.js');
+		console.log('Syntax for shell.js:');
+		console.log('	shell.js [Command Set] [Action] [arg1]...[arg(n)]');
+		console.log('	');
+		console.log('Available Command Sets & Actions:');
+		var help = Object.keys(commandSets);
+		for (let cSet in help) {
+		
+			if ('string' == typeof help[cSet]) {
+			
+				console.log('	' + help[cSet]);
+				if ('object' == typeof commandSets[help[cSet]]) {
+				
+					for (let cAction in commandSets[help[cSet]]) {
+					
+						if ('string' == typeof commandSets[help[cSet]][cAction]) {
+						
+							console.log('		' + commandSets[help[cSet]][cAction]);
+						
+						}
+					
+					}
+					
+				}
+			
+			}
+		
+		}
+		process.exit();
+		break;
+	default:
+		console.log('Unrecognized Command Set: "' + args[0] + '". (use shell.js -h for list of available Command Sets)');
 
 }
 

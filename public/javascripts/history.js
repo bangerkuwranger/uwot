@@ -28,7 +28,7 @@ class CliHistory {
 		localStorage.setItem(INDEX_FIELD, 0);
 		this.index = 0;
 		var storageArray = [];
-		for (var i = 0; i < localStorage.length; i++) {
+		for (let i = 0; i < localStorage.length; i++) {
 		
 			if (localStorage.key(i).substring(0, INDEX_PREFIX.length) == INDEX_PREFIX) {
 			
@@ -37,9 +37,9 @@ class CliHistory {
 			}
 		
 		}
-		for (var i = 0; i < storageArray.length; i++) {
+		for (let j = 0; j < storageArray.length; j++) {
 		
-			localStorage.removeItem(storageArray[i]);
+			localStorage.removeItem(storageArray[j]);
 		
 		}
 		return;

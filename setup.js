@@ -36,7 +36,7 @@ class UwotSetup {
 			for (let i=0; i<environments.length; i++) {
 			
 				let env = environments[i];
-				if ('string' == typeof env && -1 != validEnv.indexOf(env)) {
+				if ('string' == typeof env && -1 !== validEnv.indexOf(env)) {
 				
 					switch(env) {
 					

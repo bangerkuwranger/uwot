@@ -68,7 +68,7 @@ class Flag {
 			}
 			else {
 					
-				var flagValue = stringValue.substring(flagIdx + flagLength + 1).trim();
+				flagValue = stringValue.substring(flagIdx + flagLength + 1).trim();
 			
 			}
 			if (flagValue.length < 1) {
