@@ -540,19 +540,7 @@ class UwotFs {
 // 			
 // 			}
 			//resolve
-			try {
-			
-				var absPth = this.resolvePath(pth);
-			
-			}
-			catch(e) {
-			
-				//return error objects
-				return e;
-			
-			}
-			//return error objects if resolve returns an error,
-			//unlikely to happen since it throws errors...
+			var absPth = this.resolvePath(pth);
 			if('string' !== typeof absPth) {
 			
 				return absPth;

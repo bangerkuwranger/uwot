@@ -858,10 +858,10 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeCwd()).to.be.an.instanceof(TypeError).with.property('message').that.equals('path must be a string');
 			
 			});
-			it('should return a TypeError if path cannot be resolved', function() {
+			it('should return an Error if resolvePath returns an error attempting to resolve pth value', function() {
 			
-				var pathResolveStub = sinon.stub(path, 'resolve').throws(new TypeError('test resolve error'));
-				expect(filesystem.changeCwd('/var')).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new Error('test resolvePath error'));
+				expect(filesystem.changeCwd('/var')).to.be.an.instanceof(Error).with.property('message').that.equals('test resolvePath error');
 			
 			});
 			it('should return an error if this.isReadable returns an error', function() {
@@ -871,11 +871,46 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
+			it('should return an error if fs.statSync(absPth) or calling the isDirectory() method of that result throws an error', function() {
+			
+				var testPath = '/var';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncErrorStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: "read", path: testPath}));
+				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+				statSyncErrorStub.restore();
+				testStats.isDirectory = function() { throw new ReferenceError('isDirectory is not defined')};
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(ReferenceError).with.property('message').that.equals('isDirectory is not defined');
+			
+			});
 			it('should return a systemError if resolved path is not readable by user', function() {
 			
 				var testPath = '/var';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
 				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an systemError if absPth is not pointing to a directory', function() {
+			
+				var testPath = '/var';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncErrorStub = sinon.stub(fs, 'statSync').returns(testStats);
+				expect(filesystem.changeCwd(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOTDIR');
+			
+			});
+			it('should return true and set this.cwd to an empty string if root directory is readable by user and absPth === this.root.path', function() {
+			
+				var testPath = '/';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				expect(filesystem.changeCwd(testPath)).to.be.true;
+				expect(filesystem.cwd).to.equal('');
 			
 			});
 			it('should return true and set this.cwd to resolved relative path from VFS root if resolved path is readable by user', function() {
