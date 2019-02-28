@@ -391,7 +391,7 @@ class UwotFs {
 		else {
 		
 			var isValidCwdForUser = this.changeCwd(userCwd);
-			if (!isValidCwdForUser) {
+			if (!isValidCwdForUser || isValidCwdForUser instanceof Error) {
 			
 				this.changeCwd(defaultcwd);
 			
