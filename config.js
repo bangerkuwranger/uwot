@@ -53,7 +53,7 @@ class ExternalBinPath{
 		isSudoOnly
 	) {
 	
-		if ('object' == typeof pathName && null !== pathName && 'undefined' == typeof dirPath && 'undefined' == typeof isSudoOnly) {
+		if ('object' === typeof pathName && null !== pathName && 'undefined' === typeof dirPath && 'undefined' === typeof isSudoOnly) {
 		
 			var argsObj = Object.assign(pathName);
 			pathName = argsObj.hasOwnProperty('pathName') ? argsObj.pathName : null;
@@ -159,7 +159,7 @@ class ExternalTheme{
 		path
 	) {
 	
-		if ('object' == typeof name && null !== name && 'undefined' == typeof path) {
+		if ('object' === typeof name && null !== name && 'undefined' === typeof path) {
 		
 			var argsObj = Object.assign(name);
 			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
@@ -167,7 +167,7 @@ class ExternalTheme{
 		
 		}
 		this.name = sanitize.cleanString(name, 255);
-		this.path = sanitize.cleanString(path, 1024)
+		this.path = sanitize.cleanString(path, 1024);
 	
 	}
 	
@@ -191,7 +191,7 @@ class ReverseProxyBin{
 		isConsole
 	) {
 	
-		if ('object' == typeof name && null !== name && 'undefined' == typeof url && 'undefined' == typeof isLocal && 'undefined' == typeof isConsole) {
+		if ('object' === typeof name && null !== name && 'undefined' === typeof url && 'undefined' === typeof isLocal && 'undefined' === typeof isConsole) {
 		
 			var argsObj = Object.assign(name);
 			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
@@ -202,8 +202,8 @@ class ReverseProxyBin{
 		}
 		this.name = sanitize.cleanString(name, 255);
 		this.url = sanitize.cleanString(url, 1024);
-		this.isLocal = 'undefined' == typeof isLocal ? false : sanitize.cleanBool(isLocal);
-		this.isConsole = 'undefined' == typeof isConsole ? false : sanitize.cleanBool(isConsole);
+		this.isLocal = 'undefined' === typeof isLocal ? false : sanitize.cleanBool(isLocal);
+		this.isConsole = 'undefined' === typeof isConsole ? false : sanitize.cleanBool(isConsole);
 	
 	}
 	
@@ -243,7 +243,7 @@ function isArrayKey(keyString) {
 	else {
 	
 		var idx = arrayKeys.indexOf(keyString);
-		return -1 == idx ? false : true;
+		return -1 === idx ? false : true;
 	
 	}
 
@@ -259,7 +259,7 @@ function mergeMaps(oldMap, newMap, catName) {
 		throw new TypeError('oldMap and newMap args must be instances of Map for mergeMaps');
 	
 	}
-	else if ('string' != typeof catName || -1 == Object.keys(confDefaults()).indexOf(catName)) {
+	else if ('string' !== typeof catName || -1 === Object.keys(confDefaults()).indexOf(catName)) {
 	
 		throw new TypeError('invalid category name passed to mergeMaps');
 	
@@ -320,7 +320,7 @@ function arrayMembersToClass(
 	returnClassObj
 ) {
 
-	if ('object' != typeof arrayOfObjs || null === arrayOfObjs || !(Array.isArray(arrayOfObjs))) {
+	if ('object' !== typeof arrayOfObjs || null === arrayOfObjs || !(Array.isArray(arrayOfObjs))) {
 	
 		throw new TypeError('first argument must be an array of objects.');
 	
@@ -334,8 +334,8 @@ function arrayMembersToClass(
 	
 		var invalidMembers = 0;
 		var newArray = [];
-		let objClass = arrayMemberClassMap.get(arrayKey);
-		let useGenericObj = 'undefined' == typeof returnClassObj || !returnClassObj || 'false' === returnClassObj || 0 === returnClassObj;
+		let ObjClass = arrayMemberClassMap.get(arrayKey);
+		let useGenericObj = 'undefined' === typeof returnClassObj || !returnClassObj || 'false' === returnClassObj || 0 === returnClassObj;
 		for (let i=0; i<arrayOfObjs.length; i++) {
 		
 			let thisObjArgs = arrayOfObjs[i];
@@ -350,14 +350,14 @@ function arrayMembersToClass(
 			}
 			else if (Array.isArray(thisObjArgs)) {
 			
-				thisObj = new objClass(...thisObjArgs);
+				thisObj = new ObjClass(...thisObjArgs);
 			
 			}
 			else {
 			
 				try{
 				
-					thisObj = new objClass(thisObjArgs);
+					thisObj = new ObjClass(thisObjArgs);
 				
 				}
 				catch(e) {
@@ -372,7 +372,7 @@ function arrayMembersToClass(
 				invalidMembers++;
 			
 			}
-			else if (useGenericObj && 'function' == typeof thisObj.getGeneric) {
+			else if (useGenericObj && 'function' === typeof thisObj.getGeneric) {
 			
 				let genericObj = thisObj.getGeneric();
 				newArray.push(genericObj);
@@ -414,16 +414,16 @@ class UwotConfigBase {
 		nconf.defaults(confDefaults());
 		this.nconf = nconf;
 		this.utilities = {
-			mergeMaps: mergeMaps,
-			isArrayKey: isArrayKey,
-			arrayMembersToClass: arrayMembersToClass
+			mergeMaps,
+			isArrayKey,
+			arrayMembersToClass
 		};
 	
 	}
 	
 	get(cat, key, excludeArrays) {
 	
-		if ('string' != typeof cat) {
+		if ('string' !== typeof cat) {
 		
 			return undefined;
 		
@@ -431,10 +431,10 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			if ('object' == typeof catVal && null !== catVal && 'string' == typeof key) {
+			if ('object' === typeof catVal && null !== catVal && 'string' === typeof key) {
 			
 				var confVal = catVal[key];
-				if ('string' == typeof confVal) {
+				if ('string' === typeof confVal) {
 				
 					if ('true' === confVal.trim().toLowerCase()) {
 					
@@ -456,14 +456,14 @@ class UwotConfigBase {
 				return confVal;	
 			
 			}
-			else if ('object' == typeof catVal && null !== catVal) {
+			else if ('object' === typeof catVal && null !== catVal) {
 			
-				if ('undefined' == typeof excludeArrays || excludeArrays) {
+				if ('undefined' === typeof excludeArrays || excludeArrays) {
 			
 					arrayKeys.forEach(function(ak) {
 				
 						let thisAk = ak.split(':', 2);
-						if (cat == thisAk[0]) {
+						if (cat === thisAk[0]) {
 					
 							delete catVal[thisAk[1]];
 					
@@ -513,7 +513,7 @@ class UwotConfigBase {
 	// sets changed string values for existing cat in values Map object
 	updateCatStrVals(cat, values, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to updateCatStrVals.');
 		
@@ -600,12 +600,12 @@ class UwotConfigBase {
 	
 	setStrVal(cat, key, value, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to setStrVal.');
 		
 		}
-		else if ('string' != typeof cat || 'string' != typeof key || 'string' != typeof value) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'string' !== typeof value) {
 		
 			return callback(new TypeError('invalid args passed to setStrVal.'), false);
 		
@@ -613,7 +613,7 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			if ('object' == typeof catVal && null !== catVal) {
+			if ('object' === typeof catVal && null !== catVal) {
 			
 				var valIsSet = false;
 				if ('true' === value.toString().trim().toLowerCase()) {
@@ -655,12 +655,12 @@ class UwotConfigBase {
 	
 	setArrVal(cat, key, value, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to setArrVal.');
 		
 		}
-		else if ('string' != typeof cat || 'string' != typeof key || 'object' != typeof value || null === value || !(Array.isArray(value))) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'object' !== typeof value || null === value || !(Array.isArray(value))) {
 		
 			return callback(new TypeError('invalid args passed to setArrVal.'), false);
 		
@@ -668,11 +668,12 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			if ('object' == typeof catVal && null !== catVal) {
+			var valIsSet;
+			if ('object' === typeof catVal && null !== catVal) {
 			
 				try {
 				
-					var valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), this.utilities.arrayMembersToClass(value, cat + ':' + sanitize.cleanString(key)));
+					valIsSet = nconf.set(cat + ':' + sanitize.cleanString(key), this.utilities.arrayMembersToClass(value, cat + ':' + sanitize.cleanString(key)));
 				
 				}
 				catch(error) {
@@ -704,12 +705,12 @@ class UwotConfigBase {
 	
 	addArrVal(cat, key, value, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to addArrVal.');
 		
 		}
-		else if ('string' != typeof cat || 'string' != typeof key || 'string' != typeof value) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'string' !== typeof value) {
 		
 			return callback(new TypeError('invalid args passed to addArrVal.'), false);
 		
@@ -718,7 +719,7 @@ class UwotConfigBase {
 		
 			var catVal = nconf.get(cat);
 			var newObj = global.Uwot.Constants.tryParseJSON(sanitize.cleanString(value, 1024));
-			if ('object' == typeof catVal && null !== catVal) {
+			if ('object' === typeof catVal && null !== catVal) {
 			
 				var currArr = catVal[key];
 				if ('object' !== typeof currArr || !(Array.isArray(currArr))) {
@@ -726,7 +727,7 @@ class UwotConfigBase {
 					return callback(new TypeError('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
-				else if (!newObj || 'object' != typeof newObj) {
+				else if (!newObj || 'object' !== typeof newObj) {
 				
 					return callback(new TypeError('new value for ' + cat + ':' + key + ' is not a JSON encoded object.'), false);
 				
@@ -770,12 +771,12 @@ class UwotConfigBase {
 	
 	removeArrIdx(cat, key, index, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to setArrVal.');
 		
 		}
-		else if ('string' != typeof cat || 'string' != typeof key || 'number' != typeof index || isNaN(parseInt(index))) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' !== typeof index || isNaN(parseInt(index))) {
 		
 			return callback(new TypeError('invalid args passed to removeArrIdx.'), false);
 		
@@ -783,7 +784,7 @@ class UwotConfigBase {
 		else {
 		
 			var catVal = nconf.get(cat);
-			if ('object' == typeof catVal && null !== catVal) {
+			if ('object' === typeof catVal && null !== catVal) {
 			
 				var currArr = catVal[key];
 				if ('object' !== typeof currArr || !(Array.isArray(currArr))) {
@@ -791,7 +792,7 @@ class UwotConfigBase {
 					return callback(new TypeError('value for ' + cat + ':' + key + ' is not an array.'), false);
 				
 				}
-				else if(currArr[index] == undefined) {
+				else if(currArr[index] === undefined) {
 				
 					return callback(false, false);
 				
@@ -824,12 +825,12 @@ class UwotConfigBase {
 	
 	resetToDefault(cat, key, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to resetToDefault.');
 		
 		}
-		else if ('string' != typeof cat || 'string' != typeof key) {
+		else if ('string' !== typeof cat || 'string' !== typeof key) {
 		
 			return callback(new TypeError('invalid args passed to resetToDefault.'), false);
 		
@@ -837,7 +838,7 @@ class UwotConfigBase {
 		else {
 		
 			var localCatVals = nconf.stores.local.get(cat);
-			if ('object' == typeof localCatVals && 'undefined' !== typeof localCatVals[key]) {
+			if ('object' === typeof localCatVals && 'undefined' !== typeof localCatVals[key]) {
 			
 				nconf.stores.local.clear(cat + ':' + key);
 				return nconf.save(null, callback);
@@ -864,11 +865,11 @@ class UwotConfigBase {
 		let cnfTransport, cnfPort, cnfDomain, cnfSecure;
 		let serverCnf = this.nconf.get('server');
 		let defaults = confDefaults();
-		cnfTransport = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.transport ? serverCnf.transport : defaults.server.transport;
-		cnfDomain = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.domain ? serverCnf.domain : defaults.server.domain;
-		cnfPort = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && 'string' == typeof serverCnf.port ? serverCnf.port : defaults.server.port.toString();
-		cnfSecure = null !== serverCnf && undefined !== serverCnf && 'object' == typeof serverCnf && ('string' == typeof serverCnf.transport || 'boolean' == typeof serverCnf.transport) ? sanitize.cleanBool(serverCnf.secure) : false;
-		if ('boolean' == typeof cnfSecure && cnfSecure) {
+		cnfTransport = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.transport ? serverCnf.transport : defaults.server.transport;
+		cnfDomain = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.domain ? serverCnf.domain : defaults.server.domain;
+		cnfPort = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.port ? serverCnf.port : defaults.server.port.toString();
+		cnfSecure = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && ('string' === typeof serverCnf.transport || 'boolean' === typeof serverCnf.transport) ? sanitize.cleanBool(serverCnf.secure) : false;
+		if ('boolean' === typeof cnfSecure && cnfSecure) {
 			cnfPort = '443';
 			cnfTransport = 'https';
 		}
@@ -887,6 +888,6 @@ class UwotConfigBase {
 	
 	}
 
-};
+}
 
 module.exports = UwotConfigBase;
