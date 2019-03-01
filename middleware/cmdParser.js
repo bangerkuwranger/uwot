@@ -130,6 +130,7 @@ class UwotRuntimeCmds {
 
 		var exe = {isOp: false, type: 'Command', isSudo: false};
 		exe.name = sanitize.cleanString(astCommand.name.text);
+		var args = [];
 		if ('string' === typeof exe.name && '' !== exe.name) {
 	
 			var eom = false;
@@ -138,7 +139,6 @@ class UwotRuntimeCmds {
 				if (this.user.maySudo()) {
 					exe.input = 'undefined' !== typeof input ? input : null;
 					exe.output = 'undefined' !== typeof output ? output : null;
-					var args = [];
 					if ('object' === typeof astCommand.suffix) {
 		
 						args = args.concat(astCommand.suffix);
@@ -176,8 +176,7 @@ class UwotRuntimeCmds {
 			
 				}
 				else {
-			
-					var args = [];
+				
 					args = args = args.concat(astCommand.suffix);
 					if (0 < args.length) {
 					
@@ -198,7 +197,6 @@ class UwotRuntimeCmds {
 		
 				exe.input = 'undefined' !== typeof input ? input : null;
 				exe.output = 'undefined' !== typeof output ? output : null;
-				var args = [];
 				if ('object' === typeof astCommand.prefix) {
 		
 					args = args.concat(astCommand.prefix);
@@ -245,7 +243,7 @@ class UwotRuntimeCmds {
 									
 										}
 										cIdx++;
-										var eoa = false;
+										var eom = false;
 										for (let oArgIdx = cIdx; oArgIdx < reqCount; oArgIdx++) {
 									
 											thisOpt.args.push(args[oArgIdx]);
@@ -511,7 +509,7 @@ class UwotRuntimeCmds {
 					var exe = exeMap.get(i);
 					if ('object' !== typeof exe || null === exe) {
 			
-						results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' is invalid'), outputType));
+						results.output.push(this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType));
 						j++;
 			
 					}
@@ -675,7 +673,7 @@ class UwotRuntimeCmds {
 									}
 									else {
 						
-										results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+										results.output.push(this.outputLine(new TypeError('exe with has invalid output'), outputType));
 										j++;
 						
 									}
@@ -764,7 +762,7 @@ class UwotRuntimeCmds {
 										}
 										else {
 						
-											results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid output'), outputType));
+											results.output.push(this.outputLine(new TypeError('exe with index ' + j + ' has invalid output'), outputType));
 											j++;
 						
 										}
@@ -772,7 +770,7 @@ class UwotRuntimeCmds {
 									}
 									else {
 					
-										results.output.push(this.outputLine(new TypeError('exe with index ' + key + ' has invalid input'), outputType));
+										results.output.push(this.outputLine(new TypeError('exe with index ' + j + ' has invalid input'), outputType));
 										j++;
 					
 									}

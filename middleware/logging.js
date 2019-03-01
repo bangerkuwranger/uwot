@@ -3,10 +3,10 @@ var transports = require('../logger').transports;
 
 module.exports = {
 	'error': expressWinston.errorLogger({
-	  	transports: [
+		transports: [
 			transports.errorFile,
 			transports.errorConsole
-	  	]
+		]
 	}),
 	'info': expressWinston.logger({
 		transports: [
@@ -20,4 +20,4 @@ module.exports = {
 			transports.debugConsole
 		]
 	})
-}
+};

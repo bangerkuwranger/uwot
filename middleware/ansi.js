@@ -14,14 +14,14 @@
 
 function parseToAnsi(ansiObj) {
 
-	var tagName = 'string' == typeof ansiObj.tag ? ansiObj.tag : 'span';
+	var tagName = 'string' === typeof ansiObj.tag ? ansiObj.tag : 'span';
 	var classesString = "ansi";
-	if ('string' == typeof ansiObj.color) {
+	if ('string' === typeof ansiObj.color) {
 	
 		classesString += ' fg-' + ansiObj.color;
 	
 	}
-	if ('string' == typeof ansiObj.backgroundColor) {
+	if ('string' === typeof ansiObj.backgroundColor) {
 	
 		classesString += ' bg-' + ansiObj.backgroundColor;
 	
@@ -43,27 +43,27 @@ function parseToAnsi(ansiObj) {
 	}
 	var openTag = '<' + tagName + ' class="' + classesString + '">';
 	var closeTag = '</' + tagName + '>';
-	if ('undefined' == typeof ansiObj.content) {
+	if ('undefined' === typeof ansiObj.content) {
 	
 		return '<' + tagName + ' class="' + classesString + '" />';
 	
 	}
-	else if ('string' == typeof ansiObj.content) {
+	else if ('string' === typeof ansiObj.content) {
 	
 		return openTag + ansiObj.content + closeTag;
 	
 	}
-	else if ('object' == typeof ansiObj.content && Array.isArray(ansiObj.content)) {
+	else if ('object' === typeof ansiObj.content && Array.isArray(ansiObj.content)) {
 	
 		var ansiString = openTag;
 		ansiObj.content.forEach(function(el) {
 		
-			if ('string' == typeof el) {
+			if ('string' === typeof el) {
 			
 				ansiString += el;
 			
 			}
-			else if ('object' == typeof el) {
+			else if ('object' === typeof el) {
 			
 				ansiString += parseToAnsi(el);
 			
@@ -84,7 +84,7 @@ function parseToAnsi(ansiObj) {
 function ansi(obj) {
 
 	var val = obj;
-	if ('object' == typeof val && 'object' == typeof val.output) {
+	if ('object' === typeof val && 'object' === typeof val.output) {
 	
 		obj.output = parseToAnsi(val.output);
 		return this.json(obj);

@@ -11,6 +11,6 @@ module.exports = function(args) {
 		denied += '<span class="ansi fg-red">Permission Denied</span>';
 		return res.json(denied);
 	
-	}
+	};
 
 };
