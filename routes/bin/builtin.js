@@ -1,8 +1,5 @@
 'use strict';
 const path = require('path');
-const nonceHandler = require('node-timednonce');
-const denyAllOthers = require('../../middleware/denyAllOthers');
-const filesystem = require('../../filesystem');
 
 const validBuiltins = [
 	'cd',
@@ -68,8 +65,8 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 
 	execute(args, options, app, user, callback, isSudo) {
 	
-		var argsArray = 'object' == typeof args ? this.argsObjToNameArray(args) : null;
-		global.Uwot.FileSystems[user._id].cmd('cd', argsArray, function(error, result) {
+		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
+		global.Uwot.FileSystems[user._id].cmd('cd', argsArray, function(error) {
 		
 			if (error) {
 			
@@ -83,15 +80,12 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 					output: '',
 					cwd: newCwd
 				};
-				var now = new Date();
-				var oneDayLater = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 				executeResult.output += 'changed directory to ' + newCwd;
 				return callback(false, executeResult);
 			
 			}
 		
 		}, isSudo);
-		// return super.execute(args, options, app, callback, isSudo);
 	
 	}
 	
@@ -211,12 +205,9 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		var biName = '';
 		var biArgs = [];
 		var biOpts = [];
-		var executeResult = {
-			output: ''
-		};
-		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+		if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 		
-			biName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : biName;
+			biName = 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : biName;
 			if (biName === '') {
 			
 				this.help(function(error, helpOutput) {
@@ -240,7 +231,7 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 				//loop through addtl args and set to biArgs for execution
 			
 			}
-			if ('object' == typeof options && Array.isArray(options) && options.length > 0) {
+			if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
 		
 				for (let i = 0; i < options.length; i++) {
 				
@@ -264,19 +255,19 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		else {
 		
 			this.help(function(error, helpOutput) {
+			
+				if (error) {
 				
-					if (error) {
-					
-						return callback(error, null);
-					
-					}
-					else {
-					
-						return callback(false, helpOutput);
-					
-					}
+					return callback(error, null);
 				
-				}.bind(this));
+				}
+				else {
+				
+					return callback(false, helpOutput);
+				
+				}
+			
+			}.bind(this));
 		
 		}
 	
@@ -291,14 +282,14 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 				return callback(error, null);
 			
 			}
-			else if ('object' == typeof helpOutput && null !== helpOutput) {
+			else if ('object' === typeof helpOutput && null !== helpOutput) {
 			
 				return callback(false, helpOutput);
 			
 			}
 			else {
 			
-				return callback(false, {output: '*** Help system currently unavailable. ***', isBold: true})
+				return callback(false, {output: '*** Help system currently unavailable. ***', isBold: true});
 			
 			}
 		
@@ -306,9 +297,9 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-};
+}
 
-var builtin = new UwotCmdBuiltin (
+var builtin = new UwotCmdBuiltin(
 	{
 		name:				'builtin',
 		description:		'Run builtin commands in the running uwot process. This differs from ACTUAL shells in that most logical, memory, user, and process management builtins are implemented elsewhere (e.g. login/logout) or not implemented at all.',

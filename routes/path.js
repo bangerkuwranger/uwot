@@ -20,11 +20,11 @@ router.post(
 	};
 	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
 	
-		if ('string' == typeof req.body.nonce) {
+		if ('string' === typeof req.body.nonce) {
 			var nv = nonceHandler.verify('index-get', req.body.nonce);
-			if (nv && 'object' != typeof nv) {
+			if (nv && 'object' !== typeof nv) {
 			
-				if ('object' == typeof req.body.cmdAst) {
+				if ('object' === typeof req.body.cmdAst) {
 				
 					resObj.output = {content: []};
 					if ("development" === global.process.env.NODE_ENV) {
@@ -32,7 +32,9 @@ router.post(
 						resObj.output.content.push({content: 'CMD Verified. AST: ', color: 'cyan'}, {tag:'br'}, {tag:'br'}, JSON.stringify(req.body.cmdAst), {tag:'br'}, {tag:'br'});
 					
 					}
-					if ('object' == typeof req.body.runtime && 'object' == typeof req.body.runtime.exes) {
+					// TBD
+					// take req.body.cwd and apply it to user's filesystem if it is not a match to current vcwd.
+					if ('object' === typeof req.body.runtime && 'object' === typeof req.body.runtime.exes) {
 					
 						if ("development" === global.process.env.NODE_ENV) {
 						
@@ -50,13 +52,13 @@ router.post(
 
 						}
 						req.body.runtime.executeCommands();
-						if ('object' == typeof req.body.runtime.results) {
+						if ('object' === typeof req.body.runtime.results) {
 							
-							if ('object' == typeof req.body.runtime.results.output && Array.isArray(req.body.runtime.results.output) && req.body.runtime.results.output.length > 0) {
+							if ('object' === typeof req.body.runtime.results.output && Array.isArray(req.body.runtime.results.output) && req.body.runtime.results.output.length > 0) {
 							
 								req.body.runtime.results.output.forEach(function(ol) {
 								
-									if ('object' == typeof ol && 'object' == typeof ol.content && Array.isArray(ol.content) && ('object' == typeof ol.content[0] || ('string' == typeof ol.content[0] && !ol.content[0].startsWith('operation')))) {
+									if ('object' === typeof ol && 'object' === typeof ol.content && Array.isArray(ol.content) && ('object' === typeof ol.content[0] || ('string' === typeof ol.content[0] && !ol.content[0].startsWith('operation')))) {
 									
 										resObj.output.content.push(ol, {tag:'br'});
 									
@@ -66,20 +68,20 @@ router.post(
 							
 							}
 							resObj.operations = [];
-							if ('object' == typeof req.body.runtime.results.operations && Array.isArray(req.body.runtime.results.operations) && req.body.runtime.results.operations.length > 0) {
+							if ('object' === typeof req.body.runtime.results.operations && Array.isArray(req.body.runtime.results.operations) && req.body.runtime.results.operations.length > 0) {
 						
 								for (let i = 0; i < req.body.runtime.results.operations.length; i++) {
 						
 // 									resObj.output.content.push({tag:'br'}, JSON.stringify(req.body.runtime.results.operations[i]));
-									if ('object' == typeof req.body.runtime.results.operations[i] && Array.isArray(req.body.runtime.results.operations[i])) {
+									if ('object' === typeof req.body.runtime.results.operations[i] && Array.isArray(req.body.runtime.results.operations[i])) {
 							
-										req.body.operations = req.body.runtime.results.operations[i].map(x =>({name: x.name, args: 'object' == typeof x.args ? x.args : []}));
+										req.body.operations = req.body.runtime.results.operations[i].map((x_ =>({name: x.name, args: 'object' === typeof x.args ? x.args : []}));
 							
 									}
-									else if ('object' == typeof req.body.runtime.results.operations[i] && null !== req.body.runtime.results.operations[i]) {
+									else if ('object' === typeof req.body.runtime.results.operations[i] && null !== req.body.runtime.results.operations[i]) {
 							
 										req.body.operations = req.body.runtime.results.operations[i];
-										req.body.operations.args = 'object' == typeof req.body.operations.args ? req.body.operations.args : [];
+										req.body.operations.args = 'object' === typeof req.body.operations.args ? req.body.operations.args : [];
 							
 									}
 									if ('string' === typeof req.body.operations) {
@@ -87,7 +89,7 @@ router.post(
 										resObj.operations.push(req.body.operations);
 				
 									}
-									else if ('object' == typeof req.body.operations && null !== req.body.operations) {
+									else if ('object' === typeof req.body.operations && null !== req.body.operations) {
 				
 										if (Array.isArray(req.body.operations)) {
 								
@@ -105,17 +107,17 @@ router.post(
 								}
 							
 							}
-							if ('object' == typeof req.body.runtime.results.cookies && null !== req.body.runtime.results.cookies) {
+							if ('object' === typeof req.body.runtime.results.cookies && null !== req.body.runtime.results.cookies) {
 							
 								resObj.cookies = req.body.runtime.results.cookies;
 							
 							}
-							if ('string' == typeof req.body.runtime.results.redirect) {
+							if ('string' === typeof req.body.runtime.results.redirect) {
 							
 								resObj.redirect = Url.parse(req.body.runtime.results.redirect, global.Uwot.Config.getConfigServerOrigin());
 							
 							}
-							if ('string' == typeof req.body.runtime.results.cwd) {
+							if ('string' === typeof req.body.runtime.results.cwd) {
 							
 								resObj.cwd = req.body.runtime.results.cwd;
 							
@@ -142,12 +144,12 @@ router.post(
 				}
 			
 			}
-			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
+			else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 			
 				resObj.output = {
 					color: 'yellow',
 					content: 'Invalid Request -' + nv.message
-				}
+				};
 			
 			}
 			
@@ -166,7 +168,7 @@ router.post(
 
 });
 
-if ('object' == typeof global.Uwot.Bin && Object.keys(global.Uwot.Bin).length > 0) {
+if ('object' === typeof global.Uwot.Bin && Object.keys(global.Uwot.Bin).length > 0) {
 
 	var binPathKeys = Object.keys(global.Uwot.Bin);
 	for (let i = 0; i < binPathKeys.length; i++) {

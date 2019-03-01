@@ -1,7 +1,5 @@
 'use strict';
 const path = require('path');
-const nonceHandler = require('node-timednonce');
-const denyAllOthers = require('../../middleware/denyAllOthers');
 const validateTheme = require('../../helpers/themeLoader').isValidTheme;
 
 class UwotCmdTheme extends global.Uwot.Exports.Cmd {
@@ -16,7 +14,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -29,9 +27,9 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 		var executeResult = {
 			output: ''
 		};
-		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+		if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 		
-			themeName = 'object' == typeof args[0] && 'string' == typeof args[0].text ? args[0].text.trim() : themeName;
+			themeName = 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : themeName;
 			if (themeName === '') {
 			
 				this.help(function(error, helpOutput) {
@@ -51,11 +49,11 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 				}.bind(this));
 			
 			}
-			if ('object' == typeof options && Array.isArray(options) && options.length > 0) {
+			if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
 		
 				for (let i = 0; i < options.length; i++) {
 				
-					if ('object' == typeof options[i] && 'string' == typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
+					if ('object' === typeof options[i] && 'string' === typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
 				
 						saveTheme = true;
 						i = options.length;
@@ -123,7 +121,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 				return callback(error, null);
 			
 			}
-			else if ('object' == typeof helpOutput && null !== helpOutput) {
+			else if ('object' === typeof helpOutput && null !== helpOutput) {
 			
 				helpOutput.content.push(themeList);
 				return callback(false, helpOutput);
@@ -132,7 +130,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 			else {
 			
 				themeList.content.unshift({output: '*** Help system currently unavailable. ***', isBold: true});
-				return callback(false, themeList)
+				return callback(false, themeList);
 			
 			}
 		
@@ -158,9 +156,9 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 	
 	}
 
-};
+}
 
-var theme = new UwotCmdTheme (
+var theme = new UwotCmdTheme(
 	{
 		name:				'theme',
 		description:		'Changes the theme for the console window.',

@@ -500,7 +500,7 @@ class SystemError extends Error {
 		
 		var message;
 		var msgConst;
-		if ('object' !== typeof contect || typeof context.syscall === 'undefined') {
+		if ('object' !== typeof context || 'string' !== typeof context.syscall) {
 		
 			key = 'UNKNOWN';
 			msgConst = messages.get(key);
