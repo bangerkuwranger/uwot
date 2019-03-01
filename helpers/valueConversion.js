@@ -5,7 +5,7 @@ module.exports = {
 
 	stringNoSpaces: function stringNoSpaces(value, format) {
 	
-		if ('undefined' == typeof value || null === value) {
+		if ('undefined' === typeof value || null === value) {
 		
 			return '';
 		
@@ -130,7 +130,7 @@ module.exports = {
 					}
 					else {
 					
-						value = ('string' == typeof value) ? parseInt(value) : value;
+						value = ('string' === typeof value) ? parseInt(value) : value;
 						return (Number.isInteger(value)) ? value : defaultValue;
 					
 					}
@@ -144,7 +144,7 @@ module.exports = {
 					else {
 					
 						defaultValue = null === defaultValue ? '' : defaultValue;
-						value = ('number' == typeof value) ? value.toString() : value;
+						value = ('number' === typeof value) ? value.toString() : value;
 						return ('string' === typeof value) ? value : defaultValue;
 					
 					}
@@ -178,7 +178,7 @@ module.exports = {
 			switch (format) {
 			
 				case 'db':
-					return ('string' == typeof value) ? parseFloat(value) : value;
+					return ('string' === typeof value) ? parseFloat(value) : value;
 					break;
 				case 'csv':
 					if (useNull) {
@@ -188,7 +188,7 @@ module.exports = {
 					}
 					else {
 					
-						value = ('number' == typeof value) ? value.toFixed(4) : value.toString();
+						value = ('number' === typeof value) ? value.toFixed(4) : value.toString();
 						return (null === value || 'null' === value) ? '': value;
 					
 					}
@@ -246,8 +246,8 @@ module.exports = {
 	cleanDate: function cleanDate(value, format) {
 	
 		var defaultValue = new Date();
-		value = 'string' == typeof value || 'number' == typeof value ? new Date(value) : value;
-		value = ('object' == typeof value && value instanceof Date) ? value : defaultValue;
+		value = 'string' === typeof value || 'number' === typeof value ? new Date(value) : value;
+		value = ('object' === typeof value && value instanceof Date) ? value : defaultValue;
 		value = value.toString() === 'Invalid Date' ? defaultValue : value;
 		if ('string' !== typeof format) {
 		
@@ -275,7 +275,7 @@ module.exports = {
 	
 	arrayOfObjectsOrEmpty: function arrayOfObjectsOrEmpty(value) {
 
-		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'object' == typeof value[0] ? value : [];
+		value = 'object' === typeof value && null !== value && Array.isArray(value) && 'object' === typeof value[0] ? value : [];
 		var objectArray = [];
 		for (let i = 0; i < value.length; i++) {
 		
@@ -288,7 +288,7 @@ module.exports = {
 	
 	arrayOfStringsOrEmpty: function arrayOfStringsOrEmpty(value) {
 
-		value = 'object' == typeof value && null !== value && Array.isArray(value) && 'string' == typeof value[0] ? value : [];
+		value = 'object' === typeof value && null !== value && Array.isArray(value) && 'string' === typeof value[0] ? value : [];
 		var stringArray = [];
 		for (let i = 0; i < value.length; i++) {
 		

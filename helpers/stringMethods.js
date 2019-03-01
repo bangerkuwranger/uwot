@@ -36,6 +36,6 @@ if (!String.prototype.toCrArray) {
 	
 		return this.split(/[\r\n]+/);
 	
-	}
+	};
 
 }

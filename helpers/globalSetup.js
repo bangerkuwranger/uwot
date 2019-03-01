@@ -1,8 +1,5 @@
 // node packages
 var path = require('path');
-var fs = require('fs');
-
-// npm packages
 
 // app packages
 var Config = require('../config');
@@ -262,6 +259,6 @@ module.exports = {
 	
 	},
 	
-	initGlobalObjects: initGlobalObjects
+	initGlobalObjects
 
-}
+};

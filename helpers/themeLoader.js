@@ -11,7 +11,6 @@ module.exports = {
 		if (localThemeStats.isDirectory()) {
 	
 			var localFileList = fs.readdirSync(localThemePath);
-			var localThemeFiles = [];
 			var localFileLength = localFileList.length;
 			for (let i = 0; i < localFileLength; i++) {
 	
@@ -52,7 +51,7 @@ module.exports = {
 	// false if not.
 	isValidTheme(themeName) {
 	
-		if ('undefined' == typeof themeName || null === themeName || '' === themeName) {
+		if ('undefined' === typeof themeName || null === themeName || '' === themeName) {
 		
 			return Object.keys(global.Uwot.Themes);
 		
@@ -71,4 +70,4 @@ module.exports = {
 	
 	}
 
-}
+};

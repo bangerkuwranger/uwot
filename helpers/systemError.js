@@ -6,12 +6,12 @@
 // using almost the same logic from node's core errors.js
 // BUT dumber and less efficient: hardcodes the messages using values from the uv header
 // context is obj with props:
-// 	(string)dest
+//	(string)dest
 //	(string)path
 //	(string)syscall //if omitted, all functions return a UNKNOWN error code and syscall of 'unknown'
 
 // SystemError constructor creates object with immutable properties matching final node
-// 	SystemError objects, as well as getters and setters for internal SystemError class props.
+//	SystemError objects, as well as getters and setters for internal SystemError class props.
 //	use getters and setters for changing and returning dynamic values, otherwise
 //	properties can be directly returned using dot notation like 'real' SystemErrors
 
@@ -20,10 +20,10 @@
 //	function fakeSystemProcess(args, callback) {
 //		doSomething(args, function(err, val) {
 //			if(err) {
-// 				var context = {path: '/usr/local/bin/mongo', syscall: 'unlink'};
-// 				var error = systemError.EPERM(context);
-// 				console.error(error.message);
-// 				return callback(error, null);
+//				var context = {path: '/usr/local/bin/mongo', syscall: 'unlink'};
+//				var error = systemError.EPERM(context);
+//				console.error(error.message);
+//				return callback(error, null);
 //			}
 //			return callback(false, val);
 //		});
@@ -32,7 +32,7 @@
 
 // UV posix errnos in descending order
 const UV__ENOTTY				= -4029;
-const UV__EREMOTEIO 			= -4030;
+const UV__EREMOTEIO				= -4030;
 const UV__EMLINK				= -4032;
 const UV__ENXIO					= -4033;
 const UV__ERANGE				= -4034;
@@ -485,7 +485,7 @@ const messages = new Map([
 let buffer;
 function lazyBuffer() {
 
-	if (buffer === undefined) {
+	if (typeof buffer === 'undefined') {
 	
 		buffer = require('buffer').Buffer;
 	
@@ -494,34 +494,19 @@ function lazyBuffer() {
 
 }
 
-var sysErrors = {};
-for (var key of messages.keys()) {
-
-	sysErrors[key] = function(context) {
-	
-		// TBD
-		// Test if we can captureStackTrace or if strict mode throws error.
-		return new SystemError(this, context);
-	
-	}.bind(key);
-
-};
-module.exports = sysErrors;
-
-
 class SystemError extends Error {
 
 	constructor(key, context) {
 		
 		var message;
 		var msgConst;
-		if (context.syscall === undefined) {
+		if ('object' !== typeof contect || typeof context.syscall === 'undefined') {
 		
 			key = 'UNKNOWN';
 			msgConst = messages.get(key);
 			let desc = msgConst.message;
 			context.syscall = 'unknown';
-			message = `${key}:  $desc`;
+			message = `${key}:	${desc}`;
 		
 		}
 		else {
@@ -531,12 +516,12 @@ class SystemError extends Error {
 			message = `${key}: ${desc}, ${context.syscall}`;
 		 
 		}
-		if (context.path !== undefined){
+		if ('object' === typeof contect || typeof context.path !== 'undefined'){
 		
 			message += ` ${context.path}`;
 		
 		}
-		if (context.dest !== undefined) {
+		if ('object' === typeof contect || typeof context.dest !== 'undefined') {
 		
 			message += ` => ${context.dest}`;
 		
@@ -571,23 +556,22 @@ class SystemError extends Error {
 			value: context.errno
 		});
 		// Object.defineProperty(this, 'stack', {
-// 			enumerable: true,
-// 			value: 
-Error.captureStackTrace(this, SystemError)
-// 		});
+//			enumerable: true,
+//			value: 
+		Error.captureStackTrace(this, SystemError);
+//		});
 		
   }
 
-  	get name() {
-  
-//     	return `SystemError ${this['kCode']}`;
+	get name() {
+
 		return 'Error';
-    
-  	}
+	
+	}
 
 	set name(value) {
 	
-		defineProperty(this, 'name', {
+		Object.defineProperty(this, 'name', {
 			configurable: true,
 			enumerable: true,
 			value,
@@ -604,7 +588,7 @@ Error.captureStackTrace(this, SystemError)
 
 	set code(value) {
 	
-		defineProperty(this, 'code', {
+		Object.defineProperty(this, 'code', {
 			  configurable: true,
 			  enumerable: true,
 			  value,
@@ -645,21 +629,21 @@ Error.captureStackTrace(this, SystemError)
 
 	get path() {
 	
-		return this['kInfo'].path !== undefined ? this['kInfo'].path.toString() : undefined;
+		return 'object' !== typeof this['kInfo'] || typeof this['kInfo'].path === 'undefined' ? this['kInfo'].path.toString() : '';
 	
 	}
 
 	set path(val) {
 	
 		this['kInfo'].path = val ?
-	  		lazyBuffer().from(val.toString()) : undefined;
+			lazyBuffer().from(val.toString()) : undefined;
 	
 	}
 
 	get dest() {
 	
 		return this['kInfo'].path !== undefined ?
-	  		this['kInfo'].dest.toString() : undefined;
+			this['kInfo'].dest.toString() : undefined;
 	
 	}
 
@@ -671,3 +655,17 @@ Error.captureStackTrace(this, SystemError)
 	}
 
 }
+
+var sysErrors = {};
+for (var key of messages.keys()) {
+
+	sysErrors[key] = function(context) {
+	
+		// TBD
+		// Test if we can captureStackTrace or if strict mode throws error.
+		return new SystemError(this, context);
+	
+	}.bind(key);
+
+}
+module.exports = sysErrors;

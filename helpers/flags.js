@@ -33,13 +33,13 @@ class Flag {
 		switch(this.type) {
 		
 			case 'boolean':
-				this.defaultVal = 'boolean' != typeof defaultVal ? false : defaultVal;
+				this.defaultVal = 'boolean' !== typeof defaultVal ? false : defaultVal;
 				break;
 			case 'string':
-				this.defaultVal = 'string' == typeof defaultVal ? defaultVal : '';
+				this.defaultVal = 'string' === typeof defaultVal ? defaultVal : '';
 				break;
 			case 'json':
-				this.defaultVal = 'object' == typeof defaultVal ? defaultVal : {};
+				this.defaultVal = 'object' === typeof defaultVal ? defaultVal : {};
 				break;
 		
 		}
@@ -120,9 +120,9 @@ class FlagSet{
 			this.flagErrors = [];
 			for (let i = 0; i < flags.length; i++) {
 			
-				if ('object' == typeof flags[i] && null !== flags[i]) {
+				if ('object' === typeof flags[i] && null !== flags[i]) {
 				
-					if ('string' == typeof flags[i].flagString && '' === flags[i].flagString) {
+					if ('string' === typeof flags[i].flagString && '' === flags[i].flagString) {
 					
 						this.invalidFlags.push(flags[i]);
 					
