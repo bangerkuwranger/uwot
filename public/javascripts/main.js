@@ -5,15 +5,15 @@ jQuery(document).ready(function($) {
 
 	uwotHistory = new CliHistory();
 	
-	if ('string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
-		changePrompt('login')
+	if ('string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
+		changePrompt('login');
 	}
 	else {
 		changePrompt(user);
 	}
 	var initialCwd = '/';
 	var storedCwd = localStorage.getItem('UwotCwd');
-	if ('string' == typeof storedCwd) {
+	if ('string' === typeof storedCwd) {
 		initialCwd = storedCwd;
 	}
 	changeCwd(initialCwd);
@@ -23,16 +23,17 @@ jQuery(document).ready(function($) {
 			$.getScript('/javascripts/jquery.touchSwipe.min.js')
 			.done(function(script, status) {
 				$('#uwotcli').swipe({
-					swipeLeft:function(event, direction, distance, duration, fingerCount) {
+					swipeLeft(event, direction, distance, duration, fingerCount) {
 						var prevCmd = uwotHistory.getPrevItem();
 						$("#uwotcli-input").val(prevCmd).focus();	
 					},
-					swipeRight:function(event, direction, distance, duration, fingerCount) {
+					swipeRight(event, direction, distance, duration, fingerCount) {
 						var nextCmd = uwotHistory.getNextItem();
 						$("#uwotcli-input").val(nextCmd).focus();
 					},
 				});
-				return initTouchSupport = true;
+				initTouchSupport = true;
+				return initTouchSupport;
 			})
 			.always(function() {
 				$("#uwotcli-input").focus();
@@ -46,8 +47,8 @@ jQuery(document).ready(function($) {
 	$("#uwotcli").submit(function(e) {
 		e.preventDefault();
 		var op;
-		var doLogin = 'string' == typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
-		var hasLoginUser = 'string' == typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
+		var doLogin = 'string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
+		var hasLoginUser = 'string' === typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
 		if (doLogin) {
 			if (hasLoginUser) {
 				op = 'login ' + $("#uwotcli-login").val() + ' ' + $('#uwotcli-input').val();
@@ -77,7 +78,7 @@ jQuery(document).ready(function($) {
 				'/bin',
 				{
 					cmd: op,
-					nonce: nonce,
+					nonce,
 					cwd: localStorage.getItem('UwotCwd')
 				}
 			)
@@ -132,10 +133,10 @@ jQuery(document).ready(function($) {
 		
 		}
 	
-	})
+	});
 	
 	$(window).resize(function() {
-        window.setTimeout(onWidth(), 1000)
+        window.setTimeout(onWidth(), 1000);
     });
     
     onWidth();
@@ -144,38 +145,38 @@ jQuery(document).ready(function($) {
 
 function outputToMain(data, args) {
 	var lineClasses = "outputline";
-	if ('object' == typeof args) {
-		if ('boolean' == typeof args.addPrompt && args.addPrompt) {
+	if ('object' === typeof args) {
+		if ('boolean' === typeof args.addPrompt && args.addPrompt) {
 			lineClasses += " add-prompt";
 		}
 	}
-	if ('string' == typeof data) {
+	if ('string' === typeof data) {
 		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
 	}
-	else if ('object' == typeof data && null !== data) {
-		if ('string' == typeof data.output && '' !== data.output) {
+	else if ('object' === typeof data && null !== data) {
+		if ('string' === typeof data.output && '' !== data.output) {
 			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
 		}
-		if ('undefined' !== typeof data.operations && 'object' == typeof uwotOperations && Array.isArray(uwotOperations)) {
+		if ('undefined' !== typeof data.operations && 'object' === typeof uwotOperations && Array.isArray(uwotOperations)) {
 			performOperations(data.operations);
 		}
-		if ('object' == typeof data.cookies && null !== data.cookies) {
+		if ('object' === typeof data.cookies && null !== data.cookies) {
 		
 			var cNames = Object.keys(data.cookies);
 			for (let i =0; i < cNames.length; i++) {
 				var thisCName = cNames[i];
 				var thisCookie = data.cookies[thisCName];
 				var curVal = uwotGetCookieValue(thisCName);
-				if ('object' == typeof thisCookie && null !== thisCookie && 'string' == typeof thisCookie.value) {
+				if ('object' === typeof thisCookie && null !== thisCookie && 'string' === typeof thisCookie.value) {
 					var thisValue = thisCookie.value;
 					var expiry = null;
-					if ('string' == typeof thisCookie.expiry) {
+					if ('string' === typeof thisCookie.expiry) {
 						expiry = new Date(thisCookie.expiry);
 					}
-					else if ('object' == typeof thisCookie.expiry && thisCookie.expiry instanceof Date) {
+					else if ('object' === typeof thisCookie.expiry && thisCookie.expiry instanceof Date) {
 						expiry = thisCookie.expiry;
 					}
-					if (thisValue == '' && null !== expiry) {
+					if (thisValue === '' && null !== expiry) {
 						uwotSetCookie(thisCName, curVal, expiry);
 					}
 					else if (thisValue !== '' && null !== expiry) {
@@ -187,11 +188,11 @@ function outputToMain(data, args) {
 				}
 			}
 		}
-		if ('object' == typeof data.redirect && data.redirect !== null) {
+		if ('object' === typeof data.redirect && data.redirect !== null) {
 			jQuery('#uwotheader-indicator').addClass('loading');
 			window.setTimeout(uwotClientRedirect(data.redirect), 250);
 		}
-		if ('string' == typeof data.cwd) {
+		if ('string' === typeof data.cwd) {
 		
 			changeCwd(data.cwd);
 		
@@ -221,7 +222,7 @@ function changePrompt(promptString) {
 }
 
 function revertPrompt() {
-	var promptString = 'string' == typeof jQuery('#cliform .field').attr('data-prev-prompt') && '' !== jQuery('#cliform .field').attr('data-prev-prompt') ? jQuery('#cliform .field').attr('data-prev-prompt') : user;
+	var promptString = 'string' === typeof jQuery('#cliform .field').attr('data-prev-prompt') && '' !== jQuery('#cliform .field').attr('data-prev-prompt') ? jQuery('#cliform .field').attr('data-prev-prompt') : user;
 	var prevPrompt = jQuery('#cliform .field').attr('data-prompt').trim();
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
@@ -246,7 +247,7 @@ function changeCwd(cwdString) {
 			while (cwdLast === "") {
 				cwdLast = cwdArray.pop();
 			}
-			cwdLast = 'undefined' == typeof cwdLast ? '/' : cwdLast;
+			cwdLast = 'undefined' === typeof cwdLast ? '/' : cwdLast;
 			while (cwdArray[0] === "") {
 				cwdArray.shift();
 			}
@@ -273,17 +274,17 @@ function changeCwd(cwdString) {
 
 function performOperations(operations) {
 	let ops = new UwotCliOperations();
-	if ('string' == typeof operations && -1 != uwotOperations.indexOf(operations.trim())) {
+	if ('string' === typeof operations && -1 !== uwotOperations.indexOf(operations.trim())) {
 		ops.performOperation(operations.trim());
 	}
-	if ('object' == typeof operations && null !== operations) {
+	if ('object' === typeof operations && null !== operations) {
 		if (Array.isArray(operations)) {
 			operations.forEach(function(operation) {
 				performOperations(operation);
 			});
 		}
-		else if ('string' == typeof operations.name && 'object' == typeof operations.args && Array.isArray(operations.args)) {
-			var args = (operations.args.length > 0) ? operations.args.map(x => x.text) : [];
+		else if ('string' === typeof operations.name && 'object' === typeof operations.args && Array.isArray(operations.args)) {
+			var args = (operations.args.length > 0) ? operations.args.map((x) => { x.text }) : [];
 			ops.performOperation(operations.name, args);
 		}
 	}
@@ -294,10 +295,10 @@ function uwotGetCookieValue(cname) {
 	var ca = document.cookie.split(';');
 	for(var i = 0; i < ca.length; i++) {
 		var c = ca[i];
-		while (c.charAt(0) == ' ') {
+		while (c.charAt(0) === ' ') {
 			c = c.substring(1);
 		}
-		if (c.indexOf(name) == 0) {
+		if (c.indexOf(name) === 0) {
 			return c.substring(name.length, c.length);
 		}
 	}
@@ -317,7 +318,7 @@ function uwotSetCookie(cname, cvalue, cexpiry) {
 }
 
 function uwotClientRedirect(redirect) {
-	if ('object' == typeof redirect && null !== redirect) {
+	if ('object' === typeof redirect && null !== redirect) {
 		return window.location.replace(redirect.path);
 	}
 }
