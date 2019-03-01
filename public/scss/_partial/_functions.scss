@@ -18,7 +18,7 @@
 			level-2-three: 23
 		)
 	);
-	
+
 	mapGet($deep-map, 'level-1-one') is equivalent to map-get($deep-map, 'level-1-one'),
 	and returns the map as a variable for further processing by the processor.
 	HOWEVER, this is more useful for getting actual deeply nested values...
@@ -29,8 +29,9 @@
 ****/
 
 @function mapGet($map, $list...) {
-    @each $key in $list {
-        $map: map-get($map, $key);
-    }
-    @return $map;
+	@each $key in $list {
+		$map: map-get($map, $key);
+	}
+	
+	@return $map;
 }

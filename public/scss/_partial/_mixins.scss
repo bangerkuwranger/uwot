@@ -17,10 +17,9 @@ renders to:
 @mixin calc($property, $val1, $operator, $val2) {
 
 	$prefixes: ("-webkit-", "-moz-", "-ms-", "-o-", "" );
+
 	@each $prefix in $prefixes {
-	  
 		#{$property}: #{$prefix}calc(#{$val1} #{$operator} #{$val2});
-	  
 	}
 
 }
@@ -38,7 +37,5 @@ renders to:
 */
 
 @mixin numstrtoem($property, $val) {
-	
 	#{$property}: #{$val}em;
-
 }
