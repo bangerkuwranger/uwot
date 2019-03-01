@@ -5,10 +5,11 @@
 
 @import url('https://fonts.googleapis.com/css?family=Share+Tech+Mono');
 
-body{
+body {
 
 	#uwot {
 		--prompt: 'C:\\>';
+		
 		font-size: 8px;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -49,7 +50,7 @@ body{
 					.field {
 						margin-left: 3ch;
 						
-						&:before {
+						&::before {
 							left: -3ch;
 						}
 				
@@ -74,41 +75,38 @@ body{
 @media (prefers-color-scheme: dark) {
 
 	body {
-
 		#uwot {
-		
 			.terminal {
-				color: #ddd;
-				background-color: #00002a;
+				color: #DDD;
+				background-color: #00002A;
 				
 				a {
-					color: #0000cf;
+					color: #0000CF;
 	
 					&:hover,
 					&:active {
-						color: #0000df;
+						color: #0000DF;
 					}
 	
 				}
 				
 				
 				.header {
-					border-color: #ddd;
-					background-color: #00002a;
+					border-color: #DDDDDD;
+					background-color: #00002A;
 				}
 				
 				.cli {
-					border-color: #ddd;
-					background-color: #00002a;
+					border-color: #DDDDDD;
+					background-color: #00002A;
 				
 					form {
-			
 						.field {
 				
 							input,
 							input:focus,
-							input:active {						
-								color: #ddd;
+							input:active {
+								color: #DDD;
 							}
 			
 						}
@@ -127,13 +125,9 @@ body{
 
 
 @media (min-width: 642px) {
-
 	body {
-	
 		#uwot {
 			font-size: 12px;
 		}
-
 	}
-
 }

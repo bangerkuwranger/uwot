@@ -3,7 +3,7 @@
 @import 'colors';
 @import '../../_partial/ansi';
 
-body{
+body {
 
 	#uwot {
 		--prompt: "Ğö:";
@@ -44,7 +44,7 @@ body{
 					.field {
 						margin-left: 2ch;
 						
-						&:before {
+						&::before {
 							left: -2ch;
 						}
 				
@@ -68,55 +68,42 @@ body{
 }
 
 @media (prefers-color-scheme: dark) {
-
 	body {
-
 		#uwot {
-		
 			.terminal {
-				color: #aa0;
-				background-color: #111;
+				color: #AAAA000;
+				background-color: #111111;
 				
 				a {
-					color: #a0a;
+					color: #AA00AA;
 	
 					&:hover,
 					&:active {
-						color: #d0d;
+						color: #DD00DD;
 					}
 	
 				}
 				
-				
 				.header {
-					border-color: #aa0;
-					background-color: #111;
+					border-color: #DDDD00;
+					background-color: #111111;
 				}
 				
 				.cli {
-					border-color: #d0d;
-					background-color: #111;
+					border-color: #DD00DD;
+					background-color: #111111;
 				
 					form {
-			
 						.field {
-				
 							input,
 							input:focus,
-							input:active {						
-								color: #d0d;
+							input:active {
+								color: #DD00DD;
 							}
-			
 						}
-		
 					}
-				
 				}
-			
 			}
-		
 		}
-		
 	}
-
 }

@@ -2,14 +2,11 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-// @error mapGet($theme-colors, 'ansi', 'black');
-
 @include ansi(mapGet($theme-colors, 'ansi'));
 
 body {
 
 	#uwot {
-		
 		.terminal {
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
@@ -65,9 +62,7 @@ body {
 @media (prefers-color-scheme: dark) {
 
 	body {
-
 		#uwot {
-		
 			.terminal {
 				color: mapGet($ansi-colors, 'white');
 				background-color: mapGet($ansi-colors, 'black');
@@ -92,13 +87,13 @@ body {
 					border-color: mapGet($ansi-colors, 'white');
 				
 					form {
-			
-						.field {
-				
+						.field {}
 							input,
 							input:focus,
-							input:active {						
+							input:active {		
+											
 								color: mapGet($ansi-colors, 'cyan');
+							
 							}
 			
 						}
@@ -108,9 +103,8 @@ body {
 				}
 			
 			}
-		
-		}
-		
-	}
 
+		}
+	
+	}
 }

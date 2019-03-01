@@ -2,13 +2,13 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-
 @import url('https://fonts.googleapis.com/css?family=Anonymous+Pro:400,700&subset=latin-ext');
 
-body{
+body {
 
 	#uwot {
 		--prompt: '$';
+		
 		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -71,7 +71,6 @@ body{
 	body {
 
 		#uwot {
-		
 			.terminal {
 				color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
@@ -99,11 +98,12 @@ body{
 					form {
 			
 						.field {
-				
 							input,
 							input:focus,
-							input:active {						
+							input:active {		
+											
 								color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+							
 							}
 			
 						}
@@ -123,11 +123,8 @@ body{
 @media (min-width: 642px) {
 
 	body {
-	
 		#uwot {
 			font-size: 10px;
 		}
-
 	}
-
 }

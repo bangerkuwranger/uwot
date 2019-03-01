@@ -2,14 +2,13 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=greek-ext,latin-ext');
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,700,700i');
 
-body{
-
+body {
 	#uwot {
 		--prompt: '$';
+		
 		font: 12px 'Roboto', sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -72,47 +71,43 @@ body{
 	body {
 
 		#uwot {
-		
 			.terminal {
-				color: #dcd0a9;
-				background-color: #001c23;
+				color: #DCD0A9;
+				background-color: #001C23;
 				
 				a {
-					color: #1b6295;
+					color: #1B6295;
 	
 					&:hover,
 					&:active {
-						color: #1b6295;
+						color: #1B6295;
 					}
 	
 				}
 				
 				
 				.header {
-					border-color: #dcd0a9;
-					background-color: #001c23;
+					border-color: #DCD0A9;
+					background-color: #001C23;
 				}
 				
 				.cli {
-					border-color: #dcd0a9;
-					background-color: #001c23;
+					border-color: #DCD0a9;
+					background-color: #001C23;
 				
 					form {
 			
 						.field {
-				
 							input,
 							input:focus,
-							input:active {						
-								color: #1b6295;
+							input:active {
+								color: #1B6295;
 							}
-			
 						}
 		
 					}
 				
 				}
-			
 			}
 		
 		}
@@ -122,13 +117,9 @@ body{
 }
 
 @media (min-width: 642px) {
-
 	body {
-	
 		#uwot {
 			font-size: 16px;
 		}
-
 	}
-
 }

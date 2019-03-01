@@ -2,14 +2,15 @@
 @import '../../_partial/mixins';
 @import 'colors';
 @import '../../_partial/ansi';
-
 @import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext');
 
-body{
+body {
 
 	#uwot {
 		--prompt: "Ⓐ:";
+		
 		font: 8px Futura, sans-serif;
+		
 		@include ansi(mapGet($theme-colors, 'ansi'));
 		
 		.terminal {
@@ -54,14 +55,14 @@ body{
 					.field {
 						margin-left: 2ch;
 				
-						&:before {
+						&::before {
 							left: -2ch;
 						}
 				
 						input,
 						input:focus,
 						input:active {
-							margin-top: .1em;
+							margin-top: 0.1em;
 						}
 			
 					}
@@ -81,17 +82,16 @@ body{
 	body {
 
 		#uwot {
-		
 			.terminal {
-				color: #00ca12;
-				background-color: #1c1c1c;
+				color: #00CA12;
+				background-color: #1C1C1C;
 				
 				a {
-					color: #9d0d00;
+					color: #9D0D00;
 	
 					&:hover,
 					&:active {
-						color: #bd0d00;
+						color: #BD0D00;
 					}
 	
 				}
@@ -101,12 +101,12 @@ body{
 				}
 				
 				.header {
-					border-color: #9d0d00;
-					background-color: #1c1c1c;
+					border-color: #9D0D00;
+					background-color: #1C1C1C;
 				}
 				
 				.cli {
-					border-color: #9d0d00;
+					border-color: #9D0D00;
 					background-color: #1c1c1c;
 				
 					form {
@@ -115,8 +115,10 @@ body{
 				
 							input,
 							input:focus,
-							input:active {						
-								color: #00ca12;
+							input:active {
+							
+								color: #00CA12;
+							
 							}
 			
 						}
@@ -136,12 +138,10 @@ body{
 @media (min-width: 642px) {
 
 	body {
-	
 		#uwot {
 			font-size: 12px;
 			
 			.terminal {
-			
 				.output {
 					margin: 4em 0;
 				}
@@ -150,26 +150,20 @@ body{
 					padding: 0.5em 0;
 					
 					form {
-			
 						.field {
 				
 							input,
 							input:focus,
 							input:active {
 								vertical-align: bottom;
-								margin-top: .25em;
+								margin-top: 0.25em;
 							}
-			
 						}
 					
 					}
 					
 				}
-			
 			}
-			
 		}
-
 	}
-
 }

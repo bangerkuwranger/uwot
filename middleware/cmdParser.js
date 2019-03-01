@@ -828,7 +828,7 @@ module.exports = function(args) {
 			req.body.cmdAst = bashParser(req.body.cmd);
 			var cmdString = req.body.cmd.trim();
 			var cmdArray = cmdString.split(' ');
-			if (cmdArray.some((r) => {global.Uwot.Constants.cliOps.includes(r)})) {
+			if (cmdArray.some((r) => { global.Uwot.Constants.cliOps.includes(r); })) {
 		
 				if (cmdArray.length === 1) {
 				
