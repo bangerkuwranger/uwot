@@ -1261,7 +1261,7 @@ describe('config.js', function() {
 			
 				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefault(cat) {
 				
-					return stubDefaults[cat]
+					return stubDefaults[cat];
 				
 				});
 				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
