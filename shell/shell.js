@@ -4,45 +4,10 @@ const fs = require('fs');
 const readline = require('readline');
 const globalSetupHelper = require('../helpers/globalSetup');
 
-// if ('undefined' == typeof global.appRoot) {
-// 
-// 	global.appRoot = path.resolve(__dirname, '../');
-// 
-// }
-// if ('function' != typeof global.tryParseJSON) {
-// 
-// 	global.tryParseJSON = function tryParseJSON(jsonString) {
-// 
-// 		try {
-// 
-// 			var jsonObj = JSON.parse(jsonString);
-// 			if (jsonObj && typeof jsonObj === "object") {
-// 
-// 				return jsonObj;
-// 
-// 			}
-// 
-// 		}
-// 		catch (e) { }
-// 		return false;
-// 
-// 	};
-// 
-// }
-
 globalSetupHelper.initConstants();
 globalSetupHelper.initEnvironment();
-
-// if ('undefined' == typeof global.Uwot.Users) {
-// 
-// 	var uwotusers = require('../users');
-// 	global.Uwot.Users = new uwotusers();
-// 
-// }
-
 globalSetupHelper.initExports();
 
-// const cmd = require('../cmd');
 const Setup = require('../setup');
 const tableNames = [
 	'users',
@@ -54,6 +19,8 @@ const configCats = [
 	"binpath",
 	"themes"
 ];
+
+// Headline output for shell interface
 console.log('| Node application shell for: ' + global.Uwot.Constants.appRoot + ' |');
 var bottomLine = '—————————————————————————————————';
 for (let sp = 0; sp < global.Uwot.Constants.appRoot.toString().length; sp++) {
@@ -100,13 +67,14 @@ var commandSets = {
 	]
 };
 
+// Begin component functions
 
 //setup config handler
 //usage:
 //	shell.js setup [action] [category] [...args]
 function setupConfigHandler(action, category, argArray) {
 
-	if ('undefined' == typeof category || '-h' === category || '--help' === category || 'help' === category || -1 == configCats.indexOf(category)) {
+	if ('undefined' === typeof category || '-h' === category || '--help' === category || 'help' === category || -1 === configCats.indexOf(category)) {
 	
 		var helpArgs;
 		switch(action) {
@@ -161,7 +129,7 @@ function setupConfigHandler(action, category, argArray) {
 		
 		}
 		actionHelp(...helpArgs);
-		if (-1 == configCats.indexOf(category)) {
+		if (-1 === configCats.indexOf(category)) {
 			console.error('Invalid category "' + category + '". Use one of the following:');
 		}
 		else {
@@ -230,7 +198,7 @@ function listSetupCategoryValues(category, envs) {
 			process.exit();
 		
 		}
-		else if ('object' == typeof valueList && null !== valueList) {
+		else if ('object' === typeof valueList && null !== valueList) {
 		
 			var keys = Object.keys(valueList);
 			var arrays = new Map();
@@ -308,7 +276,7 @@ function setSetupCategoryKeyValue(category, key, value, envs) {
 			for (let i = 0; i < catKeys.length; i++) {
 			
 				let thisVal = currentValues[catKeys[i]];
-				if (catKeys[i] == key) {
+				if (catKeys[i] === key) {
 				
 					thisVal = value;
 				
@@ -324,7 +292,7 @@ function setSetupCategoryKeyValue(category, key, value, envs) {
 							process.exit();
 		
 						}
-						else if (-1 == savedKeys.indexOf(key)) {
+						else if (-1 === savedKeys.indexOf(key)) {
 						
 							console.error('Unable to save value "' + value + '" for ' +  category + ':' + key);
 							process.exit();
@@ -362,28 +330,34 @@ function resetSetupCategoryValues(category, envs) {
 			process.exit();
 		
 		}
+		else if (!isReset) {
+		
+			console.log('No values to reset for category ' + category + '. All values are already set to use defaults');
+		
+		}
 		else {
 		
 			console.log('Successfully reset values for category ' + category + ' to defaults.');
-			setupInterface.listCat(category, function(error, catVals) {
 			
-				if (error) {
-		
-					console.error(error);
-					process.exit();
-		
-				}
-				else {
-				
-					console.log('Current values:');
-					console.log(catVals);
-					process.exit();
-				
-				}
-			
-			});
 		
 		}
+		setupInterface.listCat(category, function(error, catVals) {
+		
+			if (error) {
+	
+				console.error(error);
+				process.exit();
+	
+			}
+			else {
+			
+				console.log('Current values:');
+				console.log(catVals);
+				process.exit();
+			
+			}
+		
+		});
 	
 	});
 
@@ -391,7 +365,7 @@ function resetSetupCategoryValues(category, envs) {
 
 function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 
-	if ('string' != typeof category || 'string' != typeof key || 'string' != typeof value) {
+	if ('string' !== typeof category || 'string' !== typeof key || 'string' !== typeof value) {
 	
 		console.error('category, key, and value must all be strings.');
 	
@@ -408,28 +382,33 @@ function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 				process.exit();
 			
 			}
+			else if (!isSaved) {
+			
+				console.log('No new values saved in array for ' + category + ':' + key + '; all previous values matched given values.');
+			
+			}
 			else {
 			
 				console.log('Successfully saved new values in array for ' + category + ':' + key);
-				setupInterface.listArrayValues(category, key, function(error, vals) {
-			
-					if (error) {
-		
-						console.error(error);
-						process.exit();
-		
-					}
-					else {
-				
-						console.log('Current values:');
-						arrayWithIdx(vals);
-						process.exit();
-				
-					}
-			
-				});
 			
 			}
+			setupInterface.listArrayValues(category, key, function(error, vals) {
+		
+				if (error) {
+	
+					console.error(error);
+					process.exit();
+	
+				}
+				else {
+			
+					console.log('Current values:');
+					arrayWithIdx(vals);
+					process.exit();
+			
+				}
+		
+			});
 		
 		});
 	
@@ -440,7 +419,7 @@ function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 function removeSetupCategoryKeyArrayValue(category, key, index, envs) {
 
 	//sanity check
-	if ('string' != typeof category || 'string' != typeof key || isNaN(parseInt(index))) {
+	if ('string' !== typeof category || 'string' !== typeof key || isNaN(parseInt(index))) {
 	
 		console.error('category and key must be strings. index must be an integer.');
 	
@@ -515,8 +494,8 @@ function removeSetupCategoryKeyArrayValue(category, key, index, envs) {
 
 function getEnvs(given, defVal) {
 
-	defVal = 'string' == typeof defVal ? defVal : 'prod';
-	var finalV = 'string' != typeof given ? defVal : given;
+	defVal = 'string' === typeof defVal ? defVal : 'prod';
+	var finalV = 'string' !== typeof given ? defVal : given;
 	var envs;
 	switch(finalV) {
 	
@@ -565,7 +544,7 @@ function dropAndCreateTable(tableName, dbPath) {
 //	shell.js db setup tablename
 function setupDb(tableName) {
 
-	if ('undefined' != typeof tableName && ('-h' === tableName || '--help' === tableName || 'help' === tableName)) {
+	if ('undefined' !== typeof tableName && ('-h' === tableName || '--help' === tableName || 'help' === tableName)) {
 	
 		actionHelp("db setup", 'Setup a table or all tables. Drops (if exists) and creates table.', 'tablename', 'Omitting the tablename will rebuild and set up all tables.');
 		console.log('Available table names:');
@@ -573,8 +552,9 @@ function setupDb(tableName) {
 		return process.exit();
 	
 	}
-	else if ('undefined' != typeof tableName) {
+	else if ('undefined' !== typeof tableName) {
 	
+		var dbPath, tableCount;
 		if (tableNames.indexOf(tableName) === -1) {
 		
 			console.log('Unknown table: ' + tableName);
@@ -586,7 +566,7 @@ function setupDb(tableName) {
 		else {
 		
 			console.log('Setting up table: ' + tableName);
-			var dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableName + '.db');
+			dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableName + '.db');
 			dropAndCreateTable(tableName, dbPath);
 			return process.exit();
 		
@@ -596,10 +576,10 @@ function setupDb(tableName) {
 	else {
 	
 		console.log('Dropping and rebuilding all tables.');
-		var tableCount = 0;
+		tableCount = 0;
 		for (let i = 0; i < tableNames.length; i++) {
 		
-			var dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableNames[i] + '.db');
+			dbPath = path.resolve(global.Uwot.Constants.appRoot, 'var/nedb/', tableNames[i] + '.db');
 			dropAndCreateTable(tableNames[i], dbPath);
 			tableCount++;
 		
@@ -616,7 +596,7 @@ function setupDb(tableName) {
 //	shell.js adminUser add username password canSudo fname lname
 function addAdminUser(uname, password, canSudo, fname, lname) {
 
-	if ('undefined' == typeof uname || 'string' != typeof uname || !uname || '' === uname) {
+	if ('undefined' === typeof uname || 'string' !== typeof uname || !uname || '' === uname) {
 	
 		return console.log('Cannot add user; username is invalid.');
 	
@@ -629,25 +609,25 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 	
 	}
 	
-	if ('undefined' == typeof fname || 'string' != typeof fname || !fname || '' === fname) {
+	if ('undefined' === typeof fname || 'string' !== typeof fname || !fname || '' === fname) {
 	
 		fname = null;
 	
 	}
 	
-	if ('undefined' == typeof lname || 'string' != typeof lname || !lname || '' === lname) {
+	if ('undefined' === typeof lname || 'string' !== typeof lname || !lname || '' === lname) {
 	
 		lname = null;
 	
 	}
 	
-	if ('undefined' == typeof password || 'string' != typeof password || !password || '' === password) {
+	if ('undefined' === typeof password || 'string' !== typeof password || !password || '' === password) {
 	
 		console.log('Cannot add user; password is invalid.');
 		return process.exit();
 	
 	}
-	if ('undefined' == typeof canSudo || 'string' != typeof canSudo || !canSudo || '' === canSudo) {
+	if ('undefined' === typeof canSudo || 'string' !== typeof canSudo || !canSudo || '' === canSudo) {
 	
 		canSudo = false;
 	
@@ -668,8 +648,8 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 		'uName': uname,
 		'createdAt': now,
 		'updatedAt': now,
-		'password': password,
-		'sudoer': ('string' == typeof canSudo && 'true' === canSudo.toLowerCase()) ? true : false
+		password,
+		'sudoer': ('string' === typeof canSudo && 'true' === canSudo.toLowerCase()) ? true : false
 	};
 	global.Uwot.Users.createNew(newUserObj, function(error, user) {
 	
@@ -691,13 +671,13 @@ function addAdminUser(uname, password, canSudo, fname, lname) {
 //	shell.js adminUser delete id
 function deleteAdminUser(id) {
 
-	if ('undefined' != typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
+	if ('undefined' !== typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
 	
 		actionHelp("adminUser delete", 'Remove an admin user.', '[id]');
 		return process.exit();
 	
 	}
-	if ('string' != typeof id || '' === id) {
+	if ('string' !== typeof id || '' === id) {
 	
 		console.log('Cannot delete user; user id invalid.');
 		return process.exit();
@@ -731,25 +711,25 @@ function deleteAdminUser(id) {
 //	shell.js adminUser changePw id oldpassword newpassword
 function changeAdminUserPassword(id, oldpw, newpw) {
 
-	if ('undefined' != typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
+	if ('undefined' !== typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
 	
 		actionHelp("adminUser changePw", 'Change password for an admin user.', '[id] [oldpassword] [newpassword]');
 		return process.exit();
 	
 	}
-	if ('string' != typeof id || '' === id) {
+	if ('string' !== typeof id || '' === id) {
 	
 		console.log('Cannot change user password; user id invalid.');
 		return process.exit();
 	
 	}
-	if ('string' != typeof oldpw || '' === oldpw) {
+	if ('string' !== typeof oldpw || '' === oldpw) {
 	
 		console.log('Cannot change user password; old password invalid.');
 		return process.exit();
 	
 	}
-	if ('string' != typeof newpw || '' === newpw) {
+	if ('string' !== typeof newpw || '' === newpw) {
 	
 		console.log('Cannot change user password; new password invalid.');
 		return process.exit();
@@ -783,25 +763,25 @@ function changeAdminUserPassword(id, oldpw, newpw) {
 //	shell.js adminUser changeName id firstname lastname
 function changeAdminUserName(id, fname, lname) {
 
-	if ('undefined' != typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
+	if ('undefined' !== typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
 	
 		actionHelp("adminUser changeName", 'Change first and last name for an admin user.', '[id] [firstname] [lastname]');
 		return process.exit();
 	
 	}
-	if ('string' != typeof id || '' === id) {
+	if ('string' !== typeof id || '' === id) {
 	
 		console.log('Cannot change user names; user id invalid.');
 		return process.exit();
 	
 	}
-	if ('string' != typeof fname || '' === fname) {
+	if ('string' !== typeof fname || '' === fname) {
 	
 		console.log('Cannot change user names; first name invalid.');
 		return process.exit();
 	
 	}
-	if ('string' != typeof lname || '' === lname) {
+	if ('string' !== typeof lname || '' === lname) {
 	
 		console.log('Cannot change user names; last name invalid.');
 		return process.exit();
@@ -835,13 +815,13 @@ function changeAdminUserName(id, fname, lname) {
 //	shell.js adminUser list
 function listAdminUsers(arg) {
 
-	if ('undefined' != typeof arg && ('-h' === arg || '--help' === arg || 'help' === arg)) {
+	if ('undefined' !== typeof arg && ('-h' === arg || '--help' === arg || 'help' === arg)) {
 	
 		actionHelp("adminUser list", 'View a list of all admin users.', '');
 		return process.exit();
 	
 	}
-	else if ('undefined' != typeof arg) {
+	else if ('undefined' !== typeof arg) {
 	
 		console.log('"adminUser list" does not accept any arguments.');
 		return process.exit();
@@ -881,17 +861,17 @@ function listAdminUsers(arg) {
 			
 			}
 			var fullName;
-			if (null == userList[i].fName && null == userList[i].lName) {
+			if (null === userList[i].fName && null === userList[i].lName) {
 			
 				fullName = "*NONE*";
 			
 			}
-			else if (null == userList[i].lName) {
+			else if (null === userList[i].lName) {
 			
 				fullName = userList[i].fName;
 			
 			}
-			else if (null == userList[i].fName) {
+			else if (null === userList[i].fName) {
 			
 				fullName = userList[i].lName;
 			
@@ -923,13 +903,13 @@ function listAdminUsers(arg) {
 //	shell.js adminUser allowSudo id
 function allowAdminUserSudo(id) {
 
-	if ('undefined' != typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
+	if ('undefined' !== typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
 	
 		actionHelp("adminUser allowSudo", 'Add sudo privilege for an admin user.', '[id]');
 		return process.exit();
 	
 	}
-	if ('string' != typeof id || '' === id) {
+	if ('string' !== typeof id || '' === id) {
 	
 		console.log('Cannot allow sudo for user; user id invalid.');
 		return process.exit();
@@ -963,13 +943,13 @@ function allowAdminUserSudo(id) {
 //	shell.js adminUser disallowSudo id
 function disallowAdminUserSudo(id) {
 
-	if ('undefined' != typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
+	if ('undefined' !== typeof id && ('-h' === id || '--help' === id || 'help' === id)) {
 	
 		actionHelp("adminUser disallowSudo", 'Remove sudo privilege for an admin user.', '[id]');
 		return process.exit();
 	
 	}
-	if ('string' != typeof id || '' === id) {
+	if ('string' !== typeof id || '' === id) {
 	
 		console.log('Cannot disallow sudo for user; user id invalid.');
 		return process.exit();
@@ -1013,8 +993,8 @@ function arrayWithIdx(ar) {
 			theseKeys.forEach(function(key) {
 			
 				var thisHead = headers.get(key);
-				var thisLen = 'string' == typeof arEl[key] ? arEl[key].length : 0;
-				if (undefined == thisHead) {
+				var thisLen = 'string' === typeof arEl[key] ? arEl[key].length : 0;
+				if ('undefined' === typeof thisHead) {
 				
 					headers.set(
 						key,
@@ -1034,7 +1014,7 @@ function arrayWithIdx(ar) {
 			});
 		
 		});
-		headers.forEach(function(value, key) {
+		var logHeaders = function(value, key) {
 		
 			for (let sp = value.maxLen + padding - value.kLen; sp > 0; sp--) {
 			
@@ -1048,7 +1028,8 @@ function arrayWithIdx(ar) {
 			
 			}
 		
-		});
+		};
+		headers.forEach(logHeaders(v, k));
 		for (let i = 0; i < ar.length; i++) {
 		
 			var logLine = '';
@@ -1060,7 +1041,7 @@ function arrayWithIdx(ar) {
 			logLine += i.toString();
 			headers.forEach(function(val, col) {
 			
-				var valLen = 'string' == typeof ar[i][col] ? ar[i][col].length : 0;
+				var valLen = 'string' === typeof ar[i][col] ? ar[i][col].length : 0;
 				
 				for (let sp = val.maxLen + padding - valLen; sp > 0; sp--) {
 				
@@ -1089,7 +1070,7 @@ function actionHelp(action, description, syntax, helpText) {
 	console.log(description);
 	console.log('Syntax for "' + action + '":');
 	console.log('	shell.js ' + action + ' ' + syntax);
-	if ('undefined' != typeof helpText && helpText) {
+	if ('undefined' !== typeof helpText && helpText) {
 	
 		console.log(helpText);
 	
@@ -1104,14 +1085,14 @@ function commandSetHelp(commandSet, helpText) {
 	var actions = commandSets[commandSet];
 	for (let action in actions) {
 	
-		if ('string' == typeof actions[action]) {
+		if ('string' === typeof actions[action]) {
 		
 			console.log('	' + actions[action]);
 		
 		}
 	
 	}
-	if ('undefined' != typeof helpText && helpText) {
+	if ('undefined' !== typeof helpText && helpText) {
 	
 		console.log(helpText.toString());
 	
@@ -1140,6 +1121,9 @@ function titleBlock(title) {
 
 }
 
+// End component functions
+
+// Begin input processing
 // Parse args and execute commands
 
 var args = [];
@@ -1215,7 +1199,7 @@ switch (args[0]) {
 			case 'reset':
 			case 'add':
 			case 'remove':
-				setupConfigHandler(an, args.shift(), args)
+				setupConfigHandler(an, args.shift(), args);
 				break;
 			case undefined:
 			case '-h':
@@ -1240,14 +1224,14 @@ switch (args[0]) {
 		var help = Object.keys(commandSets);
 		for (let cSet in help) {
 		
-			if ('string' == typeof help[cSet]) {
+			if ('string' === typeof help[cSet]) {
 			
 				console.log('	' + help[cSet]);
-				if ('object' == typeof commandSets[help[cSet]]) {
+				if ('object' === typeof commandSets[help[cSet]]) {
 				
 					for (let cAction in commandSets[help[cSet]]) {
 					
-						if ('string' == typeof commandSets[help[cSet]][cAction]) {
+						if ('string' === typeof commandSets[help[cSet]][cAction]) {
 						
 							console.log('		' + commandSets[help[cSet]][cAction]);
 						
@@ -1266,4 +1250,4 @@ switch (args[0]) {
 		console.log('Unrecognized Command Set: "' + args[0] + '". (use shell.js -h for list of available Command Sets)');
 
 }
-
+// End input processing
