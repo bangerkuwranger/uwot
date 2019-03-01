@@ -8,7 +8,7 @@ class CliHistory {
 	
 		var self = this;
 		var storedIndex = self.getAsInt(INDEX_FIELD);
-		if (storedIndex === null || 'number' != typeof storedIndex || storedIndex < 0) {
+		if (storedIndex === null || 'number' !== typeof storedIndex || storedIndex < 0) {
 		
 			storedIndex = 0;
 			self.clearHistory();
@@ -30,7 +30,7 @@ class CliHistory {
 		var storageArray = [];
 		for (let i = 0; i < localStorage.length; i++) {
 		
-			if (localStorage.key(i).substring(0, INDEX_PREFIX.length) == INDEX_PREFIX) {
+			if (localStorage.key(i).substring(0, INDEX_PREFIX.length) === INDEX_PREFIX) {
 			
 				storageArray.push(localStorage.key(i));
 			
@@ -49,7 +49,7 @@ class CliHistory {
 	
 	addItem(cmd) {
 	
-		if ('string' != typeof cmd) {
+		if ('string' !== typeof cmd) {
 		
 			return false;
 		
@@ -60,7 +60,7 @@ class CliHistory {
 			var nidx = cidx + 1;
 			try {
 			
-				if (cidx == 0 &&  null === localStorage.getItem(INDEX_PREFIX + 0)) {
+				if (cidx === 0 &&  null === localStorage.getItem(INDEX_PREFIX + 0)) {
 				
 					localStorage.setItem(INDEX_PREFIX + cidx, cmd);
 				
@@ -91,19 +91,19 @@ class CliHistory {
 	
 		var cidx = this.getCurrentIndex();
 		var lintvl = this.getLastInterval();
-		if (cidx == 0 && null === localStorage.getItem(INDEX_PREFIX + 0)) {
+		if (cidx === 0 && null === localStorage.getItem(INDEX_PREFIX + 0)) {
 		
 			return '';
 		
 		}
-		else if (cidx == 0 && null !== localStorage.getItem(INDEX_PREFIX + 0)) {
+		else if (cidx === 0 && null !== localStorage.getItem(INDEX_PREFIX + 0)) {
 		
 			return localStorage.getItem(INDEX_PREFIX + 0);
 		
 		}
 		else {
 		
-			var intvl = this.decrementInterval();
+			this.decrementInterval();
 			var intvlIdx = parseInt(lintvl) + parseInt(cidx);
 			if (intvlIdx <= 0) {
 			
@@ -143,7 +143,7 @@ class CliHistory {
 	getCurrentIndex() {
 	
 		var cidx = this.getAsInt(INDEX_FIELD);
-		if (null === cidx || 'number' != typeof cidx || cidx < 0) {
+		if (null === cidx || 'number' !== typeof cidx || cidx < 0) {
 		
 			this.clearHistory();
 			return 0;
@@ -160,7 +160,7 @@ class CliHistory {
 	getLastInterval() {
 	
 		var lintvl = this.getAsInt(INTVL_FIELD);
-		if (null === lintvl || 'number' != typeof lintvl) {
+		if (null === lintvl || 'number' !== typeof lintvl) {
 		
 			return this.resetInterval();
 		
@@ -209,7 +209,7 @@ class CliHistory {
 		var storageArray = [];
 		for (var i = 0; i < localStorage.length; i++) {
 		
-			if (localStorage.key(i).substring(0, INDEX_PREFIX.length) == INDEX_PREFIX) {
+			if (localStorage.key(i).substring(0, INDEX_PREFIX.length) === INDEX_PREFIX) {
 			
 				storageArray.push(localStorage.getItem(localStorage.key(i)));
 			

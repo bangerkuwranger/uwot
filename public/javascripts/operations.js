@@ -6,7 +6,7 @@ class UwotCliOperations {
 	
 	performOperation(operationName, operationArgs) {
 	
-		if (-1 != uwotOperations.indexOf(operationName.trim())) {
+		if (-1 !== uwotOperations.indexOf(operationName.trim())) {
 			if('object' !== typeof operationArgs || !Array.isArray(operationArgs)) {
 				this[operationName.trim()]();
 			}
@@ -22,7 +22,7 @@ class UwotCliOperations {
 	}
 	
 	history() {
-		if ('undefined' == uwotHistory || !(uwotHistory instanceof CliHistory)) {
+		if ('undefined' === uwotHistory || !(uwotHistory instanceof CliHistory)) {
 			uwotHistory = new CliHistory();
 		}
 		var histArray = uwotHistory.getAllItems();
@@ -42,12 +42,12 @@ class UwotCliOperations {
 	}
 	
 	echo(args) {
-		if ('string' == typeof args) {
+		if ('string' === typeof args) {
 			outputToMain(args);
 		}
-		else if ('object' == typeof args && null !== args) {
+		else if ('object' === typeof args && null !== args) {
+			var os = '';
 			if (Array.isArray(args)) {
-				var os = '';
 				args.forEach(function(arg) {
 					os += arg.toString() + ' ';
 				});
@@ -55,7 +55,6 @@ class UwotCliOperations {
 			}
 			else {
 				var argList = Object.keys(args);
-				var os = '';
 				argList.forEach(function(argName) {
 					os += args[argName].toString() + ' ';
 				});
@@ -68,9 +67,9 @@ class UwotCliOperations {
 	}
 	
 	login(args) {
-		if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
-			if('string' == typeof args[0] && '' !== args[0]) {
-				if('string' == typeof args[1] && '' !== args[1]) {
+		if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
+			if('string' === typeof args[0] && '' !== args[0]) {
+				if('string' === typeof args[1] && '' !== args[1]) {
 					jQuery('#uwotcli-doLogin').val('false');
 					jQuery("#uwotcli-login").val('');
 					jQuery('#uwotcli-input').attr('type', 'text');
@@ -83,7 +82,7 @@ class UwotCliOperations {
 						{
 							username: args[0],
 							password: args[1],
-							nonce: nonce,
+							nonce,
 							cwd: localStorage.getItem('UwotCwd')
 						}
 					)
@@ -97,7 +96,7 @@ class UwotCliOperations {
 							outputToMain('Successful login for user: ' + data.user.uName);
 							user = data.user.uName;
 							changePrompt(user);
-							if('string' == typeof data.cwd){
+							if('string' === typeof data.cwd){
 								changeCwd(data.cwd);
 							}
 						}
