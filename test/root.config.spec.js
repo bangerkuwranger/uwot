@@ -729,7 +729,6 @@ describe('config.js', function() {
 				
 					expect(error).to.be.an.instanceof(RangeError);
 					expect(error.message).to.equal('invalid category passed to updateCatStrVals.');
-					getCatStub.restore();
 					done();
 				
 				});
@@ -1235,7 +1234,11 @@ describe('config.js', function() {
 			});
 			it('should return a Error to callback if nconf cannot save the change', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').returns(stubDefaults[cat]);
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefault(cat) {
+				
+					return stubDefaults[cat]
+				
+				});
 				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
 				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
 				
@@ -1256,7 +1259,11 @@ describe('config.js', function() {
 			});
 			it('should return callback(false, true) if value was set and saved.', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').returns(stubDefaults[cat]);
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefault(cat) {
+				
+					return stubDefaults[cat]
+				
+				});
 				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
 				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
 				
