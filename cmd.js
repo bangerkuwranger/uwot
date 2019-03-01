@@ -126,14 +126,14 @@ class UwotCmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to execute.')
+			throw new TypeError('invalid callback passed to execute.');
 		
 		}
 		else {
 		
 			var executeString = 'executed: ' + this.command.name;
 			var helpString = false;
-			if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+			if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 		
 				for (let i = 0; i < args.length; i++) {
 			
@@ -143,7 +143,7 @@ class UwotCmd {
 				}
 		
 			}
-			if ('object' != typeof options || !Array.isArray(options) || options.length < 1) {
+			if ('object' !== typeof options || !Array.isArray(options) || options.length < 1) {
 		
 				return callback(false, executeString);
 		
@@ -151,7 +151,7 @@ class UwotCmd {
 			for (let i = 0; i < this.options.length; i++) {
 		
 				//fails on non-defined options
-				executeString += 'boolean' == typeof options[i].isLong && options[i].isLong ? ' --' : ' -';
+				executeString += 'boolean' === typeof options[i].isLong && options[i].isLong ? ' --' : ' -';
 				
 				executeString += options[i].name.toString();
 				if (options[i].name && (options[i].name === 'h' || options[i].name === 'help')) {
@@ -189,7 +189,7 @@ class UwotCmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to help.')
+			throw new TypeError('invalid callback passed to help.');
 		
 		}
 		else {
@@ -215,8 +215,8 @@ class UwotCmd {
 			outString += "\r\n";
 			if (this.options.length < 1) {
 		
-				var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
-				var outArray = this.parsePre(outString);
+				let cmdTitleNode = {content: this.command.name + ': ', isBold: true};
+				let outArray = this.parsePre(outString);
 				outArray.content.unshift(cmdTitleNode);
 				return callback(false, outArray);
 		
@@ -241,8 +241,8 @@ class UwotCmd {
 				outString += "\r\n";
 				if ((i+1) >= this.options.length) {
 			
-					var cmdTitleNode = {content: this.command.name + ': ', isBold: true};
-					var outArray = this.parsePre(outString);
+					let cmdTitleNode = {content: this.command.name + ': ', isBold: true};
+					let outArray = this.parsePre(outString);
 					outArray.content.unshift(cmdTitleNode);
 					return callback(false, outArray);
 			
@@ -266,9 +266,9 @@ class UwotCmd {
 			optArgs: [],
 			assignedArg: ''
 		};
-		if ('string' != typeof opt || '' === opt) {
+		if ('string' !== typeof opt || '' === opt) {
 		
-			throw new TypeError('invalid opt string passed to matchOpt')
+			throw new TypeError('invalid opt string passed to matchOpt');
 		
 		}
 		else {
@@ -383,9 +383,9 @@ class UwotCmd {
 				var spaceArray = crArray[i].replace(/\t/g, '    ').split(' ');
 				for (let j = 0; j < spaceArray.length; j++) {
 			
-					if ('' == spaceArray[j]) {
+					if ('' === spaceArray[j]) {
 				
-						thisNode.content.push({tag: 'span', content: '&nbsp;'})
+						thisNode.content.push({tag: 'span', content: '&nbsp;'});
 				
 					}
 					else {
@@ -442,7 +442,7 @@ class UwotCmd {
 			var nameArray = [];
 			argsObj.forEach(function(argNode) {
 			
-				if ('object' == typeof argNode && 'string' == typeof argNode.text && 'Word' === argNode.type) {
+				if ('object' === typeof argNode && 'string' === typeof argNode.text && 'Word' === argNode.type) {
 				
 					nameArray.push(argNode.text);
 				
