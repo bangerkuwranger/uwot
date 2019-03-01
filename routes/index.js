@@ -13,61 +13,61 @@ passport.use(
 	new LocalStrategy(
 	
 		function(username, password, callback) {
-    	
-    		if ('function' !== typeof callback) {
-    		
-    			throw new TypeError('invalid callback passed to LocalStrategy handler.');
-    		
-    		}
-    		else if ('string' != typeof username || 'string' !== typeof password) {
-    		
-    			return callback(new TypeError('invalid parameters passed to LocalStrategy handler.'), null);
-    		
-    		}
-    		else {
-    		
-    			var self = this;
-//     			var users = new UserModel();
-    			global.Uwot.Users.findByName(username, function(error, userObj) {
-    			
-    				if (error) {
-    				
-    					return callback(error, username);
-    				
-    				}
-    				else if (!userObj) {
-    				
-    					return callback(null, false, { message: 'Incorrect username.' });
-    				
-    				}
-    				else {
-    				
-    					global.Uwot.Users.validate(userObj._id, password, function(error, pwIsValid) {
-    					
-    						if (error) {
-    						
-    							return callback(error, username);
-    						
-    						}
-    						else if (!pwIsValid) {
-    						
-    							return callback(null, false, { message: 'Incorrect password.' });
-    						
-    						}
-    						else {
-    						
-    							return callback(false, userObj);
-    						
-    						}
-    					
-    					});
-    				
-    				}
-    			
-    			});
-    		
-    		}
-    		
+		
+			if ('function' !== typeof callback) {
+			
+				throw new TypeError('invalid callback passed to LocalStrategy handler.');
+			
+			}
+			else if ('string' !== typeof username || 'string' !== typeof password) {
+			
+				return callback(new TypeError('invalid parameters passed to LocalStrategy handler.'), null);
+			
+			}
+			else {
+			
+				var self = this;
+//				var users = new UserModel();
+				global.Uwot.Users.findByName(username, function(error, userObj) {
+				
+					if (error) {
+					
+						return callback(error, username);
+					
+					}
+					else if (!userObj) {
+					
+						return callback(null, false, { message: 'Incorrect username.' });
+					
+					}
+					else {
+					
+						global.Uwot.Users.validate(userObj._id, password, function(error, pwIsValid) {
+						
+							if (error) {
+							
+								return callback(error, username);
+							
+							}
+							else if (!pwIsValid) {
+							
+								return callback(null, false, { message: 'Incorrect password.' });
+							
+							}
+							else {
+							
+								return callback(false, userObj);
+							
+							}
+						
+						});
+					
+					}
+				
+				});
+			
+			}
+			
 		}
 	)
 );
@@ -92,25 +92,25 @@ router.use(passport.session());
 router.use(function (req, res, next) {
 
 	res.locals.login = req.isAuthenticated();
-    if (res.locals.login) {
-    
-    	res.locals.user = 'undefined' != typeof req.user.uName ? req.user.uName : '';
-    	res.locals.userId = 'undefined' != typeof req.user._id ? req.user._id : 0;
-        next();
-    
-    }
+	if (res.locals.login) {
+	
+		res.locals.user = 'undefined' !== typeof req.user.uName ? req.user.uName : '';
+		res.locals.userId = 'undefined' !== typeof req.user._id ? req.user._id : 0;
+		next();
+	
+	}
    //  else if (req.path.indexOf('/login') > -1 || req.path.indexOf('/logout') > -1) {
-//     
-//     	next();
-//     
-//     }
+//	   
+//		next();
+//	   
+//	   }
 	else {
 	
 		next();
 	
 	}
-    
-    
+	
+	
 });
 
 
@@ -134,7 +134,7 @@ router.get('/', function(req, res, next) {
 		themeName = decodeURIComponent(req.query.theme).trim();
 	
 	}
-	else if ('object' == typeof req.cookies && 'string' == typeof req.cookies.uwotSavedTheme) {
+	else if ('object' === typeof req.cookies && 'string' === typeof req.cookies.uwotSavedTheme) {
 	
 		themeName = req.cookies.uwotSavedTheme;
 		
@@ -146,7 +146,7 @@ router.get('/', function(req, res, next) {
 	}
 	if (!validateTheme(themeName)) {
 	
-		themeName == 'default';
+		themeName = 'default';
 	
 	}
 	if (req.app.get('uwot_theme') !== themeName) {
@@ -156,7 +156,7 @@ router.get('/', function(req, res, next) {
 	}
 	res.locals.theme = themeName;
 	res.locals.showTheme = global.Uwot.Config.get('themes', 'showTheme');
-	if ('object' == typeof res.locals && res.locals.login && '' !== res.locals.user) {
+	if ('object' === typeof res.locals && res.locals.login && '' !== res.locals.user) {
 	
 		res.locals.userName = res.locals.user;
 	
@@ -175,15 +175,15 @@ router.post(
 	'/login', 
 	function(req, res, next) {
 	
-		if ('string' == typeof req.body.nonce) {
+		if ('string' === typeof req.body.nonce) {
 		
 			var nv = nonceHandler.verify('index-get', req.body.nonce);
-			if (nv && 'object' != typeof nv) {
+			if (nv && 'object' !== typeof nv) {
 			
 				next();
 			
 			}
-			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
+			else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 			
 				res.json({error: new Error('Invalid Request - Reload' + nv.message).message, user: null});
 			
@@ -202,7 +202,7 @@ router.post(
 	
 		if (req.error) {
 		
-			res.json({error: error.message, user: null});
+			res.json({error: req.error.message, user: null});
 		
 		}
 		else if (!req.user) {
@@ -240,10 +240,10 @@ router.post(
 	'/logout', 
 	function(req, res, next) {
 	
-		if ('string' == typeof req.body.nonce) {
+		if ('string' === typeof req.body.nonce) {
 		
 			var nv = nonceHandler.verify('index-get', req.body.nonce);
-			if (nv && 'object' != typeof nv) {
+			if (nv && 'object' !== typeof nv) {
 			
 				if (!req.user) {
 		
@@ -261,7 +261,7 @@ router.post(
 				}
 			
 			}
-			else if ('object' == typeof nv && false === nv.status && 'string' == typeof nv.message) {
+			else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 			
 				res.json({error: new Error('Invalid Request - Reload' + nv.message).message, user: null});
 			
