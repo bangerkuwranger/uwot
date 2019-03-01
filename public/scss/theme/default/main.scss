@@ -87,7 +87,7 @@ body {
 					border-color: mapGet($ansi-colors, 'white');
 				
 					form {
-						.field {}
+						.field {
 							input,
 							input:focus,
 							input:active {		

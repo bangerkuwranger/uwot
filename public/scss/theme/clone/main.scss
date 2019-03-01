@@ -100,10 +100,8 @@ body {
 						.field {
 							input,
 							input:focus,
-							input:active {		
-											
+							input:active {
 								color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-							
 							}
 			
 						}
