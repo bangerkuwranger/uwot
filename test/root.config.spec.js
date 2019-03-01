@@ -1236,8 +1236,6 @@ describe('config.js', function() {
 			it('should return a Error to callback if nconf cannot save the change', function(done) {
 			
 				var getCatStub = sinon.stub(config.nconf, 'get').returns(stubDefaults[cat]);
-				
-				});
 				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
 				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
 				
