@@ -265,7 +265,7 @@ describe('config.js', function() {
 					var userKeys = Object.keys(binpathDefaultsObj);
 					userKeys.forEach(function (key) {
 					
-						if ('boolean' != typeof binpathDefaultsObj[key]) {
+						if ('boolean' !== typeof binpathDefaultsObj[key]) {
 						
 							oldMap.set(key, binpathDefaultsObj[key]);
 							newMap.set(key, binpathDefaultsObj[key]);
@@ -294,7 +294,7 @@ describe('config.js', function() {
 					var mergedMap = config.utilities.mergeMaps(oldMap, newMap, 'binpath');
 					testNewMap.forEach(function(value,key) {
 					
-						if ('boolean' == typeof value) {
+						if ('boolean' === typeof value) {
 						
 							expect(value).to.equal(mergedMap.get(key));
 						
@@ -355,7 +355,7 @@ describe('config.js', function() {
 						return config.utilities.arrayMembersToClass([['sawtooth', 'themes/sawtooth']], null);
 						
 					}
-					expect(passNullArrayKey).to.throw(Error, 'config setting "null" does not accept array values.')
+					expect(passNullArrayKey).to.throw(Error, 'config setting "null" does not accept array values.');
 				
 				});
 				it('should not return any array members that are not objects or === null', function() {
@@ -439,6 +439,7 @@ describe('config.js', function() {
 				
 				});
 				expect(config.get('testConfCat')).to.equal('test nconf value');
+				getCatStub.restore();
 			
 			});
 			it('should return the value of nconf.get(cat)[key] if nconf.get(cat) is a non-null object, key argument is a string, and nconf.get(cat)[key] is not a string', function() {
@@ -592,6 +593,7 @@ describe('config.js', function() {
 				var themesValsObjNoArrays = config.get('themes', null, true);
 				expect(themesValsObjNoArrays).to.be.an('object').that.is.not.null;
 				expect(themesValsObjNoArrays.external).to.be.undefined;
+				getCatStub.restore();
 			
 			});
 			it('should return an object with all config values for category, excluding array values, if cat is a string, key is not a string, and excludeArrays is true', function() {
@@ -604,6 +606,7 @@ describe('config.js', function() {
 				var themesValsObjNoArrays = config.get('themes', null, false);
 				expect(themesValsObjNoArrays).to.be.an('object').that.is.not.null;
 				expect(themesValsObjNoArrays).to.deep.equal(testConfigDefaults().themes);
+				getCatStub.restore();
 			
 			});
 			it('should return an object with all config values, and any strings that, after trim() and toLowerCase() === "true" or "false" should be boolean', function() {
@@ -624,7 +627,7 @@ describe('config.js', function() {
 							val5: true,
 							val6: 'false',
 							val7: false
-						}
+						};
 					
 					}
 					else {
@@ -650,7 +653,7 @@ describe('config.js', function() {
 			});
 			it('should return an array of all of the config category names', function() {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnAllDefaults(key) {
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnAllDefaults() {
 				
 					return stubDefaults;
 				
@@ -658,6 +661,7 @@ describe('config.js', function() {
 				var cats = Object.keys(stubDefaults);
 				var testGetCats = config.getCats();
 				expect(testGetCats).to.deep.equal(cats);
+				getCatStub.restore();
 			
 			});
 		
@@ -716,7 +720,7 @@ describe('config.js', function() {
 			});
 			it('should return a RangeError to callback if category does not exist', function(done) {
 			
-				var getCatsStub = sinon.stub(config, 'getCats').callsFake(function returnEmptyArray(cat) {
+				var getCatsStub = sinon.stub(config, 'getCats').callsFake(function returnEmptyArray() {
 				
 					return [];
 				
@@ -725,6 +729,7 @@ describe('config.js', function() {
 				
 					expect(error).to.be.an.instanceof(RangeError);
 					expect(error.message).to.equal('invalid category passed to updateCatStrVals.');
+					getCatStub.restore();
 					done();
 				
 				});
@@ -753,7 +758,7 @@ describe('config.js', function() {
 			});
 			it('should return an Error to callback if an error is thrown by mergeMaps utility', function(done) {
 			
-				var mergeMapsStub = sinon.stub(config.utilities, 'mergeMaps').callsFake(function throwError(current, updated, cat) {
+				var mergeMapsStub = sinon.stub(config.utilities, 'mergeMaps').callsFake(function throwError() {
 				
 					throw new Error('test mergeMaps error');
 				
@@ -777,12 +782,12 @@ describe('config.js', function() {
 					usersDefaultsMap.set(key, usersDefaultsObj[key]);
 				
 				});
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				
 				});
-				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnVoid(key, value) {
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnVoid() {
 				
 					return;
 				
@@ -796,6 +801,9 @@ describe('config.js', function() {
 				
 					expect(error).to.be.an.instanceof(Error);
 					expect(error.message).to.equal('test nconf.save error');
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -830,6 +838,9 @@ describe('config.js', function() {
 				
 					expect(error).to.be.false;
 					expect(savedKeys).to.deep.equal([]);
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -845,12 +856,12 @@ describe('config.js', function() {
 					usersDefaultsMap.set(key, usersDefaultsObj[key]);
 				
 				});
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				
 				});
-				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnVoid(key, value) {
+				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnVoid() {
 				
 					return;
 				
@@ -864,6 +875,9 @@ describe('config.js', function() {
 				
 					expect(error).to.be.false;
 					expect(savedKeys).to.be.false;
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -897,8 +911,8 @@ describe('config.js', function() {
 			});
 			it('should cast any changed values for keys with values that are strings that, after trim() and toLowerCase(), === "true" or "false" to booleans, and any other values to strings', function(done) {
 			
-				changedValues = {};
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var changedValues = {};
+				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				
@@ -921,6 +935,9 @@ describe('config.js', function() {
 					expect(savedKeys).to.be.an('array').that.includes('allowGuest', 'sudoFullRoot', 'createHome', 'homeWritable');
 					expect(changedValues['users:createHome']).to.equal(true);
 					expect(changedValues['users:allowGuestShellFunctions']).to.equal('0');
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -942,7 +959,7 @@ describe('config.js', function() {
 			});
 			it('should return a TypeError to callback if cat argument is not a string', function(done) {
 			
-				config.setStrVal(null, 'allowGuest', 'true', function(error, isSaved) {
+				config.setStrVal(null, 'allowGuest', 'true', function(error) {
 				
 					expect(error).to.be.an.instanceof(TypeError);
 					expect(error.message).to.equal('invalid args passed to setStrVal.');
@@ -953,7 +970,7 @@ describe('config.js', function() {
 			});
 			it('should return a TypeError to callback if key argument is not a string', function(done) {
 			
-				config.setStrVal('users', null, 'true', function(error, isSaved) {
+				config.setStrVal('users', null, 'true', function(error) {
 				
 					expect(error).to.be.an.instanceof(TypeError);
 					expect(error.message).to.equal('invalid args passed to setStrVal.');
@@ -964,7 +981,7 @@ describe('config.js', function() {
 			});
 			it('should return a TypeError to callback if value argument is not a string', function(done) {
 			
-				config.setStrVal('users', 'allowGuest', true, function(error, isSaved) {
+				config.setStrVal('users', 'allowGuest', true, function(error) {
 				
 					expect(error).to.be.an.instanceof(TypeError);
 					expect(error.message).to.equal('invalid args passed to setStrVal.');
@@ -980,7 +997,7 @@ describe('config.js', function() {
 					return undefined;
 				
 				});
-				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				config.setStrVal('users', 'allowGuest', 'true', function(error) {
 				
 					expect(error).to.be.an.instanceof(RangeError);
 					expect(error.message).to.equal('invalid cat passed to setStrVal.');
@@ -988,8 +1005,8 @@ describe('config.js', function() {
 				
 				});
 			
-			})
-			it('should return a Error if nconf cannot set the value', function(done) {
+			});
+			it('should return an error if nconf cannot set the value', function(done) {
 			
 				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
 				
@@ -1027,10 +1044,13 @@ describe('config.js', function() {
 					return callback(new Error('test nconf.save error'))
 				
 				});
-				config.setStrVal('users', 'allowGuest', 'true', function(error, isSaved) {
+				config.setStrVal('users', 'allowGuest', 'true', function(error) {
 				
 					expect(error).to.be.an.instanceof(Error);
 					expect(error.message).to.equal('test nconf.save error');
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -1114,7 +1134,7 @@ describe('config.js', function() {
 			});
 			it('should return a TypeError to callback if cat argument is not a string', function(done) {
 			
-				config.setArrVal(null, 'external', ['ugly, huge'], function(error, isSaved) {
+				config.setArrVal(null, 'external', ['ugly, huge'], function(error) {
 				
 					expect(error).to.be.an.instanceof(TypeError);
 					expect(error.message).to.equal('invalid args passed to setArrVal.');
@@ -1147,7 +1167,7 @@ describe('config.js', function() {
 			});
 			it('should return a RangeError if cat argument does not match an existing category', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
+				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults() {
 				
 					return undefined;
 				
@@ -1215,25 +1235,22 @@ describe('config.js', function() {
 			});
 			it('should return a Error to callback if nconf cannot save the change', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
-				
-					return stubDefaults[cat];
+				var getCatStub = sinon.stub(config.nconf, 'get').returns(stubDefaults[cat]);
 				
 				});
-				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnTrue(key, value) {
-				
-					return true;
-				
-				});
+				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
 				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnError(dummy, callback) {
 				
-					return callback(new Error('test nconf.save error'))
+					return callback(new Error('test nconf.save error'));
 				
 				});
 				config.setArrVal('themes', 'external', ['ugly, huge'], function(error, isSaved) {
 				
 					expect(error).to.be.an.instanceof(Error);
 					expect(error.message).to.equal('test nconf.save error');
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -1241,16 +1258,8 @@ describe('config.js', function() {
 			});
 			it('should return callback(false, true) if value was set and saved.', function(done) {
 			
-				var getCatStub = sinon.stub(config.nconf, 'get').callsFake(function returnDefaults(cat) {
-				
-					return stubDefaults[cat];
-				
-				});
-				var nconfSetStub = sinon.stub(config.nconf, 'set').callsFake(function returnTrue(key, value) {
-				
-					return true;
-				
-				});
+				var getCatStub = sinon.stub(config.nconf, 'get').returns(stubDefaults[cat]);
+				var nconfSetStub = sinon.stub(config.nconf, 'set').returns(true);
 				var nconfSaveStub = sinon.stub(config.nconf, 'save').callsFake(function returnTrue(dummy, callback) {
 				
 					return callback(false, true);
@@ -1260,6 +1269,9 @@ describe('config.js', function() {
 				
 					expect(error).to.be.false;
 					expect(isSaved).to.be.true;
+					getCatStub.restore();
+					nconfSetStub.restore();
+					nconfSaveStub.restore();
 					done();
 				
 				});
@@ -1791,11 +1803,7 @@ describe('config.js', function() {
 			it('should return defaults if nconf.get cannot retrieve saved value', function() {
 			
 				var testOrigin = 'http://localhost/';
-				var nconfGetStub = sinon.stub(config.nconf, 'get').callsFake(function returnUndefined(){
-				
-					return undefined;
-				
-				});
+				var nconfGetStub = sinon.stub(config.nconf, 'get').returns(undefined);
 				var udOrigin = config.getConfigServerOrigin();
 				expect(udOrigin).to.equal(testOrigin);
 			
@@ -2192,7 +2200,7 @@ describe('config.js', function() {
 				
 					return new ReverseProxyBin();
 				
-				};
+				}
 				expect(instantiate).to.throw(ReferenceError, 'ReverseProxyBin is not defined');
 			
 			});
@@ -2234,7 +2242,7 @@ describe('config.js', function() {
 				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
 				expect(testRPBTwo).to.be.an('object').that.is.not.null;
 				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
-				expect(testRPBTwo.name).to.be.null
+				expect(testRPBTwo.name).to.be.null;
 				expect(testRPBTwo.url).to.equal('testUrl');
 				expect(testRPBTwo.isLocal).to.be.false;
 				expect(testRPBTwo.isConsole).to.be.true;
