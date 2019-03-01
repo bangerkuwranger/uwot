@@ -45,7 +45,7 @@ class UwotFsPermissions {
 		}
 		else if (null !== permissions) {
 		
-			if ('string' == typeof permissions.owner) {
+			if ('string' === typeof permissions.owner) {
 			
 				this.owner = sanitize.cleanString(permissions.owner);
 			
@@ -56,7 +56,7 @@ class UwotFsPermissions {
 			
 			}
 			delete permissions.owner;
-			if ('object' == typeof permissions.allowed && Array.isArray(permissions.allowed)) {
+			if ('object' === typeof permissions.allowed && Array.isArray(permissions.allowed)) {
 			
 // 				this.allowed = permissions.allowed;
 				this.allowed = [];
@@ -95,7 +95,7 @@ class UwotFsPermissions {
 // 					if (this.isValidUserName(thisName)) {
 				
 						let userPerms = [];
-						if ('object' == typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
+						if ('object' === typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
 					
 							if (-1 !== permissions[thisName].indexOf('r')) {
 						
@@ -135,13 +135,13 @@ class UwotFsPermissions {
 	toGeneric() {
 	
 		var genericPermissionsObj = {
-			owner: 'string' == typeof this.owner ? this.owner : DEFAULT_OWNER,
+			owner: 'string' === typeof this.owner ? this.owner : DEFAULT_OWNER,
 			allowed: this.allowed
-		}
+		};
 		var permUsers = Object.keys(this);
 		for (let i = 0; i < permUsers.length; i++) {
 		
-			if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'validUsers' !== permUsers[i] && 'object' == typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
+			if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'validUsers' !== permUsers[i] && 'object' === typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
 			
 				genericPermissionsObj[permUsers[i]] = this[permUsers[i]];
 			
@@ -175,28 +175,29 @@ class UwotFsPermissions {
 			return new UwotFsPermissions(this.toGeneric());
 		
 		}
-		if ('string' == typeof otherPerms.owner) {
+		if ('string' === typeof otherPerms.owner) {
 		
 			otherOwner = otherPerms.owner;
 		
 		}
-		if('object' == typeof otherPerms.allowed && Array.isArray(otherPerms.allowed)) {
+		if('object' === typeof otherPerms.allowed && Array.isArray(otherPerms.allowed)) {
 		
 			otherAllowed = otherPerms.allowed;
 		
 		}
+		var otherPermsClassObj, newArg;
 		if('UwotFsPermissions' !== otherPerms.constructor.name) {
 		
 			try {
 			
-				var otherPermsClassObj = new UwotFsPermissions(otherPerms);
-				var newArg = Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric());
-				if ('undefined' == typeof thisOwner || null === thisOwner) {
+				otherPermsClassObj = new UwotFsPermissions(otherPerms);
+				newArg = Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric());
+				if ('undefined' === typeof thisOwner || null === thisOwner) {
 				
 					newArg.owner = otherOwner;
 				
 				}
-				if ('undefined' == typeof thisAllowed || null === thisAllowed) {
+				if ('undefined' === typeof thisAllowed || null === thisAllowed) {
 				
 					newArg.allowed = otherAllowed;
 				
@@ -213,8 +214,8 @@ class UwotFsPermissions {
 		}
 		else {
 		
-			var newArg = Object.assign(otherPerms.toGeneric(), this.toGeneric());
-			if ('undefined' == typeof thisOwner || null === thisOwner) {
+			newArg = Object.assign(otherPerms.toGeneric(), this.toGeneric());
+			if ('undefined' === typeof thisOwner || null === thisOwner) {
 			
 				newArg.owner = otherOwner;
 			
@@ -230,7 +231,7 @@ class UwotFsPermissions {
 	
 	}
 
-};
+}
 
 /* 
 vfs is implemented in posix-like manner. 
@@ -410,13 +411,13 @@ class UwotFs {
 	cmd(cmdName, argArr, callback, isSudo) {
 	
 		//sanity
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to cmd');
 		
 		}
 		//check against valid
-		if ('string' != typeof cmdName || 'object' != typeof argArr || -1 === VALID_CMDS.indexOf(cmdName)) {
+		if ('string' !== typeof cmdName || 'object' !== typeof argArr || -1 === VALID_CMDS.indexOf(cmdName)) {
 		
 			return callback(systemError.EINVAL({'syscall': 'signal'}), null);
 		
@@ -513,7 +514,7 @@ class UwotFs {
 			}
 			else {
 			
-				return callback(false, result)
+				return callback(false, result);
 			
 			}
 		
@@ -598,7 +599,7 @@ class UwotFs {
 	// check if user can access that dir
 	getVcwd() {
 	
-		return 'string' == typeof this.cwd && '' !== this.cwd ? path.sep + this.cwd : path.sep;
+		return 'string' === typeof this.cwd && '' !== this.cwd ? path.sep + this.cwd : path.sep;
 	
 	}
 	
@@ -608,7 +609,7 @@ class UwotFs {
 	// check if user can access that dir
 	getCwd() {
 	
-		return 'string' == typeof this.cwd && '' !== this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
+		return 'string' === typeof this.cwd && '' !== this.cwd ? path.resolve(this.root.path, this.cwd) : this.root.path;
 	
 	}
 	
@@ -1282,7 +1283,7 @@ class UwotFs {
 	// resolves path w/ expansion, using this.cwd
 	resolvePath(pth, checkIfExists) {
 	
-		if('boolean' != typeof checkIfExists) {
+		if('boolean' !== typeof checkIfExists) {
 		
 			checkIfExists = true;
 		
@@ -1401,13 +1402,13 @@ class UwotFs {
 			return pth;
 		
 		}
-		else if (path.isAbsolute(pth) && null !== this.userDir && 'string' == typeof this.userDir.path && -1 !== pth.indexOf(this.userDir.path)) {
+		else if (path.isAbsolute(pth) && null !== this.userDir && 'string' === typeof this.userDir.path && -1 !== pth.indexOf(this.userDir.path)) {
 		
 			var udPre = '/home/' + this.user.uName;
 			return pth.replace(this.userDir.path, udPre);
 		
 		}
-		else if (path.isAbsolute(pth) && null !== this.pubDir && 'string' == typeof this.pubDir.path && -1 !== pth.indexOf(this.pubDir.path)) {
+		else if (path.isAbsolute(pth) && null !== this.pubDir && 'string' === typeof this.pubDir.path && -1 !== pth.indexOf(this.pubDir.path)) {
 		
 			var pdPre = '/var/www/html';
 			return pth.replace(this.pubDir.path, pdPre);
@@ -1499,7 +1500,7 @@ class UwotFs {
 					vfsReadable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('r')) {
+				else if ('object' === typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('r')) {
 				
 					vfsReadable = true;
 				
@@ -1574,14 +1575,14 @@ class UwotFs {
 				return permissions;
 			
 			}	
-			else if (permissions && 'object' == typeof permissions) {
+			else if (permissions && 'object' === typeof permissions) {
 				
-				if ('string' == typeof permissions.owner && this.user['uName'] === permissions.owner) { 
+				if ('string' === typeof permissions.owner && this.user['uName'] === permissions.owner) { 
 				
 					vfsWritable = true;
 				
 				}
-				else if ('object' == typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('w')) {
+				else if ('object' === typeof permissions[this.user['uName']] && Array.isArray(permissions[this.user['uName']]) && -1 !== permissions[this.user['uName']].indexOf('w')) {
 				
 					vfsWritable = true;
 				
