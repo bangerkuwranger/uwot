@@ -1,41 +1,41 @@
-	/****
+/****
 
-		CALC
+	CALC
 
-	****/
+****/
 
-	/*
-	@include calc('height','100%','-','20px');
-	renders to:
-		height: -webkit-calc(100% - 20px);
-		height: -moz-calc(100% - 20px);
-		height: -ms-calc(100% - 20px);
-		height: -o-calc(100% - 20px);
-		height: calc(100% - 20px);
-	*/
+/*
+@include calc('height','100%','-','20px');
+renders to:
+	height: -webkit-calc(100% - 20px);
+	height: -moz-calc(100% - 20px);
+	height: -ms-calc(100% - 20px);
+	height: -o-calc(100% - 20px);
+	height: calc(100% - 20px);
+*/
 
-	@mixin calc($property, $val1, $operator, $val2) {
+@mixin calc($property, $val1, $operator, $val2) {
 
-		$prefixes: ("-webkit-", "-moz-", "-ms-", "-o-", "" );
+	$prefixes: ("-webkit-", "-moz-", "-ms-", "-o-", "" );
 
-		@each $prefix in $prefixes {
-			#{$property}: #{$prefix}calc(#{$val1} #{$operator} #{$val2});
-		}
-
+	@each $prefix in $prefixes {
+		#{$property}: #{$prefix}calc(#{$val1} #{$operator} #{$val2});
 	}
 
-	/****
+}
 
-		NUMBER STRING TO EM
+/****
 
-	****/
+	NUMBER STRING TO EM
 
-	/*
-	@include numstrtoem('left', '-1');
-	renders to:
-		left: -1em
-	*/
+****/
 
-	@mixin numstrtoem($property, $val) {
-		#{$property}: #{$val}em;
-	}
+/*
+@include numstrtoem('left', '-1');
+renders to:
+	left: -1em
+*/
+
+@mixin numstrtoem($property, $val) {
+	#{$property}: #{$val}em;
+}

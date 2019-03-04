@@ -1,105 +1,105 @@
-	@import '../../_partial/functions';
-	@import '../../_partial/mixins';
-	@import 'colors';
-	@import '../../_partial/ansi';
-	@include ansi(mapGet($theme-colors, 'ansi'));
+@import '../../_partial/functions';
+@import '../../_partial/mixins';
+@import 'colors';
+@import '../../_partial/ansi';
+@include ansi(mapGet($theme-colors, 'ansi'));
 
+body {
+	#uwot {
+		.terminal {
+			color: mapGet($theme-colors, 'tag', 'text');
+			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
+			a {
+				color: mapGet($theme-colors, 'tag', 'link');
+	
+				&:hover,
+				&:active {
+					color: mapGet($theme-colors, 'tag', 'hover');
+					text-decoration: none;
+				}
+	
+			}
+
+			.header {
+				border-color: mapGet($theme-colors, 'tag', 'border');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+			}
+
+			.output {
+				width: 100%;
+				min-height: 300px;
+			}
+	
+			.cli {
+				width: calc(100% - 2em);
+				margin: 0.5em 0;
+				border-color: mapGet($theme-colors, 'tag', 'border');
+		
+				form {
+					.field {
+						input,
+						input:focus,
+						input:active {
+						
+							color: mapGet($theme-colors, 'tag', 'hover');
+						
+						}
+			
+					}
+		
+				}
+		
+			}
+	
+		}
+	
+	}
+}
+
+@media (prefers-color-scheme: dark) {
 	body {
 		#uwot {
 			.terminal {
-				color: mapGet($theme-colors, 'tag', 'text');
-				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
+				color: mapGet($ansi-colors, 'white');
+				background-color: mapGet($ansi-colors, 'black');
+				
 				a {
-					color: mapGet($theme-colors, 'tag', 'link');
+					color: mapGet($ansi-colors, 'blue');
 	
 					&:hover,
 					&:active {
-						color: mapGet($theme-colors, 'tag', 'hover');
-						text-decoration: none;
+						color: mapGet($ansi-colors, 'cyan');
 					}
 	
 				}
-
+				
+				
 				.header {
-					border-color: mapGet($theme-colors, 'tag', 'border');
-					background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+					border-color: mapGet($ansi-colors, 'white');
+					background: mapGet($ansi-colors, 'black');
 				}
-
-				.output {
-					width: 100%;
-					min-height: 300px;
-				}
-	
+				
 				.cli {
-					width: calc(100% - 2em);
-					margin: 0.5em 0;
-					border-color: mapGet($theme-colors, 'tag', 'border');
-		
+					border-color: mapGet($ansi-colors, 'white');
+				
 					form {
 						.field {
 							input,
 							input:focus,
 							input:active {
-						
-								color: mapGet($theme-colors, 'tag', 'hover');
-						
+								color: mapGet($ansi-colors, 'cyan');
 							}
 			
 						}
 		
 					}
-		
+				
 				}
-	
-			}
-	
-		}
-	}
-
-	@media (prefers-color-scheme: dark) {
-		body {
-			#uwot {
-				.terminal {
-					color: mapGet($ansi-colors, 'white');
-					background-color: mapGet($ansi-colors, 'black');
-				
-					a {
-						color: mapGet($ansi-colors, 'blue');
-	
-						&:hover,
-						&:active {
-							color: mapGet($ansi-colors, 'cyan');
-						}
-	
-					}
-				
-				
-					.header {
-						border-color: mapGet($ansi-colors, 'white');
-						background: mapGet($ansi-colors, 'black');
-					}
-				
-					.cli {
-						border-color: mapGet($ansi-colors, 'white');
-				
-						form {
-							.field {
-								input,
-								input:focus,
-								input:active {
-									color: mapGet($ansi-colors, 'cyan');
-								}
 			
-							}
-		
-						}
-				
-					}
-			
-				}
-
 			}
 
 		}
+
 	}
+}

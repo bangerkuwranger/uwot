@@ -1,73 +1,73 @@
-	/****
+/****
 	
-		ANSI 16 Color Map
+	ANSI 16 Color Map
 
-	****/
+****/
 
-	$ansi-colors: (
-		// Standard
-		'black': #073642,
-		'red': #DC322F,
-		'green': #859900,
-		'yellow': #B58900,
-		'blue': #268BD2,
-		'magenta': #D33682,
-		'cyan': #2AA198,
-		'white': #EEE8D5,
-		// Bright
-		'bright-black': #002B36,
-		'bright-red': #CB4B16,
-		'bright-green': #586E75,
-		'bright-yellow': #657E83,
-		'bright-blue': #839496,
-		'bright-magenta': #6C71C4,
-		'bright-cyan': #93A1A1,
-		'bright-white': #FDF6E3
-	);
+$ansi-colors: (
+	// Standard
+	'black': #073642,
+	'red': #DC322F,
+	'green': #859900,
+	'yellow': #B58900,
+	'blue': #268BD2,
+	'magenta': #D33682,
+	'cyan': #2AA198,
+	'white': #EEE8D5,
+	// Bright
+	'bright-black': #002B36,
+	'bright-red': #CB4B16,
+	'bright-green': #586E75,
+	'bright-yellow': #657E83,
+	'bright-blue': #839496,
+	'bright-magenta': #6C71C4,
+	'bright-cyan': #93A1A1,
+	'bright-white': #FDF6E3
+);
 
 
-	/****
+/****
 	
-		Theme Color Map
+	Theme Color Map
 
-	****/
+****/
 
-	$scheme-colors: (
-		// Primary Colors
-		'primary': (
-			'fg': map-get($ansi-colors, 'white'),
-			'bg': map-get($ansi-colors, 'bright-black')
-		),
-		// Secondary Colors
-		'secondary': (
-			'fg': map-get($ansi-colors, 'bright-black'),
-			'bg': map-get($ansi-colors, 'white')
-		)
-	);
+$scheme-colors: (
+	// Primary Colors
+	'primary': (
+		'fg': map-get($ansi-colors, 'white'),
+		'bg': map-get($ansi-colors, 'bright-black')
+	),
+	// Secondary Colors
+	'secondary': (
+		'fg': map-get($ansi-colors, 'bright-black'),
+		'bg': map-get($ansi-colors, 'white')
+	)
+);
 
 
-	/****
+/****
 	
-		Contextual Color Shortcuts for Common Tags/States
+	Contextual Color Shortcuts for Common Tags/States
 
-	****/
+****/
 
-	$tag-colors: (
-		'text': mapGet($scheme-colors, 'primary', 'fg'),
-		'link': mapGet($ansi-colors, 'bright-green'),
-		'border': mapGet($scheme-colors, 'primary', 'fg'),
-		'hover': mapGet($ansi-colors, 'white')
-	);
+$tag-colors: (
+	'text': mapGet($scheme-colors, 'primary', 'fg'),
+	'link': mapGet($ansi-colors, 'bright-green'),
+	'border': mapGet($scheme-colors, 'primary', 'fg'),
+	'hover': mapGet($ansi-colors, 'white')
+);
 
 
-	/****
+/****
 
-		The Master Map
+	The Master Map
 
-	****/
+****/
 
-	$theme-colors: (
-		'ansi': $ansi-colors,
-		'scheme': $scheme-colors,
-		'tag': $tag-colors
-	);
+$theme-colors: (
+	'ansi': $ansi-colors,
+	'scheme': $scheme-colors,
+	'tag': $tag-colors
+);
