@@ -243,7 +243,6 @@ class UwotRuntimeCmds {
 									
 										}
 										cIdx++;
-										var eom = false;
 										for (let oArgIdx = cIdx; oArgIdx < reqCount; oArgIdx++) {
 									
 											thisOpt.args.push(args[oArgIdx]);

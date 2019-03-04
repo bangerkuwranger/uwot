@@ -75,7 +75,7 @@ router.post(
 // 									resObj.output.content.push({tag:'br'}, JSON.stringify(req.body.runtime.results.operations[i]));
 									if ('object' === typeof req.body.runtime.results.operations[i] && Array.isArray(req.body.runtime.results.operations[i])) {
 							
-										req.body.operations = req.body.runtime.results.operations[i].map((x_ =>({name: x.name, args: 'object' === typeof x.args ? x.args : []}));
+										req.body.operations = req.body.runtime.results.operations[i].map((x) => ({ name: x.name, args: 'object' === typeof x.args ? x.args : [] };));
 							
 									}
 									else if ('object' === typeof req.body.runtime.results.operations[i] && null !== req.body.runtime.results.operations[i]) {
