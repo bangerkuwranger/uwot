@@ -54,10 +54,8 @@ body {
 						input,
 						input:focus,
 						input:active {
-						
 							color: mapGet($theme-colors, 'tag', 'hover');
 							width: calc(100% - 2em);
-						
 						}
 			
 					}
@@ -96,7 +94,7 @@ body {
 					border-color: #DDDD00;
 					background-color: #111111;
 				}
-				
+
 				.cli {
 					border-color: #DD00DD;
 					background-color: #111111;

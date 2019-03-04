@@ -56,10 +56,12 @@ $decorations must be one of the following:
 */
 
 @mixin ansi($color-map, $ansi-mode: '16', $decorations: 'all') {
+
 	.ansi {
 		$doR: false;
 		
 		@if index($decorations, 'all') or index($decorations, 'bold') {
+
 			&.bold,
 			.bold {
 				font-weight: 800;
@@ -68,6 +70,7 @@ $decorations must be one of the following:
 		}
 		
 		@if index($decorations, 'all') or index($decorations, 'underline') {
+
 			&.underline,
 			.underline {
 				text-decoration: underline;
@@ -80,7 +83,9 @@ $decorations must be one of the following:
 		}
 		
 		@if $ansi-mode == '16' {
+
 			@each $ac in $ansi-16 {
+
 				&.fg-#{$ac} {
 					color: mapGet($color-map, #{$ac});
 					
@@ -115,7 +120,9 @@ $decorations must be one of the following:
 		}
 		
 		@else if $ansi-mode == '8' {
+
 			@each $ac in $ansi-8 {
+
 				&.fg-#{$ac} {
 					color: mapGet($color-map, #{$ac});
 					
@@ -151,7 +158,11 @@ $decorations must be one of the following:
 		}
 		
 		@else {
+
 			@error "$ansi-mode #{$ansi-mode} is not supported; use modes '8' or '16'";
+
 		}
+
 	}
+
 }

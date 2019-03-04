@@ -13,7 +13,7 @@
 body {
 
 	#uwot {
-		--prompt: '$';		
+		--prompt: '$';
 		font: 12px 'Roboto', sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -117,7 +117,7 @@ body {
 				}
 
 			}
-		
+
 		}
 
 	}

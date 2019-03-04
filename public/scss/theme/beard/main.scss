@@ -1,14 +1,17 @@
 @import '../../_partial/functions';
+
 @import '../../_partial/mixins';
+
 @import 'colors';
+
 @import '../../_partial/ansi';
+
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
 body{
 
 	#uwot {
-		--prompt: '#';
-		
+		--prompt: '#';		
 		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'), '8');
@@ -47,6 +50,7 @@ body{
 				form {
 			
 					.field {
+
 						input,
 						input:focus,
 						input:active {						
@@ -68,7 +72,9 @@ body{
 @media (prefers-color-scheme: dark) {
 
 	body {
+
 		#uwot {
+
 			.terminal {
 				color: #00AA00;
 				
@@ -82,7 +88,6 @@ body{
 	
 				}
 				
-				
 				.header {
 					border-color: #00AA00;
 				}
@@ -91,7 +96,9 @@ body{
 					border-color: #00AA00;
 				
 					form {
+
 						.field {
+
 							input,
 							input:focus,
 							input:active {
@@ -111,12 +118,17 @@ body{
 		}
 	
 	}
+
 }
 
 @media (min-width: 642px) {
+
 	body {
+
 		#uwot {
 			font-size: 12px;
 		}
+
 	}
+
 }
