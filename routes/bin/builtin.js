@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const binLoader = require('../../helpers/binLoader');
 
 const validBuiltins = [
 	'cd',
@@ -109,9 +110,22 @@ class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
-		return super.execute(args, options, app, callback, isSudo);
+		global.Uwot.FileSystems[user._id].cmd('pwd', [], function(error, pwdString) {
+		
+			if (error) {
+			
+				callback(error, null);
+			
+			}
+			else {
+			
+				return callback(false, pwdString);
+			
+			}
+		
+		}, isSudo);
 	
 	}
 	
@@ -135,9 +149,29 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
-		return super.execute(args, options, app, callback, isSudo);
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to help');
+		
+		}
+		else if ('object' !== typeof args || !Array.isArray(args)) {
+		
+			return callback(new TypeError('invalid command type for help'));
+		
+		}
+		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
+		if (binLoader.isValidBin(argsArray[0])) {
+		
+			return global.Uwot.Bin[argsArray[0]].help(callback);
+		
+		}
+		else {
+		
+			return callback(new Error('invalid command: ' + argsArray[0]));
+		
+		}
 	
 	}
 	
@@ -161,9 +195,9 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
-		return super.execute(args, options, app, callback, isSudo);
+		return super.execute(args, options, app, user, callback, isSudo);
 	
 	}
 	
@@ -195,7 +229,7 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		
 	}
 	
-	execute(args, options, app, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo) {
 	
 		if ('function' !== typeof callback) {
 		

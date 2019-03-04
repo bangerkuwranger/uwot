@@ -38,6 +38,31 @@ module.exports = {
 	
 		throw new Error('this function is not yet implemented');
 	
+	},
+	
+	// if binName is not passed, returns array of loaded bin names.
+	// if binName is provided, compares against list of loaded bin names and returns
+	// true if binName is loaded,
+	// false if not.
+	isValidBin(binName) {
+	
+		if ('undefined' === typeof binName || null === binName || '' === binName) {
+		
+			return Object.keys(global.Uwot.Bin);
+		
+		}
+		else if ('string' !== typeof binName) {
+		
+			return false;
+		
+		}
+		else {
+		
+			var loadedBins = Object.keys(global.Uwot.Bin);
+			return loadedBins.indexOf(binName.trim()) !== -1;
+		
+		}
+	
 	}
 
 };
