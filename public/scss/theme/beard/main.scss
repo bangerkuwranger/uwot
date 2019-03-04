@@ -11,7 +11,7 @@
 body{
 
 	#uwot {
-		--prompt: '#';		
+		--prompt: '#';
 		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'), '8');
