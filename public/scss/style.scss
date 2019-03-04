@@ -1,5 +1,7 @@
 @import "compass/css3";
+
 @import "_partial/functions";
+
 @import "_partial/mixins";
 
 body {
@@ -136,6 +138,7 @@ body {
 					display: flex;
 					flex-direction: column-reverse;
 					// yucky bugs are yucky.
+					
 					> :first-child {
 						margin-top: auto !important;
 						//yucky workarounds are also yucky
