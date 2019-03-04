@@ -133,7 +133,7 @@ router.post(
 				
 					resObj.output = {
 						content: {tag:'br'}
-					}
+					};
 				
 				}
 				else {

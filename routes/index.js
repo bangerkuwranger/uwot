@@ -26,8 +26,6 @@ passport.use(
 			}
 			else {
 			
-				var self = this;
-//				var users = new UserModel();
 				global.Uwot.Users.findByName(username, function(error, userObj) {
 				
 					if (error) {
