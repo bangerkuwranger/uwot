@@ -1303,7 +1303,7 @@ class UwotFs {
 			pth = this.tildeExpand(pth);
 		
 		}
-		var pthStats
+		var pthStats;
 		if (pth === path.sep) {
 		
 			try {
