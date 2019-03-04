@@ -6,7 +6,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const validateTheme = require('../helpers/themeLoader').isValidTheme;
 const FileSystem = require('../filesystem');
-// const UserModel = require('../users');
+const denyAllOthers = require('../middleware/denyAllOthers');
 
 passport.use(
 
@@ -223,18 +223,7 @@ router.post(
 	
 );
 
-router.all('/login', function (req, res, next) {
-
-	var denied = '';
-	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
-	
-		denied += req.body.cmd.trim() + ': '; 
-	
-	}
-	denied += '<span class="ansi fg-red">Permission Denied</span>';
-	return res.json(denied);
-
-});
+router.all('/login', denyAllOthers(req, res, next));
 
 router.post(
 	'/logout', 
@@ -278,18 +267,7 @@ router.post(
 	
 );
 
-router.all('/logout', function (req, res, next) {
-
-	var denied = '';
-	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
-	
-		denied += req.body.cmd.trim() + ': '; 
-	
-	}
-	denied += '<span class="ansi fg-red">Permission Denied</span>';
-	return res.json(denied);
-
-});
+router.all('/logout', denyAllOthers(req, res, next));
 
 
 module.exports = router;

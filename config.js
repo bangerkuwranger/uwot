@@ -218,7 +218,7 @@ class ReverseProxyBin{
 	
 	}
 
-};
+}
 
 const arrayKeys = [
 	'binpath:external',
@@ -865,10 +865,10 @@ class UwotConfigBase {
 		let cnfTransport, cnfPort, cnfDomain, cnfSecure;
 		let serverCnf = this.nconf.get('server');
 		let defaults = confDefaults();
-		cnfTransport = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.transport ? serverCnf.transport : defaults.server.transport;
-		cnfDomain = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.domain ? serverCnf.domain : defaults.server.domain;
-		cnfPort = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && 'string' === typeof serverCnf.port ? serverCnf.port : defaults.server.port.toString();
-		cnfSecure = null !== serverCnf && undefined !== serverCnf && 'object' === typeof serverCnf && ('string' === typeof serverCnf.transport || 'boolean' === typeof serverCnf.transport) ? sanitize.cleanBool(serverCnf.secure) : false;
+		cnfTransport = 'object' === typeof serverCnf &&null !== serverCnf && 'string' === typeof serverCnf.transport ? serverCnf.transport : defaults.server.transport;
+		cnfDomain = 'object' === typeof serverCnf && null !== serverCnf && 'string' === typeof serverCnf.domain ? serverCnf.domain : defaults.server.domain;
+		cnfPort = 'object' === typeof serverCnf && null !== serverCnf && 'string' === typeof serverCnf.port ? serverCnf.port : defaults.server.port.toString();
+		cnfSecure = 'object' === typeof serverCnf && null !== serverCnf && ('string' === typeof serverCnf.transport || 'boolean' === typeof serverCnf.transport) ? sanitize.cleanBool(serverCnf.secure) : false;
 		if ('boolean' === typeof cnfSecure && cnfSecure) {
 			cnfPort = '443';
 			cnfTransport = 'https';

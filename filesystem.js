@@ -220,7 +220,7 @@ class UwotFsPermissions {
 				newArg.owner = otherOwner;
 			
 			}
-			if ('undefined' == typeof thisAllowed || null === thisAllowed) {
+			if ('undefined' === typeof thisAllowed || null === thisAllowed) {
 			
 				newArg.allowed = otherAllowed;
 			
@@ -1288,7 +1288,7 @@ class UwotFs {
 			checkIfExists = true;
 		
 		}
-		if ('string' != typeof pth) {
+		if ('string' !== typeof pth) {
 		
 			return new TypeError('path passed to resolvePath must be a string');
 		
@@ -1303,13 +1303,14 @@ class UwotFs {
 			pth = this.tildeExpand(pth);
 		
 		}
+		var pthStats
 		if (pth === path.sep) {
 		
 			try {
 			
 				if (checkIfExists) {
 				
-					var pthStats = fs.statSync(this.root.path);
+					pthStats = fs.statSync(this.root.path);
 				
 				}
 				return this.root.path;
@@ -1341,7 +1342,7 @@ class UwotFs {
 				}
 				if (checkIfExists) {
 				
-					var pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);
+					pthStats = pthInRoot ? fs.statSync(pth) : fs.statSync(absPth);
 				
 				}
 				return pthInRoot ? pth : absPth;
@@ -1361,7 +1362,7 @@ class UwotFs {
 		
 				if (checkIfExists) {
 				
-					var fromCwdStats = fs.statSync(fromCwd);
+					pthStats = fs.statSync(fromCwd);
 				
 				}
 				return fromCwd;
@@ -1493,9 +1494,9 @@ class UwotFs {
 				return permissions;
 			
 			}	
-			else if (permissions && 'object' == typeof permissions) {
+			else if (permissions && 'object' === typeof permissions) {
 				
-				if ('string' == typeof permissions.owner && this.user['uName'] === permissions.owner) { 
+				if ('string' === typeof permissions.owner && this.user['uName'] === permissions.owner) { 
 				
 					vfsReadable = true;
 				
@@ -1652,7 +1653,7 @@ class UwotFs {
 		
 				permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
 				permissions = global.Uwot.Constants.tryParseJSON(permFile);
-				if ('object' == typeof permissions) {
+				if ('object' === typeof permissions) {
 			
 					return new UwotFsPermissions(permissions);
 			
@@ -1678,7 +1679,7 @@ class UwotFs {
 		
 				permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
 				permissions = global.Uwot.Constants.tryParseJSON(permFile);
-				if ('object' == typeof permissions) {
+				if ('object' === typeof permissions) {
 			
 					return new UwotFsPermissions(permissions);
 			

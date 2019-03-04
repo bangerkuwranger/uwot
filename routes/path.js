@@ -4,6 +4,7 @@ const Url = require('url');
 const nonceHandler = require('node-timednonce');
 const cmdParser = require('../middleware/cmdParser');
 const ansiParser = require('../middleware/ansi');
+const denyAllOthers = require('../middleware/denyAllOthers');
 
 
 router.post(
@@ -197,17 +198,6 @@ if ('object' === typeof global.Uwot.Bin && Object.keys(global.Uwot.Bin).length >
 
 }
 
-router.all('/', function (req, res, next) {
-
-	var denied = '';
-	if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
-	
-		denied += req.body.cmd.trim() + ': '; 
-	
-	}
-	denied += '<span class="ansi fg-red">Permission Denied</span>';
-	return res.json(denied);
-
-});
+router.all('/', denyAllOthers(req, res, next));
 
 module.exports = router;
