@@ -209,8 +209,7 @@ body {
 					
 						input,
 						input:focus,
-						input:active {
-										
+						input:active {										
 							margin: 0;
 							padding: 0;
 							display: inline-block;
@@ -226,7 +225,6 @@ body {
 							-moz-box-sizing: content-box;
 							box-sizing: content-box;
 							width: calc(100% - 1em);
-						
 						}
 				
 					}
@@ -255,11 +253,14 @@ body {
 }
 
 @media (min-width: 648px) {
+
 	body {
+
 		#uwot {
 			font-size: 14px;
 			
 			.terminal {
+
 				.header {
 					position: absolute;
 					
@@ -294,6 +295,7 @@ body {
 					bottom: 0;
 					
 					form {
+
 						.field {
 							font-size: inherit;
 						}
@@ -307,4 +309,5 @@ body {
 		}
 
 	}
+
 }

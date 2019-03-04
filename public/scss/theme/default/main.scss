@@ -1,11 +1,17 @@
 @import '../../_partial/functions';
+
 @import '../../_partial/mixins';
+
 @import 'colors';
+
 @import '../../_partial/ansi';
+
 @include ansi(mapGet($theme-colors, 'ansi'));
 
 body {
+
 	#uwot {
+
 		.terminal {
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
@@ -37,13 +43,13 @@ body {
 				border-color: mapGet($theme-colors, 'tag', 'border');
 		
 				form {
+
 					.field {
+
 						input,
 						input:focus,
 						input:active {
-						
 							color: mapGet($theme-colors, 'tag', 'hover');
-						
 						}
 			
 					}
@@ -55,11 +61,15 @@ body {
 		}
 	
 	}
+
 }
 
 @media (prefers-color-scheme: dark) {
+
 	body {
+
 		#uwot {
+
 			.terminal {
 				color: mapGet($ansi-colors, 'white');
 				background-color: mapGet($ansi-colors, 'black');
@@ -73,18 +83,19 @@ body {
 					}
 	
 				}
-				
-				
+
 				.header {
 					border-color: mapGet($ansi-colors, 'white');
 					background: mapGet($ansi-colors, 'black');
 				}
-				
+
 				.cli {
 					border-color: mapGet($ansi-colors, 'white');
 				
 					form {
+
 						.field {
+
 							input,
 							input:focus,
 							input:active {
@@ -102,4 +113,5 @@ body {
 		}
 
 	}
+
 }

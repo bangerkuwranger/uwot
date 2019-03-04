@@ -11,8 +11,7 @@
 body {
 
 	#uwot {
-		--prompt: "Ⓐ:";
-		
+		--prompt: "Ⓐ:";		
 		font: 8px Futura, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -84,7 +83,9 @@ body {
 @media (prefers-color-scheme: dark) {
 
 	body {
+
 		#uwot {
+
 			.terminal {
 				color: #00CA12;
 				background-color: #1C1C1C;
@@ -113,7 +114,9 @@ body {
 					background-color: #1C1C1C;
 				
 					form {
+
 						.field {
+
 							input,
 							input:focus,
 							input:active {
@@ -131,14 +134,18 @@ body {
 		}
 		
 	}
+
 }
 
 @media (min-width: 642px) {
+
 	body {
+
 		#uwot {
 			font-size: 12px;
 			
 			.terminal {
+
 				.output {
 					margin: 4em 0;
 				}
@@ -147,19 +154,26 @@ body {
 					padding: 0.5em 0;
 					
 					form {
+
 						.field {
+
 							input,
 							input:focus,
 							input:active {
 								vertical-align: bottom;
 								margin-top: 0.25em;
 							}
+
 						}
 					
 					}
 				
 				}
+
 			}
+
 		}
+
 	}
+
 }

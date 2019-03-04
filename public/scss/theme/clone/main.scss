@@ -12,7 +12,6 @@ body {
 
 	#uwot {
 		--prompt: '$';
-		
 		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
 		
 		@include ansi(mapGet($theme-colors, 'ansi'));
@@ -30,7 +29,7 @@ body {
 					color: mapGet($theme-colors, 'tag', 'hover');
 					text-decoration: none;
 				}
-	
+
 			}
 
 			.header {
@@ -51,12 +50,11 @@ body {
 				form {
 			
 					.field {
+
 						input,
 						input:focus,
 						input:active {
-						
 							color: mapGet($theme-colors, 'ansi', 'bright-black');
-						
 						}
 			
 					}
@@ -74,7 +72,9 @@ body {
 @media (prefers-color-scheme: dark) {
 
 	body {
+
 		#uwot {
+
 			.terminal {
 				color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
@@ -89,7 +89,6 @@ body {
 	
 				}
 				
-				
 				.header {
 					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
@@ -100,7 +99,9 @@ body {
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
 				
 					form {
+
 						.field {
+
 							input,
 							input:focus,
 							input:active {
@@ -118,12 +119,18 @@ body {
 		}
 	
 	}
+
 }
 
 @media (min-width: 642px) {
+
 	body {
+
 		#uwot {
 			font-size: 10px;
+
 		}
+
 	}
+
 }
