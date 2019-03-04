@@ -221,7 +221,7 @@ router.post(
 	
 );
 
-router.all('/login', denyAllOthers(req, res, next));
+router.all('/login', denyAllOthers());
 
 router.post(
 	'/logout', 
@@ -265,7 +265,7 @@ router.post(
 	
 );
 
-router.all('/logout', denyAllOthers(req, res, next));
+router.all('/logout', denyAllOthers());
 
 
 module.exports = router;
