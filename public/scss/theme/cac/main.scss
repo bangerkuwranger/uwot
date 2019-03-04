@@ -1,161 +1,161 @@
-@import '../../_partial/functions';
-@import '../../_partial/mixins';
-@import 'colors';
-@import '../../_partial/ansi';
-@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext');
-
-body {
-
-	#uwot {
-		--prompt: "Ⓐ:";
-		
-		font: 8px Futura, sans-serif;
-		
-		@include ansi(mapGet($theme-colors, 'ansi'));
-		
-		.terminal {
-			font-family: 'Fira Mono', monospace;
-			color: mapGet($theme-colors, 'tag', 'text');
-			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
-			a {
-				color: mapGet($theme-colors, 'tag', 'link');
-	
-				&:hover,
-				&:active {
-					color: mapGet($theme-colors, 'tag', 'hover');
-					text-decoration: none;
-				}
-	
-			}
-
-			.header {
-				border-color: mapGet($theme-colors, 'tag', 'border');
-				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-			}
-
-			.output {
-				width: 100%;
-				min-height: 300px;
-				background-image: url("/scss/theme/cac/img/wotcacbg.png");
-				background-size: initial;
-				background-repeat: no-repeat;
-				background-position: center;
-				margin: 8em 0 0;
-			}
-	
-			.cli {
-				width: calc(100% - 2em);
-				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'border');
-				padding: 0.5em 0 1.75em;
-		
-				form {
-			
-					.field {
-						margin-left: 2ch;
-				
-						&::before {
-							left: -2ch;
-						}
-				
-						input,
-						input:focus,
-						input:active {
-							margin-top: 0.1em;
-						}
-			
-					}
-		
-				}
-		
-			}
-	
-		}
-	
-	}
-
-}
-
-@media (prefers-color-scheme: dark) {
+	@import '../../_partial/functions';
+	@import '../../_partial/mixins';
+	@import 'colors';
+	@import '../../_partial/ansi';
+	@import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,700&subset=cyrillic,cyrillic-ext,greek,greek-ext,latin-ext');
 
 	body {
+
 		#uwot {
+			--prompt: "Ⓐ:";
+		
+			font: 8px Futura, sans-serif;
+		
+			@include ansi(mapGet($theme-colors, 'ansi'));
+		
 			.terminal {
-				color: #00CA12;
-				background-color: #1C1C1C;
-				
+				font-family: 'Fira Mono', monospace;
+				color: mapGet($theme-colors, 'tag', 'text');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
 				a {
-					color: #9D0D00;
+					color: mapGet($theme-colors, 'tag', 'link');
 	
 					&:hover,
 					&:active {
-						color: #BD0D00;
+						color: mapGet($theme-colors, 'tag', 'hover');
+						text-decoration: none;
 					}
 	
 				}
-				
-				.output {
-					background-image: url("/scss/theme/cac/img/wotcacbg_dark.png");
-				}
-				
-				.header {
-					border-color: #9D0D00;
-					background-color: #1C1C1C;
-				}
-				
-				.cli {
-					border-color: #9D0D00;
-					background-color: #1C1C1C;
-				
-					form {
-						.field {
-							input,
-							input:focus,
-							input:active {
-								color: #00CA12;
-							}
-			
-						}
-		
-					}
-				
-				}
-			
-			}
-		
-		}
-		
-	}
-}
 
-@media (min-width: 642px) {
-	body {
-		#uwot {
-			font-size: 12px;
-			
-			.terminal {
-				.output {
-					margin: 4em 0;
+				.header {
+					border-color: mapGet($theme-colors, 'tag', 'border');
+					background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				}
-				
+
+				.output {
+					width: 100%;
+					min-height: 300px;
+					background-image: url("/scss/theme/cac/img/wotcacbg.png");
+					background-size: initial;
+					background-repeat: no-repeat;
+					background-position: center;
+					margin: 8em 0 0;
+				}
+	
 				.cli {
-					padding: 0.5em 0;
-					
+					width: calc(100% - 2em);
+					margin: 0.5em 0;
+					border-color: mapGet($theme-colors, 'tag', 'border');
+					padding: 0.5em 0 1.75em;
+		
 					form {
+			
 						.field {
+							margin-left: 2ch;
+				
+							&::before {
+								left: -2ch;
+							}
+				
 							input,
 							input:focus,
 							input:active {
-								vertical-align: bottom;
-								margin-top: 0.25em;
+								margin-top: 0.1em;
 							}
+			
 						}
-					
+		
+					}
+		
+				}
+	
+			}
+	
+		}
+
+	}
+
+	@media (prefers-color-scheme: dark) {
+
+		body {
+			#uwot {
+				.terminal {
+					color: #00CA12;
+					background-color: #1C1C1C;
+				
+					a {
+						color: #9D0D00;
+	
+						&:hover,
+						&:active {
+							color: #BD0D00;
+						}
+	
 					}
 				
+					.output {
+						background-image: url("/scss/theme/cac/img/wotcacbg_dark.png");
+					}
+				
+					.header {
+						border-color: #9D0D00;
+						background-color: #1C1C1C;
+					}
+				
+					.cli {
+						border-color: #9D0D00;
+						background-color: #1C1C1C;
+				
+						form {
+							.field {
+								input,
+								input:focus,
+								input:active {
+									color: #00CA12;
+								}
+			
+							}
+		
+						}
+				
+					}
+			
+				}
+		
+			}
+		
+		}
+	}
+
+	@media (min-width: 642px) {
+		body {
+			#uwot {
+				font-size: 12px;
+			
+				.terminal {
+					.output {
+						margin: 4em 0;
+					}
+				
+					.cli {
+						padding: 0.5em 0;
+					
+						form {
+							.field {
+								input,
+								input:focus,
+								input:active {
+									vertical-align: bottom;
+									margin-top: 0.25em;
+								}
+							}
+					
+						}
+				
+					}
 				}
 			}
 		}
 	}
-}

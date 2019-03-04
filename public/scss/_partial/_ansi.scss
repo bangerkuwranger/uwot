@@ -1,157 +1,157 @@
-/*** 	NOTE — This depends on functions in the _functions.scss file!
-		Make sure this @import is after one for that file!	***/
+	/*** 	NOTE — This depends on functions in the _functions.scss file!
+			Make sure this @import is after one for that file!	***/
 
-/****
+	/****
 
-	SUPPORT VARS
+		SUPPORT VARS
 
-****/
+	****/
 
-$ansi-8:
-	'black',
-	'red',
-	'green',
-	'yellow',
-	'blue',
-	'magenta',
-	'cyan',
-	'white';
+	$ansi-8:
+		'black',
+		'red',
+		'green',
+		'yellow',
+		'blue',
+		'magenta',
+		'cyan',
+		'white';
 
-$ansi-16:
-	'black',
-	'red',
-	'green',
-	'yellow',
-	'blue',
-	'magenta',
-	'cyan',
-	'white',
-	'bright-black',
-	'bright-red',
-	'bright-green',
-	'bright-yellow',
-	'bright-blue',
-	'bright-magenta',
-	'bright-cyan',
-	'bright-white';
+	$ansi-16:
+		'black',
+		'red',
+		'green',
+		'yellow',
+		'blue',
+		'magenta',
+		'cyan',
+		'white',
+		'bright-black',
+		'bright-red',
+		'bright-green',
+		'bright-yellow',
+		'bright-blue',
+		'bright-magenta',
+		'bright-cyan',
+		'bright-white';
 
-/****
+	/****
 
-	ANSI MIXIN - Generates Classes for ANSI
+		ANSI MIXIN - Generates Classes for ANSI
 
-****/
+	****/
 
-/*
-$color-map must be a SASS map with values matching, at minimum, values from ANSI-8
-(16 is supported by default).
-$ansi-mode can be set to '8' to restrict generated classes to eight colors.
-$decorations must be one of the following:
-	'all' - rules for all decorations (overrides any other list member)
-	'none' - no decorations rules generated (overridden by any list member, i.e. only works by itself)
-	a list including any of the following (will generate rules for each in this list):
-		'bold' - increases font weight for any .ansi.bold tag
-		'underline' - adds text decoration for any .ansi.underline tag
-		'reversed' - inverts colors for any .ansi.reversed tag (heavy!)
+	/*
+	$color-map must be a SASS map with values matching, at minimum, values from ANSI-8
+	(16 is supported by default).
+	$ansi-mode can be set to '8' to restrict generated classes to eight colors.
+	$decorations must be one of the following:
+		'all' - rules for all decorations (overrides any other list member)
+		'none' - no decorations rules generated (overridden by any list member, i.e. only works by itself)
+		a list including any of the following (will generate rules for each in this list):
+			'bold' - increases font weight for any .ansi.bold tag
+			'underline' - adds text decoration for any .ansi.underline tag
+			'reversed' - inverts colors for any .ansi.reversed tag (heavy!)
 
-*/
+	*/
 
-@mixin ansi($color-map, $ansi-mode: '16', $decorations: 'all') {
-	.ansi {
-		$doR: false;
+	@mixin ansi($color-map, $ansi-mode: '16', $decorations: 'all') {
+		.ansi {
+			$doR: false;
 		
-		@if index($decorations, 'all') or index($decorations, 'bold') {
-			&.bold,
-			.bold {
-				font-weight: 800;
+			@if index($decorations, 'all') or index($decorations, 'bold') {
+				&.bold,
+				.bold {
+					font-weight: 800;
+				}
+		
 			}
 		
-		}
+			@if index($decorations, 'all') or index($decorations, 'underline') {
+				&.underline,
+				.underline {
+					text-decoration: underline;
+				}
 		
-		@if index($decorations, 'all') or index($decorations, 'underline') {
-			&.underline,
-			.underline {
-				text-decoration: underline;
 			}
 		
-		}
+			@if index($decorations, 'all') or index($decorations, 'reversed') {
+				$doR: true;
+			}
 		
-		@if index($decorations, 'all') or index($decorations, 'reversed') {
-			$doR: true;
-		}
-		
-		@if $ansi-mode == '16' {
-			@each $ac in $ansi-16 {
-				&.fg-#{$ac} {
-					color: mapGet($color-map, #{$ac});
+			@if $ansi-mode == '16' {
+				@each $ac in $ansi-16 {
+					&.fg-#{$ac} {
+						color: mapGet($color-map, #{$ac});
 					
-					@if $doR {
+						@if $doR {
 					
-						&.reversed,
-						.ansi.reversed {
-							color: inherit;
-							background-color: mapGet($color-map, #{$ac});
+							&.reversed,
+							.ansi.reversed {
+								color: inherit;
+								background-color: mapGet($color-map, #{$ac});
+							}
+					
 						}
 					
 					}
-					
-				}
 			
-				&.bg-#{$ac} {
-					background-color: mapGet($color-map, #{$ac});
+					&.bg-#{$ac} {
+						background-color: mapGet($color-map, #{$ac});
 					
-					@if $doR {
+						@if $doR {
 					
-						&.reversed,
-						.ansi.reversed {
-							color: mapGet($color-map, #{$ac});
+							&.reversed,
+							.ansi.reversed {
+								color: mapGet($color-map, #{$ac});
+							}
+					
 						}
 					
 					}
-					
-				}
 		
-			}
+				}
 	
-		}
+			}
 		
-		@else if $ansi-mode == '8' {
-			@each $ac in $ansi-8 {
-				&.fg-#{$ac} {
-					color: mapGet($color-map, #{$ac});
+			@else if $ansi-mode == '8' {
+				@each $ac in $ansi-8 {
+					&.fg-#{$ac} {
+						color: mapGet($color-map, #{$ac});
 					
-					@if $doR {
+						@if $doR {
 					
-						&.reversed,
-						.ansi.reversed {
-							color: inherit;
-							background-color: mapGet($color-map, #{$ac});
+							&.reversed,
+							.ansi.reversed {
+								color: inherit;
+								background-color: mapGet($color-map, #{$ac});
+							}
+					
 						}
 					
 					}
-					
-				}
 			
-				&.bg-#{$ac} {
-					background-color: mapGet($color-map, #{$ac});
+					&.bg-#{$ac} {
+						background-color: mapGet($color-map, #{$ac});
 					
-					@if $doR {
+						@if $doR {
 					
-						&.reversed,
-						.ansi.reversed {
-							background-color: inherit;
-							color: mapGet($color-map, #{$ac});
+							&.reversed,
+							.ansi.reversed {
+								background-color: inherit;
+								color: mapGet($color-map, #{$ac});
+							}
+					
 						}
 					
 					}
-					
+		
 				}
-		
-			}
 	
-		}
+			}
 		
-		@else {
-			@error "$ansi-mode #{$ansi-mode} is not supported; use modes '8' or '16'";
+			@else {
+				@error "$ansi-mode #{$ansi-mode} is not supported; use modes '8' or '16'";
+			}
 		}
 	}
-}

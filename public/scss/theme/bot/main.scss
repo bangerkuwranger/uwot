@@ -1,122 +1,122 @@
-@import '../../_partial/functions';
-@import '../../_partial/mixins';
-@import 'colors';
-@import '../../_partial/ansi';
-@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=greek-ext,latin-ext');
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,700,700i');
-
-body {
-	#uwot {
-		--prompt: '$';
-		
-		font: 12px 'Roboto', sans-serif;
-		
-		@include ansi(mapGet($theme-colors, 'ansi'));
-		
-		.terminal {
-			font-family: 'Roboto Mono', monospace;
-			color: mapGet($theme-colors, 'tag', 'text');
-			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
-			a {
-				color: mapGet($theme-colors, 'tag', 'link');
-	
-				&:hover,
-				&:active {
-					color: mapGet($theme-colors, 'tag', 'hover');
-					text-decoration: none;
-				}
-	
-			}
-
-			.header {
-				border-color: none;
-				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-			}
-
-			.output {
-				width: 100%;
-				min-height: 300px;
-			}
-	
-			.cli {
-				width: calc(100% - 2em);
-				margin: 0.5em 0;
-				border-color: none;
-		
-				form {
-					.field {
-						input,
-						input:focus,
-						input:active {
-						
-							color: mapGet($ansi-colors, 'blue');
-						
-						}
-			
-					}
-		
-				}
-		
-			}
-	
-		}
-	
-	}
-
-}
-
-@media (prefers-color-scheme: dark) {
+	@import '../../_partial/functions';
+	@import '../../_partial/mixins';
+	@import 'colors';
+	@import '../../_partial/ansi';
+	@import url('https://fonts.googleapis.com/css?family=Roboto+Mono:400,700&subset=greek-ext,latin-ext');
+	@import url('https://fonts.googleapis.com/css?family=Roboto:300,300i,400,700,700i');
 
 	body {
 		#uwot {
+			--prompt: '$';
+		
+			font: 12px 'Roboto', sans-serif;
+		
+			@include ansi(mapGet($theme-colors, 'ansi'));
+		
 			.terminal {
-				color: #DCD0A9;
-				background-color: #001C23;
-				
+				font-family: 'Roboto Mono', monospace;
+				color: mapGet($theme-colors, 'tag', 'text');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
 				a {
-					color: #1B6295;
+					color: mapGet($theme-colors, 'tag', 'link');
 	
 					&:hover,
 					&:active {
-						color: #1B6295;
+						color: mapGet($theme-colors, 'tag', 'hover');
+						text-decoration: none;
 					}
 	
 				}
-				
-				
+
 				.header {
-					border-color: #DCD0A9;
-					background-color: #001C23;
+					border-color: none;
+					background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				}
-				
+
+				.output {
+					width: 100%;
+					min-height: 300px;
+				}
+	
 				.cli {
-					border-color: #DCD0A9;
-					background-color: #001C23;
-				
+					width: calc(100% - 2em);
+					margin: 0.5em 0;
+					border-color: none;
+		
 					form {
-			
 						.field {
 							input,
 							input:focus,
 							input:active {
-								color: #1B6295;
+						
+								color: mapGet($ansi-colors, 'blue');
+						
 							}
+			
 						}
 		
 					}
-				
-				}
-			}
 		
+				}
+	
+			}
+	
 		}
-	}
-}
 
-@media (min-width: 642px) {
-	body {
-		#uwot {
-			font-size: 16px;
+	}
+
+	@media (prefers-color-scheme: dark) {
+
+		body {
+			#uwot {
+				.terminal {
+					color: #DCD0A9;
+					background-color: #001C23;
+				
+					a {
+						color: #1B6295;
+	
+						&:hover,
+						&:active {
+							color: #1B6295;
+						}
+	
+					}
+				
+				
+					.header {
+						border-color: #DCD0A9;
+						background-color: #001C23;
+					}
+				
+					.cli {
+						border-color: #DCD0A9;
+						background-color: #001C23;
+				
+						form {
+			
+							.field {
+								input,
+								input:focus,
+								input:active {
+									color: #1B6295;
+								}
+							}
+		
+						}
+				
+					}
+				}
+		
+			}
 		}
 	}
-}
+
+	@media (min-width: 642px) {
+		body {
+			#uwot {
+				font-size: 16px;
+			}
+		}
+	}

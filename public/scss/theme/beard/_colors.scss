@@ -1,64 +1,64 @@
-/****
+	/****
 	
-	ANSI 16 Color Map
+		ANSI 16 Color Map
 
-****/
+	****/
 
-$ansi-colors: (
-	// Standard
-	'black': #010101,
-	'red': #FE0000,
-	'green': #00FE00,
-	'yellow': #FEFE00,
-	'blue': #0000FE,
-	'magenta': #FE00FE,
-	'cyan': #00FEFE,
-	'white': #FEFEFE
-);
+	$ansi-colors: (
+		// Standard
+		'black': #010101,
+		'red': #FE0000,
+		'green': #00FE00,
+		'yellow': #FEFE00,
+		'blue': #0000FE,
+		'magenta': #FE00FE,
+		'cyan': #00FEFE,
+		'white': #FEFEFE
+	);
 
 
-/****
+	/****
 	
-	Theme Color Map
+		Theme Color Map
 
-****/
+	****/
 
-$scheme-colors: (
-	// Primary Colors
-	'primary': (
-		'fg': map-get($ansi-colors, 'green'),
-		'bg': map-get($ansi-colors, 'black')
-	),
-	// Secondary Colors
-	'secondary': (
-		'fg': map-get($ansi-colors, 'black'),
-		'bg': map-get($ansi-colors, 'green')
-	)
-);
+	$scheme-colors: (
+		// Primary Colors
+		'primary': (
+			'fg': map-get($ansi-colors, 'green'),
+			'bg': map-get($ansi-colors, 'black')
+		),
+		// Secondary Colors
+		'secondary': (
+			'fg': map-get($ansi-colors, 'black'),
+			'bg': map-get($ansi-colors, 'green')
+		)
+	);
 
 
-/****
+	/****
 	
-	Contextual Color Shortcuts for Common Tags/States
+		Contextual Color Shortcuts for Common Tags/States
 
-****/
+	****/
 
-$tag-colors: (
-	'text': mapGet($scheme-colors, 'primary', 'fg'),
-	'link': mapGet($ansi-colors, 'blue'),
-	'border': mapGet($scheme-colors, 'primary', 'fg'),
-	'hover': mapGet($ansi-colors, 'blue')
-);
+	$tag-colors: (
+		'text': mapGet($scheme-colors, 'primary', 'fg'),
+		'link': mapGet($ansi-colors, 'blue'),
+		'border': mapGet($scheme-colors, 'primary', 'fg'),
+		'hover': mapGet($ansi-colors, 'blue')
+	);
 
 
-/****
+	/****
 	
-	The Master Map
+		The Master Map
 
-****/
+	****/
 
-$theme-colors: (
-	'ansi': $ansi-colors,
-	'scheme': $scheme-colors,
-	'tag': $tag-colors
-);
+	$theme-colors: (
+		'ansi': $ansi-colors,
+		'scheme': $scheme-colors,
+		'tag': $tag-colors
+	);

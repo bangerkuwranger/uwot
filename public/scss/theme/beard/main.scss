@@ -1,122 +1,122 @@
-@import '../../_partial/functions';
-@import '../../_partial/mixins';
-@import 'colors';
-@import '../../_partial/ansi';
-@import url('https://fonts.googleapis.com/css?family=VT323');
+	@import '../../_partial/functions';
+	@import '../../_partial/mixins';
+	@import 'colors';
+	@import '../../_partial/ansi';
+	@import url('https://fonts.googleapis.com/css?family=VT323');
 
-body{
+	body{
 
-	#uwot {
-		--prompt: '#';
-		
-		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
-		
-		@include ansi(mapGet($theme-colors, 'ansi'), '8');
-		
-		.terminal {
-			font-family: 'VT323', monospace;
-			color: mapGet($theme-colors, 'tag', 'text');
-			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
-			a {
-				color: mapGet($theme-colors, 'tag', 'link');
-	
-				&:hover,
-				&:active {
-					color: mapGet($theme-colors, 'tag', 'hover');
-					text-decoration: none;
-				}
-	
-			}
-
-			.header {
-				border-color: mapGet($theme-colors, 'tag', 'border');
-				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-			}
-
-			.output {
-				width: 100%;
-				min-height: 300px;
-			}
-	
-			.cli {
-				width: calc(100% - 2em);
-				margin: 0.5em 0;
-				border-color: mapGet($theme-colors, 'tag', 'border');
-		
-				form {
-			
-					.field {
-						input,
-						input:focus,
-						input:active {						
-							color: mapGet($theme-colors, 'tag', 'text');
-						}
-			
-					}
-		
-				}
-		
-			}
-	
-		}
-	
-	}
-
-}
-
-@media (prefers-color-scheme: dark) {
-
-	body {
 		#uwot {
+			--prompt: '#';
+		
+			font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
+		
+			@include ansi(mapGet($theme-colors, 'ansi'), '8');
+		
 			.terminal {
-				color: #00AA00;
-				
+				font-family: 'VT323', monospace;
+				color: mapGet($theme-colors, 'tag', 'text');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
 				a {
-					color: #0000AA;
+					color: mapGet($theme-colors, 'tag', 'link');
 	
 					&:hover,
 					&:active {
-						color: #00CCCC;
+						color: mapGet($theme-colors, 'tag', 'hover');
+						text-decoration: none;
 					}
 	
 				}
-				
-				
+
 				.header {
-					border-color: #00AA00;
+					border-color: mapGet($theme-colors, 'tag', 'border');
+					background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				}
-				
+
+				.output {
+					width: 100%;
+					min-height: 300px;
+				}
+	
 				.cli {
-					border-color: #00AA00;
-				
+					width: calc(100% - 2em);
+					margin: 0.5em 0;
+					border-color: mapGet($theme-colors, 'tag', 'border');
+		
 					form {
+			
 						.field {
 							input,
 							input:focus,
-							input:active {
-											
-								color: #00CC00;
-							
+							input:active {						
+								color: mapGet($theme-colors, 'tag', 'text');
 							}
 			
 						}
 		
 					}
-				
-				}
-			
-			}
 		
-		}
+				}
 	
-	}
-}
+			}
+	
+		}
 
-@media (min-width: 642px) {
-	body {
-		#uwot {
-			font-size: 12px;
+	}
+
+	@media (prefers-color-scheme: dark) {
+
+		body {
+			#uwot {
+				.terminal {
+					color: #00AA00;
+				
+					a {
+						color: #0000AA;
+	
+						&:hover,
+						&:active {
+							color: #00CCCC;
+						}
+	
+					}
+				
+				
+					.header {
+						border-color: #00AA00;
+					}
+				
+					.cli {
+						border-color: #00AA00;
+				
+						form {
+							.field {
+								input,
+								input:focus,
+								input:active {
+											
+									color: #00CC00;
+							
+								}
+			
+							}
+		
+						}
+				
+					}
+			
+				}
+		
+			}
+	
 		}
 	}
-}
+
+	@media (min-width: 642px) {
+		body {
+			#uwot {
+				font-size: 12px;
+			}
+		}
+	}

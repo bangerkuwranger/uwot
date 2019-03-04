@@ -1,103 +1,104 @@
-@import '../../_partial/functions';
-@import '../../_partial/mixins';
-@import 'colors';
-@import '../../_partial/ansi';
+	@import '../../_partial/functions';
+	@import '../../_partial/mixins';
+	@import 'colors';
+	@import '../../_partial/ansi';
 
-body {
-	#uwot {
-		--prompt: "Ğö:";
-		
-		@include ansi(mapGet($theme-colors, 'ansi'));
-		
-		.terminal {
-			color: mapGet($theme-colors, 'tag', 'text');
-			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
-			a {
-				color: mapGet($theme-colors, 'tag', 'link');
-	
-				&:hover,
-				&:active {
-					color: mapGet($theme-colors, 'tag', 'hover');
-					text-decoration: none;
-				}
-	
-			}
-
-			.header {
-				border-color: mapGet($theme-colors, 'tag', 'border');
-				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-			}
-
-			.output {
-				background-image: url(/scss/theme/bind/img/wotbindbg.png);
-			}
-	
-			.cli {
-				width: calc(100% - 2em);
-				margin: 0 0 0.5em;
-				border-color: mapGet($theme-colors, 'tag', 'hover');
-		
-				form {
-					.field {
-						margin-left: 2ch;
-						
-						&::before {
-							left: -2ch;
-						}
-				
-						input,
-						input:focus,
-						input:active {
-						
-							color: mapGet($theme-colors, 'tag', 'hover');
-							width: calc(100% - 2em);
-						
-						}
-			
-					}
-		
-				}
-		
-			}
-	
-		}
-	
-	}
-
-}
-
-@media (prefers-color-scheme: dark) {
 	body {
 		#uwot {
+			--prompt: "Ğö:";
+		
+			@include ansi(mapGet($theme-colors, 'ansi'));
+		
 			.terminal {
-				color: #AAAA00;
-				background-color: #111111;
-				
+				color: mapGet($theme-colors, 'tag', 'text');
+				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+	
 				a {
-					color: #AA00AA;
+					color: mapGet($theme-colors, 'tag', 'link');
 	
 					&:hover,
 					&:active {
-						color: #DD00DD;
+						color: mapGet($theme-colors, 'tag', 'hover');
+						text-decoration: none;
 					}
+	
 				}
-				
-				.header {
-					border-color: #DDDD00;
-					background-color: #111111;
-				}
-				
-				.cli {
-					border-color: #DD00DD;
-					background-color: #111111;
 
+				.header {
+					border-color: mapGet($theme-colors, 'tag', 'border');
+					background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+				}
+
+				.output {
+					background-image: url(/scss/theme/bind/img/wotbindbg.png);
+				}
+	
+				.cli {
+					width: calc(100% - 2em);
+					margin: 0 0 0.5em;
+					border-color: mapGet($theme-colors, 'tag', 'hover');
+		
 					form {
 						.field {
+							margin-left: 2ch;
+						
+							&::before {
+								left: -2ch;
+							}
+				
 							input,
 							input:focus,
 							input:active {
-								color: #DD00DD;
+						
+								color: mapGet($theme-colors, 'tag', 'hover');
+								width: calc(100% - 2em);
+						
+							}
+			
+						}
+		
+					}
+		
+				}
+	
+			}
+	
+		}
+
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body {
+			#uwot {
+				.terminal {
+					color: #AAAA00;
+					background-color: #111111;
+				
+					a {
+						color: #AA00AA;
+	
+						&:hover,
+						&:active {
+							color: #DD00DD;
+						}
+					}
+				
+					.header {
+						border-color: #DDDD00;
+						background-color: #111111;
+					}
+				
+					.cli {
+						border-color: #DD00DD;
+						background-color: #111111;
+
+						form {
+							.field {
+								input,
+								input:focus,
+								input:active {
+									color: #DD00DD;
+								}
 							}
 						}
 					}
@@ -105,4 +106,3 @@ body {
 			}
 		}
 	}
-}
