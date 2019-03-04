@@ -13,23 +13,23 @@ body {
 	#uwot {
 		--prompt: 'C:\\>';
 		font-size: 8px;
-		
+
 		@include ansi(mapGet($theme-colors, 'ansi'));
-		
+
 		.terminal {
 			font-family: "Lucida Console", 'Share Tech Mono', "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
+
 			a {
 				color: mapGet($theme-colors, 'tag', 'link');
-	
+
 				&:hover,
 				&:active {
 					color: mapGet($theme-colors, 'tag', 'hover');
 					text-decoration: none;
 				}
-	
+
 			}
 
 			.header {
@@ -41,35 +41,35 @@ body {
 				width: 100%;
 				min-height: 300px;
 			}
-	
+
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
 				border-color: mapGet($theme-colors, 'tag', 'hover');
-		
+
 				form {
 
 					.field {
 						margin-left: 3ch;
-						
+
 						&::before {
 							left: -3ch;
 						}
-				
+
 						input,
 						input:focus,
 						input:active {
 							color: mapGet($theme-colors, 'tag', 'hover');
 						}
-			
+
 					}
-		
+
 				}
-		
+
 			}
-	
+
 		}
-	
+
 	}
 
 }
@@ -83,26 +83,26 @@ body {
 			.terminal {
 				color: #DDDDDD;
 				background-color: #00002A;
-				
+
 				a {
 					color: #0000CF;
-	
+
 					&:hover,
 					&:active {
 						color: #0000DF;
 					}
-	
+
 				}
-				
+
 				.header {
 					border-color: #DDDDDD;
 					background-color: #00002A;
 				}
-				
+
 				.cli {
 					border-color: #DDDDDD;
 					background-color: #00002A;
-				
+
 					form {
 
 						.field {

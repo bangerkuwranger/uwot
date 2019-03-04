@@ -13,17 +13,17 @@ body {
 	#uwot {
 		--prompt: '$';
 		font: 8px "Proxima Nova", Helvetica, Arial, sans-serif;
-		
+
 		@include ansi(mapGet($theme-colors, 'ansi'));
-		
+
 		.terminal {
 			font-family: monaco, 'Anonymous Pro', Consolas, "Lucida Console", monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
+
 			a {
 				color: mapGet($theme-colors, 'tag', 'link');
-	
+
 				&:hover,
 				&:active {
 					color: mapGet($theme-colors, 'tag', 'hover');
@@ -41,14 +41,14 @@ body {
 				width: 100%;
 				min-height: 300px;
 			}
-	
+
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
 				border-color: mapGet($theme-colors, 'tag', 'border');
-		
+
 				form {
-			
+
 					.field {
 
 						input,
@@ -56,15 +56,15 @@ body {
 						input:active {
 							color: mapGet($theme-colors, 'ansi', 'bright-black');
 						}
-			
+
 					}
-		
+
 				}
-		
+
 			}
-	
+
 		}
-	
+
 	}
 
 }
@@ -78,26 +78,26 @@ body {
 			.terminal {
 				color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
-				
+
 				a {
 					color: mapGet($ansi-colors, 'blue');
-	
+
 					&:hover,
 					&:active {
 						color: mapGet($ansi-colors, 'cyan');
 					}
-	
+
 				}
-				
+
 				.header {
 					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
 				}
-				
+
 				.cli {
 					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
-				
+
 					form {
 
 						.field {

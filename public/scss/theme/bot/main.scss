@@ -15,23 +15,23 @@ body {
 	#uwot {
 		--prompt: '$';
 		font: 12px 'Roboto', sans-serif;
-		
+
 		@include ansi(mapGet($theme-colors, 'ansi'));
-		
+
 		.terminal {
 			font-family: 'Roboto Mono', monospace;
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
+
 			a {
 				color: mapGet($theme-colors, 'tag', 'link');
-	
+
 				&:hover,
 				&:active {
 					color: mapGet($theme-colors, 'tag', 'hover');
 					text-decoration: none;
 				}
-	
+
 			}
 
 			.header {
@@ -43,12 +43,12 @@ body {
 				width: 100%;
 				min-height: 300px;
 			}
-	
+
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
 				border-color: none;
-		
+
 				form {
 
 					.field {
@@ -58,15 +58,15 @@ body {
 						input:active {
 							color: mapGet($ansi-colors, 'blue');
 						}
-			
+
 					}
-		
+
 				}
-		
+
 			}
-	
+
 		}
-	
+
 	}
 
 }
@@ -80,28 +80,28 @@ body {
 			.terminal {
 				color: #DCD0A9;
 				background-color: #001C23;
-				
+
 				a {
 					color: #1B6295;
-	
+
 					&:hover,
 					&:active {
 						color: #1B6295;
 					}
-	
+
 				}
 
 				.header {
 					border-color: #DCD0A9;
 					background-color: #001C23;
 				}
-				
+
 				.cli {
 					border-color: #DCD0A9;
 					background-color: #001C23;
-				
+
 					form {
-			
+
 						.field {
 
 							input,
@@ -111,9 +111,9 @@ body {
 							}
 
 						}
-		
+
 					}
-				
+
 				}
 
 			}

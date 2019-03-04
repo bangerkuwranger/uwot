@@ -6,20 +6,20 @@
 
 body {
 	margin: 0;
-	
+
 	#uwot {
 		font: 10px "Proxima Nova", Helvetica, Arial, sans-serif;
 
 		.indicator-container {
 			background-size: cover;
-			
+
 			&.loading {
 				background-image: url('/images/tmploader.gif');
 				background-image: url('/images/tmploader.svg');
 			}
-			
+
 		}
-		
+
 		.terminal {
 			font-family: monospace;
 			width: calc(100% - 2em);
@@ -28,35 +28,35 @@ body {
 			position: fixed;
 			padding: 1em;
 			overflow: hidden;
-			
+
 			h1 {
 				font-size: 1.5em;
 				font-weight: 500;
 			}
-			
+
 			h2 {
 				font-size: 1.25em;
 				font-weight: 500;
 			}
-			
+
 			h3 {
 				font-size: 1.125em;
 				font-weight: 500;
 			}
-			
+
 			h4 {
 				font-size: 1em;
 				font-weight: 600;
 			}
-			
+
 			h5 {
 				font-weight: 200;
 			}
-			
+
 			h6 {
 				font-weight: 200;
 			}
-	
+
 			.header {
 				min-height: 1em;
 				border-bottom: 1px solid;
@@ -65,22 +65,22 @@ body {
 				z-index: 10;
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
-				
+
 				> h1 {
 					max-width: calc(100% - 2em - 4px);
 					max-height: 1.33em;
 					overflow-y: hidden;
-					
+
 					> span {
 						margin-right: 1ch;
 						word-break: break-all;
-						
+
 						&.header-cwd {
 							margin-left: 1ch;
 							white-space: nowrap;
 							display: inline-block;
 							min-width: 2ch;
-						
+
 							.ellipsis-text {
 								display: inline-block;
 								position: relative;
@@ -90,23 +90,23 @@ body {
 								overflow-x: hidden;
 								max-width: 100%;
 								vertical-align: bottom;
-								
+
 								&.reverse-path {
 									direction: ltr;
 								}
-								
+
 							}
-							
+
 							> .ellipsis {
 								display: none;
 							}
-							
+
 						}
-						
+
 					}
-				
+
 				}
-				
+
 				.indicator-container {
 					min-height: 1em;
 					min-width: 1em;
@@ -117,9 +117,9 @@ body {
 					right: 0;
 					margin: 0.33em 0;
 				}
-				
+
 			}
-	
+
 			.output {
 				width: 100%;
 				min-height: 300px;
@@ -128,7 +128,7 @@ body {
 				background-size: cover;
 				background-position-x: center;
 				overflow: hidden;
-				
+
 				.output-container {
 					width: 100%;
 					max-height: 100%;
@@ -138,43 +138,43 @@ body {
 					display: flex;
 					flex-direction: column-reverse;
 					// yucky bugs are yucky.
-					
+
 					> :first-child {
 						margin-top: auto !important;
 						//yucky workarounds are also yucky
 					}
-					
+
 					.outputline {
 						line-height: 1.1em;
 						margin: 0.25em 0;
-						
+
 						&.add-prompt {
 							margin-left: 4ch;
 							position: relative;
 							min-height: 1em;
-							
-							&:before {
+
+							&::before {
 								content: var(--prompt, '>') ' ';
 								position: absolute;
 								left: -4ch;
 								top: 0;
 								font: inherit;
 							}
-						
+
 						}
-						
+
 						.ansi {
 							word-break: break-word;
 							text-indent: 4ch;
 						}
-						
+
 					}
-					
-					
+
+
 				}
-				
+
 			}
-		
+
 			.cli {
 				width: 100%;
 				height: 2em;
@@ -185,20 +185,20 @@ body {
 				top: 4em;
 				padding: 0.5em 0;
 				z-index: 10;
-				
+
 				.disabled {
 					opacity: 0.5;
 				}
-			
+
 				form {
 					width: 100%;
-				
+
 					.field {
 						width: 100%;
 						position: relative;
 						margin-left: 0;
 						font-size: 16px;
-					
+
 						&::before {
 							content: attr(data-cwd) ' ' attr(data-prompt) var(--prompt, '>');
 							position: absolute;
@@ -206,10 +206,10 @@ body {
 							top: 0;
 							font: inherit;
 						}
-					
+
 						input,
 						input:focus,
-						input:active {										
+						input:active {
 							margin: 0;
 							padding: 0;
 							display: inline-block;
@@ -226,28 +226,28 @@ body {
 							box-sizing: content-box;
 							width: calc(100% - 1em);
 						}
-				
+
 					}
-			
+
 				}
-			
+
 			}
-		
+
 		}
-	
+
 	}
-	
+
 }
 
 @media (prefers-color-scheme: dark) {
 
 	body {
-	
+
 		#uwot {
 			color: white;
 			background-color: black;
 		}
-		
+
 	}
 
 }
@@ -258,50 +258,50 @@ body {
 
 		#uwot {
 			font-size: 14px;
-			
+
 			.terminal {
 
 				.header {
 					position: absolute;
-					
+
 					.indicator-container {
 						margin: 0.33em 0;
 					}
-				
+
 				}
-				
+
 				.output {
 					background-position-x: initial;
 					margin: 5em 0;
-					
+
 					.output-container {
 						flex-direction: column;
 						justify-content: initial;
-				
+
 						> :first-child {
 							margin-top: auto !important;
 							margin-bottom: 0 !important;
 						}
 
 					}
-					
+
 				}
-				
+
 				.cli {
 					position: absolute;
 					border-top: 1px solid;
 					border-bottom-width: 0;
 					top: initial;
 					bottom: 0;
-					
+
 					form {
 
 						.field {
 							font-size: inherit;
 						}
-						
+
 					}
-					
+
 				}
 
 			}

@@ -15,16 +15,16 @@ body {
 		.terminal {
 			color: mapGet($theme-colors, 'tag', 'text');
 			background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-	
+
 			a {
 				color: mapGet($theme-colors, 'tag', 'link');
-	
+
 				&:hover,
 				&:active {
 					color: mapGet($theme-colors, 'tag', 'hover');
 					text-decoration: none;
 				}
-	
+
 			}
 
 			.header {
@@ -36,12 +36,12 @@ body {
 				width: 100%;
 				min-height: 300px;
 			}
-	
+
 			.cli {
 				width: calc(100% - 2em);
 				margin: 0.5em 0;
 				border-color: mapGet($theme-colors, 'tag', 'border');
-		
+
 				form {
 
 					.field {
@@ -51,15 +51,15 @@ body {
 						input:active {
 							color: mapGet($theme-colors, 'tag', 'hover');
 						}
-			
+
 					}
-		
+
 				}
-		
+
 			}
-	
+
 		}
-	
+
 	}
 
 }
@@ -73,15 +73,15 @@ body {
 			.terminal {
 				color: mapGet($ansi-colors, 'white');
 				background-color: mapGet($ansi-colors, 'black');
-				
+
 				a {
 					color: mapGet($ansi-colors, 'blue');
-	
+
 					&:hover,
 					&:active {
 						color: mapGet($ansi-colors, 'cyan');
 					}
-	
+
 				}
 
 				.header {
@@ -91,7 +91,7 @@ body {
 
 				.cli {
 					border-color: mapGet($ansi-colors, 'white');
-				
+
 					form {
 
 						.field {
@@ -101,11 +101,11 @@ body {
 							input:active {
 								color: mapGet($ansi-colors, 'cyan');
 							}
-			
+
 						}
-		
+
 					}
-				
+
 				}
 
 			}

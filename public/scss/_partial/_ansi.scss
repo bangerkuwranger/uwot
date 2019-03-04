@@ -59,104 +59,104 @@ $decorations must be one of the following:
 
 	.ansi {
 		$doR: false;
-		
+
 		@if index($decorations, 'all') or index($decorations, 'bold') {
 
 			&.bold,
 			.bold {
 				font-weight: 800;
 			}
-		
+
 		}
-		
+
 		@if index($decorations, 'all') or index($decorations, 'underline') {
 
 			&.underline,
 			.underline {
 				text-decoration: underline;
 			}
-		
+
 		}
-		
+
 		@if index($decorations, 'all') or index($decorations, 'reversed') {
 			$doR: true;
 		}
-		
+
 		@if $ansi-mode == '16' {
 
 			@each $ac in $ansi-16 {
 
 				&.fg-#{$ac} {
 					color: mapGet($color-map, #{$ac});
-					
+
 					@if $doR {
-					
+
 						&.reversed,
 						.ansi.reversed {
 							color: inherit;
 							background-color: mapGet($color-map, #{$ac});
 						}
-					
+
 					}
-					
+
 				}
-			
+
 				&.bg-#{$ac} {
 					background-color: mapGet($color-map, #{$ac});
-					
+
 					@if $doR {
-					
+
 						&.reversed,
 						.ansi.reversed {
 							color: mapGet($color-map, #{$ac});
 						}
-					
+
 					}
-					
+
 				}
-		
+
 			}
-	
+
 		}
-		
+
 		@else if $ansi-mode == '8' {
 
 			@each $ac in $ansi-8 {
 
 				&.fg-#{$ac} {
 					color: mapGet($color-map, #{$ac});
-					
+
 					@if $doR {
-					
+
 						&.reversed,
 						.ansi.reversed {
 							color: inherit;
 							background-color: mapGet($color-map, #{$ac});
 						}
-					
+
 					}
-					
+
 				}
-			
+
 				&.bg-#{$ac} {
 					background-color: mapGet($color-map, #{$ac});
-					
+
 					@if $doR {
-					
+
 						&.reversed,
 						.ansi.reversed {
 							background-color: inherit;
 							color: mapGet($color-map, #{$ac});
 						}
-					
+
 					}
-					
+
 				}
-		
+
 			}
-	
+
 		}
-		
+
 		@else {
 
 			@error "$ansi-mode #{$ansi-mode} is not supported; use modes '8' or '16'";
