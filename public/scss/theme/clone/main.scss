@@ -47,11 +47,12 @@ body {
 				form {
 			
 					.field {
-				
 						input,
 						input:focus,
-						input:active {						
+						input:active {
+						
 							color: mapGet($theme-colors, 'ansi', 'bright-black');
+						
 						}
 			
 					}
@@ -69,7 +70,6 @@ body {
 @media (prefers-color-scheme: dark) {
 
 	body {
-
 		#uwot {
 			.terminal {
 				color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
@@ -96,7 +96,6 @@ body {
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
 				
 					form {
-			
 						.field {
 							input,
 							input:focus,
@@ -113,13 +112,11 @@ body {
 			}
 		
 		}
-		
+	
 	}
-
 }
 
 @media (min-width: 642px) {
-
 	body {
 		#uwot {
 			font-size: 10px;

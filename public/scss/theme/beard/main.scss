@@ -5,6 +5,7 @@
 @import url('https://fonts.googleapis.com/css?family=VT323');
 
 body{
+
 	#uwot {
 		--prompt: '#';
 		
@@ -46,7 +47,6 @@ body{
 				form {
 			
 					.field {
-					
 						input,
 						input:focus,
 						input:active {						
@@ -68,9 +68,7 @@ body{
 @media (prefers-color-scheme: dark) {
 
 	body {
-
 		#uwot {
-		
 			.terminal {
 				color: #00AA00;
 				
@@ -94,11 +92,12 @@ body{
 				
 					form {
 						.field {
-				
 							input,
 							input:focus,
-							input:active {						
+							input:active {
+											
 								color: #00CC00;
+							
 							}
 			
 						}
@@ -110,9 +109,8 @@ body{
 			}
 		
 		}
-		
+	
 	}
-
 }
 
 @media (min-width: 642px) {

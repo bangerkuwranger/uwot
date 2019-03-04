@@ -45,13 +45,13 @@ body {
 				border-color: none;
 		
 				form {
-			
 					.field {
-				
 						input,
 						input:focus,
-						input:active {						
+						input:active {
+						
 							color: mapGet($ansi-colors, 'blue');
+						
 						}
 			
 					}
@@ -69,7 +69,6 @@ body {
 @media (prefers-color-scheme: dark) {
 
 	body {
-
 		#uwot {
 			.terminal {
 				color: #DCD0A9;
@@ -111,9 +110,7 @@ body {
 			}
 		
 		}
-		
 	}
-
 }
 
 @media (min-width: 642px) {

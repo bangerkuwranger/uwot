@@ -4,7 +4,6 @@
 @import '../../_partial/ansi';
 
 body {
-
 	#uwot {
 		--prompt: "Ğö:";
 		
@@ -40,7 +39,6 @@ body {
 				border-color: mapGet($theme-colors, 'tag', 'hover');
 		
 				form {
-			
 					.field {
 						margin-left: 2ch;
 						
@@ -50,9 +48,11 @@ body {
 				
 						input,
 						input:focus,
-						input:active {						
+						input:active {
+						
 							color: mapGet($theme-colors, 'tag', 'hover');
 							width: calc(100% - 2em);
+						
 						}
 			
 					}
@@ -81,7 +81,6 @@ body {
 					&:active {
 						color: #DD00DD;
 					}
-	
 				}
 				
 				.header {
@@ -92,7 +91,7 @@ body {
 				.cli {
 					border-color: #DD00DD;
 					background-color: #111111;
-				
+
 					form {
 						.field {
 							input,

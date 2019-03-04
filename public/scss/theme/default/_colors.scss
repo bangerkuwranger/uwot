@@ -25,7 +25,6 @@ $ansi-colors: (
 	'bright-white': #FFFFFF
 );
 
-
 /****
 	
 	Theme Color Map
@@ -45,20 +44,18 @@ $scheme-colors: (
 	)
 );
 
-
 /****
-	
+
 	Contextual Color Shortcuts for Common Tags/States
 
 ****/
 
 $tag-colors: (
 	'text': mapGet($scheme-colors, 'primary', 'fg'),
-	'link': #aaa,
+	'link': #AAAAAA,
 	'border': mapGet($scheme-colors, 'primary', 'fg'),
 	'hover': map-get($ansi-colors, 'bright-white')
 );
-
 
 /****
 

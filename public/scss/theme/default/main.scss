@@ -5,7 +5,6 @@
 @include ansi(mapGet($theme-colors, 'ansi'));
 
 body {
-
 	#uwot {
 		.terminal {
 			color: mapGet($theme-colors, 'tag', 'text');
@@ -38,13 +37,13 @@ body {
 				border-color: mapGet($theme-colors, 'tag', 'border');
 		
 				form {
-			
 					.field {
-				
 						input,
 						input:focus,
-						input:active {						
+						input:active {
+						
 							color: mapGet($theme-colors, 'tag', 'hover');
+						
 						}
 			
 					}
@@ -56,11 +55,9 @@ body {
 		}
 	
 	}
-
 }
 
 @media (prefers-color-scheme: dark) {
-
 	body {
 		#uwot {
 			.terminal {
@@ -90,10 +87,8 @@ body {
 						.field {
 							input,
 							input:focus,
-							input:active {		
-											
+							input:active {
 								color: mapGet($ansi-colors, 'cyan');
-							
 							}
 			
 						}
@@ -105,6 +100,6 @@ body {
 			}
 
 		}
-	
+
 	}
 }
