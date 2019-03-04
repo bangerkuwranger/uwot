@@ -43,7 +43,7 @@ const builtinConstructorArgs = {
 	printf: [
 		{
 			name:				'printf',
-			description:		'Write the formatted arguments to the standard output under the control of the format.',
+			description:		'Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process.',
 			requiredArguments:	['format'],
 			optionalArguments:	['arguments']
 		},
@@ -158,7 +158,7 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 		}
 		else if ('object' !== typeof args || !Array.isArray(args)) {
 		
-			return callback(new TypeError('invalid command type for help'));
+			return this.help(callback);
 		
 		}
 		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
@@ -194,16 +194,323 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 		);
 	
 	}
-
-	execute(args, options, app, user, callback, isSudo) {
-	
-		return super.execute(args, options, app, user, callback, isSudo);
-	
-	}
 	
 	help(callback) {
 	
 		return super.help(callback);
+	
+	}
+	
+	stripQuotes(quotedStr) {
+	
+		if ('string' !== typeof quotedStr) {
+		
+			return quotedStr;
+		
+		}
+		else if (quotedStr.charAt(0) === '"' && quotedStr.charAt(str.length - 1) === '"') {
+		
+			return quotedStr.substr(1, quotedStr.length - 2);
+		
+		}
+		else if (quotedStr.charAt(0) === "'" && quotedStr.charAt(str.length - 1) === "'") {
+		
+			return quotedStr.substr(1, quotedStr.length - 2);
+		
+		}
+		else {
+		
+			return quotedStr;
+		
+		}
+	
+	}
+	
+	// TBD
+	unescapeString(escStr) {
+	
+		var finalString = escStr;
+		const escChars = [
+			'\\\\',
+			'\\n',
+			'\\r',
+			'\\t',
+			'\\"',
+			"\\'",
+			"\\?"
+		];
+		const escCharMap = {
+			'\\\\': '&bsol;',
+			'\\n': '&NewLine;',
+			'\\r': '',
+			'\\t': '&Tab;',
+			'\\"': '&quot;',
+			"\\'": '&apos;',
+			"\\?": '&quest;'
+		};
+		escChars.forEach(function(escChar) {
+		
+			finalString = finalString.split(escChar).join(escCharMap[escChar]);
+		
+		});
+		return finalString;
+	
+	}
+	
+	// TBD
+	unsDecNum(inputStr) {
+	
+		return Math.abs(parseFloat(inputStr)).toString(10);
+	
+	}
+	
+	// TBD
+	sigDecNum(inputStr) {
+	
+		return parseFloat(inputStr).toString(10);
+	
+	}
+	
+	// TBD
+	unsOctNum(inputStr) {
+	
+		return Math.abs(parseFloat(inputStr)).toString(8);
+	
+	}
+	
+	// TBD
+	unsHexNum(inputStr, casing) {
+	
+		var result = parseFloat(inputStr);
+		if ('string' !== typeof casing || casing !== 'upper') {
+		
+			return result.toString(16);
+		
+		}
+		else {
+		
+			return result.toString(16).toUpperCase();
+		
+		}
+	
+	}
+	
+	// TBD
+	floatNum(inputStr) {
+	
+		return parseFloat(inputStr).toString(10);
+	
+	}
+	
+	// TBD
+	doubleNum(inputStr, casing, sci) {
+	
+		var result = parseFloat(inputStr);
+		if ('boolean' === typeof sci && sci) {
+		
+			return 'string' !== typeof casing || casing !== 'upper' ? result.toExponential() : result.toExponential().toUpperCase();
+		
+		}
+		else {
+		
+			return result.toString(10);
+		
+		}
+	
+	}
+	
+	// TBD
+	charStr(inputStr) {
+	
+		return inputStr.charAt(0);
+	
+	}
+	
+	replaceSub(subPattern, argsArray) {
+	
+		var sub;
+		var replaceWith = '';
+		switch (subPattern) {
+	
+			case 'b':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.unescapeString(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'i':
+			case 'd':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.sigDecNum(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'o':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.unsOctNum(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'u':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.unsDecNum(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'x':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.unsHexNum(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'X':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.unsHexNum(this.stripQuotes(sub), 'upper');
+			
+				}
+				break;
+			case 'f':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.floatNum(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 'g':
+			case 'e':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.doubleNum(this.stripQuotes(sub), 'lower', true);
+			
+				}
+				break;
+			case 'G':
+			case 'E':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.doubleNum(this.stripQuotes(sub), 'upper', true);
+			
+				}
+				break;
+			case 'c':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.charStr(this.stripQuotes(sub));
+			
+				}
+				break;
+			case 's':
+				sub = argsArray.shift();
+				if ('string' === typeof sub && '' !== sub) {
+			
+					replaceWith = this.stripQuotes(sub);
+			
+				}
+				break;
+			case '%':
+				replaceWith = '&percnt;';
+				break;
+			default:
+				return new Error('unexpected format placeholder %' + subPattern);
+	
+		}
+		return replaceWith;
+	
+	}
+	
+	execute(args, options, app, user, callback, isSudo) {
+	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to printf');
+		
+		}
+		else if ('object' !== typeof args || !Array.isArray(args)) {
+		
+			return this.help(callback);
+		
+		}
+		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
+		if ('string' === typeof argsArray[0]) {
+		
+			var format = argsArray.shift();
+			var finalString;
+			// strip single quotes if wrapped in single quotes
+			// string double quotes if wrapped in double quotes
+			finalString = this.stripQuotes(format);
+			// replace escapes in format
+			finalString = this.unescapeString(finalString);
+			var hasSubs = -1 !== finalString.indexOf('%');
+			if (!hasSubs) {
+			
+				return callback(false, finalString);
+			
+			}
+// 			var compareString = finalString;
+			// array split by placeholder char ("%")
+			var charArray = Array.from(finalString);
+			finalString = '';
+			// each member split by space char
+			// parse substitutions by following chars and perform on placeholder strings
+			var phArray = [];
+			var priorStr = ''
+			for (let i = 0; i < charArray.length; i++) {
+			
+				var ch = charArray[i];
+				if ('%' === ch) {
+				
+					phArray.push(priorStr);
+					priorStr = '';
+					var thisPh = charArray[i + 1];
+					var thisSub = this.replaceSub(thisPh, argsArray);
+					if ('string' !== typeof thisSub) {
+					
+						i = charArray.length;
+						return callback(thisSub, null);
+					
+					}
+					else {
+					
+						i++;
+						phArray.push(thisSub);
+					
+					}
+				
+				}
+				else {
+				
+					priorStr += ch;
+				
+				}
+			
+			}
+			phArray.push(priorStr);
+			// consolidate members to finalString
+			finalString = phArray.join('');
+			return callback(false, finalString);
+		
+		}
+		else {
+		
+			return callback(new Error('invalid format: ' + argsArray[0]));
+		
+		}
 	
 	}
 	
