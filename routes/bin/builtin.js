@@ -208,12 +208,12 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 			return quotedStr;
 		
 		}
-		else if (quotedStr.charAt(0) === '"' && quotedStr.charAt(str.length - 1) === '"') {
+		else if (quotedStr.charAt(0) === '"' && quotedStr.charAt(quotedStr.length - 1) === '"') {
 		
 			return quotedStr.substr(1, quotedStr.length - 2);
 		
 		}
-		else if (quotedStr.charAt(0) === "'" && quotedStr.charAt(str.length - 1) === "'") {
+		else if (quotedStr.charAt(0) === "'" && quotedStr.charAt(quotedStr.length - 1) === "'") {
 		
 			return quotedStr.substr(1, quotedStr.length - 2);
 		
@@ -469,7 +469,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 			// each member split by space char
 			// parse substitutions by following chars and perform on placeholder strings
 			var phArray = [];
-			var priorStr = ''
+			var priorStr = '';
 			for (let i = 0; i < charArray.length; i++) {
 			
 				var ch = charArray[i];
