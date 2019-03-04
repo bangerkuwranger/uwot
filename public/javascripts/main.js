@@ -284,7 +284,12 @@ function performOperations(operations) {
 			});
 		}
 		else if ('string' === typeof operations.name && 'object' === typeof operations.args && Array.isArray(operations.args)) {
-			var args = (operations.args.length > 0) ? operations.args.map((x) => { x.text; }) : [];
+			var args = [];
+			if (operations.args.length > 0) {
+				operations.args.forEach(function(argNode) {
+					args.push(argNode.text);
+				});
+			}
 			ops.performOperation(operations.name, args);
 		}
 	}
