@@ -110,7 +110,7 @@ describe('users.js', function() {
 				});
 		
 			});
-			it('should return a User object with the name "guest user" and username "guest"', function(done) {
+			it('should return a User object with _id "GUEST", the name "guest user" and username "guest"', function(done) {
 		
 				users.getGuest(function(error, guest) {
 			
@@ -121,6 +121,7 @@ describe('users.js', function() {
 					}
 					else {
 					
+						expect(guest._id).to.equal('GUEST');
 						expect(guest.fName).to.equal('guest');
 						expect(guest.lName).to.equal('user');
 						expect(guest.uName).to.equal('guest');

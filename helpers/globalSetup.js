@@ -267,7 +267,7 @@ module.exports = {
 			var loadGuest = filesystemLoader.loadGuest();
 			if (true !== loadGuest) {
 			
-				loadedFilesystems.GUEST = true;
+				loadedFilesystems.GUEST = false;
 				error = loadGuest;
 				
 			
@@ -286,14 +286,24 @@ module.exports = {
 				}
 				if ('object' === typeof loadedForSessions && Array.isArray(loadedForSessions) && loadedForSessions.length > 0) {
 				
+					var i = 0;
 					loadedForSessions.forEach(function(uid) {
 					
 						loadedFilesystems[uid] = true;
+						if (++i >= loadedForSessions.length) {
+						
+							return callback(error, loadedFilesystems);
+						
+						}
 					
 					});
 				
 				}
-				return callback(error, loadedFilesystems);
+				else {
+				
+					return callback(error, loadedFilesystems);
+				
+				}
 			
 			});
 		

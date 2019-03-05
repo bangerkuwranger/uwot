@@ -35,6 +35,7 @@ describe('globalSetup.js', function() {
 		expect(global.Uwot).to.have.property('Exports').that.is.not.null;
 		expect(global.Uwot).to.have.property('Themes').that.is.not.null;
 		expect(global.Uwot).to.have.property('Bin').that.is.not.null;
+		expect(global.Uwot).to.have.property('FileSystems').that.is.not.null;
 
 	});
 	describe('uninitialize()', function() {
@@ -442,6 +443,31 @@ describe('globalSetup.js', function() {
 			configGetStub.restore();
 		
 		});
+	
+	});
+	describe('initFileSystems(sessionStore, callback)', function() {
+	
+		before(function() {
+		
+			// if ('object' !== typeof global.Uwot.Constants || 'string' !== typeof global.Uwot.Constants.appRoot) {
+// 			
+// 				gsh.initConstants();
+// 			
+// 			}
+// 			if ('object' !== typeof global.Uwot.Config || 'function' !== typeof global.Uwot.Config.get) {
+// 			
+// 				gsh.initEnvironment();
+// 			
+// 			}
+		
+		});
+		it('should be a function');
+		it('should throw a TypeError if callback is not a function');
+		it('should return an object to the second callback arg that includes a GUEST property that is false if  filesystemLoader.loadGuest returns an error');
+		it('should return the error returned by filesystemLoader.loadGuest as the first callback arg if it returns an error and loadActiveSessionFilesystems does not');
+		it('should return an object to the second callback arg that includes a GUEST property that is true if  filesystemLoader.loadGuest executes without error');
+		it('should return the error returned by filesystemLoader.loadActiveSessionFilesystems as the first callback arg if it returns an error');
+		it('should should return an object to the second callback arg that includes properties matching the user ids from any active sessions that were successfully loaded, and these properties should have value === true')
 	
 	});
 

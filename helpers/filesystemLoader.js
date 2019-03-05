@@ -1,6 +1,4 @@
 'use strict';
-const fs = require('fs');
-const path = require('path');
 const FileSystem = require('../filesystem');
 const GUEST_UID = 'GUEST';
 
@@ -31,7 +29,7 @@ module.exports = {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to loadActiveSessionFilesystems')
+			throw new TypeError('invalid callback passed to loadActiveSessionFilesystems');
 		
 		}
 		else {
