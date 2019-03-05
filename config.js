@@ -180,7 +180,7 @@ class ExternalTheme{
 	
 	}
 
-};
+}
 
 class ReverseProxyBin{
 

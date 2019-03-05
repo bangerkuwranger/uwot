@@ -141,7 +141,7 @@ class UwotCliOperations {
 		$.post(
 			'/logout',
 			{
-				nonce: nonce,
+				nonce,
 				cwd: localStorage.getItem('UwotCwd')
 			}
 		)

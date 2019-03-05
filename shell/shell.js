@@ -544,6 +544,7 @@ function dropAndCreateTable(tableName, dbPath) {
 //	shell.js db setup tablename
 function setupDb(tableName) {
 
+	var dbPath, tableCount;
 	if ('undefined' !== typeof tableName && ('-h' === tableName || '--help' === tableName || 'help' === tableName)) {
 	
 		actionHelp("db setup", 'Setup a table or all tables. Drops (if exists) and creates table.', 'tablename', 'Omitting the tablename will rebuild and set up all tables.');
@@ -554,7 +555,6 @@ function setupDb(tableName) {
 	}
 	else if ('undefined' !== typeof tableName) {
 	
-		var dbPath, tableCount;
 		if (tableNames.indexOf(tableName) === -1) {
 		
 			console.log('Unknown table: ' + tableName);

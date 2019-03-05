@@ -30,10 +30,10 @@ class User {
 		sudoer
 	) {
 	
-		var clean_id = sanitize.cleanString(_id, null);
-		if (null !== clean_id) {
+		var cleanId = sanitize.cleanString(_id, null);
+		if (null !== cleanId) {
 		
-			this._id = clean_id;
+			this._id = cleanId;
 		
 		}
 		this.fName = sanitize.cleanString(fName);
@@ -49,12 +49,12 @@ class User {
 	
 	saltPass(password) {
 	
-		if ('string' != typeof password) {
+		if ('string' !== typeof password) {
 		
 			throw new TypeError('invalid password value passed to saltPass.');
 		
 		}
-		if ('undefined' == typeof this.salt || null == this.salt || !this.salt) {
+		if ('undefined' === typeof this.salt || null === this.salt || !this.salt) {
 		
 			this.salt = bcrypt.genSaltSync(16);
 		
@@ -66,12 +66,12 @@ class User {
 	
 	verifyPassword(password) {
 	
-		if ('string' != typeof password) {
+		if ('string' !== typeof password) {
 		
 			throw new TypeError('invalid password value passed to verifyPassword.');
 		
 		}
-		if ('undefined' == typeof this.salt || null == this.salt || !this.salt) {
+		if ('undefined' === typeof this.salt || null === this.salt || !this.salt) {
 		
 			return false;
 		
@@ -109,7 +109,7 @@ class User {
 	
 	}
 
-};
+}
 
 // TBD
 // implement allowRootUser function
@@ -132,16 +132,11 @@ module.exports = class UwotUsers {
 	
 	getGuest(callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to getGuest.');
 		
 		}
-// 		else if (!global.Uwot.Config.get('users', 'allowGuest')) {
-// 		
-// 			return callback(new Error('config does not allow guest users.'), null);
-// 		
-// 		}
 		else {
 		
 			try {
@@ -177,12 +172,12 @@ module.exports = class UwotUsers {
 	findById(uId, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to findById.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId) {
+		else if ('string' !== typeof uId || '' === uId) {
 		
 			return callback(new TypeError('invalid id passed to findById.'), null);
 		
@@ -197,7 +192,7 @@ module.exports = class UwotUsers {
 					return self.fbiCallback(error, null);
 				
 				}
-				else if (!Array.isArray(data) || !data.length || 'object' != typeof data[0]) {
+				else if (!Array.isArray(data) || !data.length || 'object' !== typeof data[0]) {
 				
 					return self.fbiCallback(false, false);
 				
@@ -228,7 +223,7 @@ module.exports = class UwotUsers {
 	findByName(uName, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to findByName.');
 		
@@ -248,7 +243,7 @@ module.exports = class UwotUsers {
 					return self.fbnCallback(error, null);
 				
 				}
-				else if (!Array.isArray(data) || !data.length || 'object' != typeof data[0]) {
+				else if (!Array.isArray(data) || !data.length || 'object' !== typeof data[0]) {
 				
 					return self.fbnCallback(false, false);
 				
@@ -283,7 +278,7 @@ module.exports = class UwotUsers {
 	createNew(uObj, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to createNew.');
 		
@@ -338,7 +333,7 @@ module.exports = class UwotUsers {
 							return self.cnCallback(error, null);
 				
 						}
-						else if ('object' != typeof data || null === data || 'string' != typeof data._id) {
+						else if ('object' !== typeof data || null === data || 'string' !== typeof data._id) {
 				
 							return self.cnCallback(false, false);
 				
@@ -374,14 +369,14 @@ module.exports = class UwotUsers {
 	remove(uId, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to remove.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId) {
+		else if ('string' !== typeof uId || '' === uId) {
 		
-			return callback(new TypeError('invalid user id passed to remove.'), null)
+			return callback(new TypeError('invalid user id passed to remove.'), null);
 		
 		}
 		else {
@@ -414,12 +409,12 @@ module.exports = class UwotUsers {
 	changePw(uId, oldPw, newPw, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to changePw.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId || 'string' !== typeof oldPw || 'string' !== typeof newPw) {
+		else if ('string' !== typeof uId || '' === uId || 'string' !== typeof oldPw || 'string' !== typeof newPw) {
 		
 			return callback(new TypeError('invalid args passed to changePw.'), null);
 		
@@ -452,7 +447,7 @@ module.exports = class UwotUsers {
 				}
 				else {
 				
-					var uObj = new User (
+					var uObj = new User(
 						uId,
 						null,
 						null,
@@ -495,12 +490,12 @@ module.exports = class UwotUsers {
 	changeName(uId, fName, lName, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to changeName.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId || 'string' !== typeof fName || 'string' !== typeof lName) {
+		else if ('string' !== typeof uId || '' === uId || 'string' !== typeof fName || 'string' !== typeof lName) {
 		
 			return callback(new TypeError('invalid args passed to changeName.'), null);
 		
@@ -515,7 +510,7 @@ module.exports = class UwotUsers {
 					return self.cnameCallback(error, null);
 				
 				}
-				else if ('number' != typeof numReplaced || numReplaced < 1) {
+				else if ('number' !== typeof numReplaced || numReplaced < 1) {
 				
 					return self.cnameCallback(false, false);
 				
@@ -549,12 +544,12 @@ module.exports = class UwotUsers {
 			}
 		
 		}
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to changeSudo.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId || 'boolean' != typeof maySudo) {
+		else if ('string' !== typeof uId || '' === uId || 'boolean' !== typeof maySudo) {
 		
 			return callback(new TypeError('invalid args passed to changeSudo.'), null);
 		
@@ -569,7 +564,7 @@ module.exports = class UwotUsers {
 					return self.csCallback(error, null);
 				
 				}
-				else if ('number' != typeof numReplaced || numReplaced < 1) {
+				else if ('number' !== typeof numReplaced || numReplaced < 1) {
 				
 					return self.csCallback(false, false);
 				
@@ -589,12 +584,12 @@ module.exports = class UwotUsers {
 	validate(uId, pw, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to validate.');
 		
 		}
-		else if ('string' != typeof uId || '' === uId || 'string' !== typeof pw || '' === pw) {
+		else if ('string' !== typeof uId || '' === uId || 'string' !== typeof pw || '' === pw) {
 		
 			return callback(new TypeError('invalid args passed to validate.'), null);
 		
@@ -609,7 +604,7 @@ module.exports = class UwotUsers {
 					return self.vCallback(error, null);
 				
 				}
-				else if (!Array.isArray(data) || !data.length || 'object' != typeof data[0]) {
+				else if (!Array.isArray(data) || !data.length || 'object' !== typeof data[0]) {
 				
 					return self.vCallback(false, false);
 				
@@ -639,7 +634,7 @@ module.exports = class UwotUsers {
 	
 	listUsers(callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to listUsers.');
 		
@@ -662,12 +657,12 @@ module.exports = class UwotUsers {
 	isUnique(username, callback) {
 	
 		var self = this;
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to isUnique.');
 		
 		}
-		else if ('string' != typeof username || '' === username) {
+		else if ('string' !== typeof username || '' === username) {
 		
 			return callback(new TypeError('invalid username passed to isUnique.'), null);
 		
@@ -688,7 +683,7 @@ module.exports = class UwotUsers {
 					return self.iuCallback(error, false);
 			
 				}
-				if ('undefined' == typeof result || result < 1) {
+				if ('undefined' === typeof result || result < 1) {
 			
 					return self.iuCallback(false, true);
 			

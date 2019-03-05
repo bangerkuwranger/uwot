@@ -10,10 +10,11 @@ class UwotTheme {
 		path
 	) {
 	
-	
+		this.name = sanitize.cleanString(name, 255);
+		this.path = sanitize.cleanString(path, 1024);
 	
 	}
 
-};
+}
 
 module.exports = UwotTheme;

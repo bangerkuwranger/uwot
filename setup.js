@@ -1,8 +1,6 @@
 'use strict';
 const path = require('path');
-const fileLog = require('./logger').all;
 const config = require('./config');
-const sanitize = require('./helpers/valueConversion');
 
 var configProd = path.resolve(__dirname, 'etc', 'prod', 'config.json');
 var configDev = path.resolve(__dirname, 'etc', 'dev', 'config.json');
@@ -36,7 +34,7 @@ class UwotSetup {
 			for (let i=0; i<environments.length; i++) {
 			
 				let env = environments[i];
-				if ('string' == typeof env && -1 !== validEnv.indexOf(env)) {
+				if ('string' === typeof env && -1 !== validEnv.indexOf(env)) {
 				
 					switch(env) {
 					
@@ -65,7 +63,7 @@ class UwotSetup {
 	
 	performConfigOperation(operation, args, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to performConfigOperation.');
 		
@@ -97,7 +95,7 @@ class UwotSetup {
 				else {
 				
 					var self = this;
-					this.devConfig[operation](...args, function(error, result) {
+					this.devConfig[operation](...args, function(error) {
 					
 						if (error) {
 						
@@ -169,7 +167,7 @@ class UwotSetup {
 	// does reset array values
 	resetCat(cat, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to resetCat.');
 		
@@ -214,7 +212,7 @@ class UwotSetup {
 	// values should be a Map object.
 	setCat(cat, values, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to setCat.');
 		
@@ -252,12 +250,12 @@ class UwotSetup {
 	
 	addArrayValue(cat, key, value, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to resetCat.');
 		
 		}
-		else if ('string' !== typeof cat || 'string' !== typeof key ||'undefined' == typeof value) {
+		else if ('string' !== typeof cat || 'string' !== typeof key ||'undefined' === typeof value) {
 		
 			return callback(new TypeError('invalid args passed to addArrayValue.'), false);
 		
@@ -272,12 +270,12 @@ class UwotSetup {
 	
 	removeArrayIndex(cat, key, index, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to removeArrayIndex.');
 		
 		}
-		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' != typeof index) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' !== typeof index) {
 		
 			return callback(new TypeError('invalid args passed to removeArrayIndex.'), false);
 		
@@ -293,7 +291,7 @@ class UwotSetup {
 	listCats(callback) {
 	
 		
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to listCats.');
 		
@@ -304,7 +302,7 @@ class UwotSetup {
 	
 	listCat(cat, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to listCat.');
 		
@@ -315,7 +313,7 @@ class UwotSetup {
 	
 	listArrayValues(cat, key, callback) {
 	
-		if ('function' != typeof callback) {
+		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to listArrayValues.');
 		
@@ -324,6 +322,6 @@ class UwotSetup {
 	
 	}
 
-};
+}
 
 module.exports = UwotSetup;

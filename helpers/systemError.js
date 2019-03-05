@@ -642,7 +642,7 @@ class SystemError extends Error {
 
 	get dest() {
 	
-		return this['kInfo'].path !== undefined ?
+		return 'undefined' !== typeof this['kInfo'].path ?
 			this['kInfo'].dest.toString() : undefined;
 	
 	}
