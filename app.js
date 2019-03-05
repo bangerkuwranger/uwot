@@ -1,7 +1,6 @@
 var path = require('path');
 const globalSetupHelper = require('./helpers/globalSetup');
 
-
 globalSetupHelper.initConstants();
 
 var express = require('express');
@@ -74,11 +73,6 @@ global.Uwot.Bin.sudo = {
 // then add to reserved list
 globalSetupHelper.initBins();
 
-// create container for global FileSystems
-// TBD
-// need to restore filesystems for any active user sessions; otherwise they get dumped at app restart
-globalSetupHelper.initFileSystems();
-
 // set up sessions
 const sessionMs = global.Uwot.Constants.sessionHours * 3600000;
 var sessionArgs = {
@@ -107,9 +101,27 @@ else {
 
 }
 sessionArgs.store = new nedbSessionStore({
-	filename: global.Uwot.Constants.appRoot + '/var/nedb/session.db'
+	filename: global.Uwot.Constants.appRoot + '/var/nedb/session.db',
+	autoCompactInterval: (sessionMs / 6)
 });
 app.use(session(sessionArgs));
+
+// create container for global FileSystems and load instances for guest and active sessions
+globalSetupHelper.initFileSystems(sessionArgs.store, function(error, filesystemsReady) {
+
+	var infoOut = JSON.stringify(filesystemsReady);
+	if (error) {
+	
+		console.error(error);
+	
+	}
+	if (app.get('env') === 'development') {
+	
+		console.log("FileSystems loaded:" + infoOut);
+	
+	}
+
+});
 
 // view engine setup
 app.set('views', path.join(global.Uwot.Constants.appRoot, 'views'));

@@ -123,6 +123,18 @@ router.post(
 								resObj.cwd = req.body.runtime.results.cwd;
 							
 							}
+							else {
+							
+								// get user id from res.locals
+								var uid = req.isAuthenticated() && 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null;
+								var userFs = global.Uwot.FileSystems[uid];
+								if('object' === typeof userFs && null !== userFs && 'function' === typeof userFs.getVcwd) {
+								
+									resObj.cwd = userFs.getVcwd();
+								
+								}
+							
+							}
 						
 						}
 					

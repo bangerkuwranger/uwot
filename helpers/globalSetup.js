@@ -8,6 +8,7 @@ var Cmd = require('../cmd');
 var Theme = require('../theme');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
+var filesystemLoader = require('./filesystemLoader');
 
 function initGlobalObjects() {
 
@@ -57,6 +58,12 @@ function initGlobalObjects() {
 		// was 'global.UwotBin'
 		global.Uwot.Bin = {};
 
+	}
+	
+	if ('object' !== typeof global.Uwot.FileSystems || null === global.Uwot.FileSystems) {
+	
+		global.Uwot.FileSystems = {};
+	
 	}
 
 }
@@ -246,9 +253,51 @@ module.exports = {
 	
 	},
 	
-	initFileSystems: function initFileSystems() {
+	initFileSystems: function initFileSystems(sessionStore, callback) {
 	
-		global.Uwot.FileSystems = {};
+		var loadedFilesystems = {};
+		var error = false;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to initFileSystems');
+		
+		}
+		else {
+		
+			var loadGuest = filesystemLoader.loadGuest();
+			if (true !== loadGuest) {
+			
+				loadedFilesystems.GUEST = true;
+				error = loadGuest;
+				
+			
+			}
+			else {
+			
+				loadedFilesystems.GUEST = true;
+			
+			}
+			filesystemLoader.loadActiveSessionFilesystems(sessionStore, function(err, loadedForSessions) {
+			
+				if (err) {
+				
+					error = err;
+				
+				}
+				if ('object' === typeof loadedForSessions && Array.isArray(loadedForSessions) && loadedForSessions.length > 0) {
+				
+					loadedForSessions.forEach(function(uid) {
+					
+						loadedFilesystems[uid] = true;
+					
+					});
+				
+				}
+				return callback(error, loadedFilesystems);
+			
+			});
+		
+		}
 	
 	},
 	

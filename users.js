@@ -156,6 +156,7 @@ module.exports = class UwotUsers {
 				delete guest.salt;
 				delete guest.saltPass;
 				delete guest.verifyPassword;
+				guest._id = 'GUEST';
 				return callback(false, guest);
 			
 			}
