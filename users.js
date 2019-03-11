@@ -1,4 +1,6 @@
 'use strict';
+const fs = require('fs');
+const path = require('path');
 var Datastore = require('nedb-core');
 var bcrypt = require('bcryptjs');
 var sanitize = require('./helpers/valueConversion');
@@ -690,6 +692,109 @@ module.exports = class UwotUsers {
 			
 				}
 				return self.iuCallback(false, false);
+		
+			});
+		
+		}
+	
+	}
+	
+	createDir(userIds, callback) {
+	
+		var self = this;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to createDir');
+		
+		}
+		else if ('object' !== typeof userIds || !Array.isArray(userIds) || userIds.length < 1) {
+		
+			return callback(new TypeError('invalid userIds passed to createDir'), null);
+		
+		}
+		else if (!global.Uwot.Config.getVal('users', 'createHome')) {
+		
+			return callback(false, false);
+		
+		}
+		else {
+		
+			self.cdCallback = callback;
+			this.db.find({})
+			.projection({password: 0, salt: 0})
+			.exec(function(error, allUsers) {
+			
+				if (error) {
+				
+					return self.cdCallback(error, null);
+				
+				}
+				else {
+				
+					var vaildUsers = allUsers.map((u) => { u._id });
+					var userDirPath = global.Uwot.Config.getVal('server', 'userDir');
+					fs.readdir(userDirPath, function(err, userFiles) {
+					
+						if (err) {
+				
+							return self.cdCallback(err, null);
+				
+						}
+						else {
+						
+							var userDirs = [];
+							for (let i = 0; i < userIds.length; i++) {
+				
+								if ('string' === typeof userIds[i] && -1 !== validUsers.indexOf(userIds[i])) {
+					
+									var thisUserName = allUsers[validUsers.indexOf(userIds[i])].uName;
+									var thisFilePath = path.join(userDirPath, thisUserName);
+									if (-1 !== userFiles.indexOf(thisUserName)) {
+									
+										try {
+										
+											var thisFileStats = fs.statSync(thisFilePath);
+											if (!thisFileStats.isDirectory()) {
+											
+												fs.unlinkSync(thisFilePath);
+												fs.mkdirSync(thisFilePath);
+											
+											}
+											userDirs.push(thisUserName);
+										
+										}
+										catch(e) {
+										
+											try {
+											
+												fs.mkdirSync(thisFilePath);
+												userDirs.push(thisUserName);
+											
+											}
+											catch(e) {
+											
+												return self.cdCallback(e, userDirs);
+											
+											}
+										
+										}
+									
+									}
+					
+								}
+								if ((i + 1) >= userIds.length) {
+								
+									return self.cdCallback(false, userDirs);
+								
+								}
+				
+							}
+						
+						}
+					
+					});
+				
+				}
 		
 			});
 		
