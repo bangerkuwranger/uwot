@@ -5,6 +5,7 @@ const sinon = require("sinon");
 const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
+var filesystemLoader = require('../helpers/filesystemLoader');
 
 var gsh = require('../helpers/globalSetup');
 
@@ -23,6 +24,12 @@ const expectedLocalBins = [
 	'builtin',
 	'theme'
 ];
+
+const getFileSystemsIds = function() {
+
+	return ['cvaxgHlVg5o5iEYy'];
+
+}
 
 describe('globalSetup.js', function() {
 
@@ -257,7 +264,7 @@ describe('globalSetup.js', function() {
 		it('should return the global.Uwot.Themes object', function() {
 		
 			global.Uwot.Themes = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueLocalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueLocalOnly(cat, key) {
 			
 				if (cat !== 'themes' || key !== 'useLocal') {
 				
@@ -279,7 +286,7 @@ describe('globalSetup.js', function() {
 		it('should run loadLocalPath() from themeLoader helper if config "themes:useLocal" is "true"', function() {
 		
 			global.Uwot.Themes = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueLocalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueLocalOnly(cat, key) {
 			
 				if (cat !== 'themes' || key !== 'useLocal') {
 				
@@ -302,7 +309,7 @@ describe('globalSetup.js', function() {
 		it('should run loadExternalPath() from themeLoader helper if config "themes:useExternal" is "true"', function() {
 		
 			global.Uwot.Themes = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueExternalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueExternalOnly(cat, key) {
 			
 				if (cat !== 'themes' || key !== 'useExternal') {
 				
@@ -352,7 +359,7 @@ describe('globalSetup.js', function() {
 		it('should add keys from global.Uwot.Bin to the global.Uwot.Constants.reserved array', function() {
 		
 			global.Uwot.Bin = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueLocalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueLocalOnly(cat, key) {
 			
 				if (cat !== 'binpath' || key !== 'useLocal') {
 				
@@ -374,7 +381,7 @@ describe('globalSetup.js', function() {
 		it('should return the global.Uwot.Bin object', function() {
 		
 			global.Uwot.Bin = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueLocalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueLocalOnly(cat, key) {
 			
 				if (cat !== 'binpath' || key !== 'useLocal') {
 				
@@ -396,7 +403,7 @@ describe('globalSetup.js', function() {
 		it('should run loadLocalPath() from binLoader helper if config "binpath:useLocal" is "true"', function() {
 		
 			global.Uwot.Bin = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueLocalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueLocalOnly(cat, key) {
 			
 				if (cat !== 'binpath' || key !== 'useLocal') {
 				
@@ -419,7 +426,7 @@ describe('globalSetup.js', function() {
 		it('should run loadExternalPath() from binLoader helper if config "binpath:useExternal" is "true"', function() {
 		
 			global.Uwot.Bin = {};
-			var configGetStub = sinon.stub(global.Uwot.Config, 'get').callsFake(function returnTrueExternalOnly(cat, key) {
+			var configGetStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnTrueExternalOnly(cat, key) {
 			
 				if (cat !== 'binpath' || key !== 'useExternal') {
 				
@@ -461,13 +468,110 @@ describe('globalSetup.js', function() {
 // 			}
 		
 		});
-		it('should be a function');
-		it('should throw a TypeError if callback is not a function');
-		it('should return an object to the second callback arg that includes a GUEST property that is false if  filesystemLoader.loadGuest returns an error');
-		it('should return the error returned by filesystemLoader.loadGuest as the first callback arg if it returns an error and loadActiveSessionFilesystems does not');
-		it('should return an object to the second callback arg that includes a GUEST property that is true if  filesystemLoader.loadGuest executes without error');
-		it('should return the error returned by filesystemLoader.loadActiveSessionFilesystems as the first callback arg if it returns an error');
-		it('should should return an object to the second callback arg that includes properties matching the user ids from any active sessions that were successfully loaded, and these properties should have value === true')
+		it('should be a function', function() {
+		
+			expect(gsh.initFileSystems).to.be.a('function');
+		
+		});
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			expect(gsh.initFileSystems).to.throw(TypeError, 'invalid callback passed to initFileSystems');
+		
+		});
+		it('should return an object to the second callback arg that includes a GUEST property that is false if filesystemLoader.loadGuest returns an error', function(done) {
+		
+			var loadGuestStub = sinon.stub(filesystemLoader, 'loadGuest').returns(new Error('test loadGuest Error'));
+			var loadActiveSessionFilesystemsStub = sinon.stub(filesystemLoader, 'loadActiveSessionFilesystems').callsFake(function returnIdsToCallback(sessionStore, cb) {
+			
+				return cb(false, getFileSystemsIds());
+			
+			});
+			gsh.initFileSystems(null, function(error, savedFsObj) {
+			
+				expect(savedFsObj).to.be.an('object').with.property('GUEST').that.is.false;
+				loadGuestStub.restore();
+				loadActiveSessionFilesystemsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the error returned by filesystemLoader.loadGuest as the first callback arg if it returns an error and loadActiveSessionFilesystems does not', function(done) {
+		
+			var loadGuestStub = sinon.stub(filesystemLoader, 'loadGuest').returns(new Error('test loadGuest error'));
+			var loadActiveSessionFilesystemsStub = sinon.stub(filesystemLoader, 'loadActiveSessionFilesystems').callsFake(function returnIdsToCallback(sessionStore, cb) {
+			
+				return cb(false, getFileSystemsIds());
+			
+			});
+			gsh.initFileSystems(null, function(error, savedFsObj) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test loadGuest error');
+				loadGuestStub.restore();
+				loadActiveSessionFilesystemsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an object to the second callback arg that includes a GUEST property that is true if  filesystemLoader.loadGuest executes without error', function(done) {
+		
+			var loadGuestStub = sinon.stub(filesystemLoader, 'loadGuest').returns(true);
+			var loadActiveSessionFilesystemsStub = sinon.stub(filesystemLoader, 'loadActiveSessionFilesystems').callsFake(function returnIdsToCallback(sessionStore, cb) {
+			
+				return cb(false, getFileSystemsIds());
+			
+			});
+			gsh.initFileSystems(null, function(error, savedFsObj) {
+			
+				expect(error).to.be.false;
+				expect(savedFsObj).to.be.an('object').with.property('GUEST').that.is.true;
+				loadGuestStub.restore();
+				loadActiveSessionFilesystemsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the error returned by filesystemLoader.loadActiveSessionFilesystems as the first callback arg if it returns an error', function(done) {
+		
+			var loadGuestStub = sinon.stub(filesystemLoader, 'loadGuest').returns(true);
+			var loadActiveSessionFilesystemsStub = sinon.stub(filesystemLoader, 'loadActiveSessionFilesystems').callsFake(function returnIdsToCallback(sessionStore, cb) {
+			
+				return cb(new Error('test loadActiveSessionFilesystem error'), getFileSystemsIds());
+			
+			});
+			gsh.initFileSystems(null, function(error, savedFsObj) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test loadActiveSessionFilesystem error');
+				expect(savedFsObj).to.be.an('object').with.property('GUEST').that.is.true;
+				loadGuestStub.restore();
+				loadActiveSessionFilesystemsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should should return an object to the second callback arg that includes properties matching the user ids from any active sessions that were successfully loaded, and these properties should have value === true', function(done) {
+		
+			var testUserIdArray = getFileSystemsIds();
+			var loadGuestStub = sinon.stub(filesystemLoader, 'loadGuest').returns(true);
+			var loadActiveSessionFilesystemsStub = sinon.stub(filesystemLoader, 'loadActiveSessionFilesystems').callsFake(function returnIdsToCallback(sessionStore, cb) {
+			
+				return cb(new Error('test loadActiveSessionFilesystem error'), getFileSystemsIds());
+			
+			});
+			gsh.initFileSystems(null, function(error, savedFsObj) {
+			
+				expect(savedFsObj).to.be.an('object').with.property(testUserIdArray[0]).that.is.true;
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test loadActiveSessionFilesystem error');
+				loadGuestStub.restore();
+				loadActiveSessionFilesystemsStub.restore();
+				done();
+			
+			});
+		
+		})
 	
 	});
 

@@ -405,7 +405,7 @@ describe('filesystem.js', function() {
 			});
 			it('should create object this.pubDir and assign global config setting for pubDir to this.pubDir.path', function() {
 			
-				expect(filesystem.pubDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.get('server', 'pubDir'));
+				expect(filesystem.pubDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.getVal('server', 'pubDir'));
 			
 			});
 			it('should assign null to this.userDir if this.user is a guest', function(done) {
@@ -422,7 +422,7 @@ describe('filesystem.js', function() {
 			});
 			it('should create object this.userDir and assign global config userDir + "/{this.user.uName}" to this.userDir.path if user is not a guest.', function() {
 			
-				expect(filesystem.userDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.get('server', 'userDir') + path.sep + instanceUser.uName);
+				expect(filesystem.userDir).to.be.an('object').with.property('path').that.equals(global.Uwot.Config.getVal('server', 'userDir') + path.sep + instanceUser.uName);
 			
 			});
 			it('should set this.cwd to this.userDir.path if cwd is undefined and this.userDir is a non-null object', function() {
@@ -440,7 +440,7 @@ describe('filesystem.js', function() {
 			});
 			it('should set this.cwd to pubDir.path is cwd is undefined and this.userDir is null', function(done) {
 			
-				var testPath = global.Uwot.Config.get('server', 'pubDir').replace(filesystem.root.path + '/', '');
+				var testPath = global.Uwot.Config.getVal('server', 'pubDir').replace(filesystem.root.path + '/', '');
 				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
 				
 					this.cwd = pth.replace(this.root.path + '/', '');
@@ -483,7 +483,7 @@ describe('filesystem.js', function() {
 			it('should set this.cwd to pubDir.path is cwd is a string representing a path not readable by user and this.userDir is null', function(done) {
 			
 				var testCwd = '/var';
-				var testPath = global.Uwot.Config.get('server', 'pubDir').replace(filesystem.root.path + '/', '');
+				var testPath = global.Uwot.Config.getVal('server', 'pubDir').replace(filesystem.root.path + '/', '');
 				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function setCwd(pth) {
 				
 					if (pth === '/var') {

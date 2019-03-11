@@ -24,7 +24,7 @@ globalSetupHelper.initExports();
 
 globalSetupHelper.initThemes();
 
-var currentThemeName = 'string' === typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.Uwot.Config.get('themes', 'defaultTheme');
+var currentThemeName = 'string' === typeof process.env.UWOT_THEME ? process.env.UWOT_THEME : global.Uwot.Config.getVal('themes', 'defaultTheme');
 app.set('uwot_theme', currentThemeName);
 var themePath = path.join(global.Uwot.Constants.appRoot, 'default' === currentThemeName ? 'public' : currentThemeName);
 

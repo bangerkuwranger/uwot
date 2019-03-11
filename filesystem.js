@@ -372,15 +372,15 @@ class UwotFs {
 			x: false
 		};
 		this.pubDir = {
-			path: global.Uwot.Config.get('server', 'pubDir'),
+			path: global.Uwot.Config.getVal('server', 'pubDir'),
 			r: true,
 			w: false,
 			x: false
 		};
 		this.userDir = this.user.uName === 'guest' ? null : {
-			path: path.resolve(global.Uwot.Config.get('server', 'userDir'), this.user.uName),
+			path: path.resolve(global.Uwot.Config.getVal('server', 'userDir'), this.user.uName),
 			r: true,
-			w: global.Uwot.Config.get('users', 'homeWritable'),
+			w: global.Uwot.Config.getVal('users', 'homeWritable'),
 			x: false
 		};
 		var defaultcwd = null !== this.userDir ? this.userDir.path : this.pubDir.path;
@@ -534,12 +534,6 @@ class UwotFs {
 		}
 		else {
 			
-			// this.resolvePath does this already if necessary...
-// 			if (-1 === pth.indexOf(this.root.path)) {
-// 			
-// 				pth = pth.replace(/^\/+/g, '');
-// 			
-// 			}
 			//resolve
 			var absPth = this.resolvePath(pth);
 			if('string' !== typeof absPth) {
@@ -1201,12 +1195,12 @@ class UwotFs {
 			}
 			else if (userName === "*") {
 			
-				return pathIsInside(fullPath, path.resolve(global.Uwot.Config.get('server', 'userDir')));
+				return pathIsInside(fullPath, path.resolve(global.Uwot.Config.getVal('server', 'userDir')));
 		
 			}
 			else {
 
-				var thisUserDirPath = path.resolve(global.Uwot.Config.get('server', 'userDir'), userName);
+				var thisUserDirPath = path.resolve(global.Uwot.Config.getVal('server', 'userDir'), userName);
 				if (fs.existsSync(thisUserDirPath)) {
 		
 					return pathIsInside(fullPath, thisUserDirPath);
@@ -1478,7 +1472,7 @@ class UwotFs {
 		}
 		else if ((inRoot || inUsers) && !inAllowed) {
 		
-			vfsReadable = (this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot'));
+			vfsReadable = (this.sudo && global.Uwot.Config.getVal('users', 'sudoFullRoot'));
 		
 		}
 		else if (this.isInUser(fullPath)) {
@@ -1563,7 +1557,7 @@ class UwotFs {
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		else if (inHome && global.Uwot.Config.get('users', 'homeWritable') && global.Uwot.Config.get('users', 'createHome')) {
+		else if (inHome && global.Uwot.Config.getVal('users', 'homeWritable') && global.Uwot.Config.getVal('users', 'createHome')) {
 		
 			vfsWritable = true;
 		
@@ -1592,7 +1586,7 @@ class UwotFs {
 			}
 		
 		}
-		else if (inRoot && this.sudo && global.Uwot.Config.get('users', 'sudoFullRoot')) {
+		else if (inRoot && this.sudo && global.Uwot.Config.getVal('users', 'sudoFullRoot')) {
 		
 			vfsWritable = true;
 		
@@ -1631,7 +1625,7 @@ class UwotFs {
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
 		}
-		else if (inRoot && !inAllowed && !(this.sudo && (global.Uwot.Config.get('users', 'sudoFullRoot')))) {
+		else if (inRoot && !inAllowed && !(this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		

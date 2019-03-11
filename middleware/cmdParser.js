@@ -29,9 +29,9 @@ class UwotRuntimeCmds {
 		
 			this.ast = ast;
 			this.user = user;
-			if (global.Uwot.Config.get('users', 'allowShellFunctions') && 'string' === typeof this.user.uName) {
+			if (global.Uwot.Config.getVal('users', 'allowShellFunctions') && 'string' === typeof this.user.uName) {
 			
-				if ('guest' === this.user.uName && global.Uwot.Config.get('users', 'allowGuest') && global.Uwot.Config.get('users', 'allowGuestShellFunctions')) {
+				if ('guest' === this.user.uName && global.Uwot.Config.getVal('users', 'allowGuest') && global.Uwot.Config.getVal('users', 'allowGuestShellFunctions')) {
 				
 					this.fx = new Map();
 				
@@ -522,7 +522,7 @@ class UwotRuntimeCmds {
 			
 						if (exe.isOp) {
 				
-							if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.get('users', 'allowGuest')) {
+							if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
 								results.output.push(this.outputLine('operation ' + exe.name, outputType));
 								results.operations.push(exe);
@@ -537,7 +537,7 @@ class UwotRuntimeCmds {
 						}
 						else {
 				
-							if (this.user.uName !== 'guest' || global.Uwot.Config.get('users', 'allowGuest')) {
+							if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
 								if (null === exe.input) {
 					
@@ -788,7 +788,7 @@ class UwotRuntimeCmds {
 					}
 					if (j >= exeMap.size) {
 			
-						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.get('users', 'allowGuest')) {
+						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
 							results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
 			

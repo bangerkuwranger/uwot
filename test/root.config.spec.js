@@ -409,17 +409,17 @@ describe('config.js', function() {
 			});
 		
 		});
-		describe('get(cat, key, excludeArrays)', function() {
+		describe('getVal(cat, key, excludeArrays)', function() {
 		
 			it('should be a function', function() {
 			
-				expect(config.get).to.be.a('function');
+				expect(config.getVal).to.be.a('function');
 			
 			});
 			it('should return undefined if cat argument is not a string', function() {
 			
-				expect(config.get()).to.be.undefined;
-				expect(config.get(null)).to.be.undefined;
+				expect(config.getVal()).to.be.undefined;
+				expect(config.getVal(null)).to.be.undefined;
 			
 			});
 			it('should return the value of nconf.get("cat") if that value is not an object', function() {
@@ -438,7 +438,7 @@ describe('config.js', function() {
 					}
 				
 				});
-				expect(config.get('testConfCat')).to.equal('test nconf value');
+				expect(config.getVal('testConfCat')).to.equal('test nconf value');
 				getCatStub.restore();
 			
 			});
@@ -470,9 +470,9 @@ describe('config.js', function() {
 					}
 					
 				});
-				expect(config.get('testConfCat', 'val3')).to.be.an('array').that.includes('test', 'nconf', 'value');
-				expect(config.get('testConfCat', 'val5')).to.be.true;
-				expect(config.get('testConfCat', 'val7')).to.be.false;
+				expect(config.getVal('testConfCat', 'val3')).to.be.an('array').that.includes('test', 'nconf', 'value');
+				expect(config.getVal('testConfCat', 'val5')).to.be.true;
+				expect(config.getVal('testConfCat', 'val7')).to.be.false;
 			
 			});
 			it('should return the value of nconf.get(cat)[key] if nconf.get(cat) is a non-null object, key argument is a string, and nconf.get(cat)[key] is a string that does not equal "true" or "false"', function() {
@@ -503,8 +503,8 @@ describe('config.js', function() {
 					}
 					
 				});
-				expect(config.get('testConfCat', 'val1')).to.equal('test nconf value');
-				expect(config.get('testConfCat', 'val2')).to.equal('also test nconf value');
+				expect(config.getVal('testConfCat', 'val1')).to.equal('test nconf value');
+				expect(config.getVal('testConfCat', 'val2')).to.equal('also test nconf value');
 			
 			});
 			it('should return true if nconf.get(cat) is a non-null object, key argument is a string, and nconf.get(cat)[key] is a string that === "true" after trim() and toLowerCase()', function() {
@@ -535,8 +535,8 @@ describe('config.js', function() {
 					}
 					
 				});
-				expect(config.get('testConfCat', 'val4')).to.be.true;
-				expect(config.get('testConfCat', 'val5')).to.be.true;
+				expect(config.getVal('testConfCat', 'val4')).to.be.true;
+				expect(config.getVal('testConfCat', 'val5')).to.be.true;
 			
 			});
 			it('should return true if nconf.get(cat) is a non-null object, key argument is a string, and nconf.get(cat)[key] is a string that === "false" after trim() and toLowerCase()', function() {
@@ -567,8 +567,8 @@ describe('config.js', function() {
 					}
 					
 				});
-				expect(config.get('testConfCat', 'val6')).to.be.false;
-				expect(config.get('testConfCat', 'val7')).to.be.false;
+				expect(config.getVal('testConfCat', 'val6')).to.be.false;
+				expect(config.getVal('testConfCat', 'val7')).to.be.false;
 			
 			});
 			it('should return an object with all config values for category, excluding array values, if cat is a string, key is not a string, and excludeArrays is undefined', function() {
@@ -578,7 +578,7 @@ describe('config.js', function() {
 					return stubDefaults[key];
 				
 				});
-				var themesValsObjNoArrays = config.get('themes', null);
+				var themesValsObjNoArrays = config.getVal('themes', null);
 				expect(themesValsObjNoArrays).to.be.an('object').that.is.not.null;
 				expect(themesValsObjNoArrays.external).to.be.undefined;
 			
@@ -590,7 +590,7 @@ describe('config.js', function() {
 					return stubDefaults[key];
 				
 				});
-				var themesValsObjNoArrays = config.get('themes', null, true);
+				var themesValsObjNoArrays = config.getVal('themes', null, true);
 				expect(themesValsObjNoArrays).to.be.an('object').that.is.not.null;
 				expect(themesValsObjNoArrays.external).to.be.undefined;
 				getCatStub.restore();
@@ -603,7 +603,7 @@ describe('config.js', function() {
 					return stubDefaults[key];
 				
 				});
-				var themesValsObjNoArrays = config.get('themes', null, false);
+				var themesValsObjNoArrays = config.getVal('themes', null, false);
 				expect(themesValsObjNoArrays).to.be.an('object').that.is.not.null;
 				expect(themesValsObjNoArrays).to.deep.equal(testConfigDefaults().themes);
 				getCatStub.restore();
@@ -637,7 +637,7 @@ describe('config.js', function() {
 					}
 				
 				});
-				var themesValsObjNoArrays = config.get('testConfCat');
+				var themesValsObjNoArrays = config.getVal('testConfCat');
 				expect(themesValsObjNoArrays.val4).to.be.true;
 				expect(themesValsObjNoArrays.val6).to.be.false;
 			
@@ -736,7 +736,7 @@ describe('config.js', function() {
 			});
 			it('should return an Error to callback if an error is thrown while getting current config category values', function(done) {
 			
-				var getCatStub = sinon.stub(config, 'get').callsFake(function throwNewError(cat, key, arrays) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function throwNewError(cat, key, arrays) {
 				
 					throw new Error('test nconf.get error');
 				
@@ -781,7 +781,7 @@ describe('config.js', function() {
 					usersDefaultsMap.set(key, usersDefaultsObj[key]);
 				
 				});
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				
@@ -818,7 +818,7 @@ describe('config.js', function() {
 					usersDefaultsMap.set(key, usersDefaultsObj[key]);
 				
 				});
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function returnDefaults(cat, key, arrays) {
 				
 					return stubDefaults[cat];
 				
@@ -855,7 +855,7 @@ describe('config.js', function() {
 					usersDefaultsMap.set(key, usersDefaultsObj[key]);
 				
 				});
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				
@@ -884,7 +884,7 @@ describe('config.js', function() {
 			});
 			it('should return callback(false, savedKeys) if changes were successfully saved for keys in array savedKeys', function(done) {
 			
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat, key, arrays) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function returnDefaults(cat, key, arrays) {
 				
 					return stubDefaults[cat];
 				
@@ -911,7 +911,7 @@ describe('config.js', function() {
 			it('should cast any changed values for keys with values that are strings that, after trim() and toLowerCase(), === "true" or "false" to booleans, and any other values to strings', function(done) {
 			
 				var changedValues = {};
-				var getCatStub = sinon.stub(config, 'get').callsFake(function returnDefaults(cat) {
+				var getCatStub = sinon.stub(config, 'getVal').callsFake(function returnDefaults(cat) {
 				
 					return stubDefaults[cat];
 				

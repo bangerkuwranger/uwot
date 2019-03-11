@@ -116,12 +116,12 @@ router.use(function (req, res, next) {
 router.get('/', function(req, res, next) {
 	
 	var respValues = {
-		title: global.Uwot.Config.get('server', 'siteName'),
+		title: global.Uwot.Config.getVal('server', 'siteName'),
 	};
 	
 	res.locals.nonce = nonceHandler.create( 'index-get', 300000 );
 	res.locals.validOps = global.Uwot.Constants.cliOps ? JSON.stringify(global.Uwot.Constants.cliOps) : '[]';
-	if (global.Uwot.Config.get('server', 'showVersion')) {
+	if (global.Uwot.Config.getVal('server', 'showVersion')) {
 	
 		res.locals.uwotVersion = global.Uwot.Constants.version;
 	
@@ -153,13 +153,13 @@ router.get('/', function(req, res, next) {
 	
 	}
 	res.locals.theme = themeName;
-	res.locals.showTheme = global.Uwot.Config.get('themes', 'showTheme');
+	res.locals.showTheme = global.Uwot.Config.getVal('themes', 'showTheme');
 	if ('object' === typeof res.locals && res.locals.login && '' !== res.locals.user) {
 	
 		res.locals.userName = res.locals.user;
 	
 	}
-	if (!global.Uwot.Config.get('users', 'allowGuest')) {
+	if (!global.Uwot.Config.getVal('users', 'allowGuest')) {
 	
 		res.locals.forceLogin = true;
 	

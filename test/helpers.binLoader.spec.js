@@ -21,12 +21,6 @@ const testLocalBinPathFiles = [
 describe('binLoader.js', function() {
 
 	describe('loadLocalPath()', function() {
-		
-		afterEach(function() {
-
-			sinon.restore();
-
-		});
 	
 		it('should be a function', function() {
 		
@@ -114,17 +108,17 @@ describe('binLoader.js', function() {
 			expect(binLoader.isValidBin).to.be.a('function');
 		
 		});
-		it('should return the theme names as an array if binName arg is undefined', function() {
+		it('should return the bin names as an array if binName arg is undefined', function() {
 		
 			expect(binLoader.isValidBin()).to.be.an('array').that.deep.equals(loadedBins);
 		
 		});
-		it('should return the theme names as an array if binName arg is null', function() {
+		it('should return the bin names as an array if binName arg is null', function() {
 		
 			expect(binLoader.isValidBin(null)).to.be.an('array').that.deep.equals(loadedBins);
 		
 		});
-		it('should return the theme names as an array if binName arg is an empty string', function() {
+		it('should return the bin names as an array if binName arg is an empty string', function() {
 		
 			expect(binLoader.isValidBin('')).to.be.an('array').that.deep.equals(loadedBins);
 		
@@ -134,12 +128,12 @@ describe('binLoader.js', function() {
 			expect(binLoader.isValidBin(['binName'])).to.be.false;
 		
 		});
-		it('should return false if binName arg is a string that is not a key in global.Uwot.Themes', function() {
+		it('should return false if binName arg is a string that is not a key in global.Uwot.Bin', function() {
 		
 			expect(binLoader.isValidBin('[binName]')).to.be.false;
 		
 		});
-		it('should return true if binName arg is a string that is a key in global.Uwot.Themes', function() {
+		it('should return true if binName arg is a string that is a key in global.Uwot.Bin', function() {
 		
 			expect(binLoader.isValidBin('theme')).to.be.true;
 		

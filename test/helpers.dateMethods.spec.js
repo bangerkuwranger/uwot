@@ -15,11 +15,6 @@ describe('dateMethods.js', function() {
 		testDate = new Date(1546450800498);
 	
 	});
-	afterEach(function() {
-
-		sinon.restore();
-
-	});
 	describe('Date.toMySqlString()', function() {
 	
 		var asMySqlString = '2019-01-02 17:40:00';
@@ -46,7 +41,7 @@ describe('dateMethods.js', function() {
 		
 	
 	});
-	describe('Array.toCsvString()', function() {
+	describe('Date.toCsvString()', function() {
 	
 		var asCsvString = '2019-01-02 17:40:00 UTC';
 		it('should be a property of a Date', function() {

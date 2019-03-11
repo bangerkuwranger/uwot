@@ -213,7 +213,7 @@ module.exports = {
 	initThemes: function initThemes() {
 	
 		// load local themes if enabled
-		if (global.Uwot.Config.get('themes', 'useLocal')) {
+		if (global.Uwot.Config.getVal('themes', 'useLocal')) {
 
 			themeLoader.loadLocalPath();
 
@@ -221,7 +221,7 @@ module.exports = {
 
 		// TBD
 		// load external themes if enabled
-		if (global.Uwot.Config.get('themes', 'useExternal')) {
+		if (global.Uwot.Config.getVal('themes', 'useExternal')) {
 		
 			themeLoader.loadExternalPath();
 		
@@ -234,7 +234,7 @@ module.exports = {
 	initBins: function initBins() {
 	
 		// load locals if enabled
-		if (global.Uwot.Config.get('binpath', 'useLocal')) {
+		if (global.Uwot.Config.getVal('binpath', 'useLocal')) {
 
 			binLoader.loadLocalPath();
 
@@ -242,7 +242,7 @@ module.exports = {
 
 		// TBD
 		// load externals if enabled
-		if (global.Uwot.Config.get('binpath', 'useExternal')) {
+		if (global.Uwot.Config.getVal('binpath', 'useExternal')) {
 
 			binLoader.loadExternalPath();
 

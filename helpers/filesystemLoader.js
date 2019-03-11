@@ -7,7 +7,7 @@ module.exports = {
 	// loads guest filesystem
 	loadGuest() {
 	
-		var guestCwd = global.Uwot.Config.get('server', 'pubDir');
+		var guestCwd = global.Uwot.Config.getVal('server', 'pubDir');
 		try {
 		
 			global.Uwot.FileSystems[GUEST_UID] = new FileSystem(GUEST_UID, guestCwd);
@@ -23,7 +23,6 @@ module.exports = {
 	
 	},
 	
-	// TBD
 	//loads filesystems for active session users
 	loadActiveSessionFilesystems(sessionStore, callback) {
 	

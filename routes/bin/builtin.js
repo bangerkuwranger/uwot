@@ -226,7 +226,6 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	// TBD
 	unescapeString(escStr) {
 	
 		var finalString = escStr;
@@ -257,28 +256,24 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	// TBD
 	unsDecNum(inputStr) {
 	
 		return Math.abs(parseFloat(inputStr)).toString(10);
 	
 	}
 	
-	// TBD
 	sigDecNum(inputStr) {
 	
 		return parseFloat(inputStr).toString(10);
 	
 	}
 	
-	// TBD
 	unsOctNum(inputStr) {
 	
 		return Math.abs(parseFloat(inputStr)).toString(8);
 	
 	}
 	
-	// TBD
 	unsHexNum(inputStr, casing) {
 	
 		var result = parseFloat(inputStr);
@@ -295,14 +290,12 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	// TBD
 	floatNum(inputStr) {
 	
 		return parseFloat(inputStr).toString(10);
 	
 	}
 	
-	// TBD
 	doubleNum(inputStr, casing, sci) {
 	
 		var result = parseFloat(inputStr);
@@ -318,8 +311,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 		}
 	
 	}
-	
-	// TBD
+
 	charStr(inputStr) {
 	
 		return inputStr.charAt(0);
@@ -527,7 +519,6 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		);
 		
 		// Super don't do this; these are other commands that don't have an assoc. file
-		// TBD
 		// add each builtin directly to global.Uwot.Bin 
 		global.Uwot.Bin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
 		global.Uwot.Bin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);

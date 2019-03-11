@@ -41,9 +41,6 @@ class UwotCmdOption {
 
 }
 
-// TBD
-// find a way to allow end user to explicitly include the filesystem module for execution logic
-
 class UwotCmd {
 
 	/**

@@ -421,7 +421,7 @@ class UwotConfigBase {
 	
 	}
 	
-	get(cat, key, excludeArrays) {
+	getVal(cat, key, excludeArrays) {
 	
 		if ('string' !== typeof cat) {
 		
@@ -535,7 +535,7 @@ class UwotConfigBase {
 			var currentVals, updatedVals;
 			try {
 			
-				currentVals = new Map(Object.entries(this.get(cat, null, false)));
+				currentVals = new Map(Object.entries(this.getVal(cat, null, false)));
 				updatedVals = this.utilities.mergeMaps(currentVals, values, cat);
 				
 			}
