@@ -514,7 +514,7 @@ class SystemError extends Error {
 			msgConst = messages.get(key);
 			let desc = msgConst.message;
 			message = `${key}: ${desc}, ${context.syscall}`;
-		 
+
 		}
 		if ('object' === typeof contect || typeof context.path !== 'undefined'){
 		
@@ -589,10 +589,10 @@ class SystemError extends Error {
 	set code(value) {
 	
 		Object.defineProperty(this, 'code', {
-			  configurable: true,
-			  enumerable: true,
-			  value,
-			  writable: true
+			configurable: true,
+			enumerable: true,
+			value,
+			writable: true
 		});
 	
 	}

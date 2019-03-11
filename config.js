@@ -150,7 +150,7 @@ class ExternalBinPath{
 	
 	}
 
-};
+}
 
 class ExternalTheme{
 

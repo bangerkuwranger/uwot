@@ -23,4 +23,3 @@ Sure, at some point, that is the plan. I'd like to get it, y'know, functional, b
 ## So, it doesn't work?
 
 Well, as of alpha 19, it has a functioning shell interface that allows an admin to configure it, can run in prod, dev, debug, test, etc., and will indeed create a functional CLI interface that provides a very limited instruction set. Commands like history, clear, login/logout, and some of the standard bash builtins are already implemented, and they do function as expected... which is nice. However, it's certainly not operating within the scope envisioned at this point... which is not so nice. It doesn't help that I got sidetracked by stabilizing what I'd already written by writing test scripts, automated quality checks, and so forth... but it'll get there. Eventually. The fact that I've even written this and made the repo public is a pretty good sign, right?
-
