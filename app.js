@@ -6,7 +6,6 @@ globalSetupHelper.initConstants();
 var express = require('express');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
-var fs = require('fs-extra');
 var fileLog = require('./middleware/logging');
 var session = require('express-session');
 var nedbSessionStore = require('nedb-session-store')(session);
