@@ -31,6 +31,8 @@ const getFileSystemsIds = function() {
 
 }
 
+// TBD
+// stub out the user db to remove the last of the occasional ENOENTs 
 describe('globalSetup.js', function() {
 
 	it('should create global.Uwot object and all properties as empty objects, if objects do not already exist, upon first require', function() {

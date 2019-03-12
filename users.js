@@ -870,7 +870,7 @@ module.exports = class UwotUsers {
 											var thisFileStats = fs.statSync(thisFilePath);
 											if (thisFileStats.isDirectory()) {
 											
-												fs.mkdirSync(thisFilePath);
+												fs.removeSync(thisFilePath);
 											
 											}
 											userDirs.push(thisUserName);
