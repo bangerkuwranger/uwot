@@ -7,12 +7,16 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
-globalSetupHelper.initConstants();
-globalSetupHelper.initExports();
 var themeLoader = require('../helpers/themeLoader');
 
 describe('themeLoader.js', function() {
 
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		globalSetupHelper.initExports();
+	
+	});
 	describe('loadLocalPath()', function() {
 		
 		afterEach(function() {

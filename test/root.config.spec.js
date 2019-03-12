@@ -1,7 +1,6 @@
 var path = require('path');
 var fs = require('fs');
 const globalSetupHelper = require('../helpers/globalSetup');
-globalSetupHelper.initConstants();
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -10,8 +9,7 @@ const expect = chai.expect;
 
 const sanitize = require('../helpers/valueConversion');
 const Config = require('../config');
-var config;
-const testConfigPathDev = path.resolve(global.Uwot.Constants.etcDev, 'config.json');
+var config, testConfigPathDev;
 const testConfigDefaults = function() {
 	return {
 		server: {
@@ -52,6 +50,12 @@ const testConfigDefaults = function() {
 
 describe('config.js', function() {
 
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		testConfigPathDev = path.resolve(global.Uwot.Constants.etcDev, 'config.json');
+	
+	});
 	describe('UwotConfigBase', function() {
 	
 		var stubDefaults;

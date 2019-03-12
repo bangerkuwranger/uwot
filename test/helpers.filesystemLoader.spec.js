@@ -8,8 +8,6 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 var session = require('express-session');
 var nedbSessionStore = require('nedb-session-store')(session);
-globalSetupHelper.initConstants();
-globalSetupHelper.initExports();
 var filesystemLoader = require('../helpers/filesystemLoader');
 var FileSystem = require('../filesystem');
 
@@ -50,7 +48,13 @@ const getGuestUser = function() {
 };
 
 describe('filesystemLoader.js', function() {
-
+	
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		globalSetupHelper.initExports();
+	
+	});
 	describe('loadGuest()', function() {
 		
 		it('should be a function', function() {

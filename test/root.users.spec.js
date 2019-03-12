@@ -1,6 +1,6 @@
 var path = require('path');
 var fs = require('fs');
-const globalSetupHelper = require('../helpers/globalSetup');
+var globalSetupHelper = require('../helpers/globalSetup');
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -14,7 +14,11 @@ describe('users.js', function() {
 
 	before('getting fresh UserInterface instance', function() {
 	
-		users = new Users();
+		globalSetupHelper.uninitialize();
+		globalSetupHelper.initGlobalObjects();
+		globalSetupHelper.initConstants();
+		globalSetupHelper.initEnvironment();
+		users = global.Uwot.Users;
 
 	});
 	describe('UwotUsers', function() {
@@ -1596,6 +1600,137 @@ describe('users.js', function() {
 				});
 			
 			});
+		
+		});
+		describe('createDir(userIds, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(users.createDir).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback arg is not a function', function() {
+			
+				expect(users.createDir).to.throw(TypeError, 'invalid callback passed to createDir');
+			
+			});
+			it('should return a TypeError to callback if userIds is not an array or is empty', function(done) {
+			
+				users.createDir(null, function(errOne, resOne) {
+				
+					expect(errOne).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid userIds passed to createDir');
+					expect(resOne).to.be.null;
+					users.createDir([], function(errTwo, resTwo) {
+					
+						expect(errTwo).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid userIds passed to createDir');
+						expect(resTwo).to.be.null;
+						done();
+					
+					});
+				
+				});
+			
+			});
+			it('should return callback(false, false) if users:createHome config value is not true', function(done) {
+			
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				users.createDir(['fuser'], function(err, res) {
+				
+					expect(err).to.be.false;
+					expect(res).to.be.false;
+					getValStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should return an error to callback if the user lookup from the db returns an error', function(done) {
+			
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(true);
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(searchTerms, callback) {
+				
+					return callback(new Error('test db.find error'), []);
+			
+				});
+				users.createDir(['fuser'], function(err, res) {
+				
+					expect(err).to.be.an.instanceof(Error).with.property('message').that.equals('test db.find error');
+					expect(res).to.be.null;
+					getValStub.restore();
+					dbFindStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should return an error to callback if the fs.readdir of the config userDir path returns an error', function(done) {
+			
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(true);
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(path, cb) {
+				
+					return cb(new Error('test fs.readdir error'), null);
+				
+				});
+				users.createDir(['fuser'], function(err, res) {
+				
+					expect(err).to.be.an.instanceof(Error).with.property('message').that.equals('test fs.readdir error');
+					expect(res).to.be.null;
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should return an array of directory names to callback if all directories were either successfully created or already exist');
+			it('should remove the file and create a directory if a file with the same name as the userName already exists and is not a directory');
+			it('should create a new directory if the path is extant but fs.syncStat throws an error');
+			it('should return an error and partial list of directories successfully created/verified if fs.unlinkSync throws an error while trying to remove a file');
+			it('should return an error and partial list of directories successfully created/verified if fs.mkdirSync throws an error while trying to create a new directory');
 		
 		});
 

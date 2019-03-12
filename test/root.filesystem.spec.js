@@ -2,8 +2,6 @@ var path = require('path');
 var fs = require('fs');
 const SystemError = require('../helpers/systemError');
 const globalSetupHelper = require('../helpers/globalSetup');
-globalSetupHelper.initConstants();
-globalSetupHelper.initEnvironment();
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -118,6 +116,12 @@ const getTestPerms = function() {
 
 describe('filesystem.js', function() {
 
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		globalSetupHelper.initEnvironment();
+	
+	});
 	describe('UwotFs', function() {
 	
 		beforeEach(function() {

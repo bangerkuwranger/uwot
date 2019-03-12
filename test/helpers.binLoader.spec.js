@@ -7,8 +7,6 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
-globalSetupHelper.initConstants();
-globalSetupHelper.initExports();
 var binLoader = require('../helpers/binLoader');
 
 const testLocalBinPathFiles = [
@@ -20,6 +18,12 @@ const testLocalBinPathFiles = [
 
 describe('binLoader.js', function() {
 
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		globalSetupHelper.initExports();
+	
+	});
 	describe('loadLocalPath()', function() {
 	
 		it('should be a function', function() {

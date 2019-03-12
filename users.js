@@ -720,9 +720,7 @@ module.exports = class UwotUsers {
 		else {
 		
 			self.cdCallback = callback;
-			this.db.find({})
-			.projection({password: 0, salt: 0})
-			.exec(function(error, allUsers) {
+			this.db.find({}, function(error, allUsers) {
 			
 				if (error) {
 				
@@ -776,6 +774,21 @@ module.exports = class UwotUsers {
 												return self.cdCallback(e, userDirs);
 											
 											}
+										
+										}
+									
+									}
+									else {
+									
+										try {
+											
+											fs.mkdirSync(thisFilePath);
+											userDirs.push(thisUserName);
+										
+										}
+										catch(e) {
+										
+											return self.cdCallback(e, userDirs);
 										
 										}
 									

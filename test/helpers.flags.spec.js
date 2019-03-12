@@ -5,7 +5,6 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
-globalSetupHelper.initConstants();
 var FlagSet = require('../helpers/flags');
 var testFlagSet;
 const testFlagSetArgs = [
@@ -82,6 +81,11 @@ const testFlagSetArgs = [
 
 describe('flags.js', function() {
 	
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+	
+	});
 	beforeEach(function() {
 	
 		testFlagSet = new FlagSet(testFlagSetArgs);

@@ -1,7 +1,6 @@
 var path = require('path');
 var fs = require('fs');
 const globalSetupHelper = require('../helpers/globalSetup');
-globalSetupHelper.initConstants();
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -10,47 +9,7 @@ const expect = chai.expect;
 
 const sanitize = require('../helpers/valueConversion');
 const Cmd = require('../cmd');
-var cmd;
-const testCmdArgs = {
-	command: {
-		name: 'testCmd',
-		description: 'test command instance',
-		requiredArguments: [
-			'argOne',
-			'argTwo',
-			'argThree'
-		],
-		optionalArguments: [
-			'optArgOne',
-			'optArgTwo',
-			'optArgThree'
-		]
-	},
-	options: [
-		{
-			description: 'the save flag',
-			shortOpt: 's',
-			longOpt: 'save',
-			requiredArguments: ['scope'],
-			optionalArguments: ['toDisk', 'toMemory']
-		},
-		{
-			description: 'the global flag',
-			shortOpt: 'g',
-			longOpt: 'global',
-			requiredArguments: [],
-			optionalArguments: []
-		},
-		{
-			description: 'the recursive flag',
-			shortOpt: 'r',
-			longOpt: 'recursive',
-			requiredArguments: [],
-			optionalArguments: []
-		}
-	],
-	path: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js')
-};
+var cmd, testCmdArgs;
 
 const instanceUser = {
 	"fName": "Found",
@@ -68,6 +27,51 @@ const instanceUser = {
 
 describe('cmd.js', function() {
 
+	before(function() {
+	
+		globalSetupHelper.initConstants();
+		testCmdArgs = {
+			command: {
+				name: 'testCmd',
+				description: 'test command instance',
+				requiredArguments: [
+					'argOne',
+					'argTwo',
+					'argThree'
+				],
+				optionalArguments: [
+					'optArgOne',
+					'optArgTwo',
+					'optArgThree'
+				]
+			},
+			options: [
+				{
+					description: 'the save flag',
+					shortOpt: 's',
+					longOpt: 'save',
+					requiredArguments: ['scope'],
+					optionalArguments: ['toDisk', 'toMemory']
+				},
+				{
+					description: 'the global flag',
+					shortOpt: 'g',
+					longOpt: 'global',
+					requiredArguments: [],
+					optionalArguments: []
+				},
+				{
+					description: 'the recursive flag',
+					shortOpt: 'r',
+					longOpt: 'recursive',
+					requiredArguments: [],
+					optionalArguments: []
+				}
+			],
+			path: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js')
+		};
+	
+	});
 	describe('UwotCmd', function() {
 	
 		beforeEach(function() {
