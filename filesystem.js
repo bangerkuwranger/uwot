@@ -186,23 +186,11 @@ class UwotFsPermissions {
 		
 		}
 		var otherPermsClassObj, newArg;
-		if('UwotFsPermissions' !== otherPerms.constructor.name) {
+		if ('UwotFsPermissions' !== otherPerms.constructor.name) {
 		
 			try {
 			
 				otherPermsClassObj = new UwotFsPermissions(otherPerms);
-				newArg = Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric());
-				if ('undefined' === typeof thisOwner || null === thisOwner) {
-				
-					newArg.owner = otherOwner;
-				
-				}
-				if ('undefined' === typeof thisAllowed || null === thisAllowed) {
-				
-					newArg.allowed = otherAllowed;
-				
-				}
-				return new UwotFsPermissions(newArg);
 			
 			}
 			catch(e) {
@@ -214,18 +202,37 @@ class UwotFsPermissions {
 		}
 		else {
 		
-			newArg = Object.assign(otherPerms.toGeneric(), this.toGeneric());
-			if ('undefined' === typeof thisOwner || null === thisOwner) {
-			
-				newArg.owner = otherOwner;
-			
-			}
-			if ('undefined' === typeof thisAllowed || null === thisAllowed) {
-			
-				newArg.allowed = otherAllowed;
-			
-			}
+			otherPermsClassObj = otherPerms;
+		
+		}
+		try {
+		
+			newArg = Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric());
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		if ('undefined' === typeof thisOwner || null === thisOwner) {
+		
+			newArg.owner = otherOwner;
+		
+		}
+		if ('undefined' === typeof thisAllowed || null === thisAllowed) {
+		
+			newArg.allowed = otherAllowed;
+		
+		}
+		try {
+		
 			return new UwotFsPermissions(newArg);
+		
+		}
+		catch(e) {
+		
+			return e;
 		
 		}
 	
