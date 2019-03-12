@@ -1,5 +1,5 @@
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 var globalSetupHelper = require('../helpers/globalSetup');
 var systemError = require('../helpers/systemError');
 
@@ -2259,6 +2259,25 @@ describe('users.js', function() {
 				});
 			
 			});
+		
+		});
+		describe('removeDir(userIds, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(users.removeDir).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if callback arg is not a function', function() {
+			
+				expect(users.removeDir).to.throw(TypeError, 'invalid callback passed to removeDir');
+			
+			});
+			it('should return a TypeError to callback if userIds is not an array or is empty');
+			it('should return an error to callback if db.find returns an error');
+			it('should return an error to callback if fs.readdir returns an error');
+			it('should return callback(false, false) if userDir is empty');
+			it('should remove any directories in userDir matching valid userNames with associated _id values in userIds and return those userNames as an Array')
 		
 		});
 

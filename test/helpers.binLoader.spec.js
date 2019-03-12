@@ -1,5 +1,5 @@
 const globalSetupHelper = require('../helpers/globalSetup');
-var fs = require('fs');
+var fs = require('fs-extra');
 var path = require('path');
 
 const sinon = require("sinon");

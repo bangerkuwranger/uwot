@@ -1,5 +1,5 @@
 'use strict';
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 var Datastore = require('nedb-core');
 var bcrypt = require('bcryptjs');

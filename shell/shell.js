@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const readline = require('readline');
 const globalSetupHelper = require('../helpers/globalSetup');
 

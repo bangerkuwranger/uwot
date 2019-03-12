@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 const nconf = require('nconf');
 const sanitize = require('./helpers/valueConversion');
 const fileLog = require('./logger').all;

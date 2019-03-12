@@ -1,5 +1,5 @@
 var path = require('path');
-var fs = require('fs');
+var fs = require('fs-extra');
 const SystemError = require('../helpers/systemError');
 const globalSetupHelper = require('../helpers/globalSetup');
 

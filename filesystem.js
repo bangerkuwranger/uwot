@@ -1,5 +1,5 @@
 'use strict';
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const pathIsInside = require('path-is-inside');
 const systemError = require('./helpers/systemError');
