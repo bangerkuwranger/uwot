@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs');
 var globalSetupHelper = require('../helpers/globalSetup');
+var systemError = require('../helpers/systemError');
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -1792,6 +1793,35 @@ describe('users.js', function() {
 				
 				});
 				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				var statsSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFileStats() {
+				
+					var thisTestStats = new fs.Stats(
+						{
+							dev: 2114,
+							ino: 48064969,
+							mode: 33188,
+							nlink: 1,
+							uid: 85,
+							gid: 100,
+							rdev: 0,
+							size: 527,
+							blksize: 4096,
+							blocks: 8,
+							atimeMs: 1318289051000.1,
+							mtimeMs: 1318289051000.1,
+							ctimeMs: 1318289051000.1,
+							birthtimeMs: 1318289051000.1,
+							atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+						}
+					);
+					thisTestStats.isDirectory = function() { return true };
+					thisTestStats.isFile = function() { return false };
+					return thisTestStats;
+				
+				});
 				users.createDir(['CDeOOrH0gOg791cZ', '123fourfive678ninetenELEVENTWELVE'], function(err, res) {
 				
 					expect(err).to.be.false;
@@ -1800,15 +1830,433 @@ describe('users.js', function() {
 					dbFindStub.restore();
 					readdirStub.restore();
 					mkdirSyncStub.restore();
+					statsSyncStub.restore();
 					done();
 				
 				});
 			
 			});
-			it('should remove the file and create a directory if a file with the same name as the userName already exists and is not a directory');
-			it('should create a new directory if the path is extant but fs.syncStat throws an error');
-			it('should return an error and partial list of directories successfully created/verified if fs.unlinkSync throws an error while trying to remove a file');
-			it('should return an error and partial list of directories successfully created/verified if fs.mkdirSync throws an error while trying to create a new directory');
+			it('should remove the file and create a directory if a file with the same name as the userName already exists and is not a directory', function(done) {
+			
+				var userDirPath = path.join(global.Uwot.Constants.appRoot, 'home');
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnExpected(cat, val) {
+				
+					if (cat + val === 'serveruserDir') {
+					
+						return userDirPath;
+					
+					}
+					else {
+					
+						return true;
+					
+					}
+				
+				});
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnArray(path, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				var statsSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFileStats() {
+				
+					var thisTestStats = new fs.Stats(
+						{
+							dev: 2114,
+							ino: 48064969,
+							mode: 33188,
+							nlink: 1,
+							uid: 85,
+							gid: 100,
+							rdev: 0,
+							size: 527,
+							blksize: 4096,
+							blocks: 8,
+							atimeMs: 1318289051000.1,
+							mtimeMs: 1318289051000.1,
+							ctimeMs: 1318289051000.1,
+							birthtimeMs: 1318289051000.1,
+							atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+						}
+					);
+					thisTestStats.isDirectory = function() { return false };
+					thisTestStats.isFile = function() { return true };
+					return thisTestStats;
+				
+				});
+				var unlinkSyncStub = sinon.stub(fs, 'unlinkSync').returns(undefined);
+				users.createDir(['CDeOOrH0gOg791cZ', '123fourfive678ninetenELEVENTWELVE'], function(err, res) {
+				
+					expect(err).to.be.false;
+					expect(res).to.deep.equal(['fuser', 'mortimerhemp']);
+					expect(unlinkSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					expect(mkdirSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					mkdirSyncStub.restore();
+					statsSyncStub.restore();
+					unlinkSyncStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should create a new directory if the path is extant but fs.syncStat throws an error', function(done) {
+			
+				var userDirPath = path.join(global.Uwot.Constants.appRoot, 'home');
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnExpected(cat, val) {
+				
+					if (cat + val === 'serveruserDir') {
+					
+						return userDirPath;
+					
+					}
+					else {
+					
+						return true;
+					
+					}
+				
+				});
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnArray(path, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				var statsSyncStub = sinon.stub(fs, 'statSync').returns(systemError.ENOENT({syscall: 'stat', path: path.join(userDirPath, 'mortimerhemp')}));
+				var unlinkSyncStub = sinon.stub(fs, 'unlinkSync').returns(undefined);
+				users.createDir(['CDeOOrH0gOg791cZ', '123fourfive678ninetenELEVENTWELVE'], function(err, res) {
+				
+					expect(err).to.be.false;
+					expect(res).to.deep.equal(['fuser', 'mortimerhemp']);
+					expect(statsSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					expect(unlinkSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.false;
+					expect(mkdirSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					mkdirSyncStub.restore();
+					statsSyncStub.restore();
+					unlinkSyncStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should list of directories successfully created/verified if fs.unlinkSync throws an error while trying to remove a file but directory for username is successfully created', function(done) {
+			
+				var userDirPath = path.join(global.Uwot.Constants.appRoot, 'home');
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnExpected(cat, val) {
+				
+					if (cat + val === 'serveruserDir') {
+					
+						return userDirPath;
+					
+					}
+					else {
+					
+						return true;
+					
+					}
+				
+				});
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnArray(path, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				var statsSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFileStats() {
+				
+					var thisTestStats = new fs.Stats(
+						{
+							dev: 2114,
+							ino: 48064969,
+							mode: 33188,
+							nlink: 1,
+							uid: 85,
+							gid: 100,
+							rdev: 0,
+							size: 527,
+							blksize: 4096,
+							blocks: 8,
+							atimeMs: 1318289051000.1,
+							mtimeMs: 1318289051000.1,
+							ctimeMs: 1318289051000.1,
+							birthtimeMs: 1318289051000.1,
+							atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+						}
+					);
+					thisTestStats.isDirectory = function() { return false };
+					thisTestStats.isFile = function() { return true };
+					return thisTestStats;
+				
+				});
+				var unlinkSyncStub = sinon.stub(fs, 'unlinkSync').throws(systemError.EPERM({syscall: 'unlink', path: path.join(userDirPath, 'mortimerhemp')}));
+				users.createDir(['CDeOOrH0gOg791cZ', '123fourfive678ninetenELEVENTWELVE'], function(err, res) {
+				
+					expect(err).to.be.false;
+					expect(res).to.deep.equal(['fuser', 'mortimerhemp']);
+					expect(unlinkSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					expect(mkdirSyncStub.calledWith(path.join(userDirPath, 'mortimerhemp'))).to.be.true;
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					mkdirSyncStub.restore();
+					statsSyncStub.restore();
+					unlinkSyncStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should return an error and partial list of directories successfully created/verified if fs.mkdirSync throws an error while trying to create a new directory', function(done) {
+			
+				var userDirPath = path.join(global.Uwot.Constants.appRoot, 'home');
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnExpected(cat, val) {
+				
+					if (cat + val === 'serveruserDir') {
+					
+						return userDirPath;
+					
+					}
+					else {
+					
+						return true;
+					
+					}
+				
+				});
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnArray(path, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').throws(systemError.EPERM({syscall: 'mkdir', path: path.join(userDirPath, 'mortimerhemp')}));
+				var statsSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnFileStats() {
+				
+					var thisTestStats = new fs.Stats(
+						{
+							dev: 2114,
+							ino: 48064969,
+							mode: 33188,
+							nlink: 1,
+							uid: 85,
+							gid: 100,
+							rdev: 0,
+							size: 527,
+							blksize: 4096,
+							blocks: 8,
+							atimeMs: 1318289051000.1,
+							mtimeMs: 1318289051000.1,
+							ctimeMs: 1318289051000.1,
+							birthtimeMs: 1318289051000.1,
+							atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+							birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+						}
+					);
+					thisTestStats.isDirectory = function() { return true };
+					thisTestStats.isFile = function() { return false };
+					return thisTestStats;
+				
+				});
+				users.createDir(['123fourfive678ninetenELEVENTWELVE', 'CDeOOrH0gOg791cZ'], function(err, res) {
+				
+					expect(err).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+					expect(res).to.deep.equal(['mortimerhemp']);
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					mkdirSyncStub.restore();
+					statsSyncStub.restore();
+					done();
+				
+				});
+			
+			});
 		
 		});
 
