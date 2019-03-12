@@ -1726,7 +1726,85 @@ describe('users.js', function() {
 				});
 			
 			});
-			it('should return an array of directory names to callback if all directories were either successfully created or already exist');
+			it('should return an array of directory names to callback if all directories were either successfully created or already exist', function(done) {
+			
+				var userDirPath = path.join(global.Uwot.Constants.appRoot, 'home');
+				var getValStub = sinon.stub(global.Uwot.Config, 'getVal').callsFake(function returnExpected(cat, val) {
+				
+					if (cat + val === 'serveruserDir') {
+					
+						return userDirPath;
+					
+					}
+					else {
+					
+						return true;
+					
+					}
+				
+				});
+				const dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnUserDoc(searchTerms, callback) {
+				
+					return callback(false, [
+						{
+							"fName": "Found",
+							"lName": "User",
+							"uName": "fuser",
+							"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+							"sudoer": true,
+							"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "CDeOOrH0gOg791cZ"
+						},
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+			
+				});
+				var readdirStub = sinon.stub(fs, 'readdir').callsFake(function returnArray(path, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var mkdirSyncStub = sinon.stub(fs, 'mkdirSync').returns(true);
+				users.createDir(['CDeOOrH0gOg791cZ', '123fourfive678ninetenELEVENTWELVE'], function(err, res) {
+				
+					expect(err).to.be.false;
+					expect(res).to.deep.equal(['fuser', 'mortimerhemp']);
+					getValStub.restore();
+					dbFindStub.restore();
+					readdirStub.restore();
+					mkdirSyncStub.restore();
+					done();
+				
+				});
+			
+			});
 			it('should remove the file and create a directory if a file with the same name as the userName already exists and is not a directory');
 			it('should create a new directory if the path is extant but fs.syncStat throws an error');
 			it('should return an error and partial list of directories successfully created/verified if fs.unlinkSync throws an error while trying to remove a file');
