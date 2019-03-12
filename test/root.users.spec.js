@@ -11,6 +11,8 @@ const expect = chai.expect;
 const Users = require('../users');
 var users;
 
+// TBD
+// stub out the crypto functions so we don't spend an eternity verifying that crypto is crypto enough
 describe('users.js', function() {
 
 	before('getting fresh UserInterface instance', function() {
