@@ -731,7 +731,7 @@ module.exports = class UwotUsers {
 				}
 				else {
 				
-					var vaildUsers = allUsers.map((u) => { u._id });
+					var validUsers = allUsers.map((u) => { u._id; });
 					var userDirPath = global.Uwot.Config.getVal('server', 'userDir');
 					fs.readdir(userDirPath, function(err, userFiles) {
 					
