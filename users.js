@@ -814,5 +814,95 @@ module.exports = class UwotUsers {
 		}
 	
 	}
+	
+	removeDir(userIds, callback) {
+	
+		var self = this;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to removeDir');
+		
+		}
+		else if ('object' !== typeof userIds || !Array.isArray(userIds) || userIds.length < 1) {
+		
+			return callback(new TypeError('invalid userIds passed to removeDir'), null);
+		
+		}
+		else {
+		
+			self.rdCallback = callback;
+			this.db.find({}, function(error, allUsers) {
+			
+				if (error) {
+				
+					return self.rdCallback(error, null);
+				
+				}
+				else {
+				
+					var validUsers = allUsers.map((u) => { return u._id; });
+					var userDirPath = global.Uwot.Config.getVal('server', 'userDir');
+					fs.readdir(userDirPath, function(err, userFiles) {
+					
+						if (err) {
+				
+							return self.rdCallback(err, null);
+				
+						}
+						else if ('object' !== typeof userFiles || !Array.isArray(userFiles) || userFiles.length < 1) {
+						
+							return self.rdCallback(false, false);
+						
+						}
+						else {
+						
+							var userDirs = [];
+							for (let i = 0; i < userIds.length; i++) {
+				
+								if ('string' === typeof userIds[i] && -1 !== validUsers.indexOf(userIds[i])) {
+					
+									var thisUserName = allUsers[validUsers.indexOf(userIds[i])].uName;
+									var thisFilePath = path.join(userDirPath, thisUserName);
+									if (-1 !== userFiles.indexOf(thisUserName)) {
+									
+										try {
+										
+											var thisFileStats = fs.statSync(thisFilePath);
+											if (thisFileStats.isDirectory()) {
+											
+												fs.mkdirSync(thisFilePath);
+											
+											}
+											userDirs.push(thisUserName);
+										
+										}
+										catch(e) {
+										
+											return self.rdCallback(e, userDirs);
+										
+										}
+									
+									}
+					
+								}
+								if ((i + 1) >= userIds.length) {
+								
+									return self.rdCallback(false, userDirs);
+								
+								}
+				
+							}
+						
+						}
+					
+					});
+				
+				}
+		
+			});
+		
+		}
+	
+	}
 
 };
