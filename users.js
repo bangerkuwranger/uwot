@@ -129,6 +129,51 @@ module.exports = class UwotUsers {
 		// check if create user dir is set in config
 		// if so, verify each user has a dir
 		// if not, create dir and set perms for user
+		var needHomeDirectories = global.Uwot.Config.getVal('users', 'createHome');
+		if (needHomeDirectories) {
+		
+			var self = this;
+			this.db.find({}, function(error, allUsers) {
+			
+				if (error) {
+				
+					throw error;
+				
+				}
+				else if ('object' === typeof allUsers && Array.isArray(allUsers) && allUsers.length > 1) {
+				
+					var uids = allUsers.map((user) => { return user._id; });
+					self.createDir(uids, function(error, userDirs) {
+					
+						if (error) {
+						
+							console.log(error);
+						
+						}
+						if (userDirs) {
+						
+							console.log('All userDirs: ' + JSON.stringify(userDirs));
+						
+						}
+						return;
+					
+					});
+				
+				}
+				else {
+				
+					return;
+				
+				}
+			
+			});
+		
+		}
+		else {
+		
+			return;
+		
+		}
 	
 	}
 	
