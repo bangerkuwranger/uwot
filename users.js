@@ -140,7 +140,7 @@ module.exports = class UwotUsers {
 					throw error;
 				
 				}
-				else if ('object' === typeof allUsers && Array.isArray(allUsers) && allUsers.length > 1) {
+				else if ('object' === typeof allUsers && Array.isArray(allUsers) && allUsers.length > 0) {
 				
 					var uids = allUsers.map((user) => { return user._id; });
 					self.createDir(uids, function(error, userDirs) {
