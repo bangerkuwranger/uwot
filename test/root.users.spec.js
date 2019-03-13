@@ -568,7 +568,12 @@ describe('users.js', function() {
 			it('should return an error as the first argument in callback if db.insert throws an error', function(done) {
 		
 				this.timeout(10000);
-				const dbFindStub = sinon.stub(users.db, 'insert').callsFake(function returnInsertError(newUser, callback) {
+				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
+				
+					return callback(false, true);
+			
+				});
+				const dbInsertStub = sinon.stub(users.db, 'insert').callsFake(function returnInsertError(newUser, callback) {
 				
 					return callback(
 						new Error('db.insert error'),
@@ -588,7 +593,12 @@ describe('users.js', function() {
 			it('should return callback(false, false) if db.insert could not create a new record', function(done) {
 		
 				this.timeout(10000);
-				const dbFindStub = sinon.stub(users.db, 'insert').callsFake(function returnFalse(newUser, callback) {
+				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
+				
+					return callback(false, true);
+			
+				});
+				const dbInsertStub = sinon.stub(users.db, 'insert').callsFake(function returnFalse(newUser, callback) {
 				
 					return callback(
 						false,
@@ -607,30 +617,114 @@ describe('users.js', function() {
 			});
 			it('should return callback(false, User(newRecord)) if db.insert is successful', function(done) {
 		
-				const dbFindStub = sinon.stub(users.db, 'insert').callsFake(function returnNewUserDoc(newUser, callback) {
+				var testUserArgs = {
+					uName: 'newUser',
+					password: 'newUserP@55'
+				};
+				var testUserResult = {
+					"fName": "",
+					"lName": "",
+					"uName": "",
+					"password": "$2a$16$KOigNymFmGpwaBdRxzyhA..T2t4ZRCPTlbLdtg02T7AXuTeZQ7Oam",
+					"sudoer": false,
+					"salt": "$2a$16$KOigNymFmGpwaBdRxzyhA.",
+					"createdAt": new Date(),
+					"updatedAt": new Date(),
+					"_id": "CDeOOrH0gOg791cZ"
+				}
+				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
 				
+					return callback(false, true);
+			
+				});
+				const dbInsertStub = sinon.stub(users.db, 'insert').callsFake(function returnNewUserDoc(newUser, callback) {
+				
+					var findResult = {
+						uName: newUser.uName,
+						fName: testUserResult.fName,
+						lName: testUserResult.lName,
+						password: testUserResult.password,
+						sudoer: testUserResult.sudoer,
+						salt: testUserResult.salt,
+						createdAt: testUserResult.createdAt,
+						updatedAt: testUserResult.updatedAt,
+						"_id": testUserResult._id
+					}
 					return callback(
 						false,
-						{
-							"fName": "",
-							"lName": "",
-							"uName": newUser.uName,
-							"password": "$2a$16$KOigNymFmGpwaBdRxzyhA..T2t4ZRCPTlbLdtg02T7AXuTeZQ7Oam",
-							"sudoer": true,
-							"salt": "$2a$16$KOigNymFmGpwaBdRxzyhA.",
-							"createdAt": new Date(),
-							"updatedAt": new Date(),
-							"_id": "CDeOOrH0gOg791cZ"
-						}
+						findResult
 					);
 			
 				});
-				users.createNew({uName: 'newUser', password: 'newUserP@55'}, function(error, newUser) {
+				const createDirStub = sinon.stub(users, 'createDir').callsFake(function returnCreated(idArray, cb) {
+				
+					return cb(false, false);
+				
+				});
+				users.createNew(testUserArgs, function(error, newUser) {
 			
 					this.timeout(10000);
 					expect(error).to.equal(false);
 					expect(newUser).to.be.an('object');
 					expect(newUser.constructor.name.toString()).to.equal('User');
+					done();
+			
+				}.bind(this));
+		
+			});
+			it('should call createDir with the user._id after db.insert is successful', function(done) {
+		
+				var testUserArgs = {
+					uName: 'newUser',
+					password: 'newUserP@55'
+				};
+				var testUserResult = {
+					"fName": "",
+					"lName": "",
+					"uName": "",
+					"password": "$2a$16$KOigNymFmGpwaBdRxzyhA..T2t4ZRCPTlbLdtg02T7AXuTeZQ7Oam",
+					"sudoer": false,
+					"salt": "$2a$16$KOigNymFmGpwaBdRxzyhA.",
+					"createdAt": new Date(),
+					"updatedAt": new Date(),
+					"_id": "CDeOOrH0gOg791cZ"
+				}
+				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
+				
+					return callback(false, true);
+			
+				});
+				const dbInsertStub = sinon.stub(users.db, 'insert').callsFake(function returnNewUserDoc(newUser, callback) {
+				
+					var findResult = {
+						uName: newUser.uName,
+						fName: testUserResult.fName,
+						lName: testUserResult.lName,
+						password: testUserResult.password,
+						sudoer: testUserResult.sudoer,
+						salt: testUserResult.salt,
+						createdAt: testUserResult.createdAt,
+						updatedAt: testUserResult.updatedAt,
+						"_id": testUserResult._id
+					}
+					return callback(
+						false,
+						findResult
+					);
+			
+				});
+				const createDirStub = sinon.stub(users, 'createDir').callsFake(function returnCreated(idArray, cb) {
+				
+					return cb(false, [testUserArgs.uName]);
+				
+				});
+				users.createNew(testUserArgs, function(error, newUser) {
+			
+					this.timeout(10000);
+					expect(error).to.equal(false);
+					expect(newUser).to.be.an('object');
+					expect(newUser.constructor.name.toString()).to.equal('User');
+					expect(createDirStub.calledWith([testUserResult._id])).to.be.true;
 					done();
 			
 				}.bind(this));

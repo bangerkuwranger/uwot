@@ -274,10 +274,6 @@ module.exports = class UwotUsers {
 	
 	}
 	
-	// TBD
-	// check if create user dir is set in config
-	// create user dir if not exists
-	// rename old and create new if dir already exists
 	createNew(uObj, callback) {
 	
 		var self = this;
@@ -355,7 +351,21 @@ module.exports = class UwotUsers {
 								data.sudoer
 					
 							);
-							return self.cnCallback(false, savedUser);
+							self.createDir([savedUser._id], function(error, userDirs) {
+							
+								if (error) {
+				
+									return self.cnCallback(error, savedUser);
+				
+								}
+								else {
+								
+									return self.cnCallback(false, savedUser);
+								
+								}
+							
+							});
+							
 				
 						}
 			
