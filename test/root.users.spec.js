@@ -8,6 +8,8 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
+var bcrypt = require('bcryptjs');
+
 const Users = require('../users');
 var users;
 
@@ -566,8 +568,7 @@ describe('users.js', function() {
 		
 			});
 			it('should return an error as the first argument in callback if db.insert throws an error', function(done) {
-		
-				this.timeout(10000);
+			
 				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
 				
 					return callback(false, true);
@@ -581,6 +582,8 @@ describe('users.js', function() {
 					);
 			
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.createNew({uName: 'newUser', password: 'newUserP@55'}, function(error, newUser) {
 			
 					expect(error).to.be.instanceof(Error);
@@ -591,8 +594,7 @@ describe('users.js', function() {
 		
 			});
 			it('should return callback(false, false) if db.insert could not create a new record', function(done) {
-		
-				this.timeout(10000);
+			
 				const isUniqueStub = sinon.stub(users, 'isUnique').callsFake(function returnTrue(uName, callback) {
 				
 					return callback(false, true);
@@ -606,6 +608,8 @@ describe('users.js', function() {
 					);
 			
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.createNew({uName: 'newUser', password: 'newUserP@55'}, function(error, newUser) {
 			
 					expect(error).to.equal(false);
@@ -661,9 +665,10 @@ describe('users.js', function() {
 					return cb(false, false);
 				
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.createNew(testUserArgs, function(error, newUser) {
-			
-					this.timeout(10000);
+				
 					expect(error).to.equal(false);
 					expect(newUser).to.be.an('object');
 					expect(newUser.constructor.name.toString()).to.equal('User');
@@ -718,9 +723,10 @@ describe('users.js', function() {
 					return cb(false, [testUserArgs.uName]);
 				
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.createNew(testUserArgs, function(error, newUser) {
-			
-					this.timeout(10000);
+				
 					expect(error).to.equal(false);
 					expect(newUser).to.be.an('object');
 					expect(newUser.constructor.name.toString()).to.equal('User');
@@ -986,8 +992,7 @@ describe('users.js', function() {
 		
 			});
 			it('should return callback(error, null) if db.update returns an error', function(done) {
-		
-				this.timeout(10000);
+			
 				var stubValidateTrue = sinon.stub(users, 'validate').callsFake(function returnTrue(uId, oldPw, callback) {
 				
 					return callback(false, true);
@@ -998,6 +1003,8 @@ describe('users.js', function() {
 					return callback(new Error('update error'), null);
 			
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.changePw('CDeOOrH0gOg791cZ', 'testP@55', 'newtestP@55', function(error, isPwUpdated) {
 				
 					expect(error).to.be.instanceof(Error);
@@ -1008,8 +1015,7 @@ describe('users.js', function() {
 		
 			});
 			it('should return callback(false, false) if db.update was unsuccessful (record does not exist)', function(done) {
-		
-				this.timeout(10000);
+			
 				var stubValidateTrue = sinon.stub(users, 'validate').callsFake(function returnTrue(uId, oldPw, callback) {
 				
 					return callback(false, true);
@@ -1020,6 +1026,8 @@ describe('users.js', function() {
 					return callback(false, 0);
 			
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.changePw('CDeOOrH0gOg791cZ', 'testP@55', 'newtestP@55', function(error, isPwUpdated) {
 				
 					expect(error).to.be.false;
@@ -1030,8 +1038,7 @@ describe('users.js', function() {
 		
 			});
 			it('should return callback(false, false) if db.update was successful', function(done) {
-		
-				this.timeout(10000);
+			
 				var stubValidateTrue = sinon.stub(users, 'validate').callsFake(function returnTrue(uId, oldPw, callback) {
 				
 					return callback(false, true);
@@ -1042,6 +1049,8 @@ describe('users.js', function() {
 					return callback(false, 1);
 			
 				});
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				users.changePw('CDeOOrH0gOg791cZ', 'testP@55', 'newtestP@55', function(error, isPwUpdated) {
 				
 					expect(error).to.be.false;
@@ -1480,6 +1489,7 @@ describe('users.js', function() {
 					return callback(false, [userData]);
 			
 				});
+				var compareSyncStub = sinon.stub(bcrypt, 'compareSync').returns(false);
 				users.validate('CDeOOrH0gOg791cZ', 'testpass', function(error, isValid) {
 			
 					expect(error).to.be.false;
@@ -1507,6 +1517,7 @@ describe('users.js', function() {
 					return callback(false, [userData]);
 			
 				});
+				var compareSyncStub = sinon.stub(bcrypt, 'compareSync').returns(true);
 				users.validate('CDeOOrH0gOg791cZ', 'testP@55', function(error, isValid) {
 			
 					expect(error).to.be.false;
@@ -2424,7 +2435,6 @@ describe('users.js', function() {
 		});
 		describe('saltPass(password)', function() {
 		
-			this.timeout(10000);
 			it('should throw an error if "password" is not a string', function() {
 	
 				function passNullPassword() {
@@ -2438,12 +2448,16 @@ describe('users.js', function() {
 			it('should generate a new value for salt property if salt property is undefined.', function() {
 			
 				delete testUser.salt;
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				var newSaltedPassword = testUser.saltPass('newTestP@55');
 				expect(testUser.salt).to.not.equal(null);
 			
 			});
 			it('should generate a new value for salt property if salt property is null.', function() {
 			
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				var newSaltedPassword = testUser.saltPass('newTestP@55');
 				expect(testUser.salt).to.not.equal(null);
 			
@@ -2451,12 +2465,16 @@ describe('users.js', function() {
 			it('should generate a new value for salt property if salt property is falsey.', function() {
 			
 				testUser.salt = 0;
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				var newSaltedPassword = testUser.saltPass('newTestP@55');
 				expect(testUser.salt).to.not.equal(0);
 			
 			});
 			it('should return a salted password prepended with the salt.', function() {
 			
+				var genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				var hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				var newSaltedPassword = testUser.saltPass('newTestP@55');
 				expect(newSaltedPassword).to.include(testUser.salt);
 			
@@ -2465,10 +2483,18 @@ describe('users.js', function() {
 		});
 		describe('verifyPassword(password)', function() {
 		
-			this.timeout(15000);
+			var genSaltSyncStub, hashSyncStub;
 			beforeEach('generating password', function() {
 			
+				genSaltSyncStub = sinon.stub(bcrypt, 'genSaltSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ.");
+				hashSyncStub = sinon.stub(bcrypt, 'hashSync').returns("$2a$16$KPBBkPbCBW./mwnXuoBYJ..z56khVltcaST8aHNSuVic.YPQPKGTC");
 				testUser.password = testUser.saltPass('testP@55');
+			
+			});
+			afterEach('restoring hashing stubs', function() {
+			
+				genSaltSyncStub.restore();
+				hashSyncStub.restore();
 			
 			});
 			it('should throw a TypeError if it is passed a non-string value for password', function() {
@@ -2504,14 +2530,18 @@ describe('users.js', function() {
 			});
 			it('should return false if salted password doesn\'t match password property', function() {
 			
+				var compareSyncStub = sinon.stub(bcrypt, 'compareSync').returns(false);
 				var verify = testUser.verifyPassword('testPass');
 				expect(verify).to.be.false;
+				compareSyncStub.restore();
 			
 			});
 			it('should return true if salted password matches password property', function() {
 			
+				var compareSyncStub = sinon.stub(bcrypt, 'compareSync').returns(true);
 				var verify = testUser.verifyPassword('testP@55');
 				expect(verify).to.be.true;
+				compareSyncStub.restore();
 			
 			});
 		
