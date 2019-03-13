@@ -113,6 +113,39 @@ describe('globalSetup.js', function() {
 			expect(global.Uwot.Constants.tryParseJSON).to.be.a('function');
 		
 		});
+		// TBD
+		// tests for tryParseJSON
+		it('should assign a function that converts special chars for html syntax to html entities within a string and returns a string with the result to global.Uwot.Constants.escapeHtml', function() {
+		
+			expect(global.Uwot.Constants.escapeHtml).to.be.a('function');
+		
+		});
+// 		describe('escapeHtml(str)', function() {
+// 		
+// 			it('should be a function', function() {
+// 			
+// 				expect(global.Uwot.Constants.escapeHtml).to.be.a('function');
+// 			
+// 			});
+// 			it('should return the str argument unchanged if it is not a string', function() {
+// 			
+// 				expect(global.Uwot.Constants.escapeHtml(null)).to.equal(null);
+// 			
+// 			});
+// 			it('should return the str argument unchanged if it is a string that doesn\'t contain one of ["<",">","\"","\'"]', function() {
+// 			
+// 				var noEscape = 'This should be just fine.';
+// 				expect(global.Uwot.Constants.escapeHtml(noEscape)).to.equal(noEscape);
+// 			
+// 			});
+// 			it('should return the str argument with values ["<",">","\"","\'"] replaced by html entities', function() {
+// 			
+// 				var escapeWillMakeMeGod = '<ra class="solar">filthy \'lucre\'</ra>';
+// 				expect(global.Uwot.Constants.escapeHtml(escapeWillMakeMeGod)).to.equal('&lt;ra class=&quot;solar&quot;&gt;filthy &#039;lucre&#039;&lt;/ra&gt;');
+// 			
+// 			});
+// 		
+// 		});
 		it('should assign an array of valid frontend operation names to global.Uwot.Constants.cliOps', function() {
 		
 			expect(global.Uwot.Constants.cliOps).to.be.an('array').that.is.not.empty;

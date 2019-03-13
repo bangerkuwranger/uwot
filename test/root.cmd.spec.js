@@ -641,32 +641,6 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('escapeHtml(str)', function() {
-		
-			it('should be a function', function() {
-			
-				expect(cmd.escapeHtml).to.be.a('function');
-			
-			});
-			it('should return the str argument unchanged if it is not a string', function() {
-			
-				expect(cmd.escapeHtml(null)).to.equal(null);
-			
-			});
-			it('should return the str argument unchanged if it is a string that doesn\'t contain one of ["<",">","\"","\'"]', function() {
-			
-				var noEscape = 'This should be just fine.';
-				expect(cmd.escapeHtml(noEscape)).to.equal(noEscape);
-			
-			});
-			it('should return the str argument with values ["<",">","\"","\'"] replaced by html entities', function() {
-			
-				var escapeWillMakeMeGod = '<ra class="solar">filthy \'lucre\'</ra>';
-				expect(cmd.escapeHtml(escapeWillMakeMeGod)).to.equal('&lt;ra class=&quot;solar&quot;&gt;filthy &#039;lucre&#039;&lt;/ra&gt;');
-			
-			});
-		
-		});
 		describe('argsObjToNameArray(argsObj)', function() {
 		
 			it('should be a function', function() {

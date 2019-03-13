@@ -458,7 +458,13 @@ class UwotFs {
 						result = this.changeCwd(...argArr);
 						break;
 					case 'ls':
-						result = this.readDir(this.cwd);
+						// expected argArr:
+						// [(string)path, (bool)showInvisible, (bool)longForm]
+						var rawFileArr = this.readDir(argArr[0]);
+						argArr[1] == 'boolean' === typeof argArr[1] ? argArr[1] : false;
+						argArr[2] == 'boolean' === typeof argArr[2] ? argArr[2] : false;
+						var vprocFileArr = this.visibility(rawFileArr, argArr[0], argArr[1]);
+						result = argArr[2] ? this.longFormatFiles(vprocFileArr, argArr[0]) : vprocFileArr;
 						// need to parse flags to format output...
 						// only supporting -l and -a
 						// need to parse args in case a path is provided
@@ -516,6 +522,31 @@ class UwotFs {
 			//return result or error
 			if (result instanceof Error) {
 			
+				if (result.hasOwnProperty('code')) {
+				
+					var seCode = result.code;
+					var sePath, seTarget;
+					if ('string' === typeof result.path && 'string' === typeof result.target) {
+					
+						sePath = 'string' === typeof result.path && this.isInRoot(result.path) ? this.dissolvePath(result.path) : result.path;
+						seTarget = 'string' === typeof result.target && this.isInRoot(result.target) ? this.dissolvePath(result.target) : result.target;
+						result = systemError[seCode]({syscall: result.syscall, path: sePath, target: seTarget});
+					
+					}
+					else if ('string' === typeof result.target) {
+					
+						seTarget = 'string' === typeof result.target && this.isInRoot(result.target) ? this.dissolvePath(result.target) : result.target;
+						result = systemError[seCode]({syscall: result.syscall, target: seTarget});
+					
+					}
+					else if ('string' === typeof result.path) {
+					
+						sePath = 'string' === typeof result.path && this.isInRoot(result.path) ? this.dissolvePath(result.path) : result.path;
+						result = systemError[seCode]({syscall: result.syscall, path: sePath});
+					
+					}
+				
+				}
 				return callback(result, null);
 			
 			}
@@ -1969,6 +2000,72 @@ class UwotFs {
 			}
 		
 		}
+	
+	}
+	
+	visibility(fileArray, pth, showInvisible) {
+	
+		var finalArray;
+		if ('object' !== typeof fileArray || !Array.isArray(fileArray)) {
+		
+			return fileArray;
+		
+		}
+		else if (showInvisible) {
+		
+			finalArray = fileArray.map((x) => { return x; });
+			var pFileIdx = finalArray.indexOf(UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			if (-1 < pFileIdx) {
+			
+				finalArray.splice(pFileIdx, 1);
+			
+			}
+			if ('string' === typeof pth && pth !== this.root.path && pth !== '/' && pth !== '') {
+			
+				finalArray.unshift('..');
+			
+			}
+			finalArray.unshift('.');
+			return finalArray;
+		
+		}
+		else {
+		
+			finalArray = [];
+			for (let i = 0; i < fileArray.length; i++) {
+			
+				if ('string' === typeof fileArray[i] && !fileArray[i].startsWith('.')) {
+				
+					finalArray.push(fileArray[i]);
+				
+				}
+				if ((i + 1) >= fileArray.length) {
+				
+					return finalArray;
+				
+				}
+			
+			}
+		
+		}
+	
+	}
+	
+	longFormatFiles(fileArray, pth) {
+	
+		var finalArray;
+		if ('object' !== typeof fileArray || !Array.isArray(fileArray)) {
+		
+			return fileArray;
+		
+		}
+		// getPermissions for parent directory
+		// loop through files
+			// statSync file
+			// use perms and stats to build line:
+				// file/dir/link, perm.allowed, stats.nlink, perm.owner, stats.size, stats.mtime, fName
+			// add to finalArray
+		return finalArray;
 	
 	}
 

@@ -386,7 +386,7 @@ class UwotCmd {
 					}
 					else {
 				
-						thisNode.content.push({content: this.escapeHtml(spaceArray[j])});
+						thisNode.content.push({content: global.Uwot.Constants.escapeHtml(spaceArray[j])});
 						if ((j + 1) < spaceArray.length && '' !== spaceArray[j+1]) {
 					
 							thisNode.content.push({tag: 'span', content: '&nbsp;'});
@@ -408,21 +408,6 @@ class UwotCmd {
 		}
 		return output;
 	
-	}
-	
-	escapeHtml(str) {
-	
-		if ('string' !== typeof str) {
-		
-			return str;
-			
-		}
-		return str.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;")
-		.replace(/'/g, "&#039;");
-		
 	}
 	
 	argsObjToNameArray(argsObj) {

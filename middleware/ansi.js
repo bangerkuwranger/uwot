@@ -9,6 +9,7 @@
  * prop: (bool)isReversed -> html: class "reversed"
  * prop: (bool)isBold -> html: class "bold"
  * prop: (bool)isUnderline -> html: class "underline"
+ * prop: (array)classes -> html: each element escaped and added to classes for tag
  * prop: (array)content -> strings & hierarchical objects in order
  */
 
@@ -39,6 +40,16 @@ function parseToAnsi(ansiObj) {
 	if (ansiObj.isUnderline) {
 	
 		classesString += ' underline';
+	
+	}
+	if ('object' === typeof ansiObj.classes && Array.isArray(ansiObj.classes) && ansiObj.classes.length > 0) {
+	
+		ansiObj.classes.forEach((className) => {
+		
+			classesString += 'string' === typeof className && '' !== className ? ' ' + global.Uwot.Constants.escapeHtml(className.trim()) : '';
+			return;
+		
+		});
 	
 	}
 	var openTag = '<' + tagName + ' class="' + classesString + '">';

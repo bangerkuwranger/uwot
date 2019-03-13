@@ -103,6 +103,26 @@ module.exports = {
 			};
 
 		}
+		
+		if ('function' !== typeof global.Uwot.Constants.escapeHtml) {
+		
+			// was 'UwotCmd.Prototype.escapeHtml'
+			global.Uwot.Constants.escapeHtml = function escapeHtml(str) {
+	
+				if ('string' !== typeof str) {
+		
+					return str;
+			
+				}
+				return str.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		
+			}
+		
+		}
 
 		if ('object' !== typeof global.Uwot.Constants.cliOps || !Array.isArray(global.Uwot.Constants.cliOps)) {
 

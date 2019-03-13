@@ -661,10 +661,10 @@ describe('filesystem.js', function() {
 					return 'readDir ' + Array.from(arguments).join(' ');
 				
 				});
-				filesystem.cmd('ls', null, function(error, result) {
+				filesystem.cmd('ls', [], function(error, result) {
 				
 					expect(error).to.be.false;
-					expect(result).to.equal('readDir ' + filesystem.cwd);
+					expect(readDirStub.called).to.be.true;
 					done();
 				
 				}, true);
