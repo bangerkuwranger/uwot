@@ -461,8 +461,8 @@ class UwotFs {
 						// expected argArr:
 						// [(string)path, (bool)showInvisible, (bool)longForm]
 						var rawFileArr = this.readDir(argArr[0]);
-						argArr[1] == 'boolean' === typeof argArr[1] ? argArr[1] : false;
-						argArr[2] == 'boolean' === typeof argArr[2] ? argArr[2] : false;
+						argArr[1] = 'boolean' === typeof argArr[1] ? argArr[1] : false;
+						argArr[2] = 'boolean' === typeof argArr[2] ? argArr[2] : false;
 						var vprocFileArr = this.visibility(rawFileArr, argArr[0], argArr[1]);
 						result = argArr[2] ? this.longFormatFiles(vprocFileArr, argArr[0]) : vprocFileArr;
 						// need to parse flags to format output...

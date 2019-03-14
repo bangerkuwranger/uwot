@@ -77,7 +77,7 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 					
 						for (i = 0; i < resArr.length; i++) {
 						
-							var lineObj = super.parsePre(line);
+							var lineObj = super.parsePre(resArr[i]);
 							executeResult.output.content.push(lineObj, {tag: 'br'});
 							if ((i + 1) >= resArr.length) {
 							
@@ -91,7 +91,7 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 					else {
 					
 						i = 0;
-						executeResult.output.content = {tag: 'div', content: [], classes: ['autoColContainer']}
+						executeResult.output.content = {tag: 'div', content: [], classes: ['autoColContainer']};
 						resArr.forEach((fileName) => {
 						
 							executeResult.output.content.content.push({content: fileName, classes: ['autoColElement']});

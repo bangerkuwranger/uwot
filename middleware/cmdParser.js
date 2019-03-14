@@ -20,6 +20,7 @@ class UwotRuntimeCmds {
 
 	constructor(ast, user) {
 	
+		// validate ast and its top level structure before parsing; throw error if invalid/undefined
 		if ('object' !== typeof ast || ast.type !== 'Script' || 'object' !== typeof ast.commands || !(Array.isArray(ast.commands))) {
 		
 			throw new TypeError('invalid ast node passed to buildCommands');
@@ -27,8 +28,13 @@ class UwotRuntimeCmds {
 		}
 		else {
 		
+			// assign ast & user as object props
 			this.ast = ast;
 			this.user = user;
+			// check whether users are allowed to create shell functions by config;
+			// if so, add fx property as obj prop and assign empty Map
+			// if not, assign false to fx property so those function nodes will be skipped
+			// (users assigning functions without being allowed will likely throw an error during execution if they then call those funcs)
 			if (global.Uwot.Config.getVal('users', 'allowShellFunctions') && 'string' === typeof this.user.uName) {
 			
 				if ('guest' === this.user.uName && global.Uwot.Config.getVal('users', 'allowGuest') && global.Uwot.Config.getVal('users', 'allowGuestShellFunctions')) {
@@ -48,6 +54,7 @@ class UwotRuntimeCmds {
 				}
 			
 			}
+			// begin tree traversal
 			this.buildCommands();
 		
 		}
@@ -56,12 +63,15 @@ class UwotRuntimeCmds {
 	
 	buildCommands() {
 	
+		// assign empty Map to exes prop
 		this.exes = new Map();
+		// begin recursive traversal for each node in ast.commands array, assigning exeMap to exes property Map
 		for (let i = 0; i < this.ast.commands.length; i++) {
 		
 			this.exes.set(i, this.parseCommandNode(this.ast.commands[i]));
 		
 		}
+		// also returns its exes array in case we need to use in closure somewhere rather than deferred execution
 		return this.exes;
 
 	}
@@ -70,13 +80,17 @@ class UwotRuntimeCmds {
 	
 	executeCommands() {
 	
+		// deferred execution starts here, traversing exes Map and returning results
 		this.results = this.executeMap(this.exes);
 		return this.results;
 	
 	}
 	
+	// top level logic for sorting each command node by type, then running appropriate parsing method with proper args
+	// note all parsed redirects from bourne-style interpretation by AST parser must be passed down here in order to route execution IO in subparser
 	parseCommandNode(astCmd, output, input) {
 
+		// throw error if commandNode is invalid or type is not one of the supported types
 		if ('object' !== typeof astCmd || -1 === commandTypes.indexOf(astCmd.type)) {
 	
 			throw new TypeError('invalid ast command node passed to parseCommandNode');
@@ -84,8 +98,10 @@ class UwotRuntimeCmds {
 		}
 		else {
 	
+			// default redirects to null if unset
 			output = 'undefined' !== typeof output ? output : null;
 			input = 'undefined' !== typeof input ? input : null;
+			// choose valid type, assign appropriate args, run subparser
 			switch(astCmd.type) {
 		
 				case 'Pipeline':
@@ -116,6 +132,8 @@ class UwotRuntimeCmds {
 					break;
 				case 'Until':
 					break;
+				// default should never run, its a failsafe against inappropriate injection or broken parsing.
+				// Command is recursive traversal of additional commands possibly in above node types
 				case 'Command':
 				default:
 					return this.parseCommand(astCmd, output, input);
@@ -126,6 +144,10 @@ class UwotRuntimeCmds {
 	
 	}
 	
+	// parse base command AST node to executable obj in exeMap.
+	// most simple commands just use this;
+	// more complex controls will also end up calling this more than once
+	// note redirects get passed here as well
 	parseCommand(astCommand, output, input) {
 
 		var exe = {isOp: false, type: 'Command', isSudo: false};
@@ -822,27 +844,11 @@ module.exports = function(args) {
 	
 			// get user id from res.locals
 			var uid = req.isAuthenticated() && 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null;
+			// parse res.body.cmd to AST and assign to req.body.cmdAst
 			req.body.cmdAst = bashParser(req.body.cmd);
-			var cmdString = req.body.cmd.trim();
-			var cmdArray = cmdString.split(' ');
-			if (cmdArray.some((r) => { global.Uwot.Constants.cliOps.includes(r); })) {
-		
-				if (cmdArray.length === 1) {
-				
-					req.body.operations = cmdString;
-				
-				}
-				else {
-				
-					//simple parsing, won't do args and any non-ops words get skipped
-					req.body.operations = cmdArray;
-				
-				}
-		
-			}
-// 			var userInterface = new Users();
 			if ('string' !== typeof uid) {
 		
+				// get guest if invalid/unset user id
 				global.Uwot.Users.getGuest(function(error, user) {
 			
 					if (error) {
@@ -852,6 +858,9 @@ module.exports = function(args) {
 					}
 					else {
 				
+						// probably needless, but ensure guest cannot sudo
+						user.maySudo = function() { return false; };
+						// assign new runtime to req.body.runtime using parsed AST, req.app, and guest user
 						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 						next();
 				
@@ -862,6 +871,7 @@ module.exports = function(args) {
 			}
 			else {
 		
+				// extra check that user still exists in DB
 				global.Uwot.Users.findById(uid, function(error, user) {
 			
 					if (error) {
@@ -869,6 +879,7 @@ module.exports = function(args) {
 						next(error);
 				
 					}
+					// if matching user not in DB, get guest user
 					else if (!user) {
 				
 						global.Uwot.Users.getGuest(function(error, user) {
@@ -880,7 +891,9 @@ module.exports = function(args) {
 							}
 							else {
 							
-								user.maySudo = function() {return false;};
+								// probably needless, but ensure guest cannot sudo
+								user.maySudo = function() { return false; };
+								// assign new runtime to req.body.runtime using parsed AST, req.app, and guest user
 								req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 								next();
 				
@@ -889,8 +902,10 @@ module.exports = function(args) {
 						}.bind(this));
 				
 					}
+					// match found in DB; use auth user for runtime
 					else {
 				
+						// assign new runtime to req.body.runtime using parsed AST, req.app, and found user
 						req.body.runtime = new UwotRuntimeCmds(req.body.cmdAst, user).addAppInstance(req.app);
 						next();
 				
