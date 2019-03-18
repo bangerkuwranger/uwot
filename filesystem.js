@@ -2012,6 +2012,11 @@ class UwotFs {
 			return fileArray;
 		
 		}
+		else if (showInvisible && 'string' !== typeof pth) {
+		
+			return new TypeError('invalid pth passed to visibility');
+		
+		}
 		else if (showInvisible) {
 		
 			finalArray = fileArray.map((x) => { return x; });
@@ -2055,15 +2060,20 @@ class UwotFs {
 	longFormatFiles(fileArray, pth) {
 	
 		var finalArray = [];
-		if ('object' !== typeof fileArray || !Array.isArray(fileArray)) {
+		if ('object' !== typeof fileArray || !Array.isArray(fileArray) || fileArray.length < 1) {
 		
 			return fileArray;
+		
+		}
+		else if ('string' !== typeof pth) {
+		
+			return new TypeError('invalid pth passed to longFormatFiles');
 		
 		}
 		// getPermissions for parent directory
 		var parentPerms = this.getPermissions(pth);
 		var permLine = '';
-		if ('object' === typeof parentPerms.allowed && null !== parentPerms.allowed && Array.isArray(parentPerms.allowed)) {
+		if ('object' === typeof parentPerms.allowed && null !== parentPerms.allowed && Array.isArray(parentPerms.allowed) && parentPerms.allowed.length > 0) {
 		
 			if (-1 !== parentPerms.allowed.indexOf('r')) {
 			
@@ -2072,7 +2082,7 @@ class UwotFs {
 			}
 			else {
 			
-				permline += '-';
+				permLine += '-';
 			
 			}
 			if (-1 !== parentPerms.allowed.indexOf('w')) {
@@ -2082,7 +2092,7 @@ class UwotFs {
 			}
 			else {
 			
-				permline += '-';
+				permLine += '-';
 			
 			}
 			if (-1 !== parentPerms.allowed.indexOf('x')) {
@@ -2092,7 +2102,7 @@ class UwotFs {
 			}
 			else {
 			
-				permline += '-';
+				permLine += '-';
 			
 			}
 		
@@ -2111,6 +2121,55 @@ class UwotFs {
 			try {
 			
 				thisFileStats = fs.statSync(path.resolve(pth, fileArray[i]));
+				var thisLine = '';
+				// use perms and stats to build line:
+				// file/dir/link, perm.allowed, stats.nlink, perm.owner, stats.size, stats.mtime, fName
+				if (thisFileStats.isDirectory()) {
+			
+					thisLine += 'd';
+			
+				}
+				else if (thisFileStats.isSymbolicLink()) {
+			
+					thisLine += 's';
+			
+				}
+				else {
+			
+					thisLine += '-';
+			
+				}
+				thisLine += permLine;
+				var links = '';
+				for (let j = (6 - thisFileStats.nlink.length); j < 0; j--) {
+			
+					links += ' ';
+			
+				}
+				links += thisFileStats.nlink + ' ' + owner;
+				var size = ''
+				for (let k = (11 - thisFileStats.size.length); k < 0; k--) {
+			
+					size += ' ';
+			
+				}
+				size += thisFileStats.size;
+				var now = new Date();
+				var mDate = new Date(thisFileStats.mtime);
+				var dateLine = ' ';
+				if (mDate.getFullYear() < now.getFullYear()) {
+			
+					dateLine += mDate.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' ');
+			
+				}
+				else {
+			
+					dateLine += mDate.toLocaleString('en-us', {month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h24'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', '');
+			
+				}
+				thisLine += links + size + dateLine + ' ' + fileArray[i] + EOL;
+				// add to finalArray
+				finalArray.push(thisLine);
 			
 			}
 			catch (e) {
@@ -2118,53 +2177,7 @@ class UwotFs {
 				console.log(e);
 			
 			}
-			var thisLine = '';
-			// use perms and stats to build line:
-			// file/dir/link, perm.allowed, stats.nlink, perm.owner, stats.size, stats.mtime, fName
-			if (thisFileStats.isDirectory()) {
 			
-				thisLine += 'd';
-			
-			}
-			else if (thisFileStats.isSymbolicLink()) {
-			
-				thisLine += 's';
-			
-			}
-			else {
-			
-				thisLine += '-';
-			
-			}
-			thisLine += permLine;
-			for (let j = (6 - thisFileStats.nlink.length); j < 0; j--) {
-			
-				thisLine += ' ';
-			
-			}
-			thisLine += thisFileStats.nlink + ' ' + owner;
-			for (let k = (11 - thisFileStats.size.length); k < 0; k--) {
-			
-				thisLine += ' ';
-			
-			}
-			thisLine += thisFileStats.size;
-			var now = new Date();
-			var mDate = new Date(thisFileStats.mtime);
-			var dateLine = ' ';
-			if (mDate.getFullYear() < now.getFullYear()) {
-			
-				dateLine += mDate.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' ');
-			
-			}
-			else {
-			
-				dateLine += mDate.toLocaleString('en-us', {month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', '');
-			
-			}
-			thisLine += dateLine + ' ' + fileArray[i] + EOL;
-			// add to finalArray
-			finalArray.push(thisLine);
 			if ((i + 1) >= fileArray.length) {
 			
 				return finalArray;

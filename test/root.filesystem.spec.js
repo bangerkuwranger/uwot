@@ -3619,6 +3619,34 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('visibility(fileArray, pth, showInvisible)', function() {
+		
+			it('should be a function');
+			it('should return the fileArray arg unchanged if it is not an array');
+			it('should return a TypeError if showInvisible is truthy and pth is not a string');
+			it('should remove a uwot permissions file from fileArray if showInvisible is truthy and a matching filename is in fileArray');
+			it('should add ".." entry to finalArray if showInvisible is truthy and pth is not root of VFS');
+			it('should always add "." entry to finalArray if showInvisible is truthy');
+			it('should remove any filenames from fileArray that start with "." if showInvisible is falsey');
+		
+		});
+		describe('longFormatFiles(fileArray, pth)', function() {
+		
+			it('should be a function');
+			it('should return fileArray arg unchanged if it is not an array or is empty');
+			it('should return a TypeError if pth is not a string');
+			it('should return "d" as the first character for lines representing directories');
+			it('should return "s" as the first character for lines representing symlinks');
+			it('should return "-" as the first character for lines representing neither dirs nor symlinks');
+			it('should return three characters matching the permissions allowed property members or dashes for each line');
+			it('should omit a file\'s line from the finalArray if statSync throws an error');
+			it('should output 6 chars containing spaces and the number of links to a file for each line');
+			it('should output the owner from getPermissions on each line');
+			it('should output 11 chars containing spaces and the byte size of the file for each line');
+			it('should output the last modified date using three char month, space, 2 char date, space, 2 char hour(24h), colon, and 2 char minute for each line');
+			it('should output the file name for each line');
+		
+		});
 	
 	});
 	describe('UwotFsPermissions', function() {
