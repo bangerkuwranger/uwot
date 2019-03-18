@@ -2109,7 +2109,7 @@ class UwotFs {
 		}
 		else {
 		
-			permLine = '---'
+			permLine = '---';
 		
 		}
 		var owner = 'string' === typeof parentPerms.owner ? parentPerms.owner : 'root';
@@ -2140,19 +2140,9 @@ class UwotFs {
 			
 				}
 				thisLine += permLine;
-				var links = '';
-				for (let j = (6 - thisFileStats.nlink.length); j < 0; j--) {
-			
-					links += ' ';
-			
-				}
+				var links = ' '.repeat(6 - thisFileStats.nlink.toString().length);
 				links += thisFileStats.nlink + ' ' + owner;
-				var size = ''
-				for (let k = (11 - thisFileStats.size.length); k < 0; k--) {
-			
-					size += ' ';
-			
-				}
+				var size = ' '.repeat(11 - thisFileStats.size.toString().length);
 				size += thisFileStats.size;
 				var now = new Date();
 				var mDate = new Date(thisFileStats.mtime);
@@ -2164,7 +2154,7 @@ class UwotFs {
 				}
 				else {
 			
-					dateLine += mDate.toLocaleString('en-us', {month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h24'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', '');
+					dateLine += mDate.toLocaleString('en-us', {hourCycle: 'h24', hour12: false, month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', '');
 			
 				}
 				thisLine += links + size + dateLine + ' ' + fileArray[i] + EOL;

@@ -1,6 +1,7 @@
 var path = require('path');
 var fs = require('fs-extra');
 const globalSetupHelper = require('../helpers/globalSetup');
+const EOL = require('os').EOL;
 
 const sinon = require("sinon");
 const chai = require("chai");
@@ -351,9 +352,9 @@ describe('cmd.js', function() {
 						optString += ' [' + testCmdArgs.options[i].optionalArguments[j] + ']';
 			
 					}
-					optString += "\r\n";
+					optString += EOL;
 					optString += '       ' + testCmdArgs.options[i].description;
-					optString += "\r\n";
+					optString += EOL;
 		
 				}
 				cmd.help(function(error, helpArray) {
@@ -386,9 +387,9 @@ describe('cmd.js', function() {
 						optString += ' [' + testCmdArgs.options[i].optionalArguments[j] + ']';
 			
 					}
-					optString += "\r\n";
+					optString += EOL;
 					optString += '       ' + testCmdArgs.options[i].description;
-					optString += "\r\n";
+					optString += EOL;
 		
 				}
 				cmd.help(function(error, helpArray) {

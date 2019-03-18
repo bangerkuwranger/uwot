@@ -1,6 +1,7 @@
 'use strict';
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
+const EOL = require('os').EOL;
 
 class UwotCmdCommand {
 
@@ -206,9 +207,9 @@ class UwotCmd {
 				outString += ' [--options]';
 		
 			}
-			outString += "\r\n";
+			outString += EOL;
 			outString += this.command.description;
-			outString += "\r\n";
+			outString += EOL;
 			if (this.options.length < 1) {
 		
 				let cmdTitleNode = {content: this.command.name + ': ', isBold: true};
@@ -218,7 +219,7 @@ class UwotCmd {
 		
 			}
 			outString += 'Options:';
-			outString += "\r\n";
+			outString += EOL;
 			for (let i = 0; i < this.options.length; i++) {
 		
 				outString += '    -' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
@@ -232,9 +233,9 @@ class UwotCmd {
 					outString += ' [' + this.options[i].optionalArguments[j] + ']';
 			
 				}
-				outString += "\r\n";
+				outString += EOL;
 				outString += '       ' + this.options[i].description;
-				outString += "\r\n";
+				outString += EOL;
 				if ((i+1) >= this.options.length) {
 			
 					let cmdTitleNode = {content: this.command.name + ': ', isBold: true};

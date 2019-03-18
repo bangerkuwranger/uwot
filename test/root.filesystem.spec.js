@@ -100,6 +100,24 @@ const getTestStats = function() {
 	);
 	thisTestStats.isDirectory = function() { return false };
 	thisTestStats.isFile = function() { return false };
+	thisTestStats.dev = 2114;
+	thisTestStats.ino = 48064969;
+	thisTestStats.mode = 33188;
+	thisTestStats.nlink = 1;
+	thisTestStats.uid = 85;
+	thisTestStats.gid = 100;
+	thisTestStats.rdev = 0;
+	thisTestStats.size = 527;
+	thisTestStats.blksize = 4096;
+	thisTestStats.blocks = 8;
+	thisTestStats.atimeMs = 1318289051000.1;
+	thisTestStats.mtimeMs = 1318289051000.1;
+	thisTestStats.ctimeMs = 1318289051000.1;
+	thisTestStats.birthtimeMs = 1318289051000.1;
+	thisTestStats.atime = new Date('Mon, 10 Oct 2011 23:24:11 GMT');
+	thisTestStats.mtime = new Date('Mon, 10 Oct 2011 23:24:11 GMT');
+	thisTestStats.ctime = new Date('Mon, 10 Oct 2011 23:24:11 GMT');
+	thisTestStats.birthtime = new Date('Mon, 10 Oct 2011 23:24:11 GMT');
 	return thisTestStats;
 
 };
@@ -3621,29 +3639,267 @@ describe('filesystem.js', function() {
 		});
 		describe('visibility(fileArray, pth, showInvisible)', function() {
 		
-			it('should be a function');
-			it('should return the fileArray arg unchanged if it is not an array');
-			it('should return a TypeError if showInvisible is truthy and pth is not a string');
-			it('should remove a uwot permissions file from fileArray if showInvisible is truthy and a matching filename is in fileArray');
-			it('should add ".." entry to finalArray if showInvisible is truthy and pth is not root of VFS');
-			it('should always add "." entry to finalArray if showInvisible is truthy');
-			it('should remove any filenames from fileArray that start with "." if showInvisible is falsey');
+			it('should be a function', function() {
+			
+				expect(filesystem.visibility).to.be.a('function');
+			
+			});
+			it('should return the fileArray arg unchanged if it is not an array', function() {
+			
+				expect(filesystem.visibility(null, null)).to.be.null;
+				expect(filesystem.visibility({things: 'xyz', stuff: 'abc'})).to.deep.equal({things: 'xyz', stuff: 'abc'});
+			
+			});
+			it('should return a TypeError if showInvisible is truthy and pth is not a string', function() {
+			
+				expect(filesystem.visibility(['etc', 'var', 'run'], null, true)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to visibility');
+			
+			});
+			it('should remove a uwot permissions file from fileArray if showInvisible is truthy and a matching filename is in fileArray', function() {
+			
+				var testArray = [UWOT_HIDDEN_PERMISSIONS_FILENAME, 'etc', 'var', 'run'];
+				var testPath = '/';
+				expect(filesystem.visibility(testArray, testPath, true)).to.be.an('array').that.does.not.include(UWOT_HIDDEN_PERMISSIONS_FILENAME);
+			
+			});
+			it('should add ".." entry to finalArray if showInvisible is truthy and pth is not root of VFS', function() {
+			
+				var testArray = [UWOT_HIDDEN_PERMISSIONS_FILENAME, 'etc', 'var', 'run'];
+				var testPath = '/usr';
+				expect(filesystem.visibility(testArray, testPath, true)).to.be.an('array').that.includes('..');
+			
+			});
+			it('should always add "." entry to finalArray if showInvisible is truthy', function() {
+			
+				var testArray = [UWOT_HIDDEN_PERMISSIONS_FILENAME, 'etc', 'var', 'run'];
+				var testPath = '/';
+				expect(filesystem.visibility(testArray, testPath, true)).to.be.an('array').that.includes('.');
+			
+			});
+			it('should remove any filenames from fileArray that start with "." if showInvisible is falsey or undefined', function() {
+			
+				var testArray = [UWOT_HIDDEN_PERMISSIONS_FILENAME, '.DS_Store', 'etc', 'var', 'run'];
+				var testPath = '/';
+				expect(filesystem.visibility(testArray, testPath)).to.deep.equal(['etc', 'var', 'run']);
+			
+			});
 		
 		});
 		describe('longFormatFiles(fileArray, pth)', function() {
 		
-			it('should be a function');
-			it('should return fileArray arg unchanged if it is not an array or is empty');
-			it('should return a TypeError if pth is not a string');
-			it('should return "d" as the first character for lines representing directories');
-			it('should return "s" as the first character for lines representing symlinks');
-			it('should return "-" as the first character for lines representing neither dirs nor symlinks');
-			it('should return three characters matching the permissions allowed property members or dashes for each line');
-			it('should omit a file\'s line from the finalArray if statSync throws an error');
-			it('should output 6 chars containing spaces and the number of links to a file for each line');
-			it('should output the owner from getPermissions on each line');
-			it('should output 11 chars containing spaces and the byte size of the file for each line');
-			it('should output the last modified date using three char month, space, 2 char date, space, 2 char hour(24h), colon, and 2 char minute for each line');
+			it('should be a function', function() {
+			
+				expect(filesystem.longFormatFiles).to.be.a('function');
+			
+			});
+			it('should return fileArray arg unchanged if it is not an array or is empty', function() {
+			
+				expect(filesystem.longFormatFiles({things: 'xyz', stuff: 'abc'})).to.deep.equal({things: 'xyz', stuff: 'abc'});
+				expect(filesystem.longFormatFiles([])).to.deep.equal([]);
+			
+			});
+			it('should return a TypeError if pth is not a string', function() {
+			
+				expect(filesystem.longFormatFiles(['etc', 'var', 'run'], null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to longFormatFiles');
+			
+			});
+			it('should return "d" as the first character for lines representing directories', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isDirectory = function() { return true; };
+					return dirStats;
+				
+				});
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('d');
+			
+			});
+			it('should return "s" as the first character for lines representing symlinks', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return true; };
+					return dirStats;
+				
+				});
+				var testArray = ['certs'];
+				var testPath = '/etc/tls';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('s');
+			
+			});
+			it('should return "-" as the first character for lines representing neither dirs nor symlinks', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('-');
+			
+			});
+			it('should return three characters matching the permissions allowed property members or dashes for each line', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[1]).to.equal('r');
+				expect(testResultArray[2]).to.equal('-');
+				expect(testResultArray[3]).to.equal('x');
+			
+			});
+			it('should omit a file\'s line from the finalArray if statSync throws an error', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var testArray = ['run'];
+				var testPath = '/var';
+				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				expect(testResult).to.be.an('array').that.is.empty;
+			
+			});
+			it('should output 6 chars containing spaces and the number of links to a file for each line', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[4]).to.equal(' ');
+				expect(testResultArray[5]).to.equal(' ');
+				expect(testResultArray[6]).to.equal(' ');
+				expect(testResultArray[7]).to.equal(' ');
+				expect(testResultArray[8]).to.equal(' ');
+				expect(testResultArray[9]).to.equal('1');
+			
+			});
+			it('should output the owner from getPermissions on each line', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[10]).to.equal(' ');
+				expect(testResultArray[11]).to.equal('m');
+				expect(testResultArray[12]).to.equal('o');
+				expect(testResultArray[13]).to.equal('r');
+				expect(testResultArray[14]).to.equal('t');
+				expect(testResultArray[15]).to.equal('i');
+				expect(testResultArray[16]).to.equal('m');
+				expect(testResultArray[17]).to.equal('e');
+				expect(testResultArray[18]).to.equal('r');
+				expect(testResultArray[19]).to.equal('h');
+				expect(testResultArray[20]).to.equal('e');
+				expect(testResultArray[21]).to.equal('m');
+				expect(testResultArray[22]).to.equal('p');
+			
+			});
+			it('should output 11 chars containing spaces and the byte size of the file for each line', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[23]).to.equal(' ');
+				expect(testResultArray[24]).to.equal(' ');
+				expect(testResultArray[25]).to.equal(' ');
+				expect(testResultArray[26]).to.equal(' ');
+				expect(testResultArray[27]).to.equal(' ');
+				expect(testResultArray[28]).to.equal(' ');
+				expect(testResultArray[29]).to.equal(' ');
+				expect(testResultArray[30]).to.equal(' ');
+				expect(testResultArray[31]).to.equal('5');
+				expect(testResultArray[32]).to.equal('2');
+				expect(testResultArray[33]).to.equal('7');
+			
+			});
+			it('should output the last modified date using three char month, space, 2 char date, space, 2 char hour(24h), colon, and 2 char minute for each file modified in the current year', function() {
+			
+				var now = new Date();
+				var nowArray = Array.from(now.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' '));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					dirStats.mtime = now;
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				console.log(JSON.stringify(testResult));
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[34]).to.equal(' ');
+				expect(testResultArray[35]).to.equal(nowArray[0]);
+				expect(testResultArray[36]).to.equal(nowArray[1]);
+				expect(testResultArray[37]).to.equal(nowArray[2]);
+				expect(testResultArray[38]).to.equal(' ');
+				expect(testResultArray[39]).to.equal(' ');
+				expect(testResultArray[40]).to.equal(' ');
+				expect(testResultArray[41]).to.equal(' ');
+				expect(testResultArray[42]).to.equal('5');
+				expect(testResultArray[43]).to.equal('2');
+				expect(testResultArray[44]).to.equal('7');
+			
+			});
 			it('should output the file name for each line');
 		
 		});
