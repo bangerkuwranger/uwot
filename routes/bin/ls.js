@@ -73,6 +73,7 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 				else {
 				
 					var i;
+					executeResult.outputType = 'object';
 					if (longForm) {
 					
 						for (i = 0; i < resArr.length; i++) {

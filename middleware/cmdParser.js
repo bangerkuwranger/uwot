@@ -600,7 +600,23 @@ class UwotRuntimeCmds {
 														delete result.cookies;
 													
 													}
-													results.output.push(this.outputLine(result, 'object'));
+													if ('object' === typeof result.output) {
+												
+														results.output.push(this.outputLine(result.output, outputType));
+														j++;
+												
+													}
+													else {
+													
+														results.output.push(this.outputLine(result, 'object'));
+														j++;
+													
+													}
+												
+												}
+												else if ('object' === typeof result.output) {
+												
+													results.output.push(this.outputLine(result.output, outputType));
 													j++;
 												
 												}
