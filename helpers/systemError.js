@@ -484,6 +484,8 @@ const messages = new Map([
     ]
 ]);
 
+const validKeys = Array.from(messages.keys());
+
 let buffer;
 function lazyBuffer() {
 
@@ -504,11 +506,23 @@ class SystemError extends Error {
         var msgConst;
         if ('object' !== typeof context || 'string' !== typeof context.syscall) {
         
+            var unkwnCtxt = {syscall: 'unknown'};
+            if ('object' === typeof context) {
+            
+            	unkwnCtxt.path = 'string' === typeof context.path ? context.path : undefined;
+            	unkwnCtxt.dest = 'string' === typeof context.dest ? context.dest : undefined;
+            
+            }
+            context = unkwnCtxt;
             key = 'UNKNOWN';
             msgConst = messages.get(key);
             let desc = msgConst.message;
-            context.syscall = 'unknown';
             message = `${key}:  ${desc}`;
+        
+        }
+        else if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
+        
+        	throw new TypeError('invalid key passed to SystemError');
         
         }
         else {
@@ -518,12 +532,12 @@ class SystemError extends Error {
             message = `${key}: ${desc}, ${context.syscall}`;
 
         }
-        if ('object' === typeof contect || typeof context.path !== 'undefined'){
+        if ('object' === typeof context && typeof context.path !== 'undefined'){
         
             message += ` ${context.path}`;
         
         }
-        if ('object' === typeof contect || typeof context.dest !== 'undefined') {
+        if ('object' === typeof context && typeof context.dest !== 'undefined') {
         
             message += ` => ${context.dest}`;
         
@@ -670,4 +684,5 @@ for (var key of messages.keys()) {
     }.bind(key);
 
 }
+sysErrors.construct = SystemError;
 module.exports = sysErrors;
