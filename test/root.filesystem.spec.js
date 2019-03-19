@@ -3716,7 +3716,7 @@ describe('filesystem.js', function() {
 				var testArray = ['run'];
 				var testPath = '/var';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[0]).to.equal('d');
 			
@@ -3734,7 +3734,7 @@ describe('filesystem.js', function() {
 				var testArray = ['certs'];
 				var testPath = '/etc/tls';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[0]).to.equal('s');
 			
@@ -3752,7 +3752,7 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[0]).to.equal('-');
 			
@@ -3770,7 +3770,7 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[1]).to.equal('r');
 				expect(testResultArray[2]).to.equal('-');
@@ -3784,7 +3784,7 @@ describe('filesystem.js', function() {
 				var testPath = '/var';
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				expect(testResult).to.be.an('array').that.is.empty;
 			
 			});
@@ -3801,7 +3801,7 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[4]).to.equal(' ');
 				expect(testResultArray[5]).to.equal(' ');
@@ -3824,7 +3824,7 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[10]).to.equal(' ');
 				expect(testResultArray[11]).to.equal('m');
@@ -3854,7 +3854,7 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[23]).to.equal(' ');
 				expect(testResultArray[24]).to.equal(' ');
@@ -3872,7 +3872,7 @@ describe('filesystem.js', function() {
 			it('should output the last modified date using three char month, space, 2 char date, space, 2 char hour(24h), colon, and 2 char minute for each file modified in the current year', function() {
 			
 				var now = new Date();
-				var nowArray = Array.from(now.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' '));
+				var nowArray = Array.from(now.toLocaleString('en-us', {hourCycle: 'h24', hour12: false, month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', ''));
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
@@ -3885,22 +3885,80 @@ describe('filesystem.js', function() {
 				var testArray = ['bash.rc'];
 				var testPath = '~/';
 				var testResult = filesystem.longFormatFiles(testArray, testPath);
-				console.log(JSON.stringify(testResult));
+				
 				var testResultArray = Array.from(testResult[0]);
 				expect(testResultArray[34]).to.equal(' ');
 				expect(testResultArray[35]).to.equal(nowArray[0]);
 				expect(testResultArray[36]).to.equal(nowArray[1]);
 				expect(testResultArray[37]).to.equal(nowArray[2]);
-				expect(testResultArray[38]).to.equal(' ');
-				expect(testResultArray[39]).to.equal(' ');
-				expect(testResultArray[40]).to.equal(' ');
-				expect(testResultArray[41]).to.equal(' ');
-				expect(testResultArray[42]).to.equal('5');
-				expect(testResultArray[43]).to.equal('2');
-				expect(testResultArray[44]).to.equal('7');
+				expect(testResultArray[38]).to.equal(nowArray[3]);
+				expect(testResultArray[39]).to.equal(nowArray[4]);
+				expect(testResultArray[40]).to.equal(nowArray[5]);
+				expect(testResultArray[41]).to.equal(nowArray[6]);
+				expect(testResultArray[42]).to.equal(nowArray[7]);
+				expect(testResultArray[43]).to.equal(nowArray[8]);
+				expect(testResultArray[44]).to.equal(nowArray[9]);
+				expect(testResultArray[45]).to.equal(nowArray[10]);
+				expect(testResultArray[46]).to.equal(nowArray[11]);
 			
 			});
-			it('should output the file name for each line');
+			it('should output the last modified date using three char month, space, 2 char date, space, and 4 char year for each file modified before the current year', function() {
+			
+				var then = getTestStats().mtime;
+				var thenArray = Array.from(then.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' '));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[34]).to.equal(' ');
+				expect(testResultArray[35]).to.equal(thenArray[0]);
+				expect(testResultArray[36]).to.equal(thenArray[1]);
+				expect(testResultArray[37]).to.equal(thenArray[2]);
+				expect(testResultArray[38]).to.equal(thenArray[3]);
+				expect(testResultArray[39]).to.equal(thenArray[4]);
+				expect(testResultArray[40]).to.equal(thenArray[5]);
+				expect(testResultArray[41]).to.equal(thenArray[6]);
+				expect(testResultArray[42]).to.equal(thenArray[7]);
+				expect(testResultArray[43]).to.equal(thenArray[8]);
+				expect(testResultArray[44]).to.equal(thenArray[9]);
+				expect(testResultArray[45]).to.equal(thenArray[10]);
+				expect(testResultArray[46]).to.equal(thenArray[11]);
+			
+			});
+			it('should output the file name for each line', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isSymbolicLink = function() { return false; };
+					return dirStats;
+				
+				});
+				var testArray = ['bash.rc'];
+				var testPath = '~/';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[47]).to.equal(' ');
+				expect(testResultArray[48]).to.equal('b');
+				expect(testResultArray[49]).to.equal('a');
+				expect(testResultArray[50]).to.equal('s');
+				expect(testResultArray[51]).to.equal('h');
+				expect(testResultArray[52]).to.equal('.');
+				expect(testResultArray[53]).to.equal('r');
+				expect(testResultArray[54]).to.equal('c');
+			
+			});
 		
 		});
 	
