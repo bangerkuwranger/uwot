@@ -509,8 +509,8 @@ class SystemError extends Error {
             var unkwnCtxt = {syscall: 'unknown'};
             if ('object' === typeof context) {
             
-            	unkwnCtxt.path = 'string' === typeof context.path ? context.path : undefined;
-            	unkwnCtxt.dest = 'string' === typeof context.dest ? context.dest : undefined;
+                unkwnCtxt.path = 'string' === typeof context.path ? context.path : undefined;
+                unkwnCtxt.dest = 'string' === typeof context.dest ? context.dest : undefined;
             
             }
             context = unkwnCtxt;
@@ -522,7 +522,7 @@ class SystemError extends Error {
         }
         else if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
         
-        	throw new TypeError('invalid key passed to SystemError');
+            throw new TypeError('invalid key passed to SystemError');
         
         }
         else {
