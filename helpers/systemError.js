@@ -509,8 +509,8 @@ class SystemError extends Error {
             var unkwnCtxt = {syscall: 'unknown'};
             if ('object' === typeof context) {
             
-                unkwnCtxt.path = 'string' === typeof context.path ? context.path : undefined;
-                unkwnCtxt.dest = 'string' === typeof context.dest ? context.dest : undefined;
+                unkwnCtxt.path = 'string' === typeof context.path || ('object' === typeof context.path && context.path instanceof lazyBuffer()) ? context.path : undefined;
+                unkwnCtxt.dest = 'string' === typeof context.dest || ('object' === typeof context.dest && context.dest instanceof lazyBuffer()) ? context.dest : undefined;
             
             }
             context = unkwnCtxt;
@@ -532,14 +532,14 @@ class SystemError extends Error {
             message = `${key}: ${desc}, ${context.syscall}`;
 
         }
-        if ('object' === typeof context && typeof context.path !== 'undefined'){
+        if ('object' === typeof context && 'string' === typeof context.path || ('object' === typeof context.path && context.path instanceof lazyBuffer())) {
         
-            message += ` ${context.path}`;
+            message += ` ${context.path.toString()}`;
         
         }
-        if ('object' === typeof context && typeof context.dest !== 'undefined') {
+        if ('object' === typeof context && typeof 'string' === typeof context.dest || ('object' === typeof context.dest && context.dest instanceof lazyBuffer())) {
         
-            message += ` => ${context.dest}`;
+            message += ` => ${context.dest.toString()}`;
         
         }
         context.errno = msgConst.errno;
@@ -547,29 +547,79 @@ class SystemError extends Error {
         Object.defineProperty(this, 'kInfo', {
             configurable: false,
             enumerable: false,
-            value: context
+            value: context,
+            writable: true
         });
         Object.defineProperty(this, 'kCode', {
-            configurable: true,
+            configurable: false,
             enumerable: false,
             value: key,
             writable: true
         });
         Object.defineProperty(this, 'code', {
             enumerable: true,
-            value: key
+            get: function() {
+
+                return this.kCode;
+
+            },
+            set: function(value) {
+
+                this.kCode = value;
+
+            }
         });
         Object.defineProperty(this, 'dest', {
             enumerable: true,
-            value: context.dest
+            get: function() {
+    
+                return 'object' !== typeof this.kInfo || 'undefined' === typeof this.kInfo.dest ? undefined : this.kInfo.dest.toString();
+    
+            },
+            set: function(val) {
+    
+                this.kInfo.dest = 'string' === typeof val || ('object' === typeof val && val instanceof lazyBuffer()) ? lazyBuffer().from(val.toString()) : undefined;
+    
+            }
         });
         Object.defineProperty(this, 'path', {
             enumerable: true,
-            value: context.path
+            get: function() {
+    
+                return 'object' !== typeof this.kInfo || typeof this.kInfo.path === 'undefined' ? undefined : this.kInfo.path.toString();
+    
+            },
+            set: function(val) {
+    
+                this.kInfo.path = 'string' === typeof val || ('object' === typeof val && val instanceof lazyBuffer()) ? lazyBuffer().from(val.toString()) : undefined;
+    
+            }
         });
         Object.defineProperty(this, 'errno', {
             enumerable: true,
-            value: context.errno
+            get: function() {
+    
+                return this.kInfo.errno;
+    
+            },
+            set: function(val) {
+    
+                this.kInfo.errno = val;
+    
+            }
+        });
+        Object.defineProperty(this, 'syscall', {
+            enumerable: true,
+            get: function() {
+
+                return this.kInfo.syscall;
+
+            },
+            set: function(val) {
+
+                this.kInfo.syscall = val;
+
+            }
         });
         // Object.defineProperty(this, 'stack', {
 //          enumerable: true,
@@ -596,77 +646,9 @@ class SystemError extends Error {
     
     }
 
-    get code() {
-
-        return this[kCode];
-
-    }
-
-    set code(value) {
-    
-        Object.defineProperty(this, 'code', {
-            configurable: true,
-            enumerable: true,
-            value,
-            writable: true
-        });
-    
-    }
-
     get info() {
     
         return this['kInfo'];
-    
-    }
-
-    get errno() {
-    
-        return this['kInfo'].errno;
-    
-    }
-
-    set errno(val) {
-    
-        this['kInfo'].errno = val;
-    
-    }
-
-    get syscall() {
-    
-        return this['kInfo'].syscall;
-    
-    }
-
-    set syscall(val) {
-    
-        this['kInfo'].syscall = val;
-    
-    }
-
-    get path() {
-    
-        return 'object' !== typeof this['kInfo'] || typeof this['kInfo'].path === 'undefined' ? this['kInfo'].path.toString() : '';
-    
-    }
-
-    set path(val) {
-    
-        this['kInfo'].path = val ?
-            lazyBuffer().from(val.toString()) : undefined;
-    
-    }
-
-    get dest() {
-    
-        return 'undefined' !== typeof this['kInfo'].path ?
-            this['kInfo'].dest.toString() : undefined;
-    
-    }
-
-    set dest(val) {
-    
-        this['kInfo'].dest = val ?
-            lazyBuffer().from(val.toString()) : undefined;
     
     }
 
