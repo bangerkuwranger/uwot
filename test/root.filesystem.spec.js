@@ -714,7 +714,7 @@ describe('filesystem.js', function() {
 				filesystem.cmd('mkdir', ['/usr/var'], function(error, result) {
 				
 					expect(error).to.be.false;
-					expect(result).to.equal('createDir /usr/var');
+					expect(result).to.equal('createDir /usr/var false');
 					done();
 				
 				}, true);
