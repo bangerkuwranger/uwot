@@ -475,6 +475,7 @@ class UwotFs {
 						break;
 					case 'mkdir':
 						// will support -p (recursive path dir creation)
+						argArr[1] = 'boolean' === typeof argArr[1] ? argArr[1] : false;
 						result = this.createDir(...argArr);
 						break;
 					case 'rm':
@@ -772,10 +773,15 @@ class UwotFs {
 	
 	}
 	
-	createDir(pth) {
+	createDir(pth, recurse) {
 	
 		var fullPath;
 		var dirName = path.basename(pth);
+		if('boolean' !== typeof recurse) {
+		
+			recurse = false;
+		
+		}
 		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
 		
 			fullPath = pth;
