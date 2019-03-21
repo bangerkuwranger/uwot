@@ -67,7 +67,7 @@ class UwotCmdMkdir extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					executeResult.output.content.push('mkdir success: ' + finalPath);
+					executeResult.output.content.push('mkdir success: ' + userFs.dissolvePath(finalPath));
 					return callback(false, executeResult);
 				
 				}
