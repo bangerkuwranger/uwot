@@ -558,12 +558,12 @@ class SystemError extends Error {
         });
         Object.defineProperty(this, 'code', {
             enumerable: true,
-            get: function() {
+            get() {
 
                 return this.kCode;
 
             },
-            set: function(value) {
+            set(value) {
 
                 this.kCode = value;
 
@@ -571,12 +571,12 @@ class SystemError extends Error {
         });
         Object.defineProperty(this, 'dest', {
             enumerable: true,
-            get: function() {
+            get() {
     
                 return 'object' !== typeof this.kInfo || 'undefined' === typeof this.kInfo.dest ? undefined : this.kInfo.dest.toString();
     
             },
-            set: function(val) {
+            set(val) {
     
                 this.kInfo.dest = 'string' === typeof val || ('object' === typeof val && val instanceof lazyBuffer()) ? lazyBuffer().from(val.toString()) : undefined;
     
@@ -584,12 +584,12 @@ class SystemError extends Error {
         });
         Object.defineProperty(this, 'path', {
             enumerable: true,
-            get: function() {
+            get() {
     
                 return 'object' !== typeof this.kInfo || typeof this.kInfo.path === 'undefined' ? undefined : this.kInfo.path.toString();
     
             },
-            set: function(val) {
+            set(val) {
     
                 this.kInfo.path = 'string' === typeof val || ('object' === typeof val && val instanceof lazyBuffer()) ? lazyBuffer().from(val.toString()) : undefined;
     
@@ -597,12 +597,12 @@ class SystemError extends Error {
         });
         Object.defineProperty(this, 'errno', {
             enumerable: true,
-            get: function() {
+            get() {
     
                 return this.kInfo.errno;
     
             },
-            set: function(val) {
+            set(val) {
     
                 this.kInfo.errno = val;
     
@@ -610,12 +610,12 @@ class SystemError extends Error {
         });
         Object.defineProperty(this, 'syscall', {
             enumerable: true,
-            get: function() {
+            get() {
 
                 return this.kInfo.syscall;
 
             },
-            set: function(val) {
+            set(val) {
 
                 this.kInfo.syscall = val;
 
