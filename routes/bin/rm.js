@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 
-class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
+class UwotCmdRm extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -17,7 +17,7 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to bin/rmdir/execute');
+			throw new TypeError('invalid callback passed to bin/rm/execute');
 		
 		}
 		var userFs, pathTo;
@@ -36,7 +36,7 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 			output: {content: []}
 		};
 		userFs.cmd(
-			'rmdir',
+			'rm',
 			[pathTo],
 			(error, isRemoved) => {
 			
@@ -71,15 +71,15 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 
 }
 
-var rmdir = new UwotCmdRmdir(
+var rm = new UwotCmdRm(
 	{
-		name:				'rmdir',
-		description:		'Remove directory.  The rmdir utility removes the directory entry specified by the directory argument, provided it is empty.',
+		name:				'rm',
+		description:		'The rm utility attempts to remove the non-directory type file specified on the command line.',
 		requiredArguments:	['path'],
 		optionalArguments:	[]
 	},
 	[],
-	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/rmdir')
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/rm')
 );
 
-module.exports = rmdir;
+module.exports = rm;

@@ -762,7 +762,7 @@ describe('filesystem.js', function() {
 				filesystem.cmd('mv', ['/usr/var/tmpfile', '/home/' + filesystem.user.uName + '/permfile'], function(error, result) {
 				
 					expect(error).to.be.false;
-					expect(result).to.equal('moveFile /usr/var/tmpfile /home/' + filesystem.user.uName + '/permfile');
+					expect(result).to.include('moveFile /usr/var/tmpfile /home/' + filesystem.user.uName + '/permfile');
 					done();
 				
 				}, true);
@@ -802,15 +802,15 @@ describe('filesystem.js', function() {
 			});
 			it('should perform this.append if cmdName arg === "touch"', function(done) {
 			
-				var appendStub = sinon.stub(filesystem, 'append').callsFake(function returnCmd() {
+				var touchStub = sinon.stub(filesystem, 'touch').callsFake(function returnCmd() {
 				
-					return 'append ' + Array.from(arguments).join(' ');
+					return 'touch ' + Array.from(arguments).join(' ');
 				
 				});
 				filesystem.cmd('touch', ['/usr/var/tmpfile'], function(error, result) {
 				
 					expect(error).to.be.false;
-					expect(result).to.equal('append /usr/var/tmpfile ');
+					expect(result).to.include('touch /usr/var/tmpfile');
 					done();
 				
 				}, true);

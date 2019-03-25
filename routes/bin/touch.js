@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 
-class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
+class UwotCmdTouch extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -17,7 +17,7 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to bin/rmdir/execute');
+			throw new TypeError('invalid callback passed to bin/touch/execute');
 		
 		}
 		var userFs, pathTo;
@@ -36,23 +36,23 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 			output: {content: []}
 		};
 		userFs.cmd(
-			'rmdir',
+			'touch',
 			[pathTo],
-			(error, isRemoved) => {
+			(error, touched) => {
 			
 				if (error) {
 				
 					return callback(error, null);
 				
 				}
-				else if ('boolean' !== typeof isRemoved || !isRemoved) {
+				else if ('boolean' !== typeof touched || !touched) {
 				
 					return callback(new Error('invalid path'), pathTo);
 				
 				}
 				else {
 				
-					executeResult.output.content.push('removed: ' + userFs.dissolvePath(pathTo));
+					executeResult.output.content.push('touched: ' + userFs.dissolvePath(pathTo));
 					return callback(false, executeResult);
 				
 				}
@@ -71,15 +71,15 @@ class UwotCmdRmdir extends global.Uwot.Exports.Cmd {
 
 }
 
-var rmdir = new UwotCmdRmdir(
+var touch = new UwotCmdTouch(
 	{
-		name:				'rmdir',
-		description:		'Remove directory.  The rmdir utility removes the directory entry specified by the directory argument, provided it is empty.',
+		name:				'touch',
+		description:		'The touch utility sets the modification and access times of files.  If any file does not exist, it is created with default permissions.',
 		requiredArguments:	['path'],
 		optionalArguments:	[]
 	},
 	[],
-	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/rmdir')
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/touch')
 );
 
-module.exports = rmdir;
+module.exports = touch;

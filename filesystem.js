@@ -488,6 +488,9 @@ class UwotFs {
 						break;
 					case 'mv':
 						// should support -n
+						// expected argArr:
+						// [(string)source, (string)target, (bool)noOverwrite]
+						argArr[2] = 'boolean' === typeof argArr[2] ? argArr[2] : false;
 						result = this.moveFile(...argArr);
 						break;
 					case 'cp':
@@ -502,7 +505,7 @@ class UwotFs {
 						// and format result after
 						break;
 					case 'touch':
-						result = this.append(...argArr, '');
+						result = this.touch(...argArr);
 						break;
 					default:
 						result = systemError.EINVAL({'syscall': 'signal'});
@@ -678,6 +681,81 @@ class UwotFs {
 			try {
 			
 				fs.appendFileSync(path.join(fullPath, fileName), data);
+				return true;
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+		
+		}
+		else {
+		
+			return systemError.EACCES({'path': pth, 'syscall': 'write'});
+		
+		}
+	
+	}
+	
+	touch(pth) {
+	
+		var fullPath;
+		var fileName = path.basename(pth);
+		if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
+		
+			fullPath = pth;
+		
+		}
+		else {
+		
+			fullPath = this.resolvePath(pth, false);
+			if ('string' !== typeof fullPath) {
+			
+				return fullPath;
+			
+			}
+		
+		}
+		fullPath = path.dirname(fullPath);
+		var now = new Date();
+		var canWrite = this.isWritable(fullPath);
+		if (canWrite instanceof Error) {
+		
+			return canWrite;
+		
+		}
+		else if (canWrite) {
+		
+			try {
+			
+				fs.appendFileSync(path.join(fullPath, fileName), '');
+			
+			}
+			catch(e) {
+			
+				if (e instanceof Error && 'string' === typeof e.code && 'EISDIR' === e.code) {
+				
+					try {
+			
+						fs.utimesSync(path.join(fullPath, fileName), now, now);
+						return true;
+			
+					}
+					catch(err) {
+			
+						return err;
+			
+					}
+				
+				}
+				return e;
+			
+			}
+			try {
+			
+				fs.utimesSync(path.join(fullPath, fileName), now, now);
 				return true;
 			
 			}
@@ -929,8 +1007,9 @@ class UwotFs {
 	
 	}
 	
-	moveFile(source, target) {
+	moveFile(source, target, noOverwrite) {
 	
+		noOverwrite = 'boolean' === typeof noOverwrite ? noOverwrite : false;
 		var fullPathSource, fullPathTarget;
 		var fileNameSource = path.basename(source);
 		var fileNameTarget = path.basename(target);
@@ -969,6 +1048,7 @@ class UwotFs {
 		var canRead = this.isReadable(fullPathSource);
 		var canWrite = this.isWritable(fullPathSource);
 		var canWriteNew = this.isWritable(fullPathTarget);
+		var targetExists = false;
 		if (canRead instanceof Error) {
 		
 			return canRead;
@@ -986,6 +1066,25 @@ class UwotFs {
 		}
 		else if (canRead && canWrite && canWriteNew) {
 		
+			if (noOverwrite) {
+		
+				try {
+			
+					targetExists = fs.existsSync(fullPathTarget);
+			
+				}
+				catch(e) {
+			
+					return e;
+			
+				}
+				if (targetExists) {
+				
+					return new Error('File "' + path.basename(source) + '" not moved; "' + path.basename(target) + '" exists and -n flag prevents overwriting existing file.');
+				
+				}
+		
+			}
 			try {
 			
 				fs.renameSync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget));
