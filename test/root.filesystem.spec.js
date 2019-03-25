@@ -1053,6 +1053,114 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('touch(pth)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(filesystem.touch).to.be.a('function');
+			
+			});
+			it('should return an Error if this.isWritable(pth) returns an Error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(SystemError.EPERM({syscall: 'write', path: testPath}));
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a SystemError if this.isWritable(pth) returns false', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should return an Error if fs.appendFileSync throws an Error that is not a SystemError with code "EISDIR"', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').throws(SystemError.EIO({syscall: 'write', path: testPath}));
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should return an Error if fs.appendFileSync throws a SystemError with code "EISDIR" and fs.utimesSync throws an Error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').throws(SystemError.EISDIR({syscall: 'write', path: testPath}));
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').throws(SystemError.EIO({syscall: 'write', path: testPath}));
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should update the atime and mtime values of file at pth if file is a directory and return true if directory is allowed to be written by user,  fs.appendFileSync returns a SystemError with code "EISDIR", and fs.utimesSync executes without error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').throws(SystemError.EISDIR({syscall: 'write', path: testPath}));
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				expect(filesystem.touch(testPath)).to.be.true;
+			
+			});
+			it('should update the atime and mtime values of file at pth if file is not a symlink or directory, and return true if file is allowed to be written by user,  fs.appendFileSync executes without error, and fs.utimesSync executes without error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				expect(filesystem.touch(testPath)).to.be.true;
+			
+			});
+			it('should create a new empty file at pth and return true if target dir is allowed to be written by user,  fs.appendFileSync executes without error, and fs.utimesSync executes without error', function() {
+			
+				var testPath = 'testFile';
+				var resolvedPath = path.join(filesystem.getCwd(), testPath);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				expect(filesystem.touch(testPath)).to.be.true;
+				expect(appendFileSyncStub.getCall(0).args[0]).to.equal(resolvedPath);
+			
+			});
+			it('should return an Error if target is a file, fs.appendFileSync executes without error, and fs.utimesSync throws an Error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').throws(SystemError.EIO({syscall: 'write', path: testPath}));
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should use the value of pth unchanged for touch operations if pth is absolute and begins with the path to VFS root', function() {
+			
+				var testPath =  path.join(filesystem.getCwd(), 'testFile');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				expect(filesystem.touch(testPath)).to.be.true;
+				expect(appendFileSyncStub.getCall(0).args[0]).to.equal(testPath);
+			
+			});
+			it('should use this.resolvePath to resolve the full path to target if pth is relative or an absolute path not within the VFS root', function() {
+			
+				var testPath =  path.join(filesystem.getVcwd(), 'testFile');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				expect(filesystem.touch(testPath)).to.be.true;
+				expect(appendFileSyncStub.getCall(0).args[0]).to.equal(path.join(filesystem.getCwd(), 'testFile'));
+			
+			});
+			it('should return an error if this.resolvePath returns an error', function() {
+			
+				var testPath = '~/testFile';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileSyncStub = sinon.stub(fs, 'appendFileSync').returns();
+				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(SystemError.EIO({syscall: 'write', path: testPath}));
+				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+		
+		});
 		describe('copy(source, target)', function() {
 		
 			it('should be a function', function() {
@@ -1502,6 +1610,51 @@ describe('filesystem.js', function() {
 				
 				});
 				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+			
+			});
+			it('should default to using false as value of noOverwrite arg if not passed a boolean', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var renameSyncStub = sinon.stub(fs, 'renameSync').returns();
+				var existsSyncStub = sinon.stub(fs, 'existsSync').throws(new Error('don\'t throw me, bro!'));
+				expect(filesystem.moveFile(testPathSource, testPathTarget)).to.be.true;
+			
+			});
+			it('should use fs.existsSync to check if target already exists if noOverwrite arg value is true', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var renameSyncStub = sinon.stub(fs, 'renameSync').returns();
+				var existsSyncStub = sinon.stub(fs, 'existsSync').returns(false);
+				expect(filesystem.moveFile(testPathSource, testPathTarget, true)).to.be.true;
+				expect(existsSyncStub.called).to.be.true;
+			
+			});
+			it('should return an error if noOverwrite is true and fs.existsSync throws an error (unlikely in rwa)', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var renameSyncStub = sinon.stub(fs, 'renameSync').returns();
+				var existsSyncStub = sinon.stub(fs, 'existsSync').throws(new Error('ok, throw me, bro!'));
+				expect(filesystem.moveFile(testPathSource, testPathTarget, true)).to.be.an.instanceof(Error).with.property('message').that.equals('ok, throw me, bro!');
+			
+			});
+			it('should return an error referencing the -n flag if noOverwrite is true and fs.existsSync returns true', function() {
+			
+				var testPathSource = "var/run/marathon2/alephOne.exe";
+				var testPathTarget = "usr/local/bin/Marathon2.exe";
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var renameSyncStub = sinon.stub(fs, 'renameSync').returns();
+				var existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
+				expect(filesystem.moveFile(testPathSource, testPathTarget, true)).to.be.an.instanceof(Error).with.property('message').that.includes('exists and -n flag prevents overwriting existing file.');
 			
 			});
 			it('should return an error if renameSync throws an error', function() {
