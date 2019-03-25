@@ -866,6 +866,62 @@ describe('filesystem.js', function() {
 				}, true);
 			
 			});
+			it('should change the returned error\'s path property to be absolute starting from the VFS root if command process returns a SystemError that has a path.', function(done) {
+			
+				var testPath = '/usr/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnError() {
+				
+					return SystemError.EIO({syscall: 'chdir', path: path.join(this.getCwd(), testPath)});
+				
+				});
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(error.path).to.equal(path.join(filesystem.getVcwd(), testPath));
+					done();
+				
+				}, true);
+			
+			});
+			it('should change the returned error\'s dest property to be absolute starting from the VFS root if command process returns a SystemError that has a target.', function(done) {
+			
+				var testPath = '/usr/var';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnError() {
+				
+					return SystemError.EIO({syscall: 'chdir', dest: path.join(this.getCwd(), testPath)});
+				
+				});
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(error.dest).to.equal(path.join(filesystem.getVcwd(), testPath));
+					done();
+				
+				}, true);
+			
+			});
+			it('should change the returned error\'s dest and path properties to be absolute starting from the VFS root if command process returns a SystemError that has both a path and a dest.', function(done) {
+			
+				var testPath = '/usr/var';
+				var testTarg = '/var/run';
+				var changeCwdStub = sinon.stub(filesystem, 'changeCwd').callsFake(function returnError() {
+				
+					return SystemError.EIO({syscall: 'chdir', path: path.join(this.getCwd(), testPath), dest: path.join(this.getCwd(), testTarg)});
+				
+				});
+				filesystem.cmd('cd', [testPath], function(error, result) {
+				
+					expect(result).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(error.path).to.equal(path.join(filesystem.getVcwd(), testPath));
+					expect(error.dest).to.equal(path.join(filesystem.getVcwd(), testTarg));
+					done();
+				
+				}, true);
+			
+			});
 		
 		});
 		describe('changeCwd(pth)', function() {

@@ -531,17 +531,17 @@ class UwotFs {
 				
 					var seCode = result.code;
 					var sePath, seTarget;
-					if ('string' === typeof result.path && 'string' === typeof result.target) {
+					if ('string' === typeof result.path && 'string' === typeof result.dest) {
 					
 						sePath = 'string' === typeof result.path && this.isInRoot(result.path) ? this.dissolvePath(result.path) : result.path;
-						seTarget = 'string' === typeof result.target && this.isInRoot(result.target) ? this.dissolvePath(result.target) : result.target;
-						result = systemError[seCode]({syscall: result.syscall, path: sePath, target: seTarget});
+						seTarget = 'string' === typeof result.dest && this.isInRoot(result.dest) ? this.dissolvePath(result.dest) : result.dest;
+						result = systemError[seCode]({syscall: result.syscall, path: sePath, dest: seTarget});
 					
 					}
-					else if ('string' === typeof result.target) {
+					else if ('string' === typeof result.dest) {
 					
-						seTarget = 'string' === typeof result.target && this.isInRoot(result.target) ? this.dissolvePath(result.target) : result.target;
-						result = systemError[seCode]({syscall: result.syscall, target: seTarget});
+						seTarget = 'string' === typeof result.dest && this.isInRoot(result.dest) ? this.dissolvePath(result.dest) : result.dest;
+						result = systemError[seCode]({syscall: result.syscall, dest: seTarget});
 					
 					}
 					else if ('string' === typeof result.path) {
