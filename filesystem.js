@@ -31,7 +31,8 @@ const VALID_CMDS = [
 	'mv',
 	'cp',
 	'stat',
-	'touch'
+	'touch',
+	'cat'
 ];
 
 
@@ -506,6 +507,49 @@ class UwotFs {
 						break;
 					case 'touch':
 						result = this.touch(...argArr);
+						break;
+					case 'cat':
+						// expected argArr:
+						// [(string)path(s)]
+						var catArr = [];
+						for (let catIdx = 0; catIdx < argArr.length; catIdx++) {
+						
+							if ('string' === typeof argArr[catIdx]) {
+							
+								let thisFileString = this.readFile(argArr[catIdx]);
+								if ('object' === typeof thisFileString && thisFileString instanceof Error) {
+								
+									result = thisFileString;
+									catIdx = argArr.length;
+								
+								}
+								else if ('string' !== typeof thisFileString) {
+								
+									result = new systemError.EIO({syscall: 'read', path: argArr});
+									catIdx = argArr.length;
+								
+								}
+								else {
+								
+									catArr.push(thisFileString);
+								
+								}
+							
+							}
+							else {
+							
+								result = new systemError.EINVAL({syscall: 'read'});
+								catIdx = argArr.length;
+							
+							}
+							if ((catIdx + 1) >= argArr.length) {
+							
+								// pretty sure this is where the extra lines are showing up.
+								result = 'undefined' === typeof result ? catArr.join(EOL) : result;
+							
+							}
+						
+						}
 						break;
 					default:
 						result = systemError.EINVAL({'syscall': 'signal'});
@@ -989,7 +1033,7 @@ class UwotFs {
 		
 			try {
 			
-				return fs.readFileSync(path.join(fullPath, fileName));
+				return fs.readFileSync(path.join(fullPath, fileName), 'utf8');
 			
 			}
 			catch(e) {
