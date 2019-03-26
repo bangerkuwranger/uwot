@@ -3022,7 +3022,8 @@ describe('filesystem.js', function() {
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				filesystem.sudo = true;
-				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.includes('Path must be a string.');
+				// was testing w/ node v8; later versions made error more specific about what was wrong and changed wording.
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.includes(' string.');
 			
 			});
 			it('should return an error if permissions file cannot be written', function() {
@@ -3396,7 +3397,7 @@ describe('filesystem.js', function() {
 				
 					if (UWOT_HIDDEN_PERMISSIONS_FILENAME === pth || UWOT_HIDDEN_PERMISSIONS_FILENAME === pth2 || UWOT_HIDDEN_PERMISSIONS_FILENAME === pth3) {
 					
-						return new TypeError('test resolve error');
+						throw new TypeError('test resolve error');
 					
 					}
 					else {
