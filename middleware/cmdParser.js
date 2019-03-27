@@ -259,7 +259,7 @@ class UwotRuntimeCmds {
 									if (optMatch.reqArgs.length > 0) {
 								
 										var reqCount = optMatch.reqArgs.length;
-										if ('object' === thisOpt.args) {
+										if ('object' === typeof thisOpt.args && Array.isArray(thisOpt.args)) {
 									
 											reqCount = reqCount - thisOpt.args.length;
 									
@@ -272,6 +272,11 @@ class UwotRuntimeCmds {
 									
 										} 
 								
+									}
+									else {
+									
+										cIdx++;
+									
 									}
 									exe.opts.push(thisOpt);
 							

@@ -510,46 +510,9 @@ class UwotFs {
 						break;
 					case 'cat':
 						// expected argArr:
-						// [(string)path(s)]
-						var catArr = [];
-						for (let catIdx = 0; catIdx < argArr.length; catIdx++) {
-						
-							if ('string' === typeof argArr[catIdx]) {
-							
-								let thisFileString = this.readFile(argArr[catIdx]);
-								if ('object' === typeof thisFileString && thisFileString instanceof Error) {
-								
-									result = thisFileString;
-									catIdx = argArr.length;
-								
-								}
-								else if ('string' !== typeof thisFileString) {
-								
-									result = new systemError.EIO({syscall: 'read', path: argArr});
-									catIdx = argArr.length;
-								
-								}
-								else {
-								
-									catArr.push(thisFileString);
-								
-								}
-							
-							}
-							else {
-							
-								result = new systemError.EINVAL({syscall: 'read'});
-								catIdx = argArr.length;
-							
-							}
-							if ((catIdx + 1) >= argArr.length) {
-							
-								// pretty sure this is where the extra lines are showing up.
-								result = 'undefined' === typeof result ? catArr.join(EOL) : result;
-							
-							}
-						
-						}
+						// [(string)path(s), separator]
+						var separator = argArr.pop();
+						result = this.cat(argArr, separator);
 						break;
 					default:
 						result = systemError.EINVAL({'syscall': 'signal'});
@@ -813,6 +776,51 @@ class UwotFs {
 		else {
 		
 			return systemError.EACCES({'path': pth, 'syscall': 'write'});
+		
+		}
+	
+	}
+	
+	cat(pthArr, separator) {
+	
+		var catArr = [];
+		separator = 'string' === typeof separator ? separator : EOL;
+		for (let catIdx = 0; catIdx < pthArr.length; catIdx++) {
+		
+			if ('string' === typeof pthArr[catIdx]) {
+			
+				let thisFileString = this.readFile(pthArr[catIdx]);
+				if ('object' === typeof thisFileString && thisFileString instanceof Error) {
+				
+					catIdx = pthArr.length;
+					return thisFileString;
+				
+				}
+				else if ('string' !== typeof thisFileString) {
+				
+					catIdx = pthArr.length;
+					return new systemError.EIO({syscall: 'read', path: pthArr[catIdx]});
+				
+				}
+				else {
+				
+					catArr.push(thisFileString);
+				
+				}
+			
+			}
+			else {
+			
+				catIdx = pthArr.length;
+				return new systemError.EINVAL({syscall: 'read'});
+			
+			}
+			if ((catIdx + 1) >= pthArr.length) {
+			
+				// Extra EOL is default between files; default POSIX would require '' as separator
+				return catArr.join(separator+EOL);
+			
+			}
 		
 		}
 	

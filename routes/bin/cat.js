@@ -24,6 +24,7 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 		var userFs, pathArr = [];
 		var isNumbered = false;
 		var numberAll = false;
+		var separator = EOL;
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
@@ -67,10 +68,16 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 					isNumbered = true;
 			
 				}
+				if ('object' === typeof options[i] && 'string' === typeof options[i].name && (options[i].name === "p" || options[i].name === "sep")) {
+			
+					separator = 'object' === typeof options[i].args && Array.isArray(options[i].args) && 'string' === typeof options[i].args[0] ? options[i].args[0] : '';
+			
+				}
 		
 			}
 		
 		}
+		pathArr.push(separator);
 		var executeResult = {
 			output: {content: []}
 		};
@@ -91,7 +98,6 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					// executeResult.output.content.push('removed: ' + userFs.dissolvePath(pathTo));
 					var concatLineArr = concatString.split(EOL);
 					let lineNo = 1;
 					let lineIdx = 0;
@@ -147,8 +153,7 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 }
 
 // TBD
-// Let's give options args a try. -p --sep = separator, string to replace EOL with to indicate file separation
-// Also, because neckbeards bitch, should eventually include options to do line numbering by file the stupid POSIX way. (but isn't that what diff and compare are for?)
+// should eventually include options to do line numbering by file the stupid POSIX way. (but isn't that what diff and compare are for?)
 
 var cat = new UwotCmdCat(
 	{
@@ -170,6 +175,13 @@ var cat = new UwotCmdCat(
 			shortOpt: 			'n',
 			longOpt: 			null,
 			requiredArguments:	[],
+			optionalArguments:	[]
+		},
+		{
+			description:		'Define the separator between concatenated files. Using this flag without an argument results in no separator being used. Without this flag, separator is server-os EOL character.',
+			shortOpt:			'p',
+			longOpt:			'sep',
+			requiredArguments:	['separator'],
 			optionalArguments:	[]
 		}
 	],
