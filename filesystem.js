@@ -1358,6 +1358,8 @@ class UwotFs {
 			subVals.A = this.isInPub(pth) ? '-r-' : '---';
 		
 		}
+		// TBD
+		// Finish this?
 		if ('object' === typeof lstatInfo && lstatInfo instanceof fs.Stats) {
 		
 			subVals.U = 'string' === typeof permInfo.owner ? permInfo.owner : DEFAULT_OWNER;
