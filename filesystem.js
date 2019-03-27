@@ -35,6 +35,23 @@ const VALID_CMDS = [
 	'cat'
 ];
 
+const VALID_STAT_FORMAT_PLACEHOLDERS = [
+	'A',
+	'b',
+	'B',
+	'f',
+	'F',
+	'h',
+	'N',
+	's',
+	'U',
+	'w',
+	'W',
+	'x',
+	'X',
+	'y',
+	'Y'
+];
 
 class UwotFsPermissions {
 
@@ -1266,7 +1283,96 @@ class UwotFs {
 	
 	}
 	
-	stat(pth) {
+	stat(pth, isVerbose, appendFtc, format) {
+	
+		var lstatInfo = this.stat(pth);
+		var permInfo = this.getPermissions(pth);
+		var subVals = {
+			A: '',
+			b: '',
+			B: '',
+			f: '',
+			F: '',
+			h: '',
+			N: '',
+			s: '',
+			U: '',
+			w: '',
+			W: '',
+			x: '',
+			X: '',
+			y: '',
+			Y: ''
+		};
+		if (lstatInfo instanceof Error) {
+		
+			return lstatInfo;
+		
+		}
+		else if (permInfo instanceof Error) {
+		
+			return permInfo;
+		
+		}
+		else if (false === permInfo) {
+		
+			permInfo = this.getDefaultPermissions(pth);
+		
+		}
+		if ('object' === typeof permInfo.allowed && null !== permInfo.allowed && Array.isArray(permInfo.allowed) && permInfo.allowed.length > 0) {
+	
+			if (-1 !== permInfo.allowed.indexOf('r')) {
+		
+				subVals.A += 'r';
+		
+			}
+			else {
+		
+				subVals.A += '-';
+		
+			}
+			if (-1 !== permInfo.allowed.indexOf('w')) {
+		
+				subVals.A += 'w';
+		
+			}
+			else {
+		
+				subVals.A += '-';
+		
+			}
+			if (-1 !== permInfo.allowed.indexOf('x')) {
+		
+				subVals.A += 'x';
+		
+			}
+			else {
+		
+				subVals.A += '-';
+		
+			}
+	
+		}
+		else {
+		
+			subVals.A = this.isInPub(pth) ? '-r-' : '---';
+		
+		}
+		if ('object' === typeof lstatInfo && lstatInfo instanceof fs.Stats) {
+		
+			subVals.U = 'string' === typeof permInfo.owner ? permInfo.owner : DEFAULT_OWNER;
+			subVals.b = lstatInfo.blocks;
+			subVals.B = lstatInfo.blksize;
+// 			subVals.f
+// 			subVals.f
+			subVals.h = lstatInfo.nlink;
+			subVals.N = path.basename(pth);
+			subVals.s = lstatInfo.size;
+		}
+	
+	}
+	
+	lstat(pth) {
 	
 		var fullPath;
 		var fileName = path.basename(pth);
@@ -1657,28 +1763,25 @@ class UwotFs {
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		var fullPath = this.resolvePath(pth);
-		var inUsers = this.isInUser(fullPath, "*");
-		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
-		var inRoot = this.isInRoot(fullPath);
-		if (!inRoot && !inAllowed && !inUsers) {
+		var pthVars = this.getPathLocVars(pth, false);
+		if (!pthVars.inRoot && !pthVars.inAllowed && !pthVars.inUsers) {
 		
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		else if ((inRoot || inUsers) && !inAllowed) {
+		else if ((pthVars.inUsers || pthVars.inRoot) && !pthVars.inAllowed) {
 		
 			vfsReadable = (this.sudo && global.Uwot.Config.getVal('users', 'sudoFullRoot'));
 		
 		}
-		else if (this.isInUser(fullPath)) {
+		else if (pthVars.isOwned) {
 		
 			vfsReadable = true;
 		
 		}
-		else if (this.isInPub(fullPath)) {
+		else if (pthVars.inPub) {
 		
-			var permissions = this.getPermissions(fullPath);
+			var permissions = this.getPermissions(pthVars.fullPath);
 			if (permissions instanceof Error) {
 			
 				return permissions;
@@ -1710,7 +1813,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.accessSync(fullPath, fs.constants.R_OK);
+				fs.accessSync(pthVars.fullPath, fs.constants.R_OK);
 				return true;
 			
 			}
@@ -1743,24 +1846,20 @@ class UwotFs {
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		var fullPath = this.resolvePath(pth);
-		var inUsers = this.isInUser(fullPath, "*");
-		var inPub = this.isInPub(fullPath);
-		var inHome = this.isInUser(fullPath);
-		var inRoot = this.isInRoot(fullPath);
-		if (!inRoot && !inPub && !inUsers) {
+		var pthVars = this.getPathLocVars(pth, false);
+		if (!pthVars.inRoot && !pthVars.inPub && !pthVars.inUsers) {
 		
 			return systemError.ENOENT({'path': pth, 'syscall': 'stat'});
 		
 		}
-		else if (inHome && global.Uwot.Config.getVal('users', 'homeWritable') && global.Uwot.Config.getVal('users', 'createHome')) {
+		else if (pthVars.isOwned && global.Uwot.Config.getVal('users', 'homeWritable') && global.Uwot.Config.getVal('users', 'createHome')) {
 		
 			vfsWritable = true;
 		
 		}
-		else if (inPub) {
+		else if (pthVars.inPub) {
 
-			var permissions = this.getPermissions(fullPath);
+			var permissions = this.getPermissions(pthVars.fullPath);
 			if (permissions instanceof Error) {
 			
 				return permissions;
@@ -1782,7 +1881,7 @@ class UwotFs {
 			}
 		
 		}
-		else if (inRoot && this.sudo && global.Uwot.Config.getVal('users', 'sudoFullRoot')) {
+		else if (pthVars.inRoot && this.sudo && global.Uwot.Config.getVal('users', 'sudoFullRoot')) {
 		
 			vfsWritable = true;
 		
@@ -1791,7 +1890,7 @@ class UwotFs {
 		
 			try {
 			
-				fs.accessSync(fullPath, fs.constants.W_OK);
+				fs.accessSync(pthVars.fullPath, fs.constants.W_OK);
 				return true;
 			
 			}
@@ -1812,16 +1911,18 @@ class UwotFs {
 	
 	getPermissions(pth) {
 	
-		var fullPath = this.resolvePath(pth);
-		var inRoot = this.isInRoot(fullPath);
-		var inUsers = this.isInUser(fullPath, "*");
-		var inAllowed = (this.isInPub(fullPath) || this.isInUser(fullPath));
-		if (!inRoot && !inUsers && !inAllowed) {
+		var pthVars = this.getPathLocVars(pth);
+		if (pthVars instanceof Error) {
+		
+			return pthVars;
+		
+		}
+		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
 		}
-		else if (inRoot && !inAllowed && !(this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
+		else if (pthVars.inRoot && !pthVars.inAllowed && !(this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
@@ -1829,7 +1930,7 @@ class UwotFs {
 		var pthStats, permFile, permissions;
 		try {
 		
-			pthStats = fs.statSync(fullPath);
+			pthStats = fs.statSync(pthVars.fullPath);
 		
 		}
 		catch (e) {
@@ -1841,7 +1942,7 @@ class UwotFs {
 			
 			try{
 		
-				permFile = fs.readFileSync(path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
+				permFile = fs.readFileSync(path.resolve(pthVars.fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME));
 				permissions = global.Uwot.Constants.tryParseJSON(permFile);
 				if ('object' === typeof permissions) {
 			
@@ -1864,7 +1965,7 @@ class UwotFs {
 		}
 		else if (pthStats.isFile()) {
 		
-			var thisDir = path.dirname(fullPath);
+			var thisDir = path.dirname(pthVars.fullPath);
 			try{
 		
 				permFile = fs.readFileSync(path.resolve(thisDir, UWOT_HIDDEN_PERMISSIONS_FILENAME));
@@ -1896,6 +1997,37 @@ class UwotFs {
 	
 	}
 	
+	getDefaultPermissions(pth) {
+	
+		var pthVars = this.getPathLocVars(pth);
+		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inPub) {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
+		
+		}
+		else if (pthVars.inRoot && !pthVars.inAllowed && !(this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
+		
+		}
+		else if (pthVars.inPub) {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_READ_EXE});
+		
+		}
+		else if (pthVars.isOwned) {
+		
+			return new UwotFsPermissions({'owner': this.user.uName, 'allowed': global.Uwot.Config.getVal('users', 'homeWritable') ? ALLOWED_READ_WRITE_EXE : ALLOWED_READ_EXE});
+		
+		}
+		else {
+		
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
+		
+		}
+	
+	}
+	
 	setPermissions(pth, userName, permissions) {
 	
 		if (!this.sudo || 'string' !== typeof pth) {
@@ -1915,17 +2047,13 @@ class UwotFs {
 			return new Error(userName + ': illegal user name');
 		
 		}
-		var fullPath = this.resolvePath(pth);
-		var inRoot = this.isInRoot(fullPath);
-		var inUsers = this.isInUser(fullPath, "*");
-		var isOwned = this.isInUser(fullPath);
-		var inAllowed = (this.isInPub(fullPath) || isOwned);
-		if (!inRoot && !inUsers && !inAllowed) {
+		var pthVars = this.getPathLocVars(pth);
+		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
 		
 			return systemError.ENOENT({path: pth, syscall: 'chmod'});
 		
 		}
-		var currentPermissions = this.getPermissions(fullPath);
+		var currentPermissions = this.getPermissions(pthVars.fullPath);
 		if (currentPermissions instanceof Error || !currentPermissions) {
 		
 			currentPermissions = new UwotFsPermissions(null);
@@ -1937,7 +2065,7 @@ class UwotFs {
 			newPermissions.allowed = currentPermissions.allowed;
 		
 		}
-		if (isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== newPermissions.owner) {
+		if (pthVars.isOwned && DEFAULT_OWNER === currentPermissions.owner && 'string' !== typeof newPermissions.owner) {
 		
 			newPermissions.owner = this.user['uName'];
 		
@@ -1946,15 +2074,15 @@ class UwotFs {
 		var permPath;
 		try {
 		
-			var pthStats = fs.statSync(fullPath);
+			var pthStats = fs.statSync(pthVars.fullPath);
 			if (pthStats.isDirectory()) {
 			
-				permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				permPath = path.resolve(pthVars.fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 			else {
 			
-				permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				permPath = path.resolve(path.dirname(pthVars.fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 		
@@ -1990,17 +2118,13 @@ class UwotFs {
 			return new TypeError('invalid allowed');
 		
 		}
-		var fullPath = this.resolvePath(pth);
-		var inRoot = this.isInRoot(fullPath);
-		var inUsers = this.isInUser(fullPath, "*");
-		var isOwned = this.isInUser(fullPath);
-		var inAllowed = (this.isInPub(fullPath) || isOwned);
-		if (!inRoot && !inUsers && !inAllowed) {
+		var pthVars = this.getPathLocVars(pth);
+		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
 		
 			return systemError.ENOENT({path: pth, syscall: 'chmod'});
 		
 		}
-		var currentPermissions = this.getPermissions(fullPath);
+		var currentPermissions = this.getPermissions(pthVars.fullPath);
 		if (currentPermissions instanceof Error || !currentPermissions) {
 		
 			currentPermissions = new UwotFsPermissions(null);
@@ -2022,15 +2146,15 @@ class UwotFs {
 		var permPath;
 		try {
 		
-			var pthStats = fs.statSync(fullPath);
+			var pthStats = fs.statSync(pthVars.fullPath);
 			if (pthStats.isDirectory()) {
 			
-				permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				permPath = path.resolve(pthVars.fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 			else {
 			
-				permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				permPath = path.resolve(path.dirname(pthVars.fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 		
@@ -2080,17 +2204,18 @@ class UwotFs {
 		}
 		else {
 		
-			var fullPath = this.resolvePath(pth);
-			var inRoot = this.isInRoot(fullPath);
-			var inUsers = this.isInUser(fullPath, "*");
-			var isOwned = this.isInUser(fullPath);
-			var inAllowed = (this.isInPub(fullPath) || isOwned);
-			if (!inRoot && !inUsers && !inAllowed) {
+			var pthVars = this.getPathLocVars(pth);
+			if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
 			
 				return systemError.ENOENT({path: pth, syscall: 'chown'});
 			
 			}
-			var currentPermissions = this.getPermissions(fullPath);
+			var currentPermissions = this.getPermissions(pthVars.fullPath);
+			if (false === currentPermissions) {
+			
+				currentPermissions = this.getDefaultPermissions(pthVars.fullPath);
+			
+			}
 			if (currentPermissions instanceof Error) {
 			
 				currentPermissions = new UwotFsPermissions(null);
@@ -2106,15 +2231,15 @@ class UwotFs {
 			var permPath;
 			try {
 			
-				var pthStats = fs.statSync(fullPath);
+				var pthStats = fs.statSync(pthVars.fullPath);
 				if (pthStats.isDirectory()) {
 				
-					permPath = path.resolve(fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(pthVars.fullPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 				else {
 				
-					permPath = path.resolve(path.dirname(fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+					permPath = path.resolve(path.dirname(pthVars.fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
 				
 				}
 			
@@ -2264,6 +2389,11 @@ class UwotFs {
 			}
 		
 		}
+		else if (false === parentPerms && this.isInPub(pth)) {
+		
+			permLine = '-r-';
+		
+		}
 		else {
 		
 			permLine = '---';
@@ -2332,6 +2462,32 @@ class UwotFs {
 			}
 		
 		}
+	
+	}
+	
+	getPathLocVars(pth, checkIfExists) {
+	
+		if ('boolean' !== typeof checkIfExists) {
+		
+			checkIfExists = true;
+		
+		}
+		var fullPath = this.resolvePath(pth, checkIfExists);
+		var pathLocVars = fullPath instanceof Error ? 
+		fullPath :
+		{
+			fullPath,
+			inRoot:		this.isInRoot(fullPath),
+			inUsers:	this.isInUser(fullPath, "*"),
+			isOwned:	this.isInUser(fullPath),
+			inPub:		this.isInPub(fullPath)
+		};
+		if (!(pathLocVars instanceof Error)) {
+		
+			pathLocVars.inAllowed = (pathLocVars.inPub || pathLocVars.isOwned);
+		
+		}
+		return pathLocVars;
 	
 	}
 

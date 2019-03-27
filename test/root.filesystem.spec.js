@@ -1856,32 +1856,32 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('stat(pth)', function() {
+		describe('lstat(pth)', function() {
 		
 			it('should be a function', function() {
 			
-				expect(filesystem.stat).to.be.a('function');
+				expect(filesystem.lstat).to.be.a('function');
 			
 			});
 			it('should return an error if pth is relative or an absolute path not resolved to this.root.path, and resolvePath returns an error', function() {
 			
 				var testPath = 'etc/nginx/conf.d';
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new TypeError('test resolvePath error'));
-				expect(filesystem.stat(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
+				expect(filesystem.lstat(testPath)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolvePath error');
 			
 			});
 			it('should return an error if isReadable returns an error', function() {
 			
 				var testPath = 'etc/nginx/conf.d';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
-				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+				expect(filesystem.lstat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
 			it('should return a systemError if user is not allowed to read location at pth', function() {
 			
 				var testPath = 'etc/nginx/conf.d';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(false);
-				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				expect(filesystem.lstat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 			
 			});
 			it('should return an Error if fs.statSync throws an error', function() {
@@ -1889,7 +1889,7 @@ describe('filesystem.js', function() {
 				var testPath = 'etc/nginx/conf.d';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.EPERM({syscall: 'stat', path: testPath}));
-				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+				expect(filesystem.lstat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
 			
 			});
 			it('should return a Stats object if user has proper permissions and statSync executes without error', function() {
@@ -1897,9 +1897,9 @@ describe('filesystem.js', function() {
 				var testPath = 'etc/nginx/conf.d';
 				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
-				expect(filesystem.stat(testPath)).to.be.an.instanceof(fs.Stats);
-				expect(filesystem.stat("/" + testPath)).to.be.an.instanceof(fs.Stats);
-				expect(filesystem.stat(path.join(filesystem.root.path + "/", testPath))).to.be.an.instanceof(fs.Stats);
+				expect(filesystem.lstat(testPath)).to.be.an.instanceof(fs.Stats);
+				expect(filesystem.lstat("/" + testPath)).to.be.an.instanceof(fs.Stats);
+				expect(filesystem.lstat(path.join(filesystem.root.path + "/", testPath))).to.be.an.instanceof(fs.Stats);
 			
 			});
 		
@@ -2521,6 +2521,7 @@ describe('filesystem.js', function() {
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').callsFake(returnFalse);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
 				filesystem.sudo = true;
+				filesystem.cwd = '';
 				var testPath = "etc/david/lifeblood/conf.d";
 				var testPathTwo = "home/david/toadstool";
 				var usersSudoFullRoot = global.Uwot.Config.nconf.get('users:sudoFullRoot');

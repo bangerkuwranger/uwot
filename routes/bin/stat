@@ -1,0 +1,107 @@
+'use strict';
+const path = require('path');
+
+class UwotCmdStat extends global.Uwot.Exports.Cmd {
+
+	constructor( cmdObj, cmdOpts, cmdPath ) {
+	
+		super(
+			cmdObj,
+			cmdOpts,
+			cmdPath
+		);
+	
+	}
+	
+	execute(args, options, app, user, callback, isSudo) {
+	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/stat/execute');
+		
+		}
+		var userFs, pathTo;
+		try {
+		
+			userFs = global.Uwot.FileSystems[user._id];
+			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+		
+		}
+		catch(e) {
+		
+			return callback(e, null);
+		
+		}
+		var executeResult = {
+			output: {content: []}
+		};
+		userFs.cmd(
+			'stat',
+			[pathTo],
+			(error, isRemoved) => {
+			
+				if (error) {
+				
+					return callback(error, null);
+				
+				}
+				else if ('boolean' !== typeof isRemoved || !isRemoved) {
+				
+					return callback(new Error('invalid path'), pathTo);
+				
+				}
+				else {
+				
+					executeResult.output.content.push('removed: ' + userFs.dissolvePath(pathTo));
+					return callback(false, executeResult);
+				
+				}
+			
+			},
+			isSudo
+		);
+	
+	}
+	
+	help(callback) {
+	
+		super.help(callback);
+	
+	}
+
+}
+
+var stat = new UwotCmdStat(
+	{
+		name:				'stat',
+		description:		'Display file status. Does not support filesystem status or output options.',
+		requiredArguments:	['path'],
+		optionalArguments:	[]
+	},
+	[
+		{
+			description: 		'Display information using the specified format. Supported format placeholders: %A - human readable VFS permissions,  %b - blocks allocated, %B - block size in bytes, %f - file type character, %F - file type, %h - number of hard links, %N - file name, %s - size in bytes, %U - human readable VFS owner, %w - birth time in Ms since Epoch, %W - human readable birth time, %x - last access time in Ms since Epoch, %X - human readable last access time, %y - last modification time in Ms since Epoch, %Y - human readable last modification time.',
+			shortOpt: 			'f',
+			longOpt: 			'format',
+			requiredArguments:	[format],
+			optionalArguments:	[]
+		},
+		{
+			description: 		'Append filetype character to file name.',
+			shortOpt: 			'F',
+			longOpt: 			'format',
+			requiredArguments:	[format],
+			optionalArguments:	[]
+		},
+		{
+			description: 		'Display information in verbose format. Other flags will be ignored.',
+			shortOpt: 			'v',
+			longOpt: 			'verbose',
+			requiredArguments:	[format],
+			optionalArguments:	[]
+		}
+	],
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/stat')
+);
+
+module.exports = stat;
