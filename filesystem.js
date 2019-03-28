@@ -484,9 +484,6 @@ class UwotFs {
 						argArr[2] = 'boolean' === typeof argArr[2] ? argArr[2] : false;
 						var vprocFileArr = this.visibility(rawFileArr, argArr[0], argArr[1]);
 						result = argArr[2] ? this.longFormatFiles(vprocFileArr, argArr[0]) : vprocFileArr;
-						// need to parse flags to format output...
-						// only supporting -l and -a
-						// need to parse args in case a path is provided
 						break;
 					case 'pwd':
 						result = this.getVcwd();
@@ -517,10 +514,10 @@ class UwotFs {
 						result = this.copy(...argArr);
 						break;
 					case 'stat':
-						//need to parse flags from argArr prior to call...
-						//should support -f and -F
+						// expected argArr:
+						// [(string)path, (bool)isVerbose, (bool)appendFtc, (string)format]
+						// support -v -f and -F but not multiple paths
 						result = this.stat(...argArr);
-						// and format result after
 						break;
 					case 'touch':
 						result = this.touch(...argArr);
@@ -1285,24 +1282,31 @@ class UwotFs {
 	
 	stat(pth, isVerbose, appendFtc, format) {
 	
-		var lstatInfo = this.stat(pth);
+		isVerbose = 'boolean' === typeof isVerbose ? isVerbose : false;
+		appendFtc = 'boolean' === typeof appendFtc && !isVerbose ? appendFtc : false;
+		format = 'string' === typeof format && !isVerbose ? format : '%e%A %h %U %s "%X" "%Y" "%W" %B %b %N';
+		if (isVerbose) {
+		
+			format = 'File: "%N"' + EOL;
+			format += 'Size: %s Blocks: %b BlockSize: %B' + EOL
+			format += 'FileType: %F' + EOL;
+			format += 'Links: %h' + EOL;
+			format += 'Allowed: %A' + EOL;
+			format += 'Owner: %U' + EOL;
+			format += 'LastAccessed: %X' + EOL;
+			format += 'LastModified: %Y' + EOL;
+			format += 'Created: %W' + EOL;
+		
+		}
+		else if (appendFtc) {
+		
+			format = format.replace(/(?<!\\{1})(%N)(?!%f)/g, '%N%f');
+		
+		}
+		var lstatInfo = this.lstat(pth);
 		var permInfo = this.getPermissions(pth);
 		var subVals = {
-			A: '',
-			b: '',
-			B: '',
-			f: '',
-			F: '',
-			h: '',
-			N: '',
-			s: '',
-			U: '',
-			w: '',
-			W: '',
-			x: '',
-			X: '',
-			y: '',
-			Y: ''
+			A: ''
 		};
 		if (lstatInfo instanceof Error) {
 		
@@ -1358,19 +1362,75 @@ class UwotFs {
 			subVals.A = this.isInPub(pth) ? '-r-' : '---';
 		
 		}
-		// TBD
-		// Finish this?
+		subVals.U = 'string' === typeof permInfo.owner ? permInfo.owner : DEFAULT_OWNER;
+		subVals.N = path.basename(pth);
 		if ('object' === typeof lstatInfo && lstatInfo instanceof fs.Stats) {
 		
-			subVals.U = 'string' === typeof permInfo.owner ? permInfo.owner : DEFAULT_OWNER;
 			subVals.b = lstatInfo.blocks;
 			subVals.B = lstatInfo.blksize;
-// 			subVals.f
-// 			subVals.f
 			subVals.h = lstatInfo.nlink;
-			subVals.N = path.basename(pth);
 			subVals.s = lstatInfo.size;
+			subVals.w = lstatInfo.birthtimeMs;
+			subVals.W = lstatInfo.birthtime;
+			subVals.x = lstatInfo.atimeMs;
+			subVals.X = lstatInfo.atime;
+			subVals.y = lstatInfo.mtimeMs;
+			subVals.Y = lstatInfo.mtime;
+			if (lstatInfo.isFIFO()) {
+			
+				subVals.e = 'p';
+				subVals.f = '|';
+				subVals.F = 'FIFO';
+			
+			}
+			else if (lstatInfo.isDirectory()) {
+			
+				subVals.e = 'd';
+				subVals.f = '/';
+				subVals.F = 'Directory';
+			
+			}
+			else if (lstatInfo.isFile()) {
+			
+				subVals.e = '-';
+				subVals.f = '';
+				subVals.F = 'File';
+			
+			}
+			else if (lstatInfo.isSocket()) {
+			
+				subVals.e = 's';
+				subVals.f = '=';
+				subVals.F = 'Socket';
+			
+			}
+			else if (lstatInfo.isSymbolicLink()) {
+			
+				subVals.e = 'l';
+				subVals.f = '@';
+				subVals.F = 'Symbolic Link';
+			
+			}
+		
 		}
+		var formatted = format.toString();
+		formatted = formatted.replace(/(?<!\\{1})(%A)/g, subVals.A);
+		formatted = formatted.replace(/(?<!\\{1})(%b)/g, subVals.b);
+		formatted = formatted.replace(/(?<!\\{1})(%B)/g, subVals.B);
+		formatted = formatted.replace(/(?<!\\{1})(%e)/g, subVals.e);
+		formatted = formatted.replace(/(?<!\\{1})(%f)/g, subVals.f);
+		formatted = formatted.replace(/(?<!\\{1})(%F)/g, subVals.F);
+		formatted = formatted.replace(/(?<!\\{1})(%h)/g, subVals.h);
+		formatted = formatted.replace(/(?<!\\{1})(%N)/g, subVals.N);
+		formatted = formatted.replace(/(?<!\\{1})(%s)/g, subVals.s);
+		formatted = formatted.replace(/(?<!\\{1})(%U)/g, subVals.U);
+		formatted = formatted.replace(/(?<!\\{1})(%w)/g, subVals.w);
+		formatted = formatted.replace(/(?<!\\{1})(%W)/g, subVals.W);
+		formatted = formatted.replace(/(?<!\\{1})(%x)/g, subVals.x);
+		formatted = formatted.replace(/(?<!\\{1})(%X)/g, subVals.X);
+		formatted = formatted.replace(/(?<!\\{1})(%y)/g, subVals.y);
+		formatted = formatted.replace(/(?<!\\{1})(%Y)/g, subVals.Y);
+		return formatted;
 	
 	}
 	
