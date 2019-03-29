@@ -5,6 +5,7 @@ const sinon = require("sinon");
 const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
+var Datastore = require('nedb-core');
 var filesystemLoader = require('../helpers/filesystemLoader');
 
 var gsh = require('../helpers/globalSetup');
@@ -31,8 +32,6 @@ const getFileSystemsIds = function() {
 
 }
 
-// TBD
-// stub out the user db to remove the last of the occasional ENOENTs 
 describe('globalSetup.js', function() {
 
 	it('should create global.Uwot object and all properties as empty objects, if objects do not already exist, upon first require', function() {
@@ -187,9 +186,11 @@ describe('globalSetup.js', function() {
 	describe('initEnvironment()', function() {
 	
 		var initialEnv;
+		var DataStoreStub;
 		before(function() {
 		
 			initialEnv = global.process.env.NODE_ENV;
+			DataStoreStub = sinon.stub(Datastore.prototype, 'loadDatabase').returns();
 		
 		});
 		beforeEach(function() {
@@ -205,6 +206,7 @@ describe('globalSetup.js', function() {
 			global.Uwot.Config = {};
 			global.Uwot.Users = {};
 			gsh.initEnvironment();
+			DataStoreStub.restore();
 		
 		});
 		it('should be a function', function() {

@@ -125,7 +125,6 @@ module.exports = class UwotUsers {
 			fieldName: 'uName',
 			unique: true,
 		});
-		// TBD
 		// check if create user dir is set in config
 		// if so, verify each user has a dir
 		// if not, create dir and set perms for user
