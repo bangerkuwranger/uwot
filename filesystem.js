@@ -1288,7 +1288,7 @@ class UwotFs {
 		if (isVerbose) {
 		
 			format = 'File: "%N"' + EOL;
-			format += 'Size: %s Blocks: %b BlockSize: %B' + EOL
+			format += 'Size: %s Blocks: %b BlockSize: %B' + EOL;
 			format += 'FileType: %F' + EOL;
 			format += 'Links: %h' + EOL;
 			format += 'Allowed: %A' + EOL;

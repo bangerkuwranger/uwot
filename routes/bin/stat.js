@@ -1,6 +1,5 @@
 'use strict';
 const path = require('path');
-const EOL = require('os').EOL;
 
 class UwotCmdStat extends global.Uwot.Exports.Cmd {
 
