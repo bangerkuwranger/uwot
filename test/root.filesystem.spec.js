@@ -1,5 +1,6 @@
 var path = require('path');
 var fs = require('fs-extra');
+const EOL = require('os').EOL;
 const SystemError = require('../helpers/systemError');
 const globalSetupHelper = require('../helpers/globalSetup');
 
@@ -1213,6 +1214,90 @@ describe('filesystem.js', function() {
 				var utimesSyncStub = sinon.stub(fs, 'utimesSync').returns();
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(SystemError.EIO({syscall: 'write', path: testPath}));
 				expect(filesystem.touch(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+		
+		});
+		describe('cat(pthArr, separator)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(filesystem.cat).to.be.a('function');
+			
+			});
+			it('should return contents of a file at pthArr[0] without changes if file is successfully read and pthArr only has one element', function() {
+			
+				var testPath = '~/finalWillandTestament.txt';
+				var testFileContents = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var readFileStub = sinon.stub(filesystem, 'readFile').returns(testFileContents);
+				expect(filesystem.cat([testPath])).to.equal(testFileContents);
+			
+			});
+			it('should return an Error if this.readFile returns an error for any path in pthArr', function() {
+			
+				var testPath1 = '~/finalWillandTestament.txt';
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var readFileStub = sinon.stub(filesystem, 'readFile').returns(new Error('test readFile Error.'));
+				expect(filesystem.cat([testPath1, testPath2])).to.be.an.instanceof(Error).with.property('message').that.equals('test readFile Error.');
+			
+			});
+			it('should return a SystemError if a member of pthArr is not a string', function() {
+			
+				var testPath1 = ['~/finalWillandTestament.txt'];
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var readFileStub = sinon.stub(filesystem, 'readFile').returns(new Error('test readFile Error.'));
+				expect(filesystem.cat([testPath1, testPath2])).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+			
+			});
+			it('should return a SystemError if this.readFile returns a non-Error, non-string value', function() {
+			
+				var testPath1 = '~/finalWillandTestament.txt';
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var readFileStub = sinon.stub(filesystem, 'readFile').returns(null);
+				expect(filesystem.cat([testPath1, testPath2])).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+			
+			});
+			it('should return the contents of each file in pthArr in sequence with an additional EOL character between them if this.readFile does not return any errors and separator arg is not a string', function() {
+			
+				var testPath1 = '~/finalWillandTestament.txt';
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var readFileStub = sinon.stub(filesystem, 'readFile');
+				readFileStub.onCall(0).returns(testFileContents1);
+				readFileStub.onCall(1).returns(testFileContents2);
+				expect(filesystem.cat([testPath1, testPath2])).to.equal(testFileContents1 + EOL + EOL + testFileContents2);
+			
+			});
+			it('should return the contents of each file in pthArr in sequence with a single EOL character between them if this.readFile does not return any errors and separator arg is an empty string', function() {
+			
+				var testPath1 = '~/finalWillandTestament.txt';
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var readFileStub = sinon.stub(filesystem, 'readFile');
+				readFileStub.onCall(0).returns(testFileContents1);
+				readFileStub.onCall(1).returns(testFileContents2);
+				expect(filesystem.cat([testPath1, testPath2], '')).to.equal(testFileContents1 + EOL + testFileContents2);
+			
+			});
+			it('should return the contents of each file in pthArr in sequence with the value of the separator arg between them if this.readFile does not return any errors and separator arg is a string', function() {
+			
+				var testPath1 = '~/finalWillandTestament.txt';
+				var testFileContents1 = 'Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula ut id elit.';
+				var testPath2 = '~/leaveItToTheCats.txt';
+				var testFileContents2 = 'Cras mattis consectetur purus sit amet fermentum. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus posuere velit aliquet.';
+				var separator = '   24k Gold - Addendum after my kid dropped out of school:    ';
+				var readFileStub = sinon.stub(filesystem, 'readFile');
+				readFileStub.onCall(0).returns(testFileContents1);
+				readFileStub.onCall(1).returns(testFileContents2);
+				expect(filesystem.cat([testPath1, testPath2], separator)).to.equal(testFileContents1 + separator + EOL + testFileContents2);
 			
 			});
 		

@@ -813,7 +813,7 @@ class UwotFs {
 				else if ('string' !== typeof thisFileString) {
 				
 					catIdx = pthArr.length;
-					return new systemError.EIO({syscall: 'read', path: pthArr[catIdx]});
+					return systemError.EIO({syscall: 'read', path: pthArr[catIdx]});
 				
 				}
 				else {
@@ -826,7 +826,7 @@ class UwotFs {
 			else {
 			
 				catIdx = pthArr.length;
-				return new systemError.EINVAL({syscall: 'read'});
+				return systemError.EINVAL({syscall: 'read'});
 			
 			}
 			if ((catIdx + 1) >= pthArr.length) {
