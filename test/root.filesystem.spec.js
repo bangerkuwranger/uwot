@@ -4529,6 +4529,270 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('getPathLocVars(pth, checkIfExists)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(filesystem.getPathLocVars).to.be.a('function');
+			
+			});
+			it('should return an error if this.resolvePath returns an error', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.getPathLocVars(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should perform resolvePath without checking for the file\'s existence if checkIfExists is false', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath, false)).to.deep.equal({
+					fullPath: testPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+				expect(resolvePathStub.calledWith(testPath, false));
+			
+			});
+			it('should perform resolvePath while checking for the file\'s existence if checkIfExists is not a boolean or is true', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: testPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+				expect(resolvePathStub.calledWith(testPath, true));
+			
+			});
+			it('should return an object containing the resolvedPath as the value of fullPath property', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with true as the value of inRoot property if resolved path is inside root.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		true,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with false as the value of inRoot property if resolved path is not inside root.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with true as the value of inUsers property if resolved path is inside config users directory path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(true);
+				isInUserStub.onCall(1).returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	true,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with false as the value of inUsers property if resolved path is not inside config users directory path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(false);
+				isInUserStub.onCall(1).returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with true as the value of inPub property if resolved path is inside pubDir.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(false);
+				isInUserStub.onCall(1).returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		true,
+					inAllowed:	true
+				});
+			
+			});
+			it('should return an object with false as the value of inPub property if resolved path is not inside pubDir.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(false);
+				isInUserStub.onCall(1).returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with true as the value of isOwned property if resolved path is inside userDir.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(true);
+				isInUserStub.onCall(1).returns(true);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	true,
+					isOwned:	true,
+					inPub:		false,
+					inAllowed:	true
+				});
+			
+			});
+			it('should return an object with false as the value of isOwned property if resolved path is not inside userDir.path', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(false);
+				isInUserStub.onCall(1).returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		false,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+			it('should return an object with true as the value of inAllowed property if either inPub or isOwned are true', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser');
+				isInUserStub.onCall(0).returns(true);
+				isInUserStub.onCall(1).returns(true);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		true,
+					inUsers:	true,
+					isOwned:	true,
+					inPub:		true,
+					inAllowed:	true
+				});
+			
+			});
+			it('should return an object with false as the value of inAllowed property if neither inPub or isOwned are true', function() {
+			
+				var testPath = 'which/way/did/i/go';
+				var resolvedPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(resolvedPath);
+				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
+					fullPath: resolvedPath,
+					inRoot:		true,
+					inUsers:	false,
+					isOwned:	false,
+					inPub:		false,
+					inAllowed:	false
+				});
+			
+			});
+		
+		});
 	
 	});
 	describe('UwotFsPermissions', function() {
