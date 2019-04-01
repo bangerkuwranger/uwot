@@ -50,7 +50,7 @@ global.Uwot.Bin.sudo = {
 	},
 	help: function help(cb) {
 	
-		return cb(false, 'sudo <command>' + "\r\n" + 'Either you can or you can\'t. There is no "maybe" in sudo.');
+		return cb(false, 'sudo &lt;command&gt; <br/> Either you can or you can\'t. There is no "maybe" in sudo.');
 	
 	},
 	matchOpt: function matchOpt(opt) {
