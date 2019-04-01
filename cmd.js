@@ -222,7 +222,8 @@ class UwotCmd {
 			outString += EOL;
 			for (let i = 0; i < this.options.length; i++) {
 		
-				outString += '    -' + this.options[i].shortOpt + ', --' + this.options[i].longOpt + ' ';
+				outString += '    -' + this.options[i].shortOpt;
+				outString += this.options[i].longOpt === null || this.options[i].longOpt === '' ? ' ' : ', --' + this.options[i].longOpt + ' ';
 				for (let j = 0; j < this.options[i].requiredArguments.length; j++) {
 			
 					outString += ' <' + this.options[i].requiredArguments[j] + '>';
