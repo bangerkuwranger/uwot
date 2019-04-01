@@ -1941,6 +1941,130 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('stat(pth, isVerbose, appendFtc, format)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(filesystem.stat).to.be.a('function');
+			
+			});
+			it('should return an Error if this.lstat returns an error', function() {
+			
+				var testPath = '~/HowToLieWithStatistics.pdf';
+				var testStats = getTestStats();
+				var testPerms = JSON.parse(getTestPerms());
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testStats);
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return an Error if this.getPermissions returns an error', function() {
+			
+				var testPath = '~/HowToLieWithStatistics.pdf';
+				var testStats = getTestStats();
+				var testPerms = JSON.parse(getTestPerms());
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should include default permissions for the parent directory if a permissions file does not exist', function() {
+			
+				var testPath = '~/HowToLieWithStatistics.pdf';
+				var testStats = getTestStats();
+				testStats.isFile = function() { return true; };
+				var testPerms = JSON.parse(getTestPerms());
+				var defaultPerms = {
+					owner: 'root',
+					allowed: []
+				};
+				var testResults = '---- ' + testStats.nlink + ' ' + defaultPerms.owner + ' ' + testStats.size + ' "' + testStats.atime.toString() + '" "' + testStats.mtime.toString() + '" "' + testStats.birthtime.toString() + '" ' + testStats.blksize + ' ' + testStats.blocks + ' ' + path.basename(testPath);
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var getDefaultPermissionsStub = sinon.stub(filesystem, 'getDefaultPermissions').returns(defaultPerms);
+				expect(filesystem.stat(testPath)).to.equal(testResults);
+			
+			});
+			it('should return stats formatted in a single line if isVerbose is undefined or false and format is not a string', function() {
+			
+				var testPath = '~/HowToLieWithStatistics.pdf';
+				var testStats = getTestStats();
+				testStats.isFile = function() { return true; };
+				var testPerms = JSON.parse(getTestPerms());
+				var testAllowed = '';
+				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('x') ? 'x' : '-';
+				var testResults = '-' + testAllowed + ' ' + testStats.nlink + ' ' + testPerms.owner + ' ' + testStats.size + ' "' + testStats.atime.toString() + '" "' + testStats.mtime.toString() + '" "' + testStats.birthtime.toString() + '" ' + testStats.blksize + ' ' + testStats.blocks + ' ' + path.basename(testPath);
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				expect(filesystem.stat(testPath)).to.equal(testResults);
+			
+			});
+			it('should return stats in verbose format if isVerbose is true regardless of other arg values', function() {
+			
+				var testPath = '~/HowToLieWithStatistics.pdf';
+				var testStats = getTestStats();
+				testStats.isFile = function() { return true; };
+				var testPerms = JSON.parse(getTestPerms());
+				var testAllowed = '';
+				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('x') ? 'x' : '-';
+				var testResults = 'File: "' + path.basename(testPath) + '"' + EOL;
+				testResults += 'Size: ' + testStats.size + ' Blocks: ' + testStats.blocks + ' BlockSize: ' + testStats.blksize + EOL;
+				testResults += 'FileType: File' + EOL;
+				testResults += 'Links: ' + testStats.nlink + EOL;
+				testResults += 'Allowed: ' + testAllowed + EOL;
+				testResults += 'Owner: ' + testPerms.owner + EOL;
+				testResults += 'LastAccessed: ' + testStats.atime.toString() + EOL;
+				testResults += 'LastModified: ' + testStats.mtime.toString() + EOL;
+				testResults += 'Created: ' + testStats.birthtime.toString() + EOL;
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				expect(filesystem.stat(testPath, true)).to.equal(testResults);
+				expect(filesystem.stat(testPath, true, true)).to.equal(testResults);
+				expect(filesystem.stat(testPath, true, true, '%A')).to.equal(testResults);
+			
+			});
+			it('should return stats replacing valid placeholders in the format argument value with stats if format is a string and isVerbose is false or undefined', function() {
+			
+				var testPath = '~/HowToLieWithStatistics';
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var testPerms = JSON.parse(getTestPerms());
+				var testAllowed = '';
+				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('x') ? 'x' : '-';
+				var testFormat = '%Y%y%X%x%W%w%U%s%N%h%F%f%e%B%b%A';
+				var testResults = testStats.mtime.toString() + testStats.mtimeMs.toString() + testStats.atime.toString() + testStats.atimeMs.toString()+ testStats.birthtime.toString() + testStats.birthtimeMs.toString() + testPerms.owner + testStats.size + path.basename(testPath) + testStats.nlink + 'Directory/d' + testStats.blksize + testStats.blocks + testAllowed;
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				expect(filesystem.stat(testPath, false, false, testFormat)).to.equal(testResults);
+			
+			});
+			it('should append a character indicating file type to the end of each file name substitution in format string or default format string if isVerbose is false or undefined and appendFtc is true.', function() {
+			
+				var testPath = '~/HowToLieWithStatistics';
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var testPerms = JSON.parse(getTestPerms());
+				var testAllowed = '';
+				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
+				testAllowed += -1 !== testPerms.allowed.indexOf('x') ? 'x' : '-';
+				var testResults1 = 'd' + testAllowed + ' ' + testStats.nlink + ' ' + testPerms.owner + ' ' + testStats.size + ' "' + testStats.atime.toString() + '" "' + testStats.mtime.toString() + '" "' + testStats.birthtime.toString() + '" ' + testStats.blksize + ' ' + testStats.blocks + ' ' + path.basename(testPath) + '/';
+				var testFormat = '%Y%y%X%x%W%w%U%s%N%h%F%f%e%B%b%A';
+				var testResults2 = testStats.mtime.toString() + testStats.mtimeMs.toString() + testStats.atime.toString() + testStats.atimeMs.toString()+ testStats.birthtime.toString() + testStats.birthtimeMs.toString() + testPerms.owner + testStats.size + path.basename(testPath) + '/' + testStats.nlink + 'Directory/d' + testStats.blksize + testStats.blocks + testAllowed;
+				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
+				expect(filesystem.stat(testPath, false, true)).to.equal(testResults1);
+				expect(filesystem.stat(testPath, false, true, testFormat)).to.equal(testResults2);
+			
+			});
+		
+		});
 		describe('lstat(pth)', function() {
 		
 			it('should be a function', function() {

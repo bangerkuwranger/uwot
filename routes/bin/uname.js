@@ -22,7 +22,6 @@ class UwotCmdUname extends global.Uwot.Exports.Cmd {
 		}
 		else {
 		
-			var returnFormatted = false;
 			var returnString = '';
 			const envVars = {
 				s: 'Uwot',
@@ -31,7 +30,7 @@ class UwotCmdUname extends global.Uwot.Exports.Cmd {
 				p: global.process.argv0,
 				r: global.process.version,
 				v: global.Uwot.Constants.version
-			}
+			};
 			if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
 	
 				for (let i = 0; i < options.length; i++) {
