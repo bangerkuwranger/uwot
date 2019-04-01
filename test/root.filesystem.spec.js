@@ -3146,6 +3146,154 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('getDefaultPermissions(pth)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(filesystem.getDefaultPermissions).to.be.a('function');
+			
+			});
+			it('should return an Error if getPathLocVars returns an error', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				expect(filesystem.getDefaultPermissions(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a UwotFsPermissions object if getPathLocVars executes without error', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: false,
+					inUsers: false,
+					inPub: false,
+					inAllowed: false,
+					isOwned: false
+				});
+				expect(filesystem.getDefaultPermissions(testPath)).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed none if getPathLocVars executes without error and path is not in Root, Users, nor Public directory', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: false,
+					inUsers: false,
+					inPub: false,
+					inAllowed: false,
+					isOwned: false
+				});
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals('root');
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.is.empty;
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed none if getPathLocVars executes without error and path is in Root, but neither instance user nor Public directory and either this.sudo or config users:sudoFullRoot is false', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: true,
+					inUsers: false,
+					inPub: false,
+					inAllowed: false,
+					isOwned: false
+				});
+				var origSFR = global.Uwot.Config.nconf.get('users:sudoFullRoot');
+				filesystem.sudo = false;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals('root');
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.is.empty;
+				filesystem.sudo = true;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals('root');
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.is.empty;
+				filesystem.sudo = false;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', origSFR);
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed read if getPathLocVars executes without error and path is in Root, but neither instance user nor Public directory and both this.sudo and config users:sudoFullRoot are true', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: true,
+					inUsers: false,
+					inPub: false,
+					inAllowed: false,
+					isOwned: false
+				});
+				var origSFR = global.Uwot.Config.nconf.get('users:sudoFullRoot');
+				filesystem.sudo = true;
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals('root');
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.deep.equals(['r']);
+				global.Uwot.Config.nconf.set('users:sudoFullRoot', origSFR);
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed read & execute if getPathLocVars executes without error and path is in Public directory', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: true,
+					inUsers: false,
+					inPub: true,
+					inAllowed: true,
+					isOwned: false
+				});
+				var origSFR = global.Uwot.Config.nconf.get('users:sudoFullRoot');
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals('root');
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.includes('r', 'x');
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed read & execute if getPathLocVars executes without error and path is in instance user directory and config users:homeWritable is false', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: true,
+					inUsers: true,
+					inPub: false,
+					inAllowed: true,
+					isOwned: true
+				});
+				var origHW = global.Uwot.Config.nconf.get('users:homeWritable');
+				global.Uwot.Config.nconf.set('users:homeWritable', false);
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals(instanceUser.uName);
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.includes('r', 'x');
+				global.Uwot.Config.nconf.set('users:homeWritable', origHW);
+				
+			
+			});
+			it('should return a UwotFsPermissions object with default owner and allowed read, write, & execute if getPathLocVars executes without error and path is in instance user directory and config users:homeWritable is true', function() {
+			
+				var testPath = 'path/to/nowhere';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					inRoot: true,
+					inUsers: true,
+					inPub: false,
+					inAllowed: true,
+					isOwned: true
+				});
+				var origHW = global.Uwot.Config.nconf.get('users:homeWritable');
+				global.Uwot.Config.nconf.set('users:homeWritable', true);
+				var testResult = filesystem.getDefaultPermissions(testPath);
+				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
+				expect(testResult).to.have.property('owner').that.equals(instanceUser.uName);
+				expect(testResult).to.have.property('allowed').that.is.an('array').that.includes('r', 'w', 'x');
+				global.Uwot.Config.nconf.set('users:homeWritable', origHW);
+				
+			
+			});
+		
+		});
 		describe('setPermissions(pth, userName, permissions)', function() {
 		
 			it('should be a function', function() {

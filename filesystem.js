@@ -2062,14 +2062,19 @@ class UwotFs {
 	getDefaultPermissions(pth) {
 	
 		var pthVars = this.getPathLocVars(pth);
-		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inPub) {
+		if ('object' === typeof pthVars && pthVars instanceof Error) {
+		
+			return pthVars;
+		
+		}
+		else if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inPub) {
 		
 			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
 		
 		}
-		else if (pthVars.inRoot && !pthVars.inAllowed && !(this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
+		else if (pthVars.inRoot && !pthVars.inAllowed && (this.sudo && (global.Uwot.Config.getVal('users', 'sudoFullRoot')))) {
 		
-			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_NONE});
+			return new UwotFsPermissions({'owner': DEFAULT_OWNER, 'allowed': ALLOWED_READ});
 		
 		}
 		else if (pthVars.inPub) {
