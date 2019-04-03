@@ -3791,7 +3791,7 @@ describe('filesystem.js', function() {
 				var finalPath;
 				var testFileName = 'marathon';
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
-				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
 				var testPrevPerms = JSON.parse(getTestPerms());
 				var finalData = {

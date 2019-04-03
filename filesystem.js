@@ -63,28 +63,6 @@ const VALID_FILE_TYPES = [
 	'fifo'
 ];
 
-/**
- * List all files in a directory recursively in a synchronous fashion
- *
- * @param {String} dir
- * @returns {IterableIterator<String>}
- * @copyright Lucio Paiva 2018
- * @author Lucio Paiva <luciopaiva@gmail.com>
- */
-function *walkSync(dir) {
-    const files = fs.readdirSync(dir);
-
-    for (const file of files) {
-        const pathToFile = path.join(dir, file);
-        const isDirectory = fs.statSync(pathToFile).isDirectory();
-        if (isDirectory) {
-            yield *walkSync(pathToFile);
-        } else {
-            yield pathToFile;
-        }
-    }
-}
-
 class UwotFsPermissions {
 
 	constructor(permissions) {
@@ -2256,7 +2234,7 @@ class UwotFs {
 		
 		}
 		var self = this;
-		isRecursive = 'boolean' !== typeof isRecursive ? isRecursive : false;
+		isRecursive = 'boolean' === typeof isRecursive ? isRecursive : false;
 		userName = 'string' === typeof userName && self.isValidUserName(userName) ? userName : null;
 		var pthVars = self.getPathLocVars(pth);
 		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
@@ -2267,7 +2245,7 @@ class UwotFs {
 		var currentPermissions = self.getPermissions(pthVars.fullPath);
 		if (currentPermissions instanceof Error || !currentPermissions) {
 		
-			currentPermissions = new UwotFsPermissions(null);
+			currentPermissions = self.getDefaultPermissions(pthVars.fullPath);
 		
 		}
 		var currentPermissionsGeneric = currentPermissions.toGeneric();
@@ -2333,6 +2311,11 @@ class UwotFs {
 				else if (subDirs instanceof Error) {
 				
 					return subDirs;
+				
+				}
+				else if (subDirs.length < 1) {
+				
+					return true;
 				
 				}
 				else {
@@ -2551,6 +2534,11 @@ class UwotFs {
 		}
 		// getPermissions for parent directory
 		var parentPerms = this.getPermissions(pth);
+		if (!parentPerms) {
+		
+			parentPerms = this.getDefaultPermissions(pth);
+		
+		}
 		var permLine = '';
 		if ('object' === typeof parentPerms.allowed && null !== parentPerms.allowed && Array.isArray(parentPerms.allowed) && parentPerms.allowed.length > 0) {
 		
@@ -2704,7 +2692,7 @@ class UwotFs {
 		try {
 		
 			fullPath = this.resolvePath(pth);
-			pthStats = fs.statSync(fullPath);
+			var pthStats = fs.statSync(fullPath);
 			fullPath = pthStats.isDirectory() ? fullPath : path.dirname(fullPath);
 		
 		}
@@ -2774,5 +2762,36 @@ class UwotFs {
 	}
 
 }
+
+/**
+ * List all files in a directory recursively in a synchronous fashion
+ *
+ * @param {String} dir
+ * @returns {IterableIterator<String>}
+ * @copyright Lucio Paiva 2018
+ * @author Lucio Paiva <luciopaiva@gmail.com>
+ */
+function* walkSync(dir) {
+
+    const files = fs.readdirSync(dir);
+    for (const file of files) {
+    
+        const pathToFile = path.join(dir, file);
+        const isDirectory = fs.statSync(pathToFile).isDirectory();
+        if (isDirectory) {
+        
+            yield* walkSync(pathToFile);
+        
+        } 
+        else {
+        
+            yield pathToFile;
+        
+        }
+    
+    }
+
+}
+
 
 module.exports = UwotFs;

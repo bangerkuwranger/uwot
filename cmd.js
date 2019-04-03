@@ -13,7 +13,7 @@ class UwotCmdCommand {
 	) {
 	
 		this.name = sanitize.stringNoSpaces(sanitize.cleanString(name, 255), 'cc');
-		this.description = sanitize.cleanString(description, 255);
+		this.description = sanitize.cleanString(description, 1024);
 		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
 		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
 	
