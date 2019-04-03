@@ -944,7 +944,7 @@ class UwotFs {
 					cpOpts = {
 						overwrite: !noOverwrite,
 						errorOnExist : true
-					}
+					};
 					fs.copySync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget), cpOpts);
 					return true;
 				
