@@ -2,7 +2,7 @@
 const path = require('path');
 const sanitize = require('../../helpers/valueConversion');
 
-class UwotCmdMv extends global.Uwot.Exports.Cmd {
+class UwotCmdCp extends global.Uwot.Exports.Cmd {
 
 	constructor( cmdObj, cmdOpts, cmdPath ) {
 	
@@ -18,10 +18,12 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to bin/mv/execute');
+			throw new TypeError('invalid callback passed to bin/cp/execute');
 		
 		}
-		var userFs, source, target, noOverwrite = false;
+		var userFs, source, target;
+		var noOverwrite = false;
+		var isRecursive = false;
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
@@ -29,7 +31,7 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 			target = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
 			if (null === source || null === target) {
 			
-				throw new TypeError('invalid source/target for bin/mv/execute');
+				throw new TypeError('invalid source/target for bin/cp/execute');
 			
 			}
 		
@@ -52,13 +54,18 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 					noOverwrite = true;
 			
 				}
+				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "R") {
+			
+					isRecursive = true;
+			
+				}
 			
 			}
 		
 		}
 		userFs.cmd(
-			'mv',
-			[source, target, noOverwrite],
+			'cp',
+			[source, target, noOverwrite, isRecursive],
 			(error, isMoved) => {
 			
 				if (error) {
@@ -68,12 +75,12 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 				}
 				else if ('boolean' !== typeof isMoved || !isMoved) {
 				
-					return callback(new Error('invalid move'), [source, target]);
+					return callback(new Error('invalid copy'), [source, target]);
 				
 				}
 				else {
 				
-					executeResult.output.content.push('moved ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
+					executeResult.output.content.push('copied ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
 					return callback(false, executeResult);
 				
 				}
@@ -92,10 +99,10 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 
 }
 
-var mv = new UwotCmdMv(
+var cp = new UwotCmdCp(
 	{
-		name:				'mv',
-		description:		'Move files. The mv utility renames the file named by the source operand to the destination path named by the target operand.',
+		name:				'cp',
+		description:		'Copy files. The cp utility copies the contents of the source to the target.',
 		requiredArguments:	['source', 'target'],
 		optionalArguments:	[]
 	},
@@ -107,8 +114,15 @@ var mv = new UwotCmdMv(
 			requiredArguments:	[],
 			optionalArguments:	[]
 		},
+		{
+			description: 		'Recursive copy. If source designates a directory, cp copies the directory and the entire subtree connected at that point.  If the source path ends in a "/", the contents of the directory are copied rather than the directory itself.',
+			shortOpt: 			'R',
+			longOpt: 			null,
+			requiredArguments:	[],
+			optionalArguments:	[]
+		}
 	],
-	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/mv')
+	path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/cp')
 );
 
-module.exports = mv;
+module.exports = cp;

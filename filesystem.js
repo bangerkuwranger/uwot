@@ -509,8 +509,9 @@ class UwotFs {
 						result = this.moveFile(...argArr);
 						break;
 					case 'cp':
-						//need to parse flags from argArr prior to calls...
 						// should support -n, -R
+						// expected argArr:
+						// [(string)source, (string)target, (bool)noOverwrite, (bool)isRecursive]
 						result = this.copy(...argArr);
 						break;
 					case 'stat':
@@ -840,8 +841,10 @@ class UwotFs {
 	
 	}
 	
-	copy(source, target) {
+	copy(source, target, noOverwrite, isRecursive) {
 		
+		noOverwrite = 'boolean' === typeof noOverwrite ? noOverwrite : false;
+		isRecursive = 'boolean' === typeof isRecursive ? isRecursive : false;
 		var fullPathSource, fullPathTarget;
 		var fileNameSource = path.basename(source);
 		var fileNameTarget = path.basename(target);
@@ -891,15 +894,40 @@ class UwotFs {
 		}
 		else if (canRead && canWrite) {
 		
-			try {
+			var cpOpts;
+			if (isRecursive) {
 			
-				fs.copyFileSync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget));
-				return true;
+				try {
+				
+					cpOpts = {
+						overwrite: !noOverwrite,
+						errorOnExist : true
+					}
+					fs.copySync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget), cpOpts);
+					return true;
+				
+				}
+				catch(e) {
+			
+					return e;
+			
+				}
 			
 			}
-			catch(e) {
+			else {
 			
-				return e;
+				try {
+			
+					cpOpts = noOverwrite ? fs.constants.COPYFILE_EXCL : cpOpts;
+					fs.copyFileSync(path.join(fullPathSource, fileNameSource), path.join(fullPathTarget, fileNameTarget), cpOpts);
+					return true;
+			
+				}
+				catch(e) {
+			
+					return e;
+			
+				}
 			
 			}
 		
