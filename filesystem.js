@@ -32,7 +32,9 @@ const VALID_CMDS = [
 	'cp',
 	'stat',
 	'touch',
-	'cat'
+	'cat',
+	'chmod',
+	'chown'
 ];
 
 const VALID_STAT_FORMAT_PLACEHOLDERS = [
@@ -52,6 +54,36 @@ const VALID_STAT_FORMAT_PLACEHOLDERS = [
 	'y',
 	'Y'
 ];
+
+const VALID_FILE_TYPES = [
+	'file',
+	'directory',
+	'symlink',
+	'socket',
+	'fifo'
+];
+
+/**
+ * List all files in a directory recursively in a synchronous fashion
+ *
+ * @param {String} dir
+ * @returns {IterableIterator<String>}
+ * @copyright Lucio Paiva 2018
+ * @author Lucio Paiva <luciopaiva@gmail.com>
+ */
+function *walkSync(dir) {
+    const files = fs.readdirSync(dir);
+
+    for (const file of files) {
+        const pathToFile = path.join(dir, file);
+        const isDirectory = fs.statSync(pathToFile).isDirectory();
+        if (isDirectory) {
+            yield *walkSync(pathToFile);
+        } else {
+            yield pathToFile;
+        }
+    }
+}
 
 class UwotFsPermissions {
 
@@ -525,9 +557,19 @@ class UwotFs {
 						break;
 					case 'cat':
 						// expected argArr:
-						// [(string)path(s), separator]
+						// [(string)path(s), (string)separator]
 						var separator = argArr.pop();
 						result = this.cat(argArr, separator);
+						break;
+					case 'chmod':
+						// expected argArr:
+						// [(string)path, (array)allowed, (bool)isRecursive, (string)username]
+						result = this.changeAllowed(...argArr);
+						break;
+					case 'chown':
+						// expected argArr:
+						// [(string)path, (string)username, (bool)isRecursive]
+						result = this.changeOwner(...argArr);
 						break;
 					default:
 						result = systemError.EINVAL({'syscall': 'signal'});
@@ -2201,11 +2243,11 @@ class UwotFs {
 	
 	}
 	
-	changeAllowed(pth, allowed) {
+	changeAllowed(pth, allowed, isRecursive, userName) {
 	
-		if (!this.sudo || 'string' !== typeof pth) {
+		if ('string' !== typeof pth) {
 		
-			return systemError.EPERM({path: pth, syscall: 'chmod'});
+			return systemError.EINVAL({syscall: 'chmod'});
 		
 		}
 		else if ('object' !== typeof allowed || null === allowed || !Array.isArray(allowed)) {
@@ -2213,20 +2255,37 @@ class UwotFs {
 			return new TypeError('invalid allowed');
 		
 		}
-		var pthVars = this.getPathLocVars(pth);
+		var self = this;
+		isRecursive = 'boolean' !== typeof isRecursive ? isRecursive : false;
+		userName = 'string' === typeof userName && self.isValidUserName(userName) ? userName : null;
+		var pthVars = self.getPathLocVars(pth);
 		if (!pthVars.inRoot && !pthVars.inUsers && !pthVars.inAllowed) {
 		
 			return systemError.ENOENT({path: pth, syscall: 'chmod'});
 		
 		}
-		var currentPermissions = this.getPermissions(pthVars.fullPath);
+		var currentPermissions = self.getPermissions(pthVars.fullPath);
 		if (currentPermissions instanceof Error || !currentPermissions) {
 		
 			currentPermissions = new UwotFsPermissions(null);
 		
 		}
 		var currentPermissionsGeneric = currentPermissions.toGeneric();
-		currentPermissionsGeneric.allowed = allowed;
+		if (!self.sudo && ('string' !== typeof currentPermissions.owner || self.user.uName !== currentPermissions.owner)) {
+		
+			return systemError.EPERM({syscall: 'chmod', path: pthVars.fullPath});
+		
+		}
+		if (null === userName) {
+		
+			currentPermissionsGeneric.allowed = allowed;
+		
+		}
+		else {
+		
+			currentPermissionsGeneric[userName] = allowed;
+		
+		}
 		var newPermissions;
 		try {
 		
@@ -2263,7 +2322,50 @@ class UwotFs {
 		try {
 		
 			fs.writeFileSync(permPath, updatedPermissions);
-			return true;
+			if (isRecursive) {
+			
+				var subDirs = self.readdirRecursive(pthVars.fullPath, 'directory');
+				if ('object' !== typeof subDirs || (!Array.isArray(subDirs) && !(subDirs instanceof Error))) {
+				
+					return systemError.EIO({syscall: 'readdir', path: pthVars.fullPath});
+				
+				}
+				else if (subDirs instanceof Error) {
+				
+					return subDirs;
+				
+				}
+				else {
+				
+					for (let i = 0; i < subDirs.length; i++) {
+					
+						try {
+						
+							self.changeAllowed(subDirs[i], allowed, false, userName);
+						
+						}
+						catch(e) {
+						
+							i = subDirs.length;
+							return e;
+						
+						}
+						if ((i + 1) >= subDirs.length) {
+						
+							return true;
+						
+						}
+					
+					}
+				
+				}
+			
+			}
+			else {
+			
+				return true;
+			
+			}
 		
 		}
 		catch(e) {
@@ -2275,7 +2377,7 @@ class UwotFs {
 	
 	}
 	
-	changeOwner(pth, userName) {
+	changeOwner(pth, userName, isRecursive) {
 	
 		if (!this.sudo) {
 		
@@ -2583,6 +2685,91 @@ class UwotFs {
 		
 		}
 		return pathLocVars;
+	
+	}
+	
+	readdirRecursive(pth, fType) {
+	
+		if ('string' !== typeof pth) {
+		
+			return systemError.EINVAL({syscall: 'read'});
+		
+		}
+		if ('string' !== typeof fType || -1 === VALID_FILE_TYPES.indexOf(fType)) {
+		
+			fType = null;
+		
+		}
+		var fullPath, pthArr = [];
+		try {
+		
+			fullPath = this.resolvePath(pth);
+			pthStats = fs.statSync(fullPath);
+			fullPath = pthStats.isDirectory() ? fullPath : path.dirname(fullPath);
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
+		for (const filePath of walkSync(fullPath)) {
+		
+			var thisFileStats;
+			try {
+			
+				thisFileStats = fs.statSync(filePath);
+			
+			}
+			catch(e) {
+			
+				return e;
+			
+			}
+			switch(fType) {
+			
+				case 'file':
+					if (thisFileStats.isFile()) {
+					
+						pthArr.push(filePath);
+					
+					}
+					break;
+				case 'directory':
+					if (thisFileStats.isDirectory()) {
+					
+						pthArr.push(filePath);
+					
+					}
+					break;
+				case 'symlink':
+					if (thisFileStats.isSymbolicLink()) {
+					
+						pthArr.push(filePath);
+					
+					}
+					break;
+				case 'socket':
+					if (thisFileStats.isSocket()) {
+					
+						pthArr.push(filePath);
+					
+					}
+					break;
+				case 'fifo':
+					if (thisFileStats.isFIFO()) {
+					
+						pthArr.push(filePath);
+					
+					}
+					break;
+				default:
+					pthArr.push(filePath);
+			
+			}
+		
+		}
+		return pthArr;
 	
 	}
 

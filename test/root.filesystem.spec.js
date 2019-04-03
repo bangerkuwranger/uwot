@@ -3668,15 +3668,12 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed).to.be.a('function');
 			
 			});
-			it('should return a SystemError if !this.sudo or pth is not a string', function() {
+			it('should return a SystemError if pth is not a string', function() {
 			
 				filesystem.sudo = true;
 				var testPath = null;
 				var testAllowed = ['r', 'w', 'x'];
-				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
-				filesystem.sudo = false;
-				testPath = '/usr/local/bin';
-				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
 			
 			});
 			it('should return a TypeError if allowed is not an object, is null, or is not an array', function() {

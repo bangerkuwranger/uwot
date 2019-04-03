@@ -66,14 +66,14 @@ class UwotCmdCp extends global.Uwot.Exports.Cmd {
 		userFs.cmd(
 			'cp',
 			[source, target, noOverwrite, isRecursive],
-			(error, isMoved) => {
+			(error, isCopied) => {
 			
 				if (error) {
 				
 					return callback(error, null);
 				
 				}
-				else if ('boolean' !== typeof isMoved || !isMoved) {
+				else if ('boolean' !== typeof isCopied || !isCopied) {
 				
 					return callback(new Error('invalid copy'), [source, target]);
 				
