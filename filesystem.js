@@ -2688,12 +2688,13 @@ class UwotFs {
 			fType = null;
 		
 		}
-		var fullPath, pthArr = [];
+		var fullPath, dirArr, pthArr = [];
 		try {
 		
 			fullPath = this.resolvePath(pth);
 			var pthStats = fs.statSync(fullPath);
 			fullPath = pthStats.isDirectory() ? fullPath : path.dirname(fullPath);
+			dirArr = this.readDir(fullPath);
 		
 		}
 		catch(e) {
@@ -2701,58 +2702,68 @@ class UwotFs {
 			return e;
 		
 		}
-		for (const filePath of walkSync(fullPath)) {
+		for (const fileName of dirArr) {
 		
-			var thisFileStats;
-			try {
+			if (fileName !== UWOT_HIDDEN_PERMISSIONS_FILENAME) {
 			
-				thisFileStats = fs.statSync(filePath);
+				var filePath = path.join(fullPath, fileName);
+				var thisFileStats;
+				try {
 			
-			}
-			catch(e) {
+					thisFileStats = fs.statSync(filePath);
 			
-				return e;
+				}
+				catch(e) {
 			
-			}
-			switch(fType) {
+					return e;
 			
-				case 'file':
-					if (thisFileStats.isFile()) {
+				}
+				switch(fType) {
+			
+					case 'file':
+						if (thisFileStats.isFile()) {
 					
+							pthArr.push(filePath);
+					
+						}
+						break;
+					case 'directory':
+						if (thisFileStats.isDirectory()) {
+					
+							pthArr.push(filePath);
+					
+						}
+						break;
+					case 'symlink':
+						if (thisFileStats.isSymbolicLink()) {
+					
+							pthArr.push(filePath);
+					
+						}
+						break;
+					case 'socket':
+						if (thisFileStats.isSocket()) {
+					
+							pthArr.push(filePath);
+					
+						}
+						break;
+					case 'fifo':
+						if (thisFileStats.isFIFO()) {
+					
+							pthArr.push(filePath);
+					
+						}
+						break;
+					default:
 						pthArr.push(filePath);
-					
-					}
-					break;
-				case 'directory':
-					if (thisFileStats.isDirectory()) {
-					
-						pthArr.push(filePath);
-					
-					}
-					break;
-				case 'symlink':
-					if (thisFileStats.isSymbolicLink()) {
-					
-						pthArr.push(filePath);
-					
-					}
-					break;
-				case 'socket':
-					if (thisFileStats.isSocket()) {
-					
-						pthArr.push(filePath);
-					
-					}
-					break;
-				case 'fifo':
-					if (thisFileStats.isFIFO()) {
-					
-						pthArr.push(filePath);
-					
-					}
-					break;
-				default:
-					pthArr.push(filePath);
+			
+				}
+				if (thisFileStats.isDirectory()) {
+			
+					pthArr.push(this.readdirRecursive(filePath, fType));
+			
+				}
 			
 			}
 		
@@ -2762,36 +2773,5 @@ class UwotFs {
 	}
 
 }
-
-/**
- * List all files in a directory recursively in a synchronous fashion
- *
- * @param {String} dir
- * @returns {IterableIterator<String>}
- * @copyright Lucio Paiva 2018
- * @author Lucio Paiva <luciopaiva@gmail.com>
- */
-function* walkSync(dir) {
-
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-    
-        const pathToFile = path.join(dir, file);
-        const isDirectory = fs.statSync(pathToFile).isDirectory();
-        if (isDirectory) {
-        
-            yield* walkSync(pathToFile);
-        
-        } 
-        else {
-        
-            yield pathToFile;
-        
-        }
-    
-    }
-
-}
-
 
 module.exports = UwotFs;

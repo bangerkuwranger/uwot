@@ -1,6 +1,5 @@
 'use strict';
 const path = require('path');
-const EOL = require('os').EOL;
 
 class UwotCmdChmod extends global.Uwot.Exports.Cmd {
 
@@ -31,13 +30,25 @@ class UwotCmdChmod extends global.Uwot.Exports.Cmd {
 			if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 			
 				pth = 'object' === typeof args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
-				allowed = ['-', '-', '-'];
+				allowed = [];
 				if ('object' === typeof args[0] && 'string' === typeof args[0].text) {
 				
 					var allowedArr = Array.from(args[0].text.trim());
-					allowed[0] = 'string' === typeof allowedArr[0] && 'r' === allowedArr[0] ? 'r' : '-';
-					allowed[1] = 'string' === typeof allowedArr[1] && 'w' === allowedArr[1] ? 'w' : '-';
-					allowed[2] = 'string' === typeof allowedArr[2] && 'x' === allowedArr[2] ? 'x' : '-';
+					if (-1 < allowedArr.indexOf('r')) {
+					
+						allowed.push('r');
+					
+					}
+					if (-1 < allowedArr.indexOf('w')) {
+					
+						allowed.push('w');
+					
+					}
+					if (-1 < allowedArr.indexOf('x')) {
+					
+						allowed.push('x');
+					
+					}
 				
 				}
 			
@@ -122,7 +133,7 @@ class UwotCmdChmod extends global.Uwot.Exports.Cmd {
 var chmod = new UwotCmdChmod(
 	{
 		name:				'chmod',
-		description:		'Change allowed permissions for files within a directory inside of the VFS. If a file is specified instead of a directory, change will be applied to parent directory. Only the owner of a file or the super-user is permitted to change the allowed permissions of a directory. As there are no user groups, permissions are set by default for all users, or specifically for one user, specified as argument of the -u flag. Also, the permissions specified do not follow POSIX rules, but are set with a single string "rwx", where including the letter allows the action, or using a dash disallows it. E.g. "---" would allow nothing, "r--" is read-only, etc.',
+		description:		'Change allowed permissions for files within a directory inside of the VFS. If a file is specified instead of a directory, change will be applied to parent directory. Only the owner of a file or the super-user is permitted to change the allowed permissions of a directory. As there are no user groups, permissions are set by default for all users, or specifically for one user, specified as argument of the -u flag. Also, the permissions specified do not follow POSIX rules, but are set with a single string "rwx", where including the letter allows the action, omitting it disallows it. E.g. "" would allow nothing, "r" is read-only, etc.',
 		requiredArguments:	['permissions', 'path'],
 		optionalArguments:	[]
 	},
