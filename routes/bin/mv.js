@@ -1,6 +1,5 @@
 'use strict';
 const path = require('path');
-const sanitize = require('../../helpers/valueConversion');
 
 class UwotCmdMv extends global.Uwot.Exports.Cmd {
 
