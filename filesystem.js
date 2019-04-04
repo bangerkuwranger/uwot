@@ -120,31 +120,27 @@ class UwotFsPermissions {
 				for (let i = 0; i < permUsers.length; i++) {
 	
 					var thisName = permUsers[i];
-// 					if (this.isValidUserName(thisName)) {
+					let userPerms = [];
+					if ('object' === typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
 				
-						let userPerms = [];
-						if ('object' === typeof permissions[thisName] && Array.isArray(permissions[thisName])) {
+						if (-1 !== permissions[thisName].indexOf('r')) {
 					
-							if (-1 !== permissions[thisName].indexOf('r')) {
-						
-								userPerms.push('r');
-						
-							}
-							if (-1 !== permissions[thisName].indexOf('w')) {
-						
-								userPerms.push('w');
-						
-							}
-							if (-1 !== permissions[thisName].indexOf('x')) {
-						
-								userPerms.push('x');
-						
-							}
+							userPerms.push('r');
+					
+						}
+						if (-1 !== permissions[thisName].indexOf('w')) {
+					
+							userPerms.push('w');
+					
+						}
+						if (-1 !== permissions[thisName].indexOf('x')) {
+					
+							userPerms.push('x');
 					
 						}
 						this[thisName] = userPerms;
 				
-// 					}
+					}
 	
 				}
 			
@@ -2292,7 +2288,8 @@ class UwotFs {
 			}
 			else {
 			
-				permPath = path.resolve(path.dirname(pthVars.fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				var dirPath = path.dirname(pthVars.fullPath);
+				permPath = path.resolve(dirPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 		
@@ -2381,7 +2378,8 @@ class UwotFs {
 			}
 			else {
 			
-				permPath = path.resolve(path.dirname(pthVars.fullPath), UWOT_HIDDEN_PERMISSIONS_FILENAME);
+				var dirPath = path.dirname(pthVars.fullPath);
+				permPath = path.resolve(dirPath, UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			}
 		
@@ -2487,7 +2485,7 @@ class UwotFs {
 				return currentPermissions;
 			
 			}
-			if (!this.sudo || !('string' === typeof currentPermissions.owner && this.user.uName === currentPermissions.owner)) {
+			if (!this.sudo && !('string' === typeof currentPermissions.owner && this.user.uName === currentPermissions.owner)) {
 		
 				return systemError.EPERM({path: pth, syscall: 'chown'});
 		

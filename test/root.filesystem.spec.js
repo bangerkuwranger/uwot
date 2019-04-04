@@ -125,11 +125,144 @@ const getTestStats = function() {
 
 const getTestPerms = function() {
 
-	return JSON.stringify({
+	return {
 		owner: 'mortimerhemp',
 		allowed: ['r','x'],
-		fuser: ['r', 'w', 'x']
-	});
+		fuser: ['r', 'w', 'x'],
+		getUserPermsString: function(uname) { 
+			var ua;
+			if ('string' === uname) { 
+				ua = this[uname];
+			} 
+			else { 
+				ua = this.allowed
+			}
+			var permLine = '';
+			if (-1 !== ua.indexOf('r')) {
+	
+				permLine += 'r';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			if (-1 !== ua.indexOf('w')) {
+	
+				permLine += 'w';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			if (-1 !== ua.indexOf('x')) {
+	
+				permLine += 'x';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			return permLine;
+		},
+		toGeneric: function() {
+	
+			var genericPermissionsObj = {
+				owner: 'string' === typeof this.owner ? this.owner : DEFAULT_OWNER,
+				allowed: this.allowed
+			};
+			var permUsers = Object.keys(this);
+			for (let i = 0; i < permUsers.length; i++) {
+		
+				if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'validUsers' !== permUsers[i] && 'object' === typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
+			
+					genericPermissionsObj[permUsers[i]] = this[permUsers[i]];
+			
+				}
+		
+			}
+			return genericPermissionsObj;
+	
+		},
+		mayRead: function() { return true; },
+		mayWrite: function() { return true; }
+	};
+
+};
+
+const getDefaultPerms = function() {
+
+	return {
+		owner: 'root',
+		allowed: [],
+		getUserPermsString: function(uname) { 
+			var ua;
+			if ('string' === uname) { 
+				ua = this[uname];
+			} 
+			else { 
+				ua = this.allowed
+			}
+			var permLine = '';
+			if (-1 !== ua.indexOf('r')) {
+	
+				permLine += 'r';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			if (-1 !== ua.indexOf('w')) {
+	
+				permLine += 'w';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			if (-1 !== ua.indexOf('x')) {
+	
+				permLine += 'x';
+	
+			}
+			else {
+	
+				permLine += '-';
+	
+			}
+			return permLine;
+		},
+		toGeneric: function() {
+	
+			var genericPermissionsObj = {
+				owner: 'string' === typeof this.owner ? this.owner : DEFAULT_OWNER,
+				allowed: this.allowed
+			};
+			var permUsers = Object.keys(this);
+			for (let i = 0; i < permUsers.length; i++) {
+		
+				if (this.hasOwnProperty(permUsers[i]) && 'owner' !== permUsers[i] && 'allowed' !== permUsers[i] && 'validUsers' !== permUsers[i] && 'object' === typeof this[permUsers[i]] && Array.isArray(this[permUsers[i]])) {
+			
+					genericPermissionsObj[permUsers[i]] = this[permUsers[i]];
+			
+				}
+		
+			}
+			return genericPermissionsObj;
+	
+		},
+		mayRead: function() { return false; },
+		mayWrite: function() { return false; }
+	}
 
 };
 
@@ -1952,7 +2085,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = '~/HowToLieWithStatistics.pdf';
 				var testStats = getTestStats();
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var lstatStub = sinon.stub(filesystem, 'lstat').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testStats);
 				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
@@ -1962,25 +2095,23 @@ describe('filesystem.js', function() {
 			
 				var testPath = '~/HowToLieWithStatistics.pdf';
 				var testStats = getTestStats();
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				expect(filesystem.stat(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
-			it('should include default permissions for the parent directory if a permissions file does not exist', function() {
+			it('should include default permissions for the parent directory if a permissions file does not exist at pth or above it in VFS', function() {
 			
 				var testPath = '~/HowToLieWithStatistics.pdf';
 				var testStats = getTestStats();
 				testStats.isFile = function() { return true; };
-				var testPerms = JSON.parse(getTestPerms());
-				var defaultPerms = {
-					owner: 'root',
-					allowed: []
-				};
+				var testPerms = getTestPerms();
+				var defaultPerms = getDefaultPerms();
 				var testResults = '---- ' + testStats.nlink + ' ' + defaultPerms.owner + ' ' + testStats.size + ' "' + testStats.atime.toString() + '" "' + testStats.mtime.toString() + '" "' + testStats.birthtime.toString() + '" ' + testStats.blksize + ' ' + testStats.blocks + ' ' + path.basename(testPath);
 				var lstatStub = sinon.stub(filesystem, 'lstat').returns(testStats);
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(false);
+				var getInheritedPermissionsStub = sinon.stub(filesystem, 'getInheritedPermissions').returns(false);
 				var getDefaultPermissionsStub = sinon.stub(filesystem, 'getDefaultPermissions').returns(defaultPerms);
 				expect(filesystem.stat(testPath)).to.equal(testResults);
 			
@@ -1990,7 +2121,7 @@ describe('filesystem.js', function() {
 				var testPath = '~/HowToLieWithStatistics.pdf';
 				var testStats = getTestStats();
 				testStats.isFile = function() { return true; };
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testAllowed = '';
 				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
 				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
@@ -2006,7 +2137,7 @@ describe('filesystem.js', function() {
 				var testPath = '~/HowToLieWithStatistics.pdf';
 				var testStats = getTestStats();
 				testStats.isFile = function() { return true; };
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testAllowed = '';
 				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
 				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
@@ -2032,7 +2163,7 @@ describe('filesystem.js', function() {
 				var testPath = '~/HowToLieWithStatistics';
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return true; };
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testAllowed = '';
 				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
 				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
@@ -2049,7 +2180,7 @@ describe('filesystem.js', function() {
 				var testPath = '~/HowToLieWithStatistics';
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return true; };
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testAllowed = '';
 				testAllowed += -1 !== testPerms.allowed.indexOf('r') ? 'r' : '-';
 				testAllowed += -1 !== testPerms.allowed.indexOf('w') ? 'w' : '-';
@@ -2716,7 +2847,7 @@ describe('filesystem.js', function() {
 					return false;
 				
 				}
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').callsFake(function trueIfPathNotHome(pth) {
 				
 					return -1 === pth.indexOf('fs/home/');
@@ -2732,13 +2863,12 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				filesystem.cwd = '';
 				var testPath = "etc/david/lifeblood/conf.d";
-				var testPathTwo = "home/david/toadstool";
 				var usersSudoFullRoot = global.Uwot.Config.nconf.get('users:sudoFullRoot');
 				global.Uwot.Config.nconf.set('users:sudoFullRoot', false);
 				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 				global.Uwot.Config.nconf.set('users:sudoFullRoot', true);
 				filesystem.sudo = false;
-				expect(filesystem.isReadable(testPathTwo)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 				global.Uwot.Config.nconf.set('users:sudoFullRoot', usersSudoFullRoot);
 			
 			});
@@ -2779,24 +2909,24 @@ describe('filesystem.js', function() {
 			});
 			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, instance user is not granted read permissions in permissions file, and owner of directory in permissions file is not instance user', function() {
 			
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: altUser.uName});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				var testPath = "var/www/html/elfo/unrequieted";
 				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 			
 			});
 			it('should return true if pth resolves to absolute path in this.pubDir.path, and instance user is granted read permissions in permissions file, and file is readable by fs', function() {
 			
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var testPerms = {owner: altUser.uName};
+				var testPerms = getTestPerms();
 				testPerms[instanceUser.uName] = ['r'];
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testPath = "var/www/html/elfo/unrequieted";
@@ -2805,12 +2935,12 @@ describe('filesystem.js', function() {
 			});
 			it('should return a systemError if pth resolves to absolute path in this.pubDir.path, and permissions are set, and instance user is not granted read permissions in permissions file', function() {
 			
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var testPerms = {};
+				var testPerms = getDefaultPerms();
 				testPerms[instanceUser.uName] = ['w'];
 				testPerms[altUser.uName] = ['r'];
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
@@ -2820,24 +2950,26 @@ describe('filesystem.js', function() {
 			});
 			it('should return true if pth resolves to absolute path in this.pubDir.path, permissions file is not set, and file is readable by fs', function() {
 			
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: 'root', allowed: ['r', 'x'], mayRead: function() {return true;}});
 				var testPath = "var/www/html/elfo/unrequieted";
 				expect(filesystem.isReadable(testPath)).to.be.true;
 			
 			});
 			it('should return an error if accessSync throws an error', function() {
 			
-				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(getTestStats());
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true)
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').throws(SystemError.EACCES({syscall: 'stat'}));
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var testPerms = getDefaultPerms();
+				testPerms.mayRead = function() { return true; };
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testPath = "var/www/html/elfo/unrequieted";
 				expect(filesystem.isReadable(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
 			
@@ -2923,19 +3055,21 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: altUser.uName});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				var testPath = "Users/elfo/lifeblood.txt";
 				expect(filesystem.isWritable(testPath)).to.be.an.instanceof(Error).with.property('code').that.includes('EACCES');
 			
 			});
-			it('should return truw if pth resolves to a path in this.pubDir, instance user is set to owner in permissions file, and is writable by fs', function() {
+			it('should return true if pth resolves to a path in this.pubDir, instance user is set to owner in permissions file, and is writable by fs', function() {
 			
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(true);
 				var isInRootStub = sinon.stub(filesystem, 'isInRoot').returns(true);
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns({owner: instanceUser.uName});
+				var testPerms = getTestPerms();
+				testPerms.owner = instanceUser.uName;
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testPath = "Users/elfo/lifeblood.txt";
 				expect(filesystem.isWritable(testPath)).to.be.true;
 			
@@ -2947,7 +3081,7 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				var accessSyncStub = sinon.stub(fs, 'accessSync').returns(true);
-				var testPerms = {owner: altUser.uName};
+				var testPerms = getTestPerms();
 				testPerms[instanceUser.uName] = ['w']
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testPath = "Users/david/lifeblood.txt";
@@ -3003,11 +3137,11 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('getPermissions(pth)', function() {
+		describe('getExplicitPermissions(pth)', function() {
 		
 			it('should be a function', function() {
 			
-				expect(filesystem.getPermissions).to.be.a('function');
+				expect(filesystem.getExplicitPermissions).to.be.a('function');
 			
 			});
 			it('should return a permissions object with owner:"root" and allowed:[] if pth is not in root, pubDir or userDir', function() {
@@ -3015,7 +3149,7 @@ describe('filesystem.js', function() {
 				var testPath = '/Users/tmp/dropBox';
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
@@ -3027,13 +3161,13 @@ describe('filesystem.js', function() {
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				filesystem.sudo = true;
 				global.Uwot.Config.nconf.set("user:sudoFullRoot", false);
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
 				filesystem.sudo = false;
 				global.Uwot.Config.nconf.set("user:sudoFullRoot", true);
-				testResult = filesystem.getPermissions(testPath);
+				testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotFsPermissions');
 				expect(testResult.owner).to.equal('root');
 				expect(testResult.allowed).to.be.an('array').that.is.empty;
@@ -3044,7 +3178,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
@@ -3054,14 +3188,14 @@ describe('filesystem.js', function() {
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns('["test" : 123]');
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.false;
 			
 			});
 			it('should return a generic permissions object with the content of the permissions file in the directory if pth points to a directory and the permissions file contains valid JSON', function() {
 			
 				testStats.isDirectory = function() { return true; };
-				var thesePerms = getTestPerms();
+				var thesePerms = JSON.stringify(getTestPerms());
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
@@ -3073,7 +3207,7 @@ describe('filesystem.js', function() {
 						errorUser
 					]);
 				});
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
 			
 			});
@@ -3083,7 +3217,7 @@ describe('filesystem.js', function() {
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').throws(SystemError.EISDIR({syscall: 'read', path: testPath}));
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.false;
 			
 			});
@@ -3093,14 +3227,14 @@ describe('filesystem.js', function() {
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns('["test" : 123]');
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.false;
 			
 			});
 			it('should return a permissions object with the content of the permissions file in the directory if pth points to a file and the permissions file in the enclosing directory contains valid JSON', function() {
 			
 				testStats.isFile = function() { return true; };
-				var thesePerms = getTestPerms();
+				var thesePerms = JSON.stringify(getTestPerms());
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
@@ -3112,7 +3246,7 @@ describe('filesystem.js', function() {
 						errorUser
 					]);
 				});
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
 			
 			});
@@ -3122,14 +3256,14 @@ describe('filesystem.js', function() {
 				var testPath = 'tmp/dropBox';
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').throws(SystemError.EISDIR({syscall: 'read', path: testPath}));
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.false;
 			
 			});
 			it('should return an ENOENT SystemError if pth is extant and in an allowed path, but points to neither a file nor a directory', function() {
 			
 				var testPath = 'tmp/dropBox';
-				var thesePerms = getTestPerms();
+				var thesePerms = JSON.stringify(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(thesePerms);
 				var listUsersStub = sinon.stub(global.Uwot.Users, 'listUsers').callsFake(function testUserList(cb) {
@@ -3140,7 +3274,7 @@ describe('filesystem.js', function() {
 						errorUser
 					]);
 				});
-				var testResult = filesystem.getPermissions(testPath);
+				var testResult = filesystem.getExplicitPermissions(testPath);
 				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
@@ -3305,7 +3439,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(null, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
 				filesystem.sudo = false;
@@ -3316,7 +3450,7 @@ describe('filesystem.js', function() {
 			
 				var testPath = '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, null, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user or permissions');
 				expect(filesystem.setPermissions(testPath, testUName, null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user or permissions');
@@ -3327,7 +3461,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(false);
 				var testPath = '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('message').that.includes(': illegal user name');
 			
@@ -3337,7 +3471,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
@@ -3348,9 +3482,8 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
-				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testPerms = getTestPerms();
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
@@ -3360,14 +3493,14 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testStats = getTestStats();
 				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
 				
 					var pthObj = path.parse(pth);
 					if (pth === testPath) {
 					
-						return null;
+						throw SystemError.ENOENT({syscall: 'stat'});
 					
 					}
 					else {
@@ -3380,8 +3513,8 @@ describe('filesystem.js', function() {
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				filesystem.sudo = true;
-				// was testing w/ node v8; later versions made error more specific about what was wrong and changed wording.
-				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(TypeError).with.property('message').that.includes(' string.');
+				// no longer dependent on specific node errors
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
 			it('should return an error if permissions file cannot be written', function() {
@@ -3389,8 +3522,9 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testStats = getTestStats();
+				testStats.isFile = function() { return true; };
 				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
 				
 					var pthObj = path.parse(pth);
@@ -3411,7 +3545,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return true; };
 				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
@@ -3429,10 +3563,10 @@ describe('filesystem.js', function() {
 					return undefined;
 				
 				});
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(getTestPerms()));
+				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(JSON.stringify(getTestPerms())));
 				expect(finalPath).to.equal(testPath + path.sep + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
@@ -3444,7 +3578,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin/';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
 				var dirnameStub = sinon.stub(path, 'dirname').callsFake(function errorOrPath(pth) {
@@ -3462,10 +3596,10 @@ describe('filesystem.js', function() {
 					return undefined;
 				
 				});
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(getTestPerms()));
+				expect(JSON.parse(jsonOutput)).to.deep.equal(JSON.parse(JSON.stringify(getTestPerms())));
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
@@ -3477,20 +3611,11 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin/';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				testPerms.allowed = null;
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.allowed = ['r', 'w'];
-				testPrevPerms.toGeneric = function() {
-				
-					return {
-						owner: this.owner,
-						allowed: this.allowed,
-						fuser: this.fuser
-					}
-				
-				};
-				var testResult = JSON.parse(getTestPerms());
+				var testResult = getTestPerms();
 				testResult.allowed = ['r', 'w'];
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3512,7 +3637,7 @@ describe('filesystem.js', function() {
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(JSON.parse(jsonOutput).allowed).to.deep.equal(testResult.allowed);
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
@@ -3524,20 +3649,11 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin/';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				testPerms.owner = null;
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.owner = 'fuser';
-				testPrevPerms.toGeneric = function() {
-				
-					return {
-						owner: this.owner,
-						allowed: this.allowed,
-						fuser: this.fuser
-					}
-				
-				};
-				var testResult = JSON.parse(getTestPerms());
+				var testResult = getTestPerms();
 				testResult.owner = 'fuser';
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3559,7 +3675,7 @@ describe('filesystem.js', function() {
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(JSON.parse(jsonOutput).owner).to.equal(testResult.owner);
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
@@ -3571,20 +3687,11 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				delete testPerms.owner;
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.owner = 'root';
-				testPrevPerms.toGeneric = function() {
-				
-					return {
-						owner: this.owner,
-						allowed: this.allowed,
-						fuser: this.fuser
-					}
-				
-				};
-				var testResult = JSON.parse(getTestPerms());
+				var testResult = getTestPerms();
 				testResult.owner = 'fuser';
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3606,7 +3713,7 @@ describe('filesystem.js', function() {
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(JSON.parse(jsonOutput).owner).to.equal(testResult.owner);
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
@@ -3618,21 +3725,12 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/usr/local/bin/';
 				var testUName = instanceUser.uName;
-				var testPerms = JSON.parse(getTestPerms());
+				var testPerms = getTestPerms();
 				testPerms[notFoundUser.uName] = ['r'];
 				delete testPerms[instanceUser.uName];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms[instanceUser.uName] = ['w', 'x'];
-				testPrevPerms.toGeneric = function() {
-				
-					return {
-						owner: this.owner,
-						allowed: this.allowed,
-						fuser: this.fuser
-					}
-				
-				};
-				var testResult = JSON.parse(getTestPerms());
+				var testResult = getTestPerms();
 				testResult[notFoundUser.uName] = ['r'];
 				testResult[instanceUser.uName] = ['w', 'x'];
 				var testStats = getTestStats();
@@ -3655,13 +3753,13 @@ describe('filesystem.js', function() {
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				filesystem.sudo = true;
 				expect(filesystem.setPermissions(testPath + testFileName, testUName, testPerms)).to.be.true;
-				expect(JSON.parse(jsonOutput)).to.deep.equal(testResult);
+				expect(JSON.parse(jsonOutput).fuser).to.deep.equal(testResult.fuser);
 				expect(finalPath).to.equal(testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME);
 			
 			});
 		
 		});
-		describe('changeAllowed(pth, allowed)', function() {
+		describe('changeAllowed(pth, allowed, isRecursive)', function() {
 		
 			it('should be a function', function() {
 			
@@ -3718,7 +3816,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				testPrevPerms.toGeneric = function() {
@@ -3742,8 +3840,8 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.EPERM({syscall: 'stat', path: testPath}));
+				var testPrevPerms = getTestPerms();
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3774,8 +3872,8 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.EPERM({syscall: 'stat', path: testPath}));
+				var testPrevPerms = getTestPerms();
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3793,12 +3891,12 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				var finalData = {
 					owner: 'root',
 					allowed: testAllowed
 				};
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.EPERM({syscall: 'stat', path: testPath}));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
@@ -3824,7 +3922,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -3864,7 +3962,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -3905,7 +4003,7 @@ describe('filesystem.js', function() {
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testAllowed = ['r', 'w', 'x'];
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -3939,18 +4037,21 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('changeOwner(pth, userName)', function() {
+		describe('changeOwner(pth, userName, isRecursive)', function() {
 		
 			it('should be a function', function() {
 			
 				expect(filesystem.changeOwner).to.be.a('function');
 			
 			});
-			it('should return a systemError if !this.sudo', function() {
+			it('should return a systemError if !this.sudo and instance user is not the current owner', function() {
 			
-				var testPath = '/usr/local/bin/';
+				var testPath = filesystem.root.path + '/usr/local/bin/';
 				var testUserName = instanceUser.uName;
 				filesystem.sudo = false;
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
 			
 			});
@@ -4007,22 +4108,13 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var testPrevPerms = JSON.parse(getTestPerms());
-				testPrevPerms.toGeneric = function() {
-				
-					return {
-						owner: this.owner,
-						allowed: this.allowed,
-						fuser: this.fuser
-					}
-				
-				};
+				var testPrevPerms = getTestPerms();
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return true; };
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
 				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').throws(SystemError.EIO({syscall: 'write', path: testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME}));
-				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.includes('EIO');
+				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
 			
 			});
 			it('should write a new JSON object with owner: "{userName}" to a permissions file at pth if pth resolves to a directory in root, public, or users, this.sudo, userName matches a user in the db, and permissions were not previously set', function() {
@@ -4033,7 +4125,7 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -4045,9 +4137,9 @@ describe('filesystem.js', function() {
 				};
 				var finalData = {
 					owner: testUserName,
-					allowed: ['r']
+					allowed: []
 				};
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(new Error('test getPermissions error'));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return true; };
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
@@ -4071,7 +4163,7 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -4111,7 +4203,7 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -4123,9 +4215,9 @@ describe('filesystem.js', function() {
 				};
 				var finalData = {
 					owner: testUserName,
-					allowed: ['r']
+					allowed: []
 				};
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(new Error('test getPermissions error'));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
 				var testStats = getTestStats();
 				testStats.isDirectory = function() { return false; };
 				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
@@ -4150,7 +4242,7 @@ describe('filesystem.js', function() {
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
-				var testPrevPerms = JSON.parse(getTestPerms());
+				var testPrevPerms = getTestPerms();
 				testPrevPerms.toGeneric = function() {
 				
 					return {
@@ -4270,7 +4362,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return "d" as the first character for lines representing directories', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4288,7 +4380,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return "s" as the first character for lines representing symlinks', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4306,7 +4398,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return "-" as the first character for lines representing neither dirs nor symlinks', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4324,7 +4416,7 @@ describe('filesystem.js', function() {
 			});
 			it('should return three characters matching the permissions allowed property members or dashes for each line', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4344,7 +4436,8 @@ describe('filesystem.js', function() {
 			});
 			it('should omit a file\'s line from the finalArray if statSync throws an error', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var testPerms = getTestPerms();
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPerms);
 				var testArray = ['run'];
 				var testPath = '/var';
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
@@ -4355,7 +4448,7 @@ describe('filesystem.js', function() {
 			});
 			it('should output 6 chars containing spaces and the number of links to a file for each line', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4378,7 +4471,7 @@ describe('filesystem.js', function() {
 			});
 			it('should output the owner from getPermissions on each line', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4408,7 +4501,7 @@ describe('filesystem.js', function() {
 			});
 			it('should output 11 chars containing spaces and the byte size of the file for each line', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4438,7 +4531,7 @@ describe('filesystem.js', function() {
 			
 				var now = new Date();
 				var nowArray = Array.from(now.toLocaleString('en-us', {hourCycle: 'h24', hour12: false, month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'}).toUpperCase().replace(',', '').replace(' AM', '').replace(' PM', ''));
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4471,7 +4564,7 @@ describe('filesystem.js', function() {
 			
 				var then = getTestStats().mtime;
 				var thenArray = Array.from(then.toLocaleString('en-us', {month: 'short', day: '2-digit', year: 'numeric'}).toUpperCase().replace(',', ' '));
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4501,7 +4594,7 @@ describe('filesystem.js', function() {
 			});
 			it('should output the file name for each line', function() {
 			
-				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(JSON.parse(getTestPerms()));
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
 				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
 				
 					var dirStats = getTestStats();
@@ -4548,12 +4641,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath, false)).to.deep.equal({
-					fullPath: testPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		testPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 				expect(resolvePathStub.calledWith(testPath, false));
 			
@@ -4566,12 +4661,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: testPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		testPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 				expect(resolvePathStub.calledWith(testPath, true));
 			
@@ -4585,12 +4682,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4603,12 +4702,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		true,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			true,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4621,12 +4722,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4641,12 +4744,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	true,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		true,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4661,12 +4766,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4681,12 +4788,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		true,
-					inAllowed:	true
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			true,
+					inAllowed:		true,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4701,12 +4810,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4721,12 +4832,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(true);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	true,
-					isOwned:	true,
-					inPub:		false,
-					inAllowed:	true
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		true,
+					isOwned:		true,
+					inPub:			false,
+					inAllowed:		true,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4741,12 +4854,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		false,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			false,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			false,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4761,12 +4876,14 @@ describe('filesystem.js', function() {
 				isInUserStub.onCall(1).returns(true);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		true,
-					inUsers:	true,
-					isOwned:	true,
-					inPub:		true,
-					inAllowed:	true
+					fullPath:		resolvedPath,
+					inRoot:			true,
+					inUsers:		true,
+					isOwned:		true,
+					inPub:			true,
+					inAllowed:		true,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4779,12 +4896,14 @@ describe('filesystem.js', function() {
 				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
 				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
 				expect(filesystem.getPathLocVars(testPath)).to.deep.equal({
-					fullPath: resolvedPath,
-					inRoot:		true,
-					inUsers:	false,
-					isOwned:	false,
-					inPub:		false,
-					inAllowed:	false
+					fullPath:		resolvedPath,
+					inRoot:			true,
+					inUsers:		false,
+					isOwned:		false,
+					inPub:			false,
+					inAllowed:		false,
+					inVFS:			true,
+					sudoAllowed:	false
 				});
 			
 			});
@@ -4853,8 +4972,8 @@ describe('filesystem.js', function() {
 				}
 			
 			});
-			var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(getTestPerms());
-			testPermissionsObj = filesystem.getPermissions('usr');
+			var readFileSyncStub = sinon.stub(fs, 'readFileSync').returns(JSON.stringify(getTestPerms()));
+			testPermissionsObj = filesystem.getDefaultPermissions('usr');
 			statSyncStub.restore();
 			readFileSyncStub.restore();
 		

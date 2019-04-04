@@ -107,7 +107,7 @@ class UwotCmdChmod extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					executeResult.output.content.push('permissions updated.')
+					executeResult.output.content.push('permissions updated.');
 					return callback(false, executeResult);
 
 				}

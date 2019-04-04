@@ -81,7 +81,7 @@ class UwotCmdChown extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					executeResult.output.content.push('owner updated.')
+					executeResult.output.content.push('owner updated.');
 					return callback(false, executeResult);
 
 				}
