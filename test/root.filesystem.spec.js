@@ -5246,8 +5246,18 @@ describe('filesystem.js', function() {
 				expect(testPermissionsObj.getUserPermsArray).to.be.a('function');
 		
 			});
-			it('should return this.allowed if user does not have specific permissions');
-			it('should return an array if the user has specific permissions');
+			it('should return this.allowed if user does not have specific permissions', function() {
+			
+				expect(testPermissionsObj.getUserPermsArray(altUser.uName)).to.deep.equal(testPermissionsObj.allowed);
+			
+			});
+			it('should return an array if the user has specific permissions', function() {
+			
+				var altPerms = ['r', 'w', 'x'];
+				testPermissionsObj[altUser.uName] = altPerms;
+				expect(testPermissionsObj.getUserPermsArray(altUser.uName)).to.deep.equal(altPerms);
+			
+			});
 		
 		});
 		describe('mayRead(userName)', function() {
@@ -5257,10 +5267,29 @@ describe('filesystem.js', function() {
 				expect(testPermissionsObj.mayRead).to.be.a('function');
 		
 			});
-			it('should return false if user does not have specific permissions and this.allowed does not contain "r"');
-			it('should return false if user does have specific permissions and the specific permissions do not contain "r"');
-			it('should return true if user does not have specific permissions and this.allowed contains "r"');
-			it('should return true if user does have specific permissions and the specific permissions contains "r"');
+			it('should return false if user does not have specific permissions and this.allowed does not contain "r"', function() {
+			
+				testPermissionsObj.allowed = ['x'];
+				expect(testPermissionsObj.mayRead(altUser.uName)).to.be.false;
+			
+			});
+			it('should return false if user does have specific permissions and the specific permissions do not contain "r"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['x'];
+				expect(testPermissionsObj.mayRead(altUser.uName)).to.be.false;
+			
+			});
+			it('should return true if user does not have specific permissions and this.allowed contains "r"', function() {
+			
+				expect(testPermissionsObj.mayRead(altUser.uName)).to.be.true;
+			
+			});
+			it('should return true if user does have specific permissions and the specific permissions contains "r"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['r', 'w'];
+				expect(testPermissionsObj.mayRead(altUser.uName)).to.be.true;
+			
+			});
 		
 		});
 		describe('mayWrite(userName)', function() {
@@ -5270,10 +5299,30 @@ describe('filesystem.js', function() {
 				expect(testPermissionsObj.mayWrite).to.be.a('function');
 		
 			});
-			it('should return false if user does not have specific permissions and this.allowed does not contain "w"');
-			it('should return false if user does have specific permissions and the specific permissions do not contain "w"');
-			it('should return true if user does not have specific permissions and this.allowed contains "w"');
-			it('should return true if user does have specific permissions and the specific permissions contains "w"');
+			it('should return false if user does not have specific permissions and this.allowed does not contain "w"', function() {
+			
+				testPermissionsObj.allowed = ['x'];
+				expect(testPermissionsObj.mayWrite(altUser.uName)).to.be.false;
+			
+			});
+			it('should return false if user does have specific permissions and the specific permissions do not contain "w"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['x'];
+				expect(testPermissionsObj.mayWrite(altUser.uName)).to.be.false;
+			
+			});
+			it('should return true if user does not have specific permissions and this.allowed contains "w"', function() {
+			
+				testPermissionsObj.allowed = ['w', 'x'];
+				expect(testPermissionsObj.mayWrite(altUser.uName)).to.be.true;
+			
+			});
+			it('should return true if user does have specific permissions and the specific permissions contains "w"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['r', 'w'];
+				expect(testPermissionsObj.mayWrite(altUser.uName)).to.be.true;
+			
+			});
 		
 		});
 		describe('mayExecute(userName)', function() {
@@ -5283,10 +5332,30 @@ describe('filesystem.js', function() {
 				expect(testPermissionsObj.mayExecute).to.be.a('function');
 		
 			});
-			it('should return false if user does not have specific permissions and this.allowed does not contain "x"');
-			it('should return false if user does have specific permissions and the specific permissions do not contain "x"');
-			it('should return true if user does not have specific permissions and this.allowed contains "x"');
-			it('should return true if user does have specific permissions and the specific permissions contains "x"');
+			it('should return false if user does not have specific permissions and this.allowed does not contain "x"', function() {
+			
+				testPermissionsObj.allowed = ['r'];
+				expect(testPermissionsObj.mayExecute(altUser.uName)).to.be.false;
+			
+			});
+			it('should return false if user does have specific permissions and the specific permissions do not contain "x"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['r'];
+				expect(testPermissionsObj.mayExecute(altUser.uName)).to.be.false;
+			
+			});
+			it('should return true if user does not have specific permissions and this.allowed contains "x"', function() {
+			
+				testPermissionsObj.allowed = ['x'];
+				expect(testPermissionsObj.mayExecute(altUser.uName)).to.be.true;
+			
+			});
+			it('should return true if user does have specific permissions and the specific permissions contains "x"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['x'];
+				expect(testPermissionsObj.mayExecute(altUser.uName)).to.be.true;
+			
+			});
 		
 		});
 		describe('getUserPermsString(userName)', function() {
@@ -5294,19 +5363,109 @@ describe('filesystem.js', function() {
 			it('should be a function', function() {
 			
 				expect(testPermissionsObj.getUserPermsString).to.be.a('function');
-				it('should return a string with the first character as "-" if user does not have specific permissions and this.allowed does not contain "r"');
-				it('should return a string with the first character as "r" if user does not have specific permissions and this.allowed contains "r"');
-				it('should return a string with the second character as "-" if user does not have specific permissions and this.allowed does not contain "w"');
-				it('should return a string with the second character as "w" if user does not have specific permissions and this.allowed contains "w"');
-				it('should return a string with the third character as "-" if user does not have specific permissions and this.allowed does not contain "x"');
-				it('should return a string with the third character as "x" if user does not have specific permissions and this.allowed contains "x"');
-				it('should return a string with the first character as "-" if user has specific permissions and the specific permissions do not contain "r"');
-				it('should return a string with the first character as "r" if user has specific permissions and the specific permissions contain "r"');
-				it('should return a string with the second character as "-" if user has specific permissions and the specific permissions do not contain "w"');
-				it('should return a string with the second character as "w" if user has specific permissions and the specific permissions contain "w"');
-				it('should return a string with the third character as "-" if user has specific permissions and the specific permissions do not contain "x"');
-				it('should return a string with the third character as "x" if user has specific permissions and the specific permissions contain "x"');
 		
+			});
+			it('should return a string with the first character as "-" if user does not have specific permissions and this.allowed does not contain "r"', function() {
+			
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[0]).to.equal('-');
+			
+			});
+			it('should return a string with the first character as "r" if user does not have specific permissions and this.allowed contains "r"', function() {
+			
+				testPermissionsObj.allowed = ['r'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[0]).to.equal('r');
+			
+			});
+			it('should return a string with the second character as "-" if user does not have specific permissions and this.allowed does not contain "w"', function() {
+			
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[1]).to.equal('-');
+			
+			});
+			it('should return a string with the second character as "w" if user does not have specific permissions and this.allowed contains "w"', function() {
+			
+				testPermissionsObj.allowed = ['w'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[1]).to.equal('w');
+			
+			});
+			it('should return a string with the third character as "-" if user does not have specific permissions and this.allowed does not contain "x"', function() {
+			
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[2]).to.equal('-');
+			
+			});
+			it('should return a string with the third character as "x" if user does not have specific permissions and this.allowed contains "x"', function() {
+			
+				testPermissionsObj.allowed = ['x'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[2]).to.equal('x');
+			
+			});
+			it('should return a string with the first character as "-" if user has specific permissions and the specific permissions do not contain "r"', function() {
+			
+				testPermissionsObj[altUser.uName] = [];
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[0]).to.equal('-');
+			
+			});
+			it('should return a string with the first character as "r" if user has specific permissions and the specific permissions contain "r"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['r'];
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[0]).to.equal('r');
+			
+			});
+			it('should return a string with the second character as "-" if user has specific permissions and the specific permissions do not contain "w"', function() {
+			
+				testPermissionsObj[altUser.uName] = [];
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[1]).to.equal('-');
+			
+			});
+			it('should return a string with the second character as "w" if user has specific permissions and the specific permissions contain "w"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['w'];
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[1]).to.equal('w');
+			
+			});
+			it('should return a string with the third character as "-" if user has specific permissions and the specific permissions do not contain "x"', function() {
+			
+				testPermissionsObj[altUser.uName] = [];
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[2]).to.equal('-');
+			
+			});
+			it('should return a string with the third character as "x" if user has specific permissions and the specific permissions contain "x"', function() {
+			
+				testPermissionsObj[altUser.uName] = ['x'];
+				testPermissionsObj.allowed = [];
+				var testResult = testPermissionsObj.getUserPermsString(altUser.uName);
+				var testResultArray = Array.from(testResult);
+				expect(testResultArray[2]).to.equal('x');
+			
 			});
 		
 		});
@@ -5351,13 +5510,33 @@ describe('filesystem.js', function() {
 				testPermissionsObj.allowed = ['r', 'w', 'x'];
 				otherPerms[altUser.uName] = ['r'];
 				var finalResult = testPermissionsObj.concatPerms(otherPerms);
-				expect(finalResult.constructor.name).to.equal('UwotFsPermissions')
+				expect(finalResult.constructor.name).to.equal('UwotFsPermissions');
 			
 			});
-			it('should return an error if otherPerms is not a UwotFsPermissions instance and the constructor for UwotFsPermissions throws an error with otherPerms as an argument');
-			it('should return an error if Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric()) throws an error');
-			it('should assign otherPerms.allowed to the result object\'s allowed property if the object the method is called on has null or undefined as the value of its allowd property');
-			it('should return an error if the UwotFsPermissions constructor throws an error with the concatenated object as an argument');
+			it('should return an error if Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric()) throws an error', function() {
+			
+				var otherPerms = testPermissionsObj.concatPerms(null);
+				otherPerms.owner = instanceUser.uName;
+				testPermissionsObj.allowed = ['r', 'w', 'x'];
+				otherPerms[altUser.uName] = ['r'];
+				var toGenericStub = sinon.stub(testPermissionsObj, 'toGeneric').throws(new Error('test toGeneric Error'));
+				var finalResult = testPermissionsObj.concatPerms(otherPerms);
+				expect(finalResult).to.be.an.instanceof(Error).with.property('message').that.equals('test toGeneric Error');
+				
+			
+			});
+			it('should assign otherPerms.allowed to the result object\'s allowed property if the object the method is called on has null or undefined as the value of its allowd property', function() {
+			
+				var otherPerms = testPermissionsObj.concatPerms(null);
+				otherPerms.owner = instanceUser.uName;
+				testPermissionsObj.allowed = null;
+				var otherAllowed = ['r', 'w', 'x'];
+				otherPerms.allowed = otherAllowed;
+				otherPerms[altUser.uName] = ['r'];
+				var finalResult = testPermissionsObj.concatPerms(otherPerms);
+				expect(finalResult.allowed).to.deep.equal(otherAllowed);
+			
+			});
 		
 		})
 	
