@@ -3246,12 +3246,72 @@ describe('filesystem.js', function() {
 				expect(filesystem.getPermissions).to.be.a('function');
 			
 			});
-			it('should return result of getExplicitPermissions if it is a non-error object');
-			it('should return an error if getExplicitPermissions returns an error');
-			it('should return the result of getInheritedPermissions if getExplicitPermissions returns false and it returns a non-error object');
-			it('should return an error if getExplicitPermissions returns false and getInheritedPermissions returns an error');
-			it('should return the result of getDefaultPermissions if getExplicitPermissions returns false, getInheritedPermissions returns false, and it is a non-error object');
-			it('should return an error if getExplicitPermissions returns false, getInheritedPermissions returns false, and getDefaultPermissions returns an error');
+			it('should return result of getExplicitPermissions if it is a non-error object', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(testPerms.toGeneric());
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
+			
+			});
+			it('should return an error if getExplicitPermissions returns an error', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return the result of getInheritedPermissions if getExplicitPermissions returns false and it returns a non-error object', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(false);
+				var getInheritedPermissionsStub = sinon.stub(filesystem, 'getInheritedPermissions').returns(testPerms.toGeneric());
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
+			
+			});
+			it('should return an error if getExplicitPermissions returns false and getInheritedPermissions returns an error', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(false);
+				var getInheritedPermissionsStub = sinon.stub(filesystem, 'getInheritedPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return the result of getDefaultPermissions if getExplicitPermissions returns false, getInheritedPermissions returns false, and it is a non-error object', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(false);
+				var getInheritedPermissionsStub = sinon.stub(filesystem, 'getInheritedPermissions').returns(false);
+				var getDefaultPermissionsStub = sinon.stub(filesystem, 'getDefaultPermissions').returns(testPerms.toGeneric());
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.deep.equal(JSON.parse(thesePerms));
+			
+			});
+			it('should return an error if getExplicitPermissions returns false, getInheritedPermissions returns false, and getDefaultPermissions returns an error', function() {
+			
+				var testPerms = getTestPerms();
+				var thesePerms = JSON.stringify(testPerms);
+				var testPath = 'tmp/dropBox';
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(false);
+				var getInheritedPermissionsStub = sinon.stub(filesystem, 'getInheritedPermissions').returns(false);
+				var getDefaultPermissionsStub = sinon.stub(filesystem, 'getDefaultPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath}));
+				var testResult = filesystem.getPermissions(testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
 		
 		});
 		describe('getExplicitPermissions(pth)', function() {
@@ -3399,12 +3459,66 @@ describe('filesystem.js', function() {
 		});
 		describe('getInheritedPermissions(pth)', function() {
 		
-			it('should be a function');
-			it('should return an error if getPathLocVars(pth) returns an error');
-			it('should return a permissions object with default owner and empty allowed array if pth is not in VFS');
-			it('should return false if pth is VFS root');
-			it('should recurse through parent directories, returning the value of the first parent with explicit permissions if any parent directory prior to root has explicit permissions');
-			it('should return false if no parent directory has explicit permissions');
+			it('should be a function', function() {
+			
+				expect(filesystem.getInheritedPermissions).to.be.a('function');
+			
+			});
+			it('should return an error if getPathLocVars(pth) returns an error', function() {
+			
+				var testPath = '/var/run/mouth/aboutMe.txt';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns(SystemError.EPERM({syscall: 'stat', path: testPath}));
+				expect(filesystem.getInheritedPermissions(testPath)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return a permissions object with default owner and empty allowed array if pth is not in VFS', function() {
+			
+				var testPath = '/var/run/mouth/aboutMe.txt';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					fullPath: path.join(filesystem.root.path, testPath),
+					inVFS: false
+				});
+				expect(filesystem.getInheritedPermissions(testPath)).to.deep.equal({owner: 'root', allowed: []});
+			
+			});
+			it('should return false if pth is VFS root', function() {
+			
+				var testPath = filesystem.root.path;
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					fullPath: testPath,
+					inVFS: true
+				});
+				expect(filesystem.getInheritedPermissions(testPath)).to.be.false;
+			
+			});
+			it('should recurse through parent directories, returning the value of the first parent with explicit permissions if any parent directory prior to root has explicit permissions', function() {
+			
+				var testPerms = getTestPerms();
+				var testPath = '/var/run/mouth/aboutMe.txt';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					fullPath: path.join(filesystem.root.path, testPath),
+					inVFS: true
+				});
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(testPerms);
+				var existsSyncStub = sinon.stub(fs, 'existsSync');
+				existsSyncStub.onCall(0).returns(false);
+				existsSyncStub.onCall(1).returns(true);
+				expect(filesystem.getInheritedPermissions(testPath)).to.deep.equal(testPerms);
+			
+			});
+			it('should return false if no parent directory has explicit permissions', function() {
+			
+				var testPerms = getTestPerms();
+				var testPath = '/var/run/mouth/aboutMe.txt';
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					fullPath: path.join(filesystem.root.path, testPath),
+					inVFS: true
+				});
+				var getExplicitPermissionsStub = sinon.stub(filesystem, 'getExplicitPermissions').returns(testPerms);
+				var existsSyncStub = sinon.stub(fs, 'existsSync').returns(false);
+				expect(filesystem.getInheritedPermissions(testPath)).to.be.false;
+			
+			});
 		
 		});
 		describe('getDefaultPermissions(pth)', function() {
