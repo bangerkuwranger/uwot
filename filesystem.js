@@ -207,7 +207,7 @@ class UwotFsPermissions {
 	mayExecute(userName) {
 	
 		var userPerms = this.getUserPermsArray(userName);
-		return userPerms.indexOf('w') > -1;
+		return userPerms.indexOf('x') > -1;
 	
 	}
 	

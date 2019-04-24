@@ -1802,6 +1802,43 @@ describe('config.js', function() {
 			});
 			
 		});
+		describe('isArrayKey(keyString)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(config.isArrayKey).to.be.a('function');
+			
+			});
+			it('should return the value of this.utilities.isArrayKey(keyString)', function() {
+			
+				var validKeys = [
+					'binpath:external',
+					'binpath:reverseProxies',
+					'themes:external'
+				];
+				var utilitiesIsArrayKeyStub = sinon.stub(config.utilities, 'isArrayKey').callsFake(function returnTF(keyString) {
+				
+					if ('string' !== typeof keyString || '' === keyString) {
+	
+						return false;
+	
+					}
+					else {
+	
+						var idx = validKeys.indexOf(keyString);
+						return -1 === idx ? false : true;
+	
+					}
+				
+				});
+				expect(config.isArrayKey()).to.be.false;
+				expect(config.isArrayKey('')).to.be.false;
+				expect(config.isArrayKey('reverseProxies')).to.be.false;
+				expect(config.isArrayKey('binpath:reverseProxies')).to.be.true;
+			
+			});
+		
+		});
 		describe('getConfigServerOrigin()', function() {
 		
 			it('should be a function', function() {

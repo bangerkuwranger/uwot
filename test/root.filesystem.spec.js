@@ -950,6 +950,54 @@ describe('filesystem.js', function() {
 				}, true);
 			
 			});
+			it('should perform this.cat if cmdName arg === "cat"', function(done) {
+			
+				var catStub = sinon.stub(filesystem, 'cat').callsFake(function returnCmd() {
+				
+					return 'cat ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('cat', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.include('cat  /usr/var/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.changeAllowed if cmdName arg === "chmod"', function(done) {
+			
+				var changeAllowedStub = sinon.stub(filesystem, 'changeAllowed').callsFake(function returnCmd() {
+				
+					return 'changeAllowed ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('chmod', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.include('changeAllowed /usr/var/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
+			it('should perform this.changeOwner if cmdName arg === "chown"', function(done) {
+			
+				var changeOwnerStub = sinon.stub(filesystem, 'changeOwner').callsFake(function returnCmd() {
+				
+					return 'changeOwner ' + Array.from(arguments).join(' ');
+				
+				});
+				filesystem.cmd('chown', ['/usr/var/tmpfile'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.include('changeOwner /usr/var/tmpfile');
+					done();
+				
+				}, true);
+			
+			});
 			it('should return an error to callback and set this.sudo to false if command process throws an error', function(done) {
 			
 				var testPath = '/usr/var';
@@ -1435,7 +1483,7 @@ describe('filesystem.js', function() {
 			});
 		
 		});
-		describe('copy(source, target)', function() {
+		describe('copy(source, target, noOverwrite, isRecursive)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1541,6 +1589,10 @@ describe('filesystem.js', function() {
 				expect(filesystem.copy(testReadPath, path.resolve(filesystem.root.path, testWritePath.replace(/^\/+/g, '')))).to.be.true;
 			
 			});
+			it('should set noOverwrite to false if arg is false or not boolean');
+			it('should set isRecursive to false if arg is false or not boolean');
+			it('should use fs.copySync to copy file recursively if isRecursive is true');
+			it('should return an error if isRecursive is true and fs.copySync throws an error');
 		
 		});
 		describe('createDir(pth)', function() {
@@ -3137,6 +3189,17 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('getPermissions(pth)', function() {
+		
+			it('should be a function');
+			it('should return result of getExplicitPermissions if it is a non-error object');
+			it('should return an error if getExplicitPermissions returns an error');
+			it('should return the result of getInheritedPermissions if getExplicitPermissions returns false and it returns a non-error object');
+			it('should return an error if getExplicitPermissions returns false and getInheritedPermissions returns an error');
+			it('should return the result of getDefaultPermissions if getExplicitPermissions returns false, getInheritedPermissions returns false, and it is a non-error object');
+			it('should return an error if getExplicitPermissions returns false, getInheritedPermissions returns false, and getDefaultPermissions returns an error');
+		
+		});
 		describe('getExplicitPermissions(pth)', function() {
 		
 			it('should be a function', function() {
@@ -3278,6 +3341,16 @@ describe('filesystem.js', function() {
 				expect(testResult).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
+		
+		});
+		describe('getInheritedPermissions(pth)', function() {
+		
+			it('should be a function');
+			it('should return an error if getPathLocVars(pth) returns an error');
+			it('should return a permissions object with default owner and empty allowed array if pth is not in VFS');
+			it('should return false if pth is VFS root');
+			it('should recurse through parent directories, returning the value of the first parent with explicit permissions if any parent directory prior to root has explicit permissions');
+			it('should return false if no parent directory has explicit permissions');
 		
 		});
 		describe('getDefaultPermissions(pth)', function() {
@@ -3517,6 +3590,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
+			it('should return an error if this.getPermissions returns an error');
 			it('should return an error if permissions file cannot be written', function() {
 			
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
@@ -4101,6 +4175,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
+			it('should return an error if this.getPermissions(pth) returns an error');
 			it('should return an error if fs cannot write to the permissions file at pth', function() {
 			
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
@@ -5164,6 +5239,77 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('getUserPermsArray(userName)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.getUserPermsArray).to.be.a('function');
+		
+			});
+			it('should return this.allowed if user does not have specific permissions');
+			it('should return an array if the user has specific permissions');
+		
+		});
+		describe('mayRead(userName)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.mayRead).to.be.a('function');
+		
+			});
+			it('should return false if user does not have specific permissions and this.allowed does not contain "r"');
+			it('should return false if user does have specific permissions and the specific permissions do not contain "r"');
+			it('should return true if user does not have specific permissions and this.allowed contains "r"');
+			it('should return true if user does have specific permissions and the specific permissions contains "r"');
+		
+		});
+		describe('mayWrite(userName)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.mayWrite).to.be.a('function');
+		
+			});
+			it('should return false if user does not have specific permissions and this.allowed does not contain "w"');
+			it('should return false if user does have specific permissions and the specific permissions do not contain "w"');
+			it('should return true if user does not have specific permissions and this.allowed contains "w"');
+			it('should return true if user does have specific permissions and the specific permissions contains "w"');
+		
+		});
+		describe('mayExecute(userName)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.mayExecute).to.be.a('function');
+		
+			});
+			it('should return false if user does not have specific permissions and this.allowed does not contain "x"');
+			it('should return false if user does have specific permissions and the specific permissions do not contain "x"');
+			it('should return true if user does not have specific permissions and this.allowed contains "x"');
+			it('should return true if user does have specific permissions and the specific permissions contains "x"');
+		
+		});
+		describe('getUserPermsString(userName)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(testPermissionsObj.getUserPermsString).to.be.a('function');
+				it('should return a string with the first character as "-" if user does not have specific permissions and this.allowed does not contain "r"');
+				it('should return a string with the first character as "r" if user does not have specific permissions and this.allowed contains "r"');
+				it('should return a string with the second character as "-" if user does not have specific permissions and this.allowed does not contain "w"');
+				it('should return a string with the second character as "w" if user does not have specific permissions and this.allowed contains "w"');
+				it('should return a string with the third character as "-" if user does not have specific permissions and this.allowed does not contain "x"');
+				it('should return a string with the third character as "x" if user does not have specific permissions and this.allowed contains "x"');
+				it('should return a string with the first character as "-" if user has specific permissions and the specific permissions do not contain "r"');
+				it('should return a string with the first character as "r" if user has specific permissions and the specific permissions contain "r"');
+				it('should return a string with the second character as "-" if user has specific permissions and the specific permissions do not contain "w"');
+				it('should return a string with the second character as "w" if user has specific permissions and the specific permissions contain "w"');
+				it('should return a string with the third character as "-" if user has specific permissions and the specific permissions do not contain "x"');
+				it('should return a string with the third character as "x" if user has specific permissions and the specific permissions contain "x"');
+		
+			});
+		
+		});
 		describe('concatPerms(otherPerms)', function() {
 		
 			it('should be a function', function() {
@@ -5208,6 +5354,10 @@ describe('filesystem.js', function() {
 				expect(finalResult.constructor.name).to.equal('UwotFsPermissions')
 			
 			});
+			it('should return an error if otherPerms is not a UwotFsPermissions instance and the constructor for UwotFsPermissions throws an error with otherPerms as an argument');
+			it('should return an error if Object.assign(otherPermsClassObj.toGeneric(), this.toGeneric()) throws an error');
+			it('should assign otherPerms.allowed to the result object\'s allowed property if the object the method is called on has null or undefined as the value of its allowd property');
+			it('should return an error if the UwotFsPermissions constructor throws an error with the concatenated object as an argument');
 		
 		})
 	
