@@ -1589,10 +1589,60 @@ describe('filesystem.js', function() {
 				expect(filesystem.copy(testReadPath, path.resolve(filesystem.root.path, testWritePath.replace(/^\/+/g, '')))).to.be.true;
 			
 			});
-			it('should set noOverwrite to false if arg is false or not boolean');
-			it('should set isRecursive to false if arg is false or not boolean');
-			it('should use fs.copySync to copy file recursively if isRecursive is true');
-			it('should return an error if isRecursive is true and fs.copySync throws an error');
+			it('should set noOverwrite to false if arg is false or not boolean', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var testOpts;
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').callsFake(function saveargs(src, trg, opts) {
+				
+					testOpts = opts;
+				
+				});
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.true;
+				expect(testOpts).to.be.undefined;
+			
+			});
+			it('should set isRecursive to false if arg is false or not boolean', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copySyncStub = sinon.stub(fs, 'copySync').returns(undefined);
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
+				expect(filesystem.copy(testReadPath, testWritePath)).to.be.true;
+				expect(copySyncStub.called).to.be.false;
+			
+			});
+			it('should use fs.copySync to copy file recursively if isRecursive is true', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copySyncStub = sinon.stub(fs, 'copySync').returns(undefined);
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
+				expect(filesystem.copy(testReadPath, testWritePath, false, true)).to.be.true;
+				expect(copyFileSyncStub.called).to.be.false;
+				expect(copySyncStub.called).to.be.true;
+			
+			});
+			it('should return an error if isRecursive is true and fs.copySync throws an error', function() {
+			
+				var testReadPath = '/etc/daemon/diablo.cfg';
+				var testWritePath = '/etc/daemon/belial.cfg';
+				var isReadableStub = sinon.stub(filesystem, 'isReadable').returns(true);
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var copySyncStub = sinon.stub(fs, 'copySync').throws(new Error('test copySync error'));
+				var copyFileSyncStub = sinon.stub(fs, 'copyFileSync').returns(undefined);
+				expect(filesystem.copy(testReadPath, testWritePath, false, true)).to.be.an.instanceof(Error).with.property('message').that.equals('test copySync error');
+				expect(copyFileSyncStub.called).to.be.false;
+				expect(copySyncStub.called).to.be.true;
+			
+			});
 		
 		});
 		describe('createDir(pth)', function() {
@@ -3191,7 +3241,11 @@ describe('filesystem.js', function() {
 		});
 		describe('getPermissions(pth)', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(filesystem.getPermissions).to.be.a('function');
+			
+			});
 			it('should return result of getExplicitPermissions if it is a non-error object');
 			it('should return an error if getExplicitPermissions returns an error');
 			it('should return the result of getInheritedPermissions if getExplicitPermissions returns false and it returns a non-error object');
