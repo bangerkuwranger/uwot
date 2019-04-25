@@ -3758,7 +3758,25 @@ describe('filesystem.js', function() {
 				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
-			it('should return an error if this.getPermissions returns an error');
+			it('should return an error if this.getPermissions returns an error', function() {
+			
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/usr/local/bin';
+				var testUName = instanceUser.uName;
+				var testPerms = getTestPerms();
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').returns({
+					fullPath: testPath,
+					inRoot: true,
+					inUsers: false,
+					inAllowed: true
+				});
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(new Error('test getPermissions error'));
+				filesystem.sudo = true;
+				expect(filesystem.setPermissions(testPath, testUName, testPerms)).to.be.an.instanceof(Error).with.property('message').that.equals('test getPermissions error');
+			
+			});
 			it('should return an error if permissions file cannot be written', function() {
 			
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
