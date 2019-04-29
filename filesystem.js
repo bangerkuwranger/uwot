@@ -2684,7 +2684,7 @@ class UwotFs {
 		var permLine = parentPerms.getUserPermsString();
 		if (false === parentPerms && this.isInPub(pth)) {
 		
-			permLine = '-r-';
+			permLine = '-rx';
 		
 		}
 		else if (false === parentPerms) {
@@ -2810,9 +2810,19 @@ class UwotFs {
 		try {
 		
 			fullPath = this.resolvePath(pth);
+			if (fullPath instanceof Error) {
+			
+				return fullPath;
+			
+			}
 			var pthStats = fs.statSync(fullPath);
 			fullPath = pthStats.isDirectory() ? fullPath : path.dirname(fullPath);
 			dirArr = this.readDir(fullPath);
+			if (dirArr instanceof Error) {
+			
+				return dirArr;
+			
+			}
 		
 		}
 		catch(e) {
@@ -2879,7 +2889,13 @@ class UwotFs {
 				}
 				if (thisFileStats.isDirectory()) {
 			
-					pthArr.push(this.readdirRecursive(filePath, fType));
+					var subDirArray = this.readdirRecursive(filePath, fType);
+					if (subDirArray instanceof Error) {
+					
+						return subDirArray;
+					
+					}
+					pthArr.push(subDirArray);
 			
 				}
 			

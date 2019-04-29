@@ -4638,6 +4638,10 @@ describe('filesystem.js', function() {
 				expect(filesystem.longFormatFiles(['etc', 'var', 'run'], null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to longFormatFiles');
 			
 			});
+			it('should return an error if this.getPermissions returns an Error');
+			it('should return "-rx" if getUserPermsString returns false and pth is inside pubDir');
+			it('should return "---" if getUserPermsString returns false and pth is not inside pubDir');
+			
 			it('should return "d" as the first character for lines representing directories', function() {
 			
 				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getTestPerms());
@@ -5185,6 +5189,28 @@ describe('filesystem.js', function() {
 				});
 			
 			});
+		
+		});
+		describe('readdirRecursive(pth, fType)', function() {
+		
+			it('should be a function');
+			it('should return a systemError if pth argument value is not a string');
+			it('should assign null to fType if fType argument value is not a string or not a valid file type');
+			it('should return an error if this.resolvePath(pth) returns an Error');
+			it('should return an error if fs.statSync throws an Error');
+			it('should return an error if this.readDir returns an Error');
+			it('should not include permissions files in the result array');
+			it('should return an error if any file causes fs.statSync to throw an Error');
+			it('should begin reading files inside of the directory at pth if it points to a directory');
+			it('should begin reading files inside of the parent directory for file at pth if it points to a non-directory file');
+			it('should only include files if fType is "file"');
+			it('should only include directories if fType is "directory"');
+			it('should only include symbolic links if fType is "symlink"');
+			it('should only include sockets if fType is "socket"');
+			it('should only include FIFOs if fType is "fifo"');
+			it('should include any file type that is not a permissions file if fType is null');
+			it('should return an error if recursive read of a directory in starting path returns an error');
+			it('should push the results of a recursive directory read to the result array if the recursive read completes without error');
 		
 		});
 	
