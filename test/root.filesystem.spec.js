@@ -4046,6 +4046,8 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
 				
 			});
+			it('should assign false to isRecursive if passed a non-boolean value for the isRecursive argument');
+			it('should assign null to userName if passed userName that is either not a string or not a valid username');
 			it('should return a SystemError if pth resolves outside of root, users, or public directories', function() {
 			
 				filesystem.sudo = true;
@@ -4067,6 +4069,8 @@ describe('filesystem.js', function() {
 // 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
+			it('should return an error if this.getPermissions returns an error');
+			it('should return a systemError if this.sudo is not true and file owner is not a string OR does not match this.user.uName');
 			it('should return an error if absolute path to permissions file cannot be resolved', function() {
 			
 				filesystem.sudo = true;
@@ -4123,6 +4127,8 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
 			
 			});
+			it('should set the allowed property for the directory\'s permissions to the value of the allowed argument if userName is null');
+			it('should set the userName property for the directory\'s permissions to the value of the allowed argument if userName is not null');
 			it('should return an error if permissions file cannot be written', function() {
 			
 				filesystem.sudo = true;
@@ -4295,6 +4301,10 @@ describe('filesystem.js', function() {
 				expect(JSON.parse(jsonOutput).allowed).to.deep.equal(testAllowed);
 			
 			});
+			it('should return a systemError if isRecursive is true and this.readdirRecursive returns a non-object or an object that is neither an array nor an instance of Error');
+			it('should return an error if isRecursive is true and this.readdirRecursive returns an Error');
+			it('should return true if isRecursive is true, and the directories below the original path are successfully updated recursively without error');
+			it('should return an error if isRecursive is true and any of the recursive operations returns an error');
 		
 		});
 		describe('changeOwner(pth, userName, isRecursive)', function() {
@@ -4340,6 +4350,7 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('message').that.includes('illegal user name');
 			
 			});
+			it('should assign false to isRecursive if argument value is non-boolean');
 			it('should return a systemError if pth does not resolve to a path inside of root, public, or users', function() {
 			
 				var testPath = '/usr/local/bin/';
@@ -4362,6 +4373,12 @@ describe('filesystem.js', function() {
 			
 			});
 			it('should return an error if this.getPermissions(pth) returns an error');
+			it('should return an error if fs.statSync throws an error when getting stats for resolved path');
+			it('should return an error if isRecursive is true and this.readdirRecursive returns an Error');
+			it('should return a systemError if isRecursive is true and this.readdirRecursive returns a value that is not an array');
+			it('should return true if isRecursive is true, permissions at pth are updated without error, and length of the array result for this.readdirRecursive is less than 1');
+			it('should return true if if isRecursive is true, permissions at pth are updated without error, and recursive operations complete without error');
+			it('should return an error if if isRecursive is true, permissions at pth are updated without error, and any of the recursive operations return an error');
 			it('should return an error if fs cannot write to the permissions file at pth', function() {
 			
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
