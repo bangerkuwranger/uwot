@@ -13,6 +13,7 @@ const FileSystem = require('../filesystem');
 var filesystem;
 var testStats;
 var testPermissionsObj;
+const DEFAULT_OWNER = 'root';
 
 const instanceUser = {
 	"fName": "Found",
@@ -4046,8 +4047,77 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid allowed');
 				
 			});
-			it('should assign false to isRecursive if passed a non-boolean value for the isRecursive argument');
-			it('should assign null to userName if passed userName that is either not a string or not a valid username');
+			it('should assign false to isRecursive if passed a non-boolean value for the isRecursive argument', function() {
+			
+				filesystem.sudo = true;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, 'true')).to.be.true;
+				expect(readdirRecursiveStub.called).to.be.false;
+			
+			});
+			it('should assign null to userName if passed userName that is either not a string or not a valid username', function() {
+			
+				filesystem.sudo = true;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').callsFake(function falseOnNAU(uName) {
+				
+					return uName !== 'notAUser';
+								
+				});
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, false, null)).to.be.true;
+				var outputObj = JSON.parse(jsonOutput);
+				expect(outputObj.allowed).to.deep.equal(testAllowed);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, false, 'notAUser')).to.be.true;
+				outputObj = JSON.parse(jsonOutput);
+				expect(outputObj.allowed).to.deep.equal(testAllowed);
+				expect(typeof outputObj.notAUser).to.equal('undefined');
+			
+			});
 			it('should return a SystemError if pth resolves outside of root, users, or public directories', function() {
 			
 				filesystem.sudo = true;
@@ -4069,8 +4139,75 @@ describe('filesystem.js', function() {
 // 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
 			
 			});
-			it('should return an error if this.getPermissions returns an error');
-			it('should return a systemError if this.sudo is not true and file owner is not a string OR does not match this.user.uName');
+			it('should return an error if this.getPermissions returns an error', function() {
+			
+				filesystem.sudo = true;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.ENOENT({syscall: 'stat', path: testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME}));
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, 'true')).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+			
+			});
+			it('should return a systemError if this.sudo is not true and file owner is not a string OR does not match this.user.uName', function() {
+			
+				filesystem.sudo = false;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').callsFake(function noOwner(pth) {
+				
+					var noOwnerPerms = getDefaultPerms();
+					delete noOwnerPerms.owner;
+					return noOwnerPerms;
+				
+				});
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, 'true', testPrevPerms.owner)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+				getPermissionsStub.restore();
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, 'true', testPrevPerms.owner)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
 			it('should return an error if absolute path to permissions file cannot be resolved', function() {
 			
 				filesystem.sudo = true;
@@ -4127,8 +4264,80 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeAllowed(testPath, testAllowed)).to.be.an.instanceof(TypeError).with.property('message').that.equals('test resolve error');
 			
 			});
-			it('should set the allowed property for the directory\'s permissions to the value of the allowed argument if userName is null');
-			it('should set the userName property for the directory\'s permissions to the value of the allowed argument if userName is not null');
+			it('should set the allowed property for the directory\'s permissions to the value of the allowed argument if userName is null', function() {
+			
+				filesystem.sudo = true;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').callsFake(function falseOnNAU(uName) {
+				
+					return uName !== 'notAUser';
+								
+				});
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, false, 'notAUser')).to.be.true;
+				var outputObj = JSON.parse(jsonOutput);
+				expect(outputObj.allowed).to.deep.equal(testAllowed);
+				expect(typeof outputObj.notAUser).to.equal('undefined');
+			
+			});
+			it('should set the userName property for the directory\'s permissions to the value of the allowed argument if userName is not null', function() {
+			
+				filesystem.sudo = true;
+				var jsonOutput;
+				var finalPath;
+				var testFileName = 'marathon';
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').callsFake(function falseOnNAU(uName) {
+				
+					return uName !== 'notAUser';
+								
+				});
+				var testPath = filesystem.root.path + '/var/www/html/local/bin/';
+				var testAllowed = ['r', 'w', 'x'];
+				var testPrevPerms = getTestPerms();
+				var finalData = {
+					owner: 'root',
+					allowed: testAllowed
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, data) {
+				
+					jsonOutput = data;
+					finalPath = pth;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeAllowed(testPath + testFileName, testAllowed, false, testPrevPerms.owner)).to.be.true;
+				var outputObj = JSON.parse(jsonOutput);
+				expect(outputObj.allowed).to.deep.equal(getDefaultPerms().allowed);
+				expect(outputObj[testPrevPerms.owner]).to.deep.equal(testAllowed);
+			
+			});
 			it('should return an error if permissions file cannot be written', function() {
 			
 				filesystem.sudo = true;
