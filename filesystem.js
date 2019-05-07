@@ -2415,15 +2415,22 @@ class UwotFs {
 				
 					for (let i = 0; i < subDirs.length; i++) {
 					
+						var curseResult;
 						try {
 						
-							self.changeAllowed(subDirs[i], allowed, false, userName);
+							curseResult = self.changeAllowed(subDirs[i], allowed, false, userName);
 						
 						}
 						catch(e) {
 						
 							i = subDirs.length;
 							return e;
+						
+						}
+						if (curseResult instanceof Error) {
+						
+							i = subDirs.length;
+							return curseResult;
 						
 						}
 						if ((i + 1) >= subDirs.length) {
@@ -2546,15 +2553,22 @@ class UwotFs {
 				
 							for (let i = 0; i < subDirs.length; i++) {
 					
+								var curseResult;
 								try {
 						
-									this.changeOwner(subDirs[i], userName, false);
+									curseResult = this.changeOwner(subDirs[i], userName, false);
 						
 								}
 								catch(e) {
 						
 									i = subDirs.length;
 									return e;
+						
+								}
+								if (curseResult instanceof Error) {
+						
+									i = subDirs.length;
+									return curseResult;
 						
 								}
 								if ((i + 1) >= subDirs.length) {
