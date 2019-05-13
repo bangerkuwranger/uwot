@@ -2919,7 +2919,7 @@ class UwotFs {
 						return subDirArray;
 					
 					}
-					pthArr.push(subDirArray);
+					pthArr = pthArr.concat(subDirArray);
 			
 				}
 			

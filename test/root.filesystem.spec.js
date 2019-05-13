@@ -6080,7 +6080,46 @@ describe('filesystem.js', function() {
 				expect(readDirStub.calledWith(path.dirname(testPath))).to.be.true;
 			
 			});
-			it('should only include files if fType is "file"');
+			it('should only include files if fType is "file"', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				var testStatsSymlink = getTestStats();
+				testStatsSymlink.isFile = function() { return false; };
+				testStatsSymlink.isDirectory = function() { return false; };
+				testStatsSymlink.isSymbolicLink = function() { return true; };
+				var testStatsFifo = getTestStats();
+				testStatsFifo.isFile = function() { return false; };
+				testStatsFifo.isDirectory = function() { return false; };
+				testStatsFifo.isSymbolicLink = function() { return false; };
+				testStatsFifo.isSocket = function() { return false; };
+				testStatsFifo.isFIFO = function() { return true; };
+				var testStatsSocket = getTestStats();
+				testStatsSocket.isFile = function() { return false; };
+				testStatsSocket.isDirectory = function() { return false; };
+				testStatsSocket.isSymbolicLink = function() { return false; };
+				testStatsSocket.isSocket = function() { return true; };
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				testStatsDir.isFile = function() { return false; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsDir);
+				statSyncStub.onCall(4).returns(testStatsFile);
+				statSyncStub.onCall(5).returns(testStatsSocket);
+				statSyncStub.onCall(6).returns(testStatsSymlink);
+				statSyncStub.onCall(7).returns(testStatsFifo);
+				var readDirStub = sinon.stub(filesystem, 'readDir');
+				readDirStub.onCall(0).returns(['file', UWOT_HIDDEN_PERMISSIONS_FILENAME, 'dir', 'socket', 'symlink', 'fifo']);
+				readDirStub.onCall(1).returns(['file']);
+				expect(filesystem.readdirRecursive(testPath, 'file')).to.deep.equal([path.join(testPath, 'file'), path.join(testPath, 'dir/file')]);
+			
+			});
 			it('should only include directories if fType is "directory"');
 			it('should only include symbolic links if fType is "symlink"');
 			it('should only include sockets if fType is "socket"');
