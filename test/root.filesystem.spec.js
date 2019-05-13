@@ -5923,16 +5923,163 @@ describe('filesystem.js', function() {
 		});
 		describe('readdirRecursive(pth, fType)', function() {
 		
-			it('should be a function');
-			it('should return a systemError if pth argument value is not a string');
-			it('should assign null to fType if fType argument value is not a string or not a valid file type');
-			it('should return an error if this.resolvePath(pth) returns an Error');
-			it('should return an error if fs.statSync throws an Error');
-			it('should return an error if this.readDir returns an Error');
-			it('should not include permissions files in the result array');
-			it('should return an error if any file causes fs.statSync to throw an Error');
-			it('should begin reading files inside of the directory at pth if it points to a directory');
-			it('should begin reading files inside of the parent directory for file at pth if it points to a non-directory file');
+			it('should be a function', function() {
+			
+				expect(filesystem.readdirRecursive).to.be.a('function');
+			
+			});
+			it('should return a systemError if pth argument value is not a string', function() {
+			
+				expect(filesystem.readdirRecursive()).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+			
+			});
+			it('should assign null to fType if fType argument value is not a string or not a valid file type', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file']);
+				expect(filesystem.readdirRecursive(testPath)).to.deep.equal([path.join(testPath, 'file')]);
+				expect(filesystem.readdirRecursive(testPath, 'alias')).to.deep.equal([path.join(testPath, 'file')]);
+			
+			});
+			it('should return an error if this.resolvePath(pth) returns an Error', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returns(new Error('test resolvePath error'));
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file']);
+				expect(filesystem.readdirRecursive(testPath)).to.be.an.instanceof(Error).with.property('message').that.equals('test resolvePath error');
+			
+			});
+			it('should return an error if fs.statSync throws an Error', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).throws(new Error('test statSync error'));
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file']);
+				expect(filesystem.readdirRecursive(testPath)).to.be.an.instanceof(Error).with.property('message').that.equals('test statSync error');
+			
+			});
+			it('should return an error if this.readDir returns an Error', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(new Error('test readDir error'));
+				expect(filesystem.readdirRecursive(testPath)).to.be.an.instanceof(Error).with.property('message').that.equals('test readDir error');
+			
+			});
+			it('should not include permissions files in the result array', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file', UWOT_HIDDEN_PERMISSIONS_FILENAME]);
+				expect(filesystem.readdirRecursive(testPath)).to.deep.equal([path.join(testPath, 'file')]);
+			
+			});
+			it('should return an error if any file causes fs.statSync to throw an Error', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).throws(new Error('test sub statSync error'));
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file', UWOT_HIDDEN_PERMISSIONS_FILENAME]);
+				expect(filesystem.readdirRecursive(testPath)).to.be.an.instanceof(Error).with.property('message').that.equals('test sub statSync error');
+			
+			});
+			it('should begin reading files inside of the directory at pth if it points to a directory', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsDir);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file', UWOT_HIDDEN_PERMISSIONS_FILENAME]);
+				expect(filesystem.readdirRecursive(testPath)).to.deep.equal([path.join(testPath, 'file')]);
+				expect(readDirStub.calledWith(testPath)).to.be.true;
+			
+			});
+			it('should begin reading files inside of the parent directory for file at pth if it points to a non-directory file', function() {
+			
+				var testPath = 'home/fuser';
+				var fullTestPath = path.join(filesystem.root.path, testPath);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testStatsFile = getTestStats();
+				var testStatsDir = getTestStats();
+				testStatsFile.isFile = function() { return true; };
+				testStatsDir.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync');
+				statSyncStub.onCall(0).returns(testStatsFile);
+				statSyncStub.onCall(1).returns(testStatsFile);
+				statSyncStub.onCall(2).returns(testStatsDir);
+				statSyncStub.onCall(3).returns(testStatsFile);
+				var readDirStub = sinon.stub(filesystem, 'readDir').returns(['file', UWOT_HIDDEN_PERMISSIONS_FILENAME]);
+				expect(filesystem.readdirRecursive(testPath)).to.deep.equal([path.join(path.dirname(testPath), 'file')]);
+				expect(readDirStub.calledWith(path.dirname(testPath))).to.be.true;
+			
+			});
 			it('should only include files if fType is "file"');
 			it('should only include directories if fType is "directory"');
 			it('should only include symbolic links if fType is "symlink"');
