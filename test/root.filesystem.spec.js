@@ -4755,7 +4755,44 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('message').that.includes('illegal user name');
 			
 			});
-			it('should assign false to isRecursive if argument value is non-boolean');
+			it('should assign false to isRecursive if argument value is non-boolean', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testPrevPerms = getTestPerms();
+				testPrevPerms.toGeneric = function() {
+				
+					return {
+						owner: this.owner,
+						allowed: this.allowed,
+						fuser: this.fuser
+					}
+				
+				};
+				var finalData = {
+					owner: testUserName,
+					allowed: []
+				};
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(getDefaultPerms());
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns(['ok', null]);
+				expect(filesystem.changeOwner(testPath, testUserName)).to.be.true;
+				expect(readdirRecursiveStub.called).to.be.false;
+			
+			});
 			it('should return a systemError if pth does not resolve to a path inside of root, public, or users', function() {
 			
 				var testPath = '/usr/local/bin/';
@@ -4766,24 +4803,193 @@ describe('filesystem.js', function() {
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
-			it('should return an error if pth resolves to a non-extant path', function() {
+			it('should return an error if this.getPermissions(pth) returns an error', function() {
 			
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
 				var testUserName = instanceUser.uName;
 				filesystem.sudo = true;
 				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
 				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var testPrevPerms = getTestPerms();
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(SystemError.EPERM({syscall: 'write', path: testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME}));
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').throws(SystemError.EIO({syscall: 'write', path: testPath + UWOT_HIDDEN_PERMISSIONS_FILENAME}));
+				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+			
+			});
+			it('should return an error if fs.statSync throws an error when getting stats for resolved path', function() {
+			
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
 				var statSyncStub = sinon.stub(fs, 'statSync').throws(SystemError.ENOENT({syscall: 'stat', path: testPath}));
 				expect(filesystem.changeOwner(testPath, testUserName)).to.be.an.instanceof(Error).with.property('code').that.includes('ENOENT');
 			
 			});
-			it('should return an error if this.getPermissions(pth) returns an error');
-			it('should return an error if fs.statSync throws an error when getting stats for resolved path');
-			it('should return an error if isRecursive is true and this.readdirRecursive returns an Error');
-			it('should return a systemError if isRecursive is true and this.readdirRecursive returns a value that is not an array');
-			it('should return true if isRecursive is true, permissions at pth are updated without error, and length of the array result for this.readdirRecursive is less than 1');
-			it('should return true if if isRecursive is true, permissions at pth are updated without error, and recursive operations complete without error');
-			it('should return an error if if isRecursive is true, permissions at pth are updated without error, and any of the recursive operations return an error');
+			it('should return an error if isRecursive is true and this.readdirRecursive returns an Error', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns(SystemError.EIO({syscall: 'readdir', path: testPath}));
+				expect(filesystem.changeOwner(testPath, testUserName, true)).to.be.an.instanceof(Error).with.property('code').that.includes('EIO');
+			
+			});
+			it('should return a systemError if isRecursive is true and this.readdirRecursive returns a value that is not an array', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns(null);
+				expect(filesystem.changeOwner(testPath, testUserName, true)).to.be.an.instanceof(Error).with.property('code').that.includes('EIO');
+				readdirRecursiveStub.restore();
+				readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns('null');
+				expect(filesystem.changeOwner(testPath, testUserName, true)).to.be.an.instanceof(Error).with.property('code').that.includes('EIO');
+			
+			});
+			it('should return true if isRecursive is true, permissions at pth are updated without error, and length of the array result for this.readdirRecursive is less than 1', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns([]);
+				expect(filesystem.changeOwner(testPath, testUserName, true)).to.be.true;
+				expect(readdirRecursiveStub.called).to.be.true;
+			
+			});
+			it('should return true if if isRecursive is true, permissions at pth are updated without error, and recursive operations complete without error', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = 'home/fuser/usr/local/bin/';
+				var fullTestPath = path.join(filesystem.root.path, testPath)
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').callsFake(function fakeLocVars(pth) {
+				
+					var ftp = pth === fullTestPath ? pth : path.join(fullTestPath, pth);
+					return {
+						"fullPath": ftp,
+						"inRoot": true,
+						"inUsers": true,
+						"isOwned": true,
+						"inPub": false,
+						"inAllowed": true,
+						"inVFS": true,
+						"sudoAllowed": true
+					}
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns(['ok', 'alsoOk']);
+				expect(filesystem.changeOwner(fullTestPath, testUserName, true)).to.be.true;
+				expect(readdirRecursiveStub.called).to.be.true;
+			
+			});
+			it('should return an error if if isRecursive is true, permissions at pth are updated without error, and any of the recursive operations return an error', function() {
+			
+				var finalPath, jsonOutput;
+				var testPath = 'home/fuser/usr/local/bin/';
+				var fullTestPath = path.join(filesystem.root.path, testPath)
+				var testUserName = instanceUser.uName;
+				filesystem.sudo = true;
+				var testPrevPerms = getTestPerms();
+				var isValidUserNameStub = sinon.stub(filesystem, 'isValidUserName').returns(true);
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').returnsArg(0);
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(testPrevPerms);
+				var testStats = getTestStats();
+				testStats.isDirectory = function() { return true; };
+				var statSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var writeFileSyncStub = sinon.stub(fs, 'writeFileSync').callsFake(function setArgVars(pth, perms) {
+				
+					finalPath = pth;
+					jsonOutput = perms;
+					return true;
+				
+				});
+				var getPathLocVarsStub = sinon.stub(filesystem, 'getPathLocVars').callsFake(function fakeLocVars(pth) {
+				
+					var ftp = pth === fullTestPath ? pth : path.join(fullTestPath, pth);
+					return {
+						"fullPath": ftp,
+						"inRoot": true,
+						"inUsers": true,
+						"isOwned": true,
+						"inPub": false,
+						"inAllowed": true,
+						"inVFS": true,
+						"sudoAllowed": true
+					}
+				
+				});
+				var readdirRecursiveStub = sinon.stub(filesystem, 'readdirRecursive').returns(['ok', null]);
+				expect(filesystem.changeOwner(fullTestPath, testUserName, true)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path');
+				expect(readdirRecursiveStub.called).to.be.true;
+			
+			});
 			it('should return an error if fs cannot write to the permissions file at pth', function() {
 			
 				var testPath = filesystem.root.path + '/home/fuser/usr/local/bin/';
@@ -5043,9 +5249,110 @@ describe('filesystem.js', function() {
 				expect(filesystem.longFormatFiles(['etc', 'var', 'run'], null)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to longFormatFiles');
 			
 			});
-			it('should return an error if this.getPermissions returns an Error');
-			it('should return "-rx" if getUserPermsString returns false and pth is inside pubDir');
-			it('should return "---" if getUserPermsString returns false and pth is not inside pubDir');
+			it('should return an error if this.getPermissions returns an Error', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(new Error('test getPermissions error'));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isFile = function() { return true; };
+					return dirStats;
+				
+				});
+				var testArray = ['run'];
+				var testPath = '/var';
+				expect(filesystem.longFormatFiles(testArray, testPath)).to.be.an.instanceof(Error).with.property('message').that.equals('test getPermissions error');
+			
+			});
+			it('should return "r-x" if getPermissions returns false and pth is inside pubDir', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isFile = function() { return true; };
+					return dirStats;
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(true);
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('-');
+				expect(testResultArray[1]).to.equal('r');
+				expect(testResultArray[2]).to.equal('-');
+				expect(testResultArray[3]).to.equal('x');
+			
+			});
+			it('should return "r-x" if getPermissions returns false and pth is inside instance user\'s home directory and config users:homeWritable is false', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isFile = function() { return true; };
+					return dirStats;
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(true);
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('-');
+				expect(testResultArray[1]).to.equal('r');
+				expect(testResultArray[2]).to.equal('-');
+				expect(testResultArray[3]).to.equal('x');
+			
+			});
+			it('should return "rwx" if getPermissions returns false and pth is inside instance user\'s home directory and config users:homeWritable is false', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isFile = function() { return true; };
+					return dirStats;
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(true);
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(true);
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('-');
+				expect(testResultArray[1]).to.equal('r');
+				expect(testResultArray[2]).to.equal('w');
+				expect(testResultArray[3]).to.equal('x');
+			
+			});
+			it('should return "---" if getPermissions returns false and pth is not inside pubDir', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions').returns(false);
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isFile = function() { return true; };
+					return dirStats;
+				
+				});
+				var isInPubStub = sinon.stub(filesystem, 'isInPub').returns(false);
+				var isInUserStub = sinon.stub(filesystem, 'isInUser').returns(false);
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				var testResultArray = Array.from(testResult[0]);
+				expect(testResultArray[0]).to.equal('-');
+				expect(testResultArray[1]).to.equal('-');
+				expect(testResultArray[2]).to.equal('-');
+				expect(testResultArray[3]).to.equal('-');
+			
+			});
 			
 			it('should return "d" as the first character for lines representing directories', function() {
 			
@@ -5119,6 +5426,24 @@ describe('filesystem.js', function() {
 				expect(testResultArray[1]).to.equal('r');
 				expect(testResultArray[2]).to.equal('-');
 				expect(testResultArray[3]).to.equal('x');
+			
+			});
+			it('should return an error if line is a directory and getPermissions for that directory returns an error', function() {
+			
+				var getPermissionsStub = sinon.stub(filesystem, 'getPermissions');
+				getPermissionsStub.onCall(0).returns(getTestPerms());
+				getPermissionsStub.onCall(1).returns(new Error('test getPermissions error'));
+				var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnDirStats(pth) {
+				
+					var dirStats = getTestStats();
+					dirStats.isDirectory = function() { return true; };
+					return dirStats;
+				
+				});
+				var testArray = ['run'];
+				var testPath = '/var';
+				var testResult = filesystem.longFormatFiles(testArray, testPath);
+				expect(testResult).to.be.an.instanceof(Error).with.property('message').that.equals('test getPermissions error');
 			
 			});
 			it('should omit a file\'s line from the finalArray if statSync throws an error', function() {

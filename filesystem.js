@@ -2533,7 +2533,7 @@ class UwotFs {
 					fs.writeFileSync(permPath, updatedPermissions);
 					if (isRecursive) {
 			
-						var subDirs = self.readdirRecursive(pthVars.fullPath, 'directory');
+						var subDirs = this.readdirRecursive(pthVars.fullPath, 'directory');
 						if (subDirs instanceof Error) {
 				
 							return subDirs;
@@ -2695,15 +2695,25 @@ class UwotFs {
 			return parentPerms;
 		
 		}
-		var permLine = parentPerms.getUserPermsString();
+		var permLine;
 		if (false === parentPerms && this.isInPub(pth)) {
 		
-			permLine = '-rx';
+			permLine = 'r-x';
+		
+		}
+		else if (false === parentPerms && this.isInUser(pth)) {
+		
+			permLine = global.Uwot.Config.getVal('users', 'homeWritable') === true ? 'rwx' : 'r-x';
 		
 		}
 		else if (false === parentPerms) {
 		
 			permLine = '---';
+		
+		}
+		else {
+		
+			permLine = parentPerms.getUserPermsString();
 		
 		}
 		var owner = 'string' === typeof parentPerms.owner ? parentPerms.owner : 'root';
