@@ -2856,7 +2856,13 @@ class UwotFs {
 		}
 		for (const fileName of dirArr) {
 		
-			if (fileName !== UWOT_HIDDEN_PERMISSIONS_FILENAME) {
+			if ('string' !== typeof fileName) {
+			
+				pthArr = systemError.EINVAL({syscall: 'stat', path: fullPath + fileName});
+				break;
+			
+			}
+			else if (fileName !== UWOT_HIDDEN_PERMISSIONS_FILENAME) {
 			
 				var filePath = path.join(fullPath, fileName);
 				var thisFileStats;
