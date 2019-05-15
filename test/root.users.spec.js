@@ -13,8 +13,6 @@ var bcrypt = require('bcryptjs');
 const Users = require('../users');
 var users;
 
-// TBD
-// stub out the crypto functions so we don't spend an eternity verifying that crypto is crypto enough
 describe('users.js', function() {
 
 	before('getting fresh UserInterface instance', function() {
@@ -2378,11 +2376,331 @@ describe('users.js', function() {
 				expect(users.removeDir).to.throw(TypeError, 'invalid callback passed to removeDir');
 			
 			});
-			it('should return a TypeError to callback if userIds is not an array or is empty');
-			it('should return an error to callback if db.find returns an error');
-			it('should return an error to callback if fs.readdir returns an error');
-			it('should return callback(false, false) if userDir is empty');
-			it('should remove any directories in userDir matching valid userNames with associated _id values in userIds and return those userNames as an Array')
+			it('should return a TypeError to callback if userIds is not an array or is empty', function(done) {
+			
+				users.removeDir('123fourfive678ninetenELEVENTWELVE', function(error, result) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid userIds passed to removeDir');
+					users.removeDir(null, function(error, result) {
+					
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid userIds passed to removeDir');
+						users.removeDir([], function(error, result) {
+						
+							expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid userIds passed to removeDir');
+							done();
+						
+						});
+					
+					});
+				
+				});
+			
+			});
+			it('should return an error to callback if db.find returns an error', function(done) {
+			
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(new Error('test db find error', null));
+				
+				});
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test db find error');
+					done();
+				
+				});
+			
+			});
+			it('should return an error to callback if fs.readdir returns an error', function(done) {
+			
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(false, [
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+				
+				});
+				var fsReaddirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(dirPath, cb) {
+				
+					return cb(systemError.ENOENT({syscall: 'readdir', path: dirPath}));
+				
+				});
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, false) if userDir is empty', function(done) {
+			
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(false, [
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+				
+				});
+				var fsReaddirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(dirPath, cb) {
+				
+					return cb(false, []);
+				
+				});
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.be.false;
+					done();
+				
+				});
+			
+			});
+			it('should remove any directories in userDir matching valid userNames with associated _id values in userIds and return those userNames as an Array', function(done) {
+			
+				var testStats = new fs.Stats(
+					{
+						dev: 2114,
+						ino: 48064969,
+						mode: 33188,
+						nlink: 1,
+						uid: 85,
+						gid: 100,
+						rdev: 0,
+						size: 527,
+						blksize: 4096,
+						blocks: 8,
+						atimeMs: 1318289051000.1,
+						mtimeMs: 1318289051000.1,
+						ctimeMs: 1318289051000.1,
+						birthtimeMs: 1318289051000.1,
+						atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+					}
+				);
+				testStats.isDirectory = function() { return true };
+				testStats.isFile = function() { return false };
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(false, [
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+				
+				});
+				var fsReaddirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(dirPath, cb) {
+				
+					return cb(false, ['mortimerhemp']);
+				
+				});
+				var fsStatSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var fsRemoveSyncStub = sinon.stub(fs, 'removeSync');
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE'], function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.deep.equal(['mortimerhemp']);
+					done();
+				
+				});
+			
+			});
+			it('should return an error and an incomplete list of removed user directory names as args of callback if statSync fails for any of the users\' directory paths', function(done) {
+			
+				var testStats = new fs.Stats(
+					{
+						dev: 2114,
+						ino: 48064969,
+						mode: 33188,
+						nlink: 1,
+						uid: 85,
+						gid: 100,
+						rdev: 0,
+						size: 527,
+						blksize: 4096,
+						blocks: 8,
+						atimeMs: 1318289051000.1,
+						mtimeMs: 1318289051000.1,
+						ctimeMs: 1318289051000.1,
+						birthtimeMs: 1318289051000.1,
+						atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+					}
+				);
+				testStats.isDirectory = function() { return true };
+				testStats.isFile = function() { return false };
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(false, [
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+				
+				});
+				var fsReaddirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(dirPath, cb) {
+				
+					return cb(false, ['mightymouse', 'mortimerhemp']);
+				
+				});
+				var fsStatSyncStub = sinon.stub(fs, 'statSync');
+				fsStatSyncStub.onCall(0).returns(testStats);
+				fsStatSyncStub.onCall(1).callsFake(function throwSystemError(pth) {
+				
+					throw systemError.ENOENT({syscall: 'stat', path: pth});
+				
+				});
+				var fsRemoveSyncStub = sinon.stub(fs, 'removeSync');
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE', 'mightymouse'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+					expect(result).to.deep.equal(['mortimerhemp']);
+					done();
+				
+				});
+			
+			});
+			it('should return an error and an incomplete list of removed user directory names as args of callback if removeSync fails for any of the users\' directory paths', function(done) {
+			
+				var testStats = new fs.Stats(
+					{
+						dev: 2114,
+						ino: 48064969,
+						mode: 33188,
+						nlink: 1,
+						uid: 85,
+						gid: 100,
+						rdev: 0,
+						size: 527,
+						blksize: 4096,
+						blocks: 8,
+						atimeMs: 1318289051000.1,
+						mtimeMs: 1318289051000.1,
+						ctimeMs: 1318289051000.1,
+						birthtimeMs: 1318289051000.1,
+						atime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						mtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						ctime: new Date('Mon, 10 Oct 2011 23:24:11 GMT'),
+						birthtime: new Date('Mon, 10 Oct 2011 23:24:11 GMT')
+					}
+				);
+				testStats.isDirectory = function() { return true };
+				testStats.isFile = function() { return false };
+				var dbFindStub = sinon.stub(users.db, 'find').callsFake(function returnError(params, cb) {
+				
+					return cb(false, [
+						{
+							"fName": "Mortimer",
+							"lName": "Hemp",
+							"uName": "mortimerhemp",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": true,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "123fourfive678ninetenELEVENTWELVE",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						},
+						{
+							"fName": "Mighty",
+							"lName": "Mouse",
+							"uName": "mightymouse",
+							"password": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.P7VSbyZwmn/tfo6I9bPSx7uQ7SCNtpe",
+							"sudoer": false,
+							"salt": "$2a$16$KPBBkPbCBW./mwnXuoBYJ.",
+							"createdAt": new Date(1546450800498),
+							"updatedAt": new Date(1546450800498),
+							"_id": "mightymouse",
+							"verifyPassword": function(pass) {return true;},
+							"maySudo": function() {return this.sudoer;}
+						}
+					]);
+				
+				});
+				var fsReaddirStub = sinon.stub(fs, 'readdir').callsFake(function returnError(dirPath, cb) {
+				
+					return cb(false, ['mightymouse', 'mortimerhemp']);
+				
+				});
+				var fsStatSyncStub = sinon.stub(fs, 'statSync').returns(testStats);
+				var fsRemoveSyncStub = sinon.stub(fs, 'removeSync');
+				fsRemoveSyncStub.onCall(0).returns(testStats);
+				fsStatSyncStub.onCall(1).callsFake(function throwSystemError(pth) {
+				
+					throw systemError.EPERM({syscall: 'rmdir', path: pth});
+				
+				});
+				users.removeDir(['123fourfive678ninetenELEVENTWELVE', 'mightymouse'], function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EPERM');
+					expect(result).to.deep.equal(['mortimerhemp']);
+					done();
+				
+				});
+			
+			});
 		
 		});
 
