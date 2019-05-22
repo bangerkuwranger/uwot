@@ -501,8 +501,7 @@ class UwotFs {
 		return this.dirsSet;
 	
 	}
-	
-	// TBD
+
 	//async wrapper for fs commands.
 	// argArr accepts array of argument objects, empty array, or null
 	// isSudo accepts boolean or undefined
@@ -1951,7 +1950,6 @@ class UwotFs {
 	
 	}
 	
-	// TBD
 	isWritable(pth) {
 	
 		var vfsWritable = false;

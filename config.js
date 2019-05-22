@@ -186,21 +186,24 @@ class ReverseProxyBin{
 
 	constructor(
 		name,
+		localFileLocation,
 		url,
 		isLocal,
 		isConsole
 	) {
 	
-		if ('object' === typeof name && null !== name && 'undefined' === typeof url && 'undefined' === typeof isLocal && 'undefined' === typeof isConsole) {
+		if ('object' === typeof name && null !== name && 'undefined' === typeof localFileLocation && 'undefined' === typeof url && 'undefined' === typeof isLocal && 'undefined' === typeof isConsole) {
 		
 			var argsObj = Object.assign(name);
 			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
+			localFileLocation= argsObj.hasOwnProperty('localFileLocation') ? argsObj.localFileLocation : null;
 			url = argsObj.hasOwnProperty('url') ? argsObj.url : null;
 			isLocal = argsObj.hasOwnProperty('isLocal') ? argsObj.isLocal : false;
 			isConsole = argsObj.hasOwnProperty('isConsole') ? argsObj.isConsole : false;
 		
 		}
 		this.name = sanitize.cleanString(name, 255);
+		this.localFileLocation = sanitize.cleanString(localFileLocation, 1024);
 		this.url = sanitize.cleanString(url, 1024);
 		this.isLocal = 'undefined' === typeof isLocal ? false : sanitize.cleanBool(isLocal);
 		this.isConsole = 'undefined' === typeof isConsole ? false : sanitize.cleanBool(isConsole);
@@ -211,6 +214,7 @@ class ReverseProxyBin{
 	
 		return {
 			name: this.name,
+			localFileLocation: this.localFileLocation,
 			url: this.url,
 			isLocal: this.isLocal,
 			isConsole: this.isConsole

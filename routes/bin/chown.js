@@ -100,9 +100,6 @@ class UwotCmdChown extends global.Uwot.Exports.Cmd {
 
 }
 
-// TBD
-// should eventually include options to do line numbering by file the stupid POSIX way. (but isn't that what diff and compare are for?)
-
 var chown = new UwotCmdChown(
 	{
 		name:				'chown',

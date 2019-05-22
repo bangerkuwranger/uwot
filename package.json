@@ -28,6 +28,7 @@
     "bash-parser": "0.5.0",
     "bcryptjs": "2.4.3",
     "body-parser": "^1.18.3",
+    "cheerio": "^1.0.0-rc.3",
     "codacy-coverage": "^3.4.0",
     "cookie-parser": "^1.4.4",
     "debug": "~2.6.9",

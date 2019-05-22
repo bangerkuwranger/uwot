@@ -2239,7 +2239,7 @@ describe('config.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor(name, url, isLocal, isConsole)', function() {
+		describe('constructor(name, localFileLocation, url, isLocal, isConsole)', function() {
 		
 			it('should not be available outside of UwotConfigBase methods', function() {
 			
@@ -2251,13 +2251,14 @@ describe('config.js', function() {
 				expect(instantiate).to.throw(ReferenceError, 'ReverseProxyBin is not defined');
 			
 			});
-			it('should accept four arguments: name(string), url(string), isLocal(bool/string), and isConsole(bool/string), assigning each to a respective property', function() {
+			it('should accept four arguments: name(string), localFileLocation(string), url(string), isLocal(bool/string), and isConsole(bool/string), assigning each to a respective property', function() {
 			
-				var amtcArgs = [['testName', 'testUrl', true, false]];
+				var amtcArgs = [['testName', 'testPath', 'testUrl', true, false]];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
 				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.localFileLocation).to.equal('testPath');
 				expect(testRPB.url).to.equal('testUrl');
 				expect(testRPB.isLocal).to.be.true;
 				expect(testRPB.isConsole).to.be.false;
@@ -2265,11 +2266,12 @@ describe('config.js', function() {
 			});
 			it('should accept a single object as an argument, assigning name, url, isLocal, and isConsole properties from arg to respective object properties', function() {
 			
-				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
+				var amtcArgs = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
 				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.localFileLocation).to.equal('testPath');
 				expect(testRPB.url).to.equal('testUrl');
 				expect(testRPB.isLocal).to.be.false;
 				expect(testRPB.isConsole).to.be.true;
@@ -2277,15 +2279,16 @@ describe('config.js', function() {
 			});
 			it('should assign null to name property if arg is undefined or not defined as property of first arg', function() {
 			
-				var amtcArgs = [[undefined, 'testUrl', true, false]];
+				var amtcArgs = [[undefined, 'testPath', 'testUrl', true, false]];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
 				expect(testRPB.name).to.be.null;
+				expect(testRPB.localFileLocation).to.equal('testPath');
 				expect(testRPB.url).to.equal('testUrl');
 				expect(testRPB.isLocal).to.be.true;
 				expect(testRPB.isConsole).to.be.false;
-				var amtcArgsTwo = [{url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
+				var amtcArgsTwo = [{url: 'testUrl', isConsole: 'true', localFileLocation: 'testPath', isLocal: 'false'}];
 				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
 				expect(testRPBTwo).to.be.an('object').that.is.not.null;
 				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
@@ -2295,9 +2298,31 @@ describe('config.js', function() {
 				expect(testRPBTwo.isConsole).to.be.true;
 			
 			});
+			it('should assign null to localFileLocation property if arg is undefined or not defined as property of first arg', function() {
+			
+				var amtcArgs = [['testName', undefined, 'testUrl', true, false]];
+				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
+				expect(testRPB).to.be.an('object').that.is.not.null;
+				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.localFileLocation).to.be.null;
+				expect(testRPB.url).to.equal('testUrl');
+				expect(testRPB.isLocal).to.be.true;
+				expect(testRPB.isConsole).to.be.false;
+				var amtcArgsTwo = [{name: 'testName', url: 'testUrl', isConsole: 'true', isLocal: 'false'}];
+				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
+				expect(testRPBTwo).to.be.an('object').that.is.not.null;
+				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
+				expect(testRPBTwo.name).to.equal('testName');
+				expect(testRPBTwo.localFileLocation).to.be.null;
+				expect(testRPBTwo.url).to.equal('testUrl');
+				expect(testRPBTwo.isLocal).to.be.false;
+				expect(testRPBTwo.isConsole).to.be.true;
+			
+			});
 			it('should assign null to url property if arg is undefined or not defined as property of first arg', function() {
 			
-				var amtcArgs = [['testName', undefined, true, false]];
+				var amtcArgs = [['testName', 'testPath', undefined, true, false]];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2305,11 +2330,12 @@ describe('config.js', function() {
 				expect(testRPB.url).to.be.null;
 				expect(testRPB.isLocal).to.be.true;
 				expect(testRPB.isConsole).to.be.false;
-				var amtcArgsTwo = [{name: 'testName', isConsole: 'true', isLocal: 'false'}];
+				var amtcArgsTwo = [{name: 'testName', localFileLocation: 'testPath', isConsole: 'true', isLocal: 'false'}];
 				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
 				expect(testRPBTwo).to.be.an('object').that.is.not.null;
 				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
 				expect(testRPB.name).to.equal('testName');
+				expect(testRPB.localFileLocation).to.equal('testPath');
 				expect(testRPB.url).to.be.null;
 				expect(testRPBTwo.isLocal).to.be.false;
 				expect(testRPBTwo.isConsole).to.be.true;
@@ -2317,7 +2343,7 @@ describe('config.js', function() {
 			});
 			it('should assign false to isLocal property if arg is undefined or not defined as property of first arg', function() {
 			
-				var amtcArgs = [['testName', 'testUrl', undefined, 'true']];
+				var amtcArgs = [['testName', 'testPath', 'testUrl', undefined, 'true']];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2325,7 +2351,7 @@ describe('config.js', function() {
 				expect(testRPB.url).to.equal('testUrl');
 				expect(testRPB.isLocal).to.be.false;
 				expect(testRPB.isConsole).to.be.true;
-				var amtcArgsTwo = [{name: 'testName', url: 'testUrl', isConsole: true}];
+				var amtcArgsTwo = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: true}];
 				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
 				expect(testRPBTwo).to.be.an('object').that.is.not.null;
 				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
@@ -2337,7 +2363,7 @@ describe('config.js', function() {
 			});
 			it('should assign false to isConsole property if arg is undefined or not defined as property of first arg', function() {
 			
-				var amtcArgs = [['testName', 'testUrl', 'true']];
+				var amtcArgs = [['testName', 'testPath', 'testUrl', 'true']];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2345,7 +2371,7 @@ describe('config.js', function() {
 				expect(testRPB.url).to.equal('testUrl');
 				expect(testRPB.isLocal).to.be.true;
 				expect(testRPB.isConsole).to.be.false;
-				var amtcArgsTwo = [{name: 'testName', url: 'testUrl', isLocal: true}];
+				var amtcArgsTwo = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isLocal: true}];
 				var testRPBTwo = config.utilities.arrayMembersToClass(amtcArgsTwo, 'binpath:reverseProxies', true)[0];
 				expect(testRPBTwo).to.be.an('object').that.is.not.null;
 				expect(testRPBTwo.constructor.name).to.equal('ReverseProxyBin');
@@ -2357,7 +2383,7 @@ describe('config.js', function() {
 			});
 			it('should truncate name property after first 255 characters', function() {
 			
-				var amtcArgs = [['Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', 'testUrl', true, false]];
+				var amtcArgs = [['Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', 'testPath', 'testUrl', true, false]];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2367,9 +2393,10 @@ describe('config.js', function() {
 				expect(testRPB.isConsole).to.be.false;
 			
 			});
+			it('should truncate localFileLocation after first 1024 characters');
 			it('should truncate url property after first 1024 characters', function() {
 			
-				var amtcArgs = [['testName', 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', true, false]];
+				var amtcArgs = [['testName', 'testPath', 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Donec sed odio dui. Cras mattis consectetur purus sit amet fermentum. Sed posuere consectetur est at lobortis. Maecenas faucibus mollis interdum. Aenean lacinia bibendum nulla sed consectetur.', true, false]];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2381,7 +2408,7 @@ describe('config.js', function() {
 			});
 			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isLocal property', function() {
 			
-				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 'true', isLocal: 0}];
+				var amtcArgs = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: 'true', isLocal: 0}];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2393,7 +2420,7 @@ describe('config.js', function() {
 			});
 			it('should cast truthy and falsey values to booleans, as well as strings === "true" and "false", for isConsole property', function() {
 			
-				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var amtcArgs = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2409,7 +2436,7 @@ describe('config.js', function() {
 		
 			it('should be a function', function() {
 			
-				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var amtcArgs = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
@@ -2418,11 +2445,11 @@ describe('config.js', function() {
 			});
 			it('should return a new object with name and path properties matching that of the instance, and constructor name "Object" rather than "ReverseProxyBin"', function() {
 			
-				var amtcArgs = [{name: 'testName', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
+				var amtcArgs = [{name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: 0, isLocal: 'true'}];
 				var testRPB = config.utilities.arrayMembersToClass(amtcArgs, 'binpath:reverseProxies', true)[0];
 				expect(testRPB).to.be.an('object').that.is.not.null;
 				expect(testRPB.constructor.name).to.equal('ReverseProxyBin');
-				expect(testRPB.getGeneric()).to.deep.equal({name: 'testName', url: 'testUrl', isConsole: false, isLocal: true});
+				expect(testRPB.getGeneric()).to.deep.equal({name: 'testName', localFileLocation: 'testPath', url: 'testUrl', isConsole: false, isLocal: true});
 				expect(testRPB.getGeneric().constructor.name).to.equal('Object');
 			
 			});

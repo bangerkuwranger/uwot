@@ -40,6 +40,14 @@ module.exports = {
 	
 	},
 	
+	// TBD
+	//loads from RPB objects as defined in config
+	loadeReverseProxyBin: function loadReverseProxyBin(rpbObj) {
+	
+		throw new Error('this function is not yet implemented');
+	
+	},
+	
 	// if binName is not passed, returns array of loaded bin names.
 	// if binName is provided, compares against list of loaded bin names and returns
 	// true if binName is loaded,
