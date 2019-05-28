@@ -63,12 +63,7 @@ module.exports = {
 	// all external links with internal targets written to calls to console.js methods
 	makeConsoleHtml(jqObj) {
 	
-		if ('function' !== typeof callback) {
-		
-			throw new TypeError('invalid callback passed to makeConsoleHtml');
-		
-		}
-		else if ('function' !== typeof jqObj) {
+		if ('function' !== typeof jqObj) {
 		
 			return callback(TypeError('invalid jqObj passed to makeConsoleHtml'), null);
 		
@@ -140,7 +135,7 @@ module.exports = {
 			
 						if (thisLink.attr('rel') === 'stylesheet' && 'string' === typeof thisLink.attr('href') && '' !== thisLink.attr('href')) {
 				
-							thisUrl = thisLink.attr('href');
+							var thisUrl = thisLink.attr('href');
 							var thisContent = cache.get(thisUrl);
 							if (!thisContent) {
 					
@@ -197,7 +192,7 @@ module.exports = {
 			
 						if (thisScript.attr('type') === 'text/javascript' && 'string' === typeof thisScript.attr('src') && '' !== thisScript.attr('src') && -1 === thisScript.attr('src').indexOf('jquery.min.js')) {
 				
-							thisUrl = thisLink.attr('src');
+							var thisUrl = thisScript.attr('src');
 							var thisContent = cache.get(thisUrl);
 							if (!thisContent) {
 					
@@ -286,9 +281,10 @@ module.exports = {
 		}
 		else {
 		
-			var $ = getAsJQuery(htmlString);
+			var self = this;
+			var $ = self.getAsJQuery(htmlString);
 			var bodyHtml = makeConsoleHtml($('body'));
-			pullHeadElements($, function(error, headContent) {
+			self.pullHeadElements($, function(error, headContent) {
 			
 				if (error) {
 				
