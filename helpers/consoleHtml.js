@@ -65,7 +65,7 @@ module.exports = {
 	
 		if ('function' !== typeof jqObj) {
 		
-			return callback(TypeError('invalid jqObj passed to makeConsoleHtml'), null);
+			throw new TypeError('invalid jqObj passed to makeConsoleHtml');
 		
 		}
 		else {
@@ -282,37 +282,46 @@ module.exports = {
 		else {
 		
 			var self = this;
-			var $ = self.getAsJQuery(htmlString);
-			var bodyHtml = makeConsoleHtml($('body'));
-			self.pullHeadElements($, function(error, headContent) {
+			try {
+
+				var $ = self.getAsJQuery(htmlString);
+				var bodyHtml = self.makeConsoleHtml($('body'));
+				self.pullHeadElements($, function(error, headContent) {
 			
-				if (error) {
+					if (error) {
 				
-					return callback(error, bodyHtml);
+						return callback(error, bodyHtml);
 				
-				}
-				else {
-				
-					var finalHtml = '';
-					if ('string' === typeof headContent.styles && headContent.styles !== '') {
-					
-						finalHtml += headContent.styles;
-					
 					}
-					if ('string' === typeof headContent.scripts && headContent.scripts !== '') {
-					
-						finalHtml += headContent.scripts;
-					
-					}
-					finalHtml += bodyHtml;
-					return callback(false, finalHtml);
+					else {
 				
-				}
+						var finalHtml = '';
+						if ('string' === typeof headContent.styles && headContent.styles !== '') {
+					
+							finalHtml += headContent.styles;
+					
+						}
+						if ('string' === typeof headContent.scripts && headContent.scripts !== '') {
+					
+							finalHtml += headContent.scripts;
+					
+						}
+						finalHtml += bodyHtml;
+						return callback(false, finalHtml);
+				
+					}
 			
-			});
-		
+				});
+
+			}
+			catch(e) {
+			
+				return callback(e, null);
+			
+			}		
+
 		}
 	
 	}
 
-}
+};

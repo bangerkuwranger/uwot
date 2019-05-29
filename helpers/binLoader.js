@@ -42,7 +42,7 @@ module.exports = {
 	
 	// TBD
 	//loads from RPB objects as defined in config
-	loadeReverseProxyBin: function loadReverseProxyBin(rpbObj) {
+	loadReverseProxyBin: function loadReverseProxyBin(rpbObj) {
 	
 		throw new Error('this function is not yet implemented');
 	
