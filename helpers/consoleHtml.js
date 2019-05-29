@@ -6,37 +6,133 @@ const cheerio = require('cheerio');
 const nodeCache = require('node-cache');
 var cache = new nodeCache({ stdTTL: 3600 });
 
-function getRemoteResource(url, callback) {
-
-	if ('function' !== typeof callback) {
+function getRemoteResources(urlOrUrlArray, contentString) {
 	
-		throw new TypeError('invalid callback passed to getRemoteResource');
+	if ('string' === typeof urlOrUrlArray) {
 	
-	}
-	else {
-	
-		request(url, function(error, response, body) {
+		return new Promise(function(resolve, reject) {
 		
-			if (error) {
+			var cached = cache.get(urlOrUrlArray);
+			if (!cached) {
+	
+				request(urlOrUrlArray, function(error, response, body) {
+		
+					if (error) {
 			
-				return callback(error, response);
+						reject(error);
 			
-			}
-			else if (response.statusCode != 200) {
+					}
+					else if (response.statusCode != 200) {
 			
-				return callback(response, null);
+						reject(response);
+			
+					}
+					else {
+				
+						cache.set(urlOrUrlArray, body);
+						if (!contentString) {
+			
+							resolve(body);
+			
+						}
+						else {
+				
+							resolve(contentString + body);
+				
+						}
+				
+					}
+		
+				});
 			
 			}
 			else {
 			
-				return callback(false, body);
+				resolve(cached);
 			
 			}
-		
+	
 		});
 	
 	}
-
+	else if ('object' === typeof urlOrUrlArray && Array.isArray(urlOrUrlArray)) {
+	
+		var currentUrl = urlOrUrlArray.shift();
+		if (!currentUrl && !contentString) {
+		
+			return Promise.reject(new Error('no content received'))
+		
+		}
+		else if (!currentUrl) {
+		
+			return Promise.resolve(contentString);
+		
+		}
+		else {
+		
+			return new Promise(function(resolve, reject) {
+	
+				var cached = cache.get(currentUrl);
+				if (!cached) {
+				
+					request(currentUrl, function(error, response, body) {
+				
+						if (error) {
+			
+							reject(error);
+			
+						}
+						else if (response.statusCode != 200) {
+			
+							reject(response);
+			
+						}
+						else  {
+				
+							cache.set(currentUrl, body);
+							if (!contentString) {
+			
+								contentString = body;
+			
+							}
+							else {
+				
+								contentString += body;
+				
+							}
+							resolve(function() {
+								
+								return getRemoteResources(urlOrUrlArray, contentString);
+							
+							});
+					
+						}
+		
+					});
+				
+				}
+				else {
+				
+					contentString = contentString ? contentString + cached : cached;
+					resolve(function() {
+					
+						return getRemoteResources(urlOrUrlArray, contentString);
+				
+					});
+				
+				}
+	
+			});
+		
+		}
+	
+	}
+	else {
+	
+		return Promise.reject(new TypeError('urlOrUrlArray must be a string or an Array of strings'));
+	
+	}
+	
 }
 
 // converts standard html output into graphic console html, which maintains interface continuity
@@ -99,7 +195,7 @@ module.exports = {
 	},
 	
 	// pulls head elements and loads from cache or remote location if needed
-	pullHeadElements(jqObj, callback) {
+	pullHeadElements(jqObj, type, callback) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -113,135 +209,62 @@ module.exports = {
 		}
 		else {
 		
-			var headLinks = jqObj('head > link');
-			var headScripts = jqObj('head > script');
-			var headContent = {
-				scripts: '<script type="text/javascript">',
-				styles: '<style type="text/css">'
-			};
-			var linkCount = headLinks.length;
-			var scriptCount = headScripts.length;
-			var stylesDone = false;
-			var scriptsDone = false;
-			while (!stylesDone && !scriptsDone) {
+			var headElements, closeTag, headContent = '';
+			if ('string' !== typeof type || 'script' !== type) {
 			
-				if (linkCount > 0) {
-				
-					headLinks.each(function(i, thisLink) {
-			
-						if (thisLink.attr('rel') === 'stylesheet' && 'string' === typeof thisLink.attr('href') && '' !== thisLink.attr('href')) {
-				
-							var thisUrl = thisLink.attr('href');
-							var thisContent = cache.get(thisUrl);
-							if (!thisContent) {
-					
-								getRemoteResource(thisUrl, function(error, response){
-								
-									if (!error) {
-									
-										cache.set(thisUrl, response);
-										headContent.styles += response;
-									
-									}
-									if (i >= linkCount) {
-								
-										headContent.styles += '</style>';
-										stylesDone = true;
-								
-									}
-						
-								});
-					
-							}
-							else {
-					
-								headContent.styles += thisContent;
-								if (i >= linkCount) {
-								
-									headContent.styles += '</style>';
-									stylesDone = true;
-								
-								}
-					
-							}
-				
-						}
-						else if (i >= linkCount) {
-					
-							headContent.styles += '</style>';
-							stylesDone = true;
-					
-						}
-			
-					});
-				
-				}
-				else {
-				
-					headContent.styles = '';
-					stylesDone = true;
-				
-				}
-				if (scriptCount > 0) {
-				
-					headScripts.each(function(i, thisScript) {
-			
-						if (thisScript.attr('type') === 'text/javascript' && 'string' === typeof thisScript.attr('src') && '' !== thisScript.attr('src') && -1 === thisScript.attr('src').indexOf('jquery.min.js')) {
-				
-							var thisUrl = thisScript.attr('src');
-							var thisContent = cache.get(thisUrl);
-							if (!thisContent) {
-					
-								getRemoteResource(thisUrl, function(error, response){
-								
-									if (!error) {
-									
-										cache.set(thisUrl, response);
-										headContent.scripts += response;
-									
-									}
-									if (i >= scriptCount) {
-								
-										headContent.scripts += '</script>';
-										scriptsDone = true;
-								
-									}
-						
-								});
-					
-							}
-							else {
-					
-								headContent.scripts += thisContent;
-								if (i >= scriptCount) {
-								
-									headContent.scripts += '</script>';
-									scriptsDone = true;
-								
-								}
-					
-							}
-				
-						}
-						else if (i >= scriptCount) {
-					
-							headContent.scripts += '</style>';
-							scriptsDone = true;
-					
-						}
-			
-					});
-				
-				}
-				else {
-				
-					headContent.scripts = '';
-					scriptsDone = true;
-				
-				}
+				type === 'style';
+				headElements = jqObj('head > link');
+				headContent += '<style type="text/css">';
+				closeTag = '</style>';
 			
 			}
-			return callback(false, headContent);
+			else {
+			
+				headElements = jqObj('head > script');
+				headContent += '<script type="text/javascript>"';
+				closeTag = '</script>';
+			
+			}
+			var urlArray = [];
+			var elementCount = headElements.length;
+			if (elementCount > 0) {
+			
+				headElements.each(function(i, thisEl) {
+		
+					if (type === 'style' &&jqObj(thisEl).attr('rel') === 'stylesheet' && 'string' === typeof jqObj(thisEl).attr('href') && '' !== jqObj(thisEl).attr('href')) {
+			
+						urlArray.push(jqObj(thisLink).attr('href'));
+			
+					}
+					else if (type === 'script' && jqObj(thisScript).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisScript).attr('src') && '' !== jqObj(thisScript).attr('src') && -1 === jqObj(thisScript).attr('src').indexOf('jquery.min.js')) {
+					
+						urlArray.push(jqObj(thisScript).attr('src'));
+					
+					}
+					if ((i + 1) >= elementCount) {
+				
+						getRemoteResources(urlArray).then((cnt) => {
+						
+							headContent += cnt + closeTag;
+							return callback(false, headContent);
+						
+						}).catch((err) => {
+						
+							return callback(err, null);
+						
+						});
+				
+					}
+		
+				});
+			
+			}
+			else {
+			
+				headContent = '';
+				return callback(false, headContent);
+			
+			}
 		
 		}
 	
@@ -266,31 +289,21 @@ module.exports = {
 
 				var $ = self.getAsJQuery(htmlString);
 				var bodyHtml = self.makeConsoleHtml($('body'));
-				self.pullHeadElements($, function(error, headContent) {
+				self.pullHeadElements($, 'style').then((styles) => {
 			
-					if (error) {
+					var finalHtml = '';
+					if ('string' === typeof styles && styles !== '') {
 				
-						return callback(error, bodyHtml);
+						finalHtml += headContent.styles;
 				
 					}
-					else {
+					finalHtml += bodyHtml;
+					return callback(false, finalHtml);
+					
+				}).catch((error) =>
 				
-						var finalHtml = '';
-						if ('string' === typeof headContent.styles && headContent.styles !== '') {
-					
-							finalHtml += headContent.styles;
-					
-						}
-						if ('string' === typeof headContent.scripts && headContent.scripts !== '') {
-					
-							finalHtml += headContent.scripts;
-					
-						}
-						finalHtml += bodyHtml;
-						return callback(false, finalHtml);
+					return callback(error, bodyHtml);
 				
-					}
-			
 				});
 
 			}

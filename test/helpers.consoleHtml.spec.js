@@ -106,8 +106,25 @@ describe('consoleHtml.js', function() {
 			expect(consoleHtml.pullHeadElements).to.throw(TypeError, 'invalid callback passed to pullHeadElements');
 		
 		});
-		it('should return a TypeError to callback if jqObj is not a function');
-		it('should not return until all matched head styles and scripts are loaded');
+		it('should return a TypeError to callback if jqObj is not a function', function(done) {
+		
+			consoleHtml.pullHeadElements(null, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid jqObj passed to pullHeadElements');
+				done();
+			
+			});
+		
+		});
+		it('should not return until all matched head styles and scripts are loaded', function(done) {
+		
+			consoleHtml.pullHeadElements(testObj, function(error, result) {
+			
+				done();
+			
+			})
+		
+		});
 		it('should set stylesDone to true and return object property "styles" to an empty string if jqObj has no link elements in head');
 		it('should set scriptsDone to true and return object property "scripts" to an empty string if jqObj has no script elements in head');
 		it('should get content of any matched style links from cache if previously cached and append it to the style tag string in the return object\'s "styles" property');
