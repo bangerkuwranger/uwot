@@ -3,8 +3,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const request = require('request');
 const cheerio = require('cheerio');
-const NodeCache = require('node-cache');
-var cache = new NodeCache({ stdTTL: 3600 });
+const nodeCache = require('node-cache');
+var cache = new nodeCache({ stdTTL: 3600 });
 
 function getRemoteResource(url, callback) {
 
@@ -81,6 +81,7 @@ module.exports = {
 					if ('string' !== typeof thisLinkOnClick && ('string' !== typeof thisLinkTarget || '_blank' !== thisLinkTarget)) {
 					
 						thisLink.attr('onClick', 'uwotConsoleGoto(' + thisLink.attr('href') + ')');
+						thisLink.addClass('uwot-console-link');
 					
 					}
 					if (i >= linkCount) {
@@ -246,22 +247,6 @@ module.exports = {
 			
 			}
 			return callback(false, headContent);
-		
-		}
-	
-	},
-	
-	// returns string with html code from inside body element of a jqObj
-	getBodyHtml(jqObj) {
-	
-		if ('function' !== typeof jqObj) {
-		
-			throw new TypeError('invalid jqObj passed to getBodyHtml');
-		
-		}
-		else {
-		
-			return jqObj('body').html();
 		
 		}
 	
