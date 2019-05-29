@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 var consoleHtml = require('../helpers/consoleHtml');
 const getTestHtmlString = function() {
 
-	return '<html><head><title>the pull of the past is the pall over us</title><meta name="description" content="art. software. music. a general sense of unease."><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=BG76j6NvbJ"><link rel="manifest" href="/site.webmanifest?v=BG76j6NvbJ"><link rel="mask-icon" href="/safari-pinned-tab.svg?v=BG76j6NvbJ" color="#ff0000"><link rel="shortcut icon" href="/favicon.ico?v=BG76j6NvbJ"><meta name="msapplication-TileColor" content="#979797"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="https://www.chadacarino.com/css/singlepage.css?v=2"><link rel="stylesheet" href="https://www.chadacarino.com/css/font-cacscribbles.css"><style type="text/css">body {font-family: cAcScribbles, "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;}h6 { text-transform: uppercase;}</style></head><body><div class="page page-comingsoon"><h1>i\'m working on it; leave me be.</h1><img src="https://www.chadacarino.com/images/caclogov2.png" alt="C. A. C." style="max-width: 320px; height: auto;"><h6><a href="https://github.com/bangerkuwranger">visit me on github</a></h6></div><ul id="fruits"><li class="apple">Apple</li><li class="orange">Orange</li><li class="pear">Pear</li></ul><p><a href="https://www.chadacarino.com/" target="_blank">spawn</a></p><p><a href="#!" target="_self" onClick="console.log(\'nothing done.\')">do nothing</a></p></body></html>';
+	return '<html><head><title>the pull of the past is the pall over us</title><meta name="description" content="art. software. music. a general sense of unease."><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=BG76j6NvbJ"><link rel="manifest" href="/site.webmanifest?v=BG76j6NvbJ"><link rel="mask-icon" href="/safari-pinned-tab.svg?v=BG76j6NvbJ" color="#ff0000"><link rel="shortcut icon" href="/favicon.ico?v=BG76j6NvbJ"><meta name="msapplication-TileColor" content="#979797"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="https://www.chadacarino.com/css/singlepage.css?v=2"><link rel="stylesheet" href="https://www.chadacarino.com/css/font-cacscribbles.css"><style type="text/css">body {font-family: cAcScribbles, "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;}h6 { text-transform: uppercase;}</style></head><body><div class="page page-comingsoon"><h1>i\'m working on it; leave me be.</h1><img src="https://www.chadacarino.com/images/caclogov2.png" alt="C. A. C." style="max-width: 320px; height: auto;"><h6><a id="normalLink" href="https://github.com/bangerkuwranger">visit me on github</a></h6></div><ul id="fruits"><li class="apple">Apple</li><li class="orange">Orange</li><li class="pear">Pear</li></ul><p><a id="spawnLink" href="https://www.chadacarino.com/" target="_blank">spawn</a></p><p><a id="nothingLink" href="#!" target="_self" onClick="console.log(\'nothing done.\')">do nothing</a></p><p><a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent">take over</a></p></body></html>';
 
 };
 
@@ -57,10 +57,41 @@ describe('consoleHtml.js', function() {
 			expect(consoleHtml.makeConsoleHtml).to.throw(TypeError, 'invalid jqObj passed to makeConsoleHtml');
 		
 		});
-		it('should return the html of the unchanged jqObj if there are no "a" tags in the markup');
-		it('should not change the onClick or class attributes of any links that have an onClick attribute');
-		it('should not change the onClick or class attributes of any links that have a target attribute of "_blank"');
-		it('should add the class "uwot-console-link" and add an onClick attribute calling "uwotConsoleGoto" to any links that do not have an onClick attribute and do not have a target attribute of "_blank"');
+		it('should return the html of the unchanged jqObj if there are no "a" tags in the markup', function() {
+		
+			testObj('a').replaceWith('');
+			var testResults = consoleHtml.makeConsoleHtml(testObj);
+			expect(testResults).to.equal(testObj.html());
+		
+		});
+		it('should not change the onclick or class attributes of any links that have an onclick attribute', function() {
+		
+			var testResults = consoleHtml.makeConsoleHtml(testObj);
+			var nothingLinkHtml = testObj.html('#nothingLink');
+			var resultObj = cheerio.load(testResults);
+			var resultLinkHtml = resultObj.html('#nothingLink');
+			expect(resultLinkHtml).to.equal(nothingLinkHtml);
+		
+		});
+		it('should not change the onclick or class attributes of any links that have a target attribute of "_blank"', function() {
+		
+			var testResults = consoleHtml.makeConsoleHtml(testObj);
+			var spawnLinkHtml = testObj.html('#spawnLink');
+			var resultObj = cheerio.load(testResults);
+			var resultLinkHtml = resultObj.html('#spawnLink');
+			expect(resultLinkHtml).to.equal(spawnLinkHtml);
+		
+		});
+		it('should add the class "uwot-console-link" and add an onclick attribute calling "uwotConsoleGoto" to any links that do not have an onclick attribute and do not have a target attribute of "_blank"', function() {
+		
+			var testResults = consoleHtml.makeConsoleHtml(testObj);
+			var resultObj = cheerio.load(testResults);
+			var normalLinkHtml = resultObj.html('#normalLink');
+			var takeoverLinkHtml = resultObj.html('#takeoverLink');
+			expect(normalLinkHtml).to.equal('<a id="normalLink" href="https://github.com/bangerkuwranger" onclick="uwotConsoleGoto(&quot;https://github.com/bangerkuwranger&quot;)" class="uwot-console-link">visit me on github</a>');
+			expect(takeoverLinkHtml).to.equal('<a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent" onclick="uwotConsoleGoto(&quot;https://www.chadacarino.com/&quot;)" class="uwot-console-link">take over</a>');
+		
+		});
 	
 	});
 	describe('pullHeadElements(jqObj, callback)', function() {

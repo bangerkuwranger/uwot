@@ -70,27 +70,22 @@ module.exports = {
 		}
 		else {
 		
-			var allLinks = jqObj('a');
-			var linkCount = allLinks.length;
+			var linkCount = jqObj('a').length;
 			if (linkCount > 0) {
 			
-				allLinks.each(function(i, thisLink) {
+				jqObj('a').each(function(i, thisLink) {
 			
-					var thisLinkTarget = thisLink.attr('target');
-					var thisLinkOnClick = thisLink.attr('onClick');
-					if ('string' !== typeof thisLinkOnClick && ('string' !== typeof thisLinkTarget || '_blank' !== thisLinkTarget)) {
+					var thisLinkTarget = jqObj(thisLink).attr('target');
+					var thisLinkOnclick = jqObj(thisLink).attr('onclick');
+					if ('string' !== typeof thisLinkOnclick && ('string' !== typeof thisLinkTarget || '_blank' !== thisLinkTarget)) {
 					
-						thisLink.attr('onClick', 'uwotConsoleGoto(' + thisLink.attr('href') + ')');
-						thisLink.addClass('uwot-console-link');
-					
-					}
-					if (i >= linkCount) {
-					
-						return jqObj.html();
+						jqObj(thisLink).attr('onclick', 'uwotConsoleGoto("' + jqObj(thisLink).attr('href') + '")');
+						jqObj(thisLink).addClass('uwot-console-link');
 					
 					}
 			
 				});
+				return jqObj.html();
 			
 			}
 			else {
