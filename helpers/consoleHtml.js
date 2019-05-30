@@ -1,6 +1,4 @@
 'use strict';
-const fs = require('fs-extra');
-const path = require('path');
 const request = require('request-promise-native');
 const cheerio = require('cheerio');
 const nodeCache = require('node-cache');
@@ -10,7 +8,7 @@ var cache = new nodeCache({ stdTTL: 3600 });
 
 module.exports = {
 	
-	cache: cache,
+	cache,
 	
 	// reads html into cheerio for jQuery-like conversion
 	getAsJQuery(htmlString) {
@@ -194,6 +192,7 @@ module.exports = {
 	// pulls head elements and loads from cache or remote location if needed
 	pullHeadElements(jqObj, type) {
 	
+		var self = this;
 		if ('function' !== typeof jqObj) {
 		
 			return Promise.reject(TypeError('invalid jqObj passed to pullHeadElements'));
@@ -235,7 +234,7 @@ module.exports = {
 					}
 					if ((i + 1) >= elementCount) {
 				
-						getRemoteResources(urlArray).then((cnt) => {
+						self.getRemoteResources(urlArray).then((cnt) => {
 						
 							headContent += cnt + closeTag;
 							return Promise.resolve(headContent);
