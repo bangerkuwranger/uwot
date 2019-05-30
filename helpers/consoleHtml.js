@@ -1,143 +1,16 @@
 'use strict';
 const fs = require('fs-extra');
 const path = require('path');
-const request = require('request');
+const request = require('request-promise-native');
 const cheerio = require('cheerio');
 const nodeCache = require('node-cache');
 var cache = new nodeCache({ stdTTL: 3600 });
 
-function getRemoteResources(urlOrUrlArray, contentString) {
-	
-	if ('string' === typeof urlOrUrlArray) {
-	
-		return new Promise(function(resolve, reject) {
-		
-			var cached = cache.get(urlOrUrlArray);
-			if (!cached) {
-	
-				request(urlOrUrlArray, function(error, response, body) {
-		
-					if (error) {
-			
-						reject(error);
-			
-					}
-					else if (response.statusCode != 200) {
-			
-						reject(response);
-			
-					}
-					else {
-				
-						cache.set(urlOrUrlArray, body);
-						if (!contentString) {
-			
-							resolve(body);
-			
-						}
-						else {
-				
-							resolve(contentString + body);
-				
-						}
-				
-					}
-		
-				});
-			
-			}
-			else {
-			
-				resolve(cached);
-			
-			}
-	
-		});
-	
-	}
-	else if ('object' === typeof urlOrUrlArray && Array.isArray(urlOrUrlArray)) {
-	
-		var currentUrl = urlOrUrlArray.shift();
-		if (!currentUrl && !contentString) {
-		
-			return Promise.reject(new Error('no content received'))
-		
-		}
-		else if (!currentUrl) {
-		
-			return Promise.resolve(contentString);
-		
-		}
-		else {
-		
-			return new Promise(function(resolve, reject) {
-	
-				var cached = cache.get(currentUrl);
-				if (!cached) {
-				
-					request(currentUrl, function(error, response, body) {
-				
-						if (error) {
-			
-							reject(error);
-			
-						}
-						else if (response.statusCode != 200) {
-			
-							reject(response);
-			
-						}
-						else  {
-				
-							cache.set(currentUrl, body);
-							if (!contentString) {
-			
-								contentString = body;
-			
-							}
-							else {
-				
-								contentString += body;
-				
-							}
-							resolve(function() {
-								
-								return getRemoteResources(urlOrUrlArray, contentString);
-							
-							});
-					
-						}
-		
-					});
-				
-				}
-				else {
-				
-					contentString = contentString ? contentString + cached : cached;
-					resolve(function() {
-					
-						return getRemoteResources(urlOrUrlArray, contentString);
-				
-					});
-				
-				}
-	
-			});
-		
-		}
-	
-	}
-	else {
-	
-		return Promise.reject(new TypeError('urlOrUrlArray must be a string or an Array of strings'));
-	
-	}
-	
-}
-
 // converts standard html output into graphic console html, which maintains interface continuity
 
 module.exports = {
+	
+	cache: cache,
 	
 	// reads html into cheerio for jQuery-like conversion
 	getAsJQuery(htmlString) {
@@ -194,17 +67,136 @@ module.exports = {
 	
 	},
 	
-	// pulls head elements and loads from cache or remote location if needed
-	pullHeadElements(jqObj, type, callback) {
+	// retrieves external resources and concatenates into a string; returns a Promise
+	getRemoteResources(urlOrUrlArray, contentString) {
 	
-		if ('function' !== typeof callback) {
+		var self = this;
+		if ('string' === typeof urlOrUrlArray) {
+	
+			return new Promise(function(resolve, reject) {
 		
-			throw new TypeError('invalid callback passed to pullHeadElements');
+				var cached = cache.get(urlOrUrlArray);
+				if (!cached) {
+	
+					return request.get(urlOrUrlArray).then((body) => {
+				
+						cache.set(urlOrUrlArray, body);
+						if (!contentString) {
 		
+							resolve(body);
+		
+						}
+						else {
+			
+							resolve(contentString + body);
+			
+						}
+				
+					}).catch((error) => {
+				
+						reject(error);
+				
+					});
+			
+				}
+				else if (!contentString) {
+
+					resolve(cached);
+
+				}
+				else {
+	
+					resolve(contentString + cached);
+	
+				}
+	
+			});
+	
 		}
-		else if ('function' !== typeof jqObj) {
+		else if ('object' === typeof urlOrUrlArray && Array.isArray(urlOrUrlArray)) {
+	
+			var currentUrl = urlOrUrlArray.shift();
+			if (!currentUrl && 'string' !== typeof contentString) {
 		
-			return callback(TypeError('invalid jqObj passed to pullHeadElements'), null);
+				return Promise.reject(new Error('no content received'));
+		
+			}
+			else if (!currentUrl) {
+		
+				return Promise.resolve(contentString);
+		
+			}
+			else {
+		
+				return new Promise(function(resolve, reject) {
+	
+					var cached = cache.get(currentUrl);
+					if (!cached) {
+				
+						return request.get(currentUrl).then((body) => {
+				
+							cache.set(currentUrl, body);
+							if (!contentString) {
+		
+								contentString = body;
+		
+							}
+							else {
+			
+								contentString += body;
+			
+							}
+							return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+						
+								resolve(content);
+						
+							}).catch((error) => {
+						
+								reject(error);
+						
+							});
+					
+						}).catch((error) => {
+					
+							reject(error);
+					
+						});
+				
+					}
+					else {
+				
+						contentString = contentString ? contentString + cached : cached;
+						return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+					
+							resolve(content);
+					
+						}).catch((error) => {
+					
+							reject(error);
+					
+						});
+				
+					}
+	
+				});
+		
+			}
+	
+		}
+		else {
+	
+			return Promise.reject(new TypeError('urlOrUrlArray must be a string or an Array of strings'));
+	
+		}
+	
+	},
+	
+	// pulls head elements and loads from cache or remote location if needed
+	pullHeadElements(jqObj, type) {
+	
+		if ('function' !== typeof jqObj) {
+		
+			return Promise.reject(TypeError('invalid jqObj passed to pullHeadElements'));
 		
 		}
 		else {
@@ -233,12 +225,12 @@ module.exports = {
 		
 					if (type === 'style' &&jqObj(thisEl).attr('rel') === 'stylesheet' && 'string' === typeof jqObj(thisEl).attr('href') && '' !== jqObj(thisEl).attr('href')) {
 			
-						urlArray.push(jqObj(thisLink).attr('href'));
+						urlArray.push(jqObj(thisEl).attr('href'));
 			
 					}
-					else if (type === 'script' && jqObj(thisScript).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisScript).attr('src') && '' !== jqObj(thisScript).attr('src') && -1 === jqObj(thisScript).attr('src').indexOf('jquery.min.js')) {
+					else if (type === 'script' && jqObj(thisEl).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisEl).attr('src') && '' !== jqObj(thisEl).attr('src') && -1 === jqObj(thisEl).attr('src').indexOf('jquery.min.js')) {
 					
-						urlArray.push(jqObj(thisScript).attr('src'));
+						urlArray.push(jqObj(thisEl).attr('src'));
 					
 					}
 					if ((i + 1) >= elementCount) {
@@ -246,11 +238,11 @@ module.exports = {
 						getRemoteResources(urlArray).then((cnt) => {
 						
 							headContent += cnt + closeTag;
-							return callback(false, headContent);
+							return Promise.resolve(headContent);
 						
 						}).catch((err) => {
 						
-							return callback(err, null);
+							return Promise.reject(err);
 						
 						});
 				
@@ -262,7 +254,7 @@ module.exports = {
 			else {
 			
 				headContent = '';
-				return callback(false, headContent);
+				return Promise.resolve(headContent);
 			
 			}
 		
@@ -289,18 +281,26 @@ module.exports = {
 
 				var $ = self.getAsJQuery(htmlString);
 				var bodyHtml = self.makeConsoleHtml($('body'));
-				self.pullHeadElements($, 'style').then((styles) => {
-			
-					var finalHtml = '';
-					if ('string' === typeof styles && styles !== '') {
-				
-						finalHtml += headContent.styles;
-				
+				var finalHtml = '';
+				Promise.all([
+					self.pullHeadElements($, 'style'),
+					self.pullHeadElements($, 'script')
+				]).then((contentArray) => {
+					
+					if('string' === typeof contentArray[0]) {
+					
+						finalHtml += contentArray[0];
+					
+					}
+					if('string' === typeof contentArray[1]) {
+					
+						finalHtml += contentArray[1];
+					
 					}
 					finalHtml += bodyHtml;
 					return callback(false, finalHtml);
 					
-				}).catch((error) =>
+				}).catch((error) => {
 				
 					return callback(error, bodyHtml);
 				
