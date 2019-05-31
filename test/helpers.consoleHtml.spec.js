@@ -10,7 +10,7 @@ const request = require('request-promise-native');
 var consoleHtml = require('../helpers/consoleHtml');
 const getTestHtmlString = function() {
 
-	return '<html><head><title>the pull of the past is the pall over us</title><meta name="description" content="art. software. music. a general sense of unease."><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=BG76j6NvbJ"><link rel="manifest" href="/site.webmanifest?v=BG76j6NvbJ"><link rel="mask-icon" href="/safari-pinned-tab.svg?v=BG76j6NvbJ" color="#ff0000"><link rel="shortcut icon" href="/favicon.ico?v=BG76j6NvbJ"><meta name="msapplication-TileColor" content="#979797"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="https://www.chadacarino.com/css/singlepage.css?v=2"><link rel="stylesheet" href="https://www.chadacarino.com/css/font-cacscribbles.css"><style type="text/css">body {font-family: cAcScribbles, "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;}h6 { text-transform: uppercase;}</style></head><body><div class="page page-comingsoon"><h1>i\'m working on it; leave me be.</h1><img src="https://www.chadacarino.com/images/caclogov2.png" alt="C. A. C." style="max-width: 320px; height: auto;"><h6><a id="normalLink" href="https://github.com/bangerkuwranger">visit me on github</a></h6></div><ul id="fruits"><li class="apple">Apple</li><li class="orange">Orange</li><li class="pear">Pear</li></ul><p><a id="spawnLink" href="https://www.chadacarino.com/" target="_blank">spawn</a></p><p><a id="nothingLink" href="#!" target="_self" onClick="console.log(\'nothing done.\')">do nothing</a></p><p><a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent">take over</a></p></body></html>';
+	return '<html><head><title>the pull of the past is the pall over us</title><meta name="description" content="art. software. music. a general sense of unease."><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=BG76j6NvbJ"><link rel="manifest" href="/site.webmanifest?v=BG76j6NvbJ"><link rel="mask-icon" href="/safari-pinned-tab.svg?v=BG76j6NvbJ" color="#ff0000"><link rel="shortcut icon" href="/favicon.ico?v=BG76j6NvbJ"><meta name="msapplication-TileColor" content="#979797"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="https://www.chadacarino.com/css/singlepage.css?v=2"><link rel="stylesheet" href="https://www.chadacarino.com/css/font-cacscribbles.css"><style type="text/css">body {font-family: cAcScribbles, "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;}h6 { text-transform: uppercase;}</style><script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script></head><body><div class="page page-comingsoon"><h1>i\'m working on it; leave me be.</h1><img src="https://www.chadacarino.com/images/caclogov2.png" alt="C. A. C." style="max-width: 320px; height: auto;"><h6><a id="normalLink" href="https://github.com/bangerkuwranger">visit me on github</a></h6></div><ul id="fruits"><li class="apple">Apple</li><li class="orange">Orange</li><li class="pear">Pear</li></ul><p><a id="spawnLink" href="https://www.chadacarino.com/" target="_blank">spawn</a></p><p><a id="nothingLink" href="#!" target="_self" onClick="console.log(\'nothing done.\')">do nothing</a></p><p><a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent">take over</a></p></body></html>';
 
 };
 
@@ -307,6 +307,17 @@ describe('consoleHtml.js', function() {
 	});
 	describe('pullHeadElements(jqObj, type)', function() {
 	
+		var getRemoteResourcesStub;
+		beforeEach('stub out getRemoteResources', function() {
+		
+			getRemoteResourcesStub = sinon.stub(consoleHtml, 'getRemoteResources');
+		
+		});
+		afterEach('restore stub', function() {
+		
+			getRemoteResourcesStub.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(consoleHtml.pullHeadElements).to.be.a('function');
@@ -327,13 +338,77 @@ describe('consoleHtml.js', function() {
 			});
 		
 		});
-		it('should set stylesDone to true and return object property "styles" to an empty string if jqObj has no link elements in head');
-		it('should set scriptsDone to true and return object property "scripts" to an empty string if jqObj has no script elements in head');
-		it('should get content of any matched style links from cache if previously cached and append it to the style tag string in the return object\'s "styles" property');
-		it('should retrieve content of any matched style links from remote location if not previously cached, then cache and append it to the style tag string in the return object\'s "styles" property');
-		it('should get content of any matched script links from cache if previously cached and append it to the script tag string in the return object\'s "scripts" property');
-		it('should retrieve content of any matched script links from remote location if not previously cached, then cache and append it to the script tag string in the return object\'s "scripts" property');
-		it('should return an object with two properties, "styles" and "scripts", each containing a string that is either empty or an html tag');
+		it('should set type to style if type arg is not a string or not "script"', function() {
+		
+			var testHtml = '<html><head><link rel="stylesheet" href="localtest.css" /></head><body><p>test body</p</body></html>';
+			var testHtmlObj = cheerio.load(testHtml);
+			var testBody = 'body {background: #333;color: #ddd}';
+			getRemoteResourcesStub.returns(Promise.resolve(testBody));
+			return expect(consoleHtml.pullHeadElements(testHtmlObj)).to.eventually.be.fulfilled.then((resultTypeUndefined) => {
+			
+				expect(resultTypeUndefined).to.equal('<style type="text/css">' + testBody + '</style>');
+				return expect(consoleHtml.pullHeadElements(testHtmlObj, 'invalidValue')).to.eventually.equal('<style type="text/css">' + testBody + '</style>');
+			
+			});
+		
+		});
+		it('should return a Promise resolved with an empty string if there are no matching elements', function() {
+		
+			var testHtml = '<html><head></head><body><p>test body</p</body></html>';
+			var testHtmlObj = cheerio.load(testHtml);
+			var testBody = 'body {background: #333;color: #ddd}';
+			getRemoteResourcesStub.returns(Promise.resolve(testBody));
+			return expect(consoleHtml.pullHeadElements(testHtmlObj)).to.eventually.equal('');
+		
+		});
+		it('should wrap returned results with a style tag, and limit results to the targets of link tags inside head with rel attr "stylesheet" and non-empty string href attr value if type is not "script"', function() {
+			var headLinks = testObj('head > link');
+			var matchedLinks = [];
+			headLinks.each(function(i, thisLink) {
+			
+				if (testObj(thisLink).attr('rel') === 'stylesheet' && 'string' === typeof testObj(thisLink).attr('href') && '' !== testObj(thisLink).attr('href')) {
+	
+					matchedLinks.push(thisLink);
+	
+				}
+			
+			});
+			testObj('head').append('<link rel="stylesheet" id="noHrefLink" /><link rel="stylesheet" href="" id="emptyHrefLink" /><link rel="css" href="nonono" id="notStylesheetRel" />');
+			getRemoteResourcesStub.callsFake(function returnArrayLength(urlArray) {
+			
+				return Promise.resolve(urlArray.length);
+			
+			});
+			return expect(consoleHtml.pullHeadElements(testObj), 'style').to.eventually.equal('<style type="text/css">' + matchedLinks.length + '</style>');
+		
+		});
+		it('should wrap returned results with a script tag, and limit results to the targets of script tags in head with type attr "text/javascript" and non-empty string without "jquery.min.js" in it as value of src attr if type is "script"', function() {
+			var headScripts = testObj('head > script');
+			var matchedScripts = [];
+			headScripts.each(function(i, thisScript) {
+			
+				if (testObj(thisScript).attr('type') === 'text/javascript' && 'string' === typeof testObj(thisScript).attr('src') && '' !== testObj(thisScript).attr('src') && -1 === testObj(thisScript).attr('src').indexOf('jquery.min.js')) {
+	
+					matchedScripts.push(thisScript);
+	
+				}
+			
+			});
+			testObj('head').append('<script type="text/javascript" id="noSrcScript"></script><script rel="text/javascript" src="" id="emptySrcScript"></script><script type="js" src="nonono" id="notTextJsType"></script><script type="text/javascript" id="jQueryScript" src="//somecdn.com/jquery.min.js"></script>');
+			getRemoteResourcesStub.callsFake(function returnArrayLength(urlArray) {
+			
+				return Promise.resolve(urlArray.length);
+			
+			});
+			return expect(consoleHtml.pullHeadElements(testObj, 'script')).to.eventually.equal('<script type="text/javascript">' + matchedScripts.length + '</script>');
+		
+		});
+		it('should return a Promise rejected with an Error if getRemoteResources returns a rejected Promise', function() {
+		
+			getRemoteResourcesStub.returns(Promise.reject('test getRemoteResources rejection'))
+			return expect(consoleHtml.pullHeadElements(testObj, 'style')).to.eventually.be.rejectedWith('test getRemoteResources rejection');
+		
+		});
 		
 	
 	});

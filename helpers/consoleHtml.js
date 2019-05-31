@@ -200,62 +200,66 @@ module.exports = {
 		}
 		else {
 		
-			var headElements, closeTag, headContent = '';
-			if ('string' !== typeof type || 'script' !== type) {
+			return new Promise((resolve, reject) => {
 			
-				type === 'style';
-				headElements = jqObj('head > link');
-				headContent += '<style type="text/css">';
-				closeTag = '</style>';
+				var headElements, closeTag, headContent = '';
+				if ('string' !== typeof type || 'script' !== type) {
 			
-			}
-			else {
+					type = 'style';
+					headElements = jqObj('head > link');
+					headContent += '<style type="text/css">';
+					closeTag = '</style>';
 			
-				headElements = jqObj('head > script');
-				headContent += '<script type="text/javascript>"';
-				closeTag = '</script>';
+				}
+				else {
 			
-			}
-			var urlArray = [];
-			var elementCount = headElements.length;
-			if (elementCount > 0) {
+					headElements = jqObj('head > script');
+					headContent += '<script type="text/javascript">';
+					closeTag = '</script>';
 			
-				headElements.each(function(i, thisEl) {
+				}
+				var urlArray = [];
+				var elementCount = headElements.length;
+				if (elementCount > 0) {
+			
+					headElements.each(function(i, thisEl) {
 		
-					if (type === 'style' &&jqObj(thisEl).attr('rel') === 'stylesheet' && 'string' === typeof jqObj(thisEl).attr('href') && '' !== jqObj(thisEl).attr('href')) {
+						if (type === 'style' && jqObj(thisEl).attr('rel') === 'stylesheet' && 'string' === typeof jqObj(thisEl).attr('href') && '' !== jqObj(thisEl).attr('href')) {
 			
-						urlArray.push(jqObj(thisEl).attr('href'));
+							urlArray.push(jqObj(thisEl).attr('href'));
 			
-					}
-					else if (type === 'script' && jqObj(thisEl).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisEl).attr('src') && '' !== jqObj(thisEl).attr('src') && -1 === jqObj(thisEl).attr('src').indexOf('jquery.min.js')) {
+						}
+						else if (type === 'script' && jqObj(thisEl).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisEl).attr('src') && '' !== jqObj(thisEl).attr('src') && -1 === jqObj(thisEl).attr('src').indexOf('jquery.min.js')) {
 					
-						urlArray.push(jqObj(thisEl).attr('src'));
+							urlArray.push(jqObj(thisEl).attr('src'));
 					
-					}
-					if ((i + 1) >= elementCount) {
+						}
+						if ((i + 1) >= elementCount) {
 				
-						self.getRemoteResources(urlArray).then((cnt) => {
+							self.getRemoteResources(urlArray).then((cnt) => {
 						
-							headContent += cnt + closeTag;
-							return Promise.resolve(headContent);
+								headContent += cnt + closeTag;
+								resolve(headContent);
 						
-						}).catch((err) => {
+							}).catch((err) => {
 						
-							return Promise.reject(err);
+								reject(err);
 						
-						});
+							});
 				
-					}
+						}
 		
-				});
+					});
 			
-			}
-			else {
+				}
+				else {
 			
-				headContent = '';
-				return Promise.resolve(headContent);
+					headContent = '';
+					resolve(headContent);
 			
-			}
+				}
+			
+			});
 		
 		}
 	
