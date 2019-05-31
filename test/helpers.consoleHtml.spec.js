@@ -424,14 +424,162 @@ describe('consoleHtml.js', function() {
 			expect(consoleHtml.loadForConsole).to.throw(TypeError, 'invalid callback passed to loadForConsole');
 		
 		});
-		it('should return a TypeError to callback if jqObj is not a function');
-		it('should return an error to callback if getAsJQuery throws an error');
-		it('should return an error to callback if makeConsoleHtml throws an error');
-		it('should return an error as first callback arg and parsed body html as second html arg if pullHeadElements returns an error');
-		it('should return the final html string with the style tag prepended if pullHeadElements results in a non-empty "styles" string');
-		it('should return the final html string with the script tag prepended if pullHeadElements results in a non-empty "scripts" string');
-		it('should return the final html string with the style and script tags prepended if pullHeadElements results in a non-empty "styles" and "scripts" string');
-		it('should return the final html string with no tag prepended if pullHeadElements results in non-string or empty "styles" and "scripts" values');
+		it('should return a TypeError to callback if htmlString is not a string', function(done) {
+		
+			consoleHtml.loadForConsole(null, function(error, result) {
+			
+				expect(result).to.be.null;
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid htmlString passed to loadForConsole');
+				done();
+			
+			});
+		
+		});
+		it('should return an error to callback if getAsJQuery throws an error', function(done) {
+		
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').throws(new Error('test getAsJQuery error'));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.be.null;
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test getAsJQuery error');
+				getAsJQueryStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error to callback if makeConsoleHtml throws an error', function(done) {
+		
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').throws(new Error('test makeConsoleHtml error'));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.be.null;
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test makeConsoleHtml error');
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error as first callback arg and parsed body html as second html arg if pullHeadElements for styles returns a rejected Promise', function(done) {
+		
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.reject(new Error('test styles pullHeadElements rejection')));
+			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(testString);
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test styles pullHeadElements rejection');
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error as first callback arg and parsed body html as second html arg if pullHeadElements for scripts returns a rejected Promise', function(done) {
+		
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
+			pullHeadElementsStub.onCall(1).returns(Promise.reject(new Error('test styles pullHeadElements rejection')));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(testString);
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test styles pullHeadElements rejection');
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the final html string with the style tag prepended if pullHeadElements for styles returns a Promise resolved with a non-empty string', function(done) {
+		
+			var finalHtml = '<style type="text/css">.styled {width: auto;}</style>' + testString;
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
+			pullHeadElementsStub.onCall(1).returns(Promise.resolve(''));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(finalHtml);
+				expect(error).to.be.false;
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the final html string with the script tag prepended if pullHeadElements for scripts returns a Promise resolved with a non-empty string', function(done) {
+		
+			var finalHtml = '<script type="text/javascript">console.log("it is a script");</script>' + testString;
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.resolve(''));
+			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(finalHtml);
+				expect(error).to.be.false;
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the final html string with the style and script tags prepended if pullHeadElements for styles and scripts return Promises resolved with non-empty strings', function(done) {
+		
+			var finalHtml = '<style type="text/css">.styled {width: auto;}</style>' + '<script type="text/javascript">console.log("it is a script");</script>' + testString;
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
+			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(finalHtml);
+				expect(error).to.be.false;
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the final html string with no tag prepended if pullHeadElements for styles and scripts return Promises resolved with empty strings', function(done) {
+		
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
+			pullHeadElementsStub.onCall(0).returns(Promise.resolve(''));
+			pullHeadElementsStub.onCall(1).returns(Promise.resolve(''));
+			consoleHtml.loadForConsole(testString, function(error, result) {
+			
+				expect(result).to.equal(testString);
+				expect(error).to.be.false;
+				getAsJQueryStub.restore();
+				makeConsoleHtmlStub.restore();
+				pullHeadElementsStub.restore();
+				done();
+			
+			});
+		
+		});
 	
 	});
 

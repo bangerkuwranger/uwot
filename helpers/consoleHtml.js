@@ -274,7 +274,7 @@ module.exports = {
 		}
 		else if ('string' !== typeof htmlString) {
 		
-			return callback(TypeError('invalid jqObj passed to loadForConsole'), null);
+			return callback(TypeError('invalid htmlString passed to loadForConsole'), null);
 		
 		}
 		else {
