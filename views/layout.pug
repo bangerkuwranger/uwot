@@ -49,6 +49,7 @@ html
 			link(rel='stylesheet', href='/css/theme/default/main.css')
 		script(type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js")
 		script(type="text/javascript" src="/javascripts/history.js")
+		script(type="text/javascript" src="/javascripts/cliListener.js")
 		script(type="text/javascript")
 			| const uwotOperations = !{validOps};
 			-if (userName)
@@ -56,6 +57,7 @@ html
 			-else
 				| var user = "uwot";
 		script(type="text/javascript" src="/javascripts/operations.js")
+		script(type="text/javascript" src="/javascripts/console.js")
 		script(type="text/javascript" src="/javascripts/main.js")
 	body
 		block content

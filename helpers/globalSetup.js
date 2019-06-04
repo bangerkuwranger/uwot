@@ -65,6 +65,12 @@ function initGlobalObjects() {
 		global.Uwot.FileSystems = {};
 	
 	}
+	
+	if ('object' !== typeof global.Uwot.Listeners || null === global.Uwot.Listeners) {
+	
+		global.Uwot.Listeners = {};
+	
+	}
 
 }
 
@@ -136,6 +142,16 @@ module.exports = {
 				"exit"
 			];
 
+		}
+		
+		if ('object' !== typeof global.Uwot.Constants.listenerTypes) {
+		
+			global.Uwot.Constants.listenerTypes = [
+				"default",		// the main listener that routes commands to path router. There can be only one.
+				"additional",	// adds commands outside of the default set while allowing default listener to route commands. There can be as many of these as needed, but cannot override default commands
+				"exclusive"		// takes over CLI interface and only routes all commands to listener target. Only one active at a time; allowed to override default commands.
+			];
+		
 		}
 		
 		if ('object' !== typeof global.Uwot.Constants.reserved || !Array.isArray(global.Uwot.Constants.reserved)) {
@@ -248,6 +264,67 @@ module.exports = {
 		}
 		
 		return global.Uwot.Themes;
+	
+	},
+	
+	// TBD
+	// Write listener tracking object and initialize the default CLI listener.
+	
+	initListeners: function initListeners(sessionStore, callback) {
+	
+		var listeners = {};
+		var error = false;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to initListeners');
+		
+		}
+		else {
+		
+			var loadGuest = filesystemLoader.loadGuest();
+			if (true !== loadGuest) {
+			
+				loadedFilesystems.GUEST = false;
+				error = loadGuest;
+				
+			
+			}
+			else {
+			
+				loadedFilesystems.GUEST = true;
+			
+			}
+			filesystemLoader.loadActiveSessionFilesystems(sessionStore, function(err, loadedForSessions) {
+			
+				if (err) {
+				
+					error = err;
+				
+				}
+				if ('object' === typeof loadedForSessions && Array.isArray(loadedForSessions) && loadedForSessions.length > 0) {
+				
+					var i = 0;
+					loadedForSessions.forEach(function(uid) {
+					
+						loadedFilesystems[uid] = true;
+						if (++i >= loadedForSessions.length) {
+						
+							return callback(error, loadedFilesystems);
+						
+						}
+					
+					});
+				
+				}
+				else {
+				
+					return callback(error, loadedFilesystems);
+				
+				}
+			
+			});
+		
+		}
 	
 	},
 	

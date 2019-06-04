@@ -7,7 +7,7 @@ var sanitize = require('./helpers/valueConversion');
 var rules = require('password-rules');
 
 /**
- * Number	_id
+ * String	_id
  * String	fName
  * String	lName
  * String	uName

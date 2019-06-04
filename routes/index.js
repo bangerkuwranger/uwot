@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const listenersRouter = require('./listeners')
 const binRouter = require('./path');
 const nonceHandler = require('node-timednonce');
 const passport = require('passport');
@@ -168,6 +169,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.use('/bin', binRouter);
+
+router.use('/listeners', listenersRouter);
 
 router.post(
 	'/login', 

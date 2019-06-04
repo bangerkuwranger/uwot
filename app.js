@@ -73,7 +73,8 @@ global.Uwot.Bin.sudo = {
 globalSetupHelper.initBins();
 
 // set up sessions
-const sessionMs = global.Uwot.Constants.sessionHours * 3600000;
+const sessionMs = global.Uwot.Config.getVal('users', 'authenticatedSessionExpiry');
+const instanceSessionMs = global.Uwot.Config.getVal('users', 'instanceSessionExpiry');
 var sessionArgs = {
 	cookie: {
 		sameSite: true,

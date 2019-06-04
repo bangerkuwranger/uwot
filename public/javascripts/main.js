@@ -44,6 +44,9 @@ jQuery(document).ready(function($) {
 	
 	$("#uwotcli-input").focus();
 	
+	// TBD
+	// refactor to use UwotCliListener class
+	
 	$("#uwotcli").submit(function(e) {
 		e.preventDefault();
 		var op;

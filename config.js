@@ -24,7 +24,9 @@ const confDefaults = function() {
 			homeWritable: false,
 			allowShellFunctions: false,
 			allowGuestShellFunctions: false,
-			allowRootUser: false
+			allowRootUser: false,
+			authenticatedSessionExpiry: global.Uwot.Constants.sessionHours * 3600000,
+			instanceSessionExpiry: global.Uwot.Constants.sessionHours * 3600000
 		},
 		binpath: {
 			useLocal: true,

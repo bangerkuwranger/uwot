@@ -58,6 +58,7 @@
     "request": "^2.88.0",
     "request-promise-native": "^1.0.7",
     "serve-favicon": "~2.4.5",
+    "uid-safe": "^2.1.5",
     "winston": "^3.2.1"
   },
   "os": [
