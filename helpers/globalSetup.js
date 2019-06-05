@@ -4,6 +4,7 @@ var path = require('path');
 // app packages
 var Config = require('../config');
 var Users = require('../users');
+var InstanceSessions = require('../instanceSessions')
 var Cmd = require('../cmd');
 var Theme = require('../theme');
 var binLoader = require('./binLoader');
@@ -36,6 +37,11 @@ function initGlobalObjects() {
 
 		// was 'global.UwotUsers'
 		global.Uwot.Users = {};
+
+	}
+	if ('object' !== typeof global.Uwot.InstanceSessions || null === global.Uwot.InstanceSessions) {
+
+		global.Uwot.InstanceSessions = {};
 
 	}
 
@@ -225,6 +231,7 @@ module.exports = {
 		// init global objects with instances of app classes
 		global.Uwot.Config = new Config(configPath);
 		global.Uwot.Users = new Users();
+		global.Uwot.InstanceSessions = new InstanceSessions();
 		return;
 	
 	},

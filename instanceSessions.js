@@ -131,6 +131,7 @@ module.exports = class UwotInstanceSessions {
 							data.createdAt,
 							data.expiresAt
 						);
+						return self.cnCallback(false, savedSession);
 					
 					}
 					catch(e) {
