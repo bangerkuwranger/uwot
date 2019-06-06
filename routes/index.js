@@ -8,6 +8,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const validateTheme = require('../helpers/themeLoader').isValidTheme;
 const FileSystem = require('../filesystem');
 const denyAllOthers = require('../middleware/denyAllOthers');
+const inSession = require('../middleware/inSession');
 
 passport.use(
 
@@ -112,9 +113,8 @@ router.use(function (req, res, next) {
 	
 });
 
-
 /* GET home page. */
-router.get('/', function(req, res, next) {
+router.get('/', inSession(), function(req, res, next) {
 	
 	var respValues = {
 		title: global.Uwot.Config.getVal('server', 'siteName'),
@@ -168,9 +168,9 @@ router.get('/', function(req, res, next) {
 	res.render('index', respValues);
 });
 
-router.use('/bin', binRouter);
+router.use('/bin', inSession(), binRouter);
 
-router.use('/listeners', listenersRouter);
+router.use('/listeners', inSession(), listenersRouter);
 
 router.post(
 	'/login', 

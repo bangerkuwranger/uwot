@@ -28,12 +28,12 @@ class InstanceSession {
 		}
 		else {
 		
-			this._id = uid(18);
+			this._id = uid.sync(18);
 		
 		}
-		this.createdAt = ('string' === typeof createdAt || ('object' === typeof createdAt && createdAt instanceof Date) ? sanitize.cleanDate(createdAt) : new Date();
+		this.createdAt = ('string' === typeof createdAt || ('object' === typeof createdAt && createdAt instanceof Date)) ? sanitize.cleanDate(createdAt) : new Date();
 		var cleanExpiry = sanitize.cleanInt(expiry);
-		var cleanExpireDate = ('string' === typeof expiresAt || ('object' === typeof expiresAt && expiresAt instanceof Date) ? sanitize.cleanDate(expiresAt) : null;
+		var cleanExpireDate = ('string' === typeof expiresAt || ('object' === typeof expiresAt && expiresAt instanceof Date)) ? sanitize.cleanDate(expiresAt) : null;
 		var expireMs = cleanExpiry <= 0 ? global.Uwot.Config.getVal('users', 'instanceSessionExpiry') : cleanExpiry;
 		this.expiresAt = null !== cleanExpireDate ? cleanExpireDate : new Date(this.createdAt + expireMs);
 	

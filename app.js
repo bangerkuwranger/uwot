@@ -13,7 +13,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
 
-var index = require('./routes/index');
+var indexRouter = require('./routes/index');
 
 var app = express();
 
@@ -74,7 +74,6 @@ globalSetupHelper.initBins();
 
 // set up sessions
 const sessionMs = global.Uwot.Config.getVal('users', 'authenticatedSessionExpiry');
-const instanceSessionMs = global.Uwot.Config.getVal('users', 'instanceSessionExpiry');
 var sessionArgs = {
 	cookie: {
 		sameSite: true,
@@ -140,7 +139,7 @@ if (app.get('env') === 'development') {
 
 app.use(express.static(path.join(global.Uwot.Constants.appRoot, 'public')));
 
-app.use('/', index);
+app.use('/', indexRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
