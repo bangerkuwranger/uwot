@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const listenersRouter = require('./listeners')
+const listenersRouter = require('./listeners');
 const binRouter = require('./path');
 const nonceHandler = require('node-timednonce');
 const passport = require('passport');

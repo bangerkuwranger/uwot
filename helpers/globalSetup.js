@@ -4,7 +4,7 @@ var path = require('path');
 // app packages
 var Config = require('../config');
 var Users = require('../users');
-var InstanceSessions = require('../instanceSessions')
+var InstanceSessions = require('../instanceSessions');
 var Cmd = require('../cmd');
 var Theme = require('../theme');
 var binLoader = require('./binLoader');
@@ -288,49 +288,7 @@ module.exports = {
 		}
 		else {
 		
-			var loadGuest = filesystemLoader.loadGuest();
-			if (true !== loadGuest) {
-			
-				loadedFilesystems.GUEST = false;
-				error = loadGuest;
-				
-			
-			}
-			else {
-			
-				loadedFilesystems.GUEST = true;
-			
-			}
-			filesystemLoader.loadActiveSessionFilesystems(sessionStore, function(err, loadedForSessions) {
-			
-				if (err) {
-				
-					error = err;
-				
-				}
-				if ('object' === typeof loadedForSessions && Array.isArray(loadedForSessions) && loadedForSessions.length > 0) {
-				
-					var i = 0;
-					loadedForSessions.forEach(function(uid) {
-					
-						loadedFilesystems[uid] = true;
-						if (++i >= loadedForSessions.length) {
-						
-							return callback(error, loadedFilesystems);
-						
-						}
-					
-					});
-				
-				}
-				else {
-				
-					return callback(error, loadedFilesystems);
-				
-				}
-			
-			});
-		
+			return callback(false, false);	
 		}
 	
 	},

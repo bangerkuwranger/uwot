@@ -1,7 +1,6 @@
 'use strict';
-const path = require('path');
 var Datastore = require('nedb-core');
-var uid = require('uid-safe')
+var uid = require('uid-safe');
 var sanitize = require('./helpers/valueConversion');
 
 /**
@@ -224,7 +223,7 @@ module.exports = class UwotInstanceSessions {
 						data[0].createdAt,
 						data[0].expiresAt
 					);
-					return self.vCallback(false, checkUser.validate());
+					return self.vCallback(false, checkSession.validate());
 				
 				}
 			
@@ -257,7 +256,7 @@ module.exports = class UwotInstanceSessions {
 					return self.ivCallback(error, null);
 				
 				}
-				else if (!Array.isArray(data) || !data.length || 'object' !== typeof data[0]) {
+				else if (updatedCount < 1) {
 				
 					return self.ivCallback(false, false);
 				
