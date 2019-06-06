@@ -7,6 +7,7 @@ var Users = require('../users');
 var InstanceSessions = require('../instanceSessions');
 var Cmd = require('../cmd');
 var Theme = require('../theme');
+var Listener = requeire('../listener');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
 var filesystemLoader = require('./filesystemLoader');
@@ -160,6 +161,26 @@ module.exports = {
 		
 		}
 		
+		if ('object' !== typeof global.Uwot.Constants.listenerParserTypes) {
+		
+			global.Uwot.Constants.listenerParserTypes = [
+				"cmdParser",		// the default command parser for the base shell. Parses to AST using bash-parser, stores AST in req.body.ast, and creates a runtime at req.body.runtime with method "executeCommands" that stores results in a property "results"
+				"internal",	// parser logic is contained a middleware function that is a method of the UwotCmd child class. parserPath must be set to the name of this method.
+				"external"		// parser logic is in a middleware function that is the export value of an additional file outside of the file containing the UwotCmd child class. parserPath must be set to the path to this file from global.Uwot.Constants.approot
+			];
+		
+		}
+		
+		if ('object' !== typeof global.Uwot.Constants.listenerOutputTypes) {
+		
+			global.Uwot.Constants.listenerOutputTypes = [
+				"ansi",		// the default command output engine for the base shell. Parses results object property 'output' to ansi and returns final object as JSON object to res.JSON
+				"internal",	// output logic is contained a middleware function that is a method of the UwotCmd child class. outputPath must be set to the name of this method, and this method MUST set res.ansi to be the output function that returns JSON object to res.JSON after performing any transformation to the expected output format
+				"external"		// output logic is in a middleware function that is the export value of an additional file outside of the file containing the UwotCmd child class. outputPath must be set to the path to this file from global.Uwot.Constants.approot. This middleware function MUST set res.ansi to be the output function that returns JSON object to res.JSON after performing any transformation to the expected output format
+			];
+		
+		}
+		
 		if ('object' !== typeof global.Uwot.Constants.reserved || !Array.isArray(global.Uwot.Constants.reserved)) {
 		
 			//was 'global.UwotReserved'
@@ -277,7 +298,7 @@ module.exports = {
 	// TBD
 	// Write listener tracking object and initialize the default CLI listener.
 	
-	initListeners: function initListeners(sessionStore, callback) {
+	initListeners: function initListeners(callback) {
 	
 		var listeners = {};
 		var error = false;
@@ -288,7 +309,45 @@ module.exports = {
 		}
 		else {
 		
-			return callback(false, false);	
+			global.Uwot.InstanceSessions.getValidInstances(function(error, validInstances) {
+			
+				if (error) {
+				
+					return callback(error, null);
+				
+				}
+				else if ('object' !== typeof validInstances || !(Array.isArray(validInstances)) || validInstances.length < 1) {
+				
+					return callback(false, false);
+				
+				}
+				else {
+				
+					for (let i = 0; i < validInstances.length; i++) {
+					
+						var currentInstanceId = validInstances[i]._id;
+						if ('object' === typeof global.Uwot.Listeners[currentInstanceId] && null !== global.Uwot.Listeners[currentInstanceId]) {
+						
+							
+						
+						}
+						else {
+						
+							global.Uwot.Listeners[currentInstanceId] = {};
+							global.Uwot.Listeners[currentInstanceId].default = new Listener('default', currentInstanceId);
+						
+						}
+						if ((i + 1) > validInstances.length) {
+						
+							return callback(false, Object.keys(global.Uwot.Listeners));
+						
+						}
+					
+					}
+				
+				}
+			
+			});
 		}
 	
 	},

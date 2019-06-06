@@ -2,6 +2,7 @@
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
 const EOL = require('os').EOL;
+const Listener = require('./listener');
 
 class UwotCmdCommand {
 
@@ -41,6 +42,77 @@ class UwotCmdOption {
 
 }
 
+class UwotListenerSettings {
+
+	constructor(settingsObj) {
+	
+		this.name = sanitize.cleanString(settingsObj.name, 255);
+		this.options = {};
+		if ('string' === typeof settingsObj.type) {
+		
+			var cleanType = sanitize.cleanString(settingsObj.type, 10);
+			if (-1 !== global.Uwot.Constants.listenerTypes.indexOf(cleanType)) {
+			
+				this.options.type = cleanType;
+			
+			}
+		
+		}
+		if ('string' === typeof settingsObj.parser) {
+		
+			var cleanParser = sanitize.cleanString(settingsObj.parser, 10);
+			if (-1 !== global.Uwot.Constants.listenerParserTypes.indexOf(cleanParser)) {
+			
+				this.options.parser = cleanParser;
+			
+			}
+		
+		}
+		if ('string' === typeof settingsObj.output) {
+		
+			var cleanOutput = sanitize.cleanString(settingsObj.output, 10);
+			if (-1 !== global.Uwot.Constants.listenerOutputTypes.indexOf(cleanOutput)) {
+			
+				this.options.output = cleanOutput;
+			
+			}
+		
+		}
+		if ('string' === typeof settingsObj.parserPath) {
+		
+			this.options.parserPath = sanitize.cleanString(settingsObj.parserPath, 1024);
+		
+		}
+		if ('string' === typeof settingsObj.outputPath) {
+		
+			this.options.outputPath = sanitize.cleanString(settingsObj.outputPath, 1024);
+		
+		}
+		if ('string' === typeof settingsObj.routerPath) {
+		
+			this.options.routerPath = sanitize.cleanString(settingsObj.routerPath, 1024);
+		
+		}
+		if ('string' === typeof settingsObj.routeUriPath) {
+		
+			this.options.routeUriPath = sanitize.cleanString(settingsObj.routeUriPath, 255);
+		
+		}
+		if ('object' === typeof settingsObj.cmdSet && Array.isArray(settingsObj.cmdSet)) {
+		
+			this.options.cmdSet = sanitize.arrayOfStringsOrEmpty(settingsObj.cmdSet);
+		
+		}
+		else {
+		
+			this.options.cmdSet = [];
+		
+		}
+	
+	}
+
+}
+
 class UwotCmd {
 
 	/**
@@ -71,7 +143,8 @@ class UwotCmd {
 	constructor(
 		command,
 		options,
-		path
+		path,
+		listenerSettings
 	) {
 	
 		try {
@@ -114,6 +187,26 @@ class UwotCmd {
 		
 		}
 		this.path = sanitize.cleanString(path);
+		if ('object' === typeof listenerSettings && null !== listenerSettings) {
+		
+			try {
+			
+				this.listenerSettings = new UwotListenerSettings(listenerSettings);
+			
+			}
+			catch(e) {
+		
+				e.message = 'Invalid listenerSettings format. ' + e.message;
+				throw e;
+		
+			}
+		
+		}
+		else {
+		
+			this.listenerSettings = false;
+		
+		}
 		
 	}
 	
@@ -438,6 +531,116 @@ class UwotCmd {
 			
 			});
 			return nameArray;
+		
+		}
+	
+	}
+	
+	registerListener(isid) {
+	
+		if ('string' !== typeof isid || !this.listenerSettings) {
+		
+			return false;
+		
+		}
+		else {
+		
+			if ('object' !== typeof global.Uwot.Listeners) {
+			
+				global.Uwot.Listeners = {};
+			
+			}
+			if ('object' !== typeof global.Uwot.Listeners[isid]) {
+			
+				global.Uwot.Listeners[isid] = {};
+			
+			}
+			if ('object' === typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+			
+				return new Error ('listener name "' + name + '" not unique for isid "' + instanceSessionId + '"');
+			
+			}
+			else {
+			
+				try {
+				
+					global.Uwot.Listeners[isid][this.listenerSettings.name] = new Listener(this.listenerSettings.name, isid, this.listenerSettings.options);
+					return true;
+				
+				}
+				catch(e) {
+				
+					return e;
+				
+				}
+			
+			}
+		
+		}
+	
+	}
+	
+	enableListener(isid) {
+	
+		var isRegistered = false;
+		if ('string' !== typeof isid || !this.listenerSettings) {
+		
+			return false;
+		
+		}
+		else if ('object' !== typeof global.Uwot.Listeners || 'object' !== typeof global.Uwot.Listeners[isid] || 'object' !== typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+		
+			isRegistered = this.registerListener(isid);
+		
+		}
+		if (!isRegistered) {
+		
+			return new Error('could not register listener ' + this.listenerSettings.name + ' for id ' + isid);
+		
+		}
+		else if (isRegistered instanceof Error) {
+		
+			isRegistered.message = 'could not register listener ' + this.listenerSettings.name + ' for id ' + isid + ': ' + isRegistered.message;
+			return isRegistered;
+		
+		}
+		else {
+		
+			global.Uwot.Listeners[isid][this.listenerSettings.name].enable();
+			return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
+		
+		}
+	
+	}
+	
+	disableListener(isid) {
+	
+		var isRegistered = false;
+		if ('string' !== typeof isid || !this.listenerSettings) {
+		
+			return false;
+		
+		}
+		else if ('object' !== typeof global.Uwot.Listeners || 'object' !== typeof global.Uwot.Listeners[isid] || 'object' !== typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+		
+			isRegistered = this.registerListener(isid);
+		
+		}
+		if (!isRegistered) {
+		
+			return new Error('could not register listener ' + this.listenerSettings.name + ' for id ' + isid);
+		
+		}
+		else if (isRegistered instanceof Error) {
+		
+			isRegistered.message = 'could not register listener ' + this.listenerSettings.name + ' for id ' + isid + ': ' + isRegistered.message;
+			return isRegistered;
+		
+		}
+		else {
+		
+			global.Uwot.Listeners[isid][this.listenerSettings.name].disable();
+			return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
 		
 		}
 	

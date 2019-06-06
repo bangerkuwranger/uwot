@@ -342,5 +342,57 @@ module.exports = class UwotInstanceSessions {
 		}
 	
 	}
+	
+	getValidInstances(callback) {
+	
+		var self = this;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to getValidInstances.');
+		
+		}
+		else {
+		
+			this.gviCallback = callback;
+			self.db.find({'expiresAt': { $gt: new Date() } }, function(error, currentInSessions) {
+			
+				if (error) {
+				
+					return self.gviCallback(error, null);
+				
+				}
+				else if ('object' !== typeof currentInSessions || !(Array.isArray(currentInSessions)) || 1 > currentInSessions.length) {
+				
+					return self.gviCallback(false, false);
+				
+				}
+				else {
+				
+					var validInstances = [];
+					for (let i = 0; i < currentInSessions.length; i++) {
+					
+						validInstances.push(
+							new InstanceSession(
+								currentInSessions[i]._id,
+								null,
+								currentInSessions[i].createdAt,
+								currentInSessions[i].expiresAt
+							).toDB()
+						);
+						if ((i + 1) >= currentInSessions.length) {
+						
+							return self.gviCallback(false, validInstances);
+						
+						}
+					
+					}
+				
+				}
+			
+			});
+		
+		}
+	
+	}
 
 };
