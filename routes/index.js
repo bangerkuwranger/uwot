@@ -165,6 +165,11 @@ router.get('/', inSession(), function(req, res, next) {
 		res.locals.forceLogin = true;
 	
 	}
+	if ('object' === typeof global.Uwot.Constants.listenerTypes && Array.isArray(global.Uwot.Constants.listenerTypes)) {
+	
+		res.locals.validUwotListenerTypes = JSON.stringify(global.Uwot.Constants.listenerTypes);
+	
+	}
 	res.render('index', respValues);
 });
 

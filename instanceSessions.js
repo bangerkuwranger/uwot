@@ -34,7 +34,7 @@ class InstanceSession {
 		var cleanExpiry = sanitize.cleanInt(expiry);
 		var cleanExpireDate = ('string' === typeof expiresAt || ('object' === typeof expiresAt && expiresAt instanceof Date)) ? sanitize.cleanDate(expiresAt) : null;
 		var expireMs = cleanExpiry <= 0 ? global.Uwot.Config.getVal('users', 'instanceSessionExpiry') : cleanExpiry;
-		this.expiresAt = null !== cleanExpireDate ? cleanExpireDate : new Date(this.createdAt + expireMs);
+		this.expiresAt = null !== cleanExpireDate ? cleanExpireDate : new Date(this.createdAt.getTime() + expireMs);
 	
 	}
 	
@@ -58,7 +58,7 @@ class InstanceSession {
 	
 		var cleanExpiry = sanitize.cleanInt(expiryExtension);
 		var expireMs = cleanExpiry <= 0 ? global.Uwot.Config.getVal('users', 'instanceSessionExpiry') : cleanExpiry;
-		this.expiresAt = new Date(this.expiresAt + expireMs);
+		this.expiresAt = new Date(this.expiresAt.getTime() + expireMs);
 	
 	}
 	
@@ -315,7 +315,7 @@ module.exports = class UwotInstanceSessions {
 						data[0].expiresAt
 					);
 					renewSession.renew(expiryExtensionMs);
-					this.db.update({_id: sessionId}, {$set: {expiresAt: renewSession.expiresAt}}, {}, function(error, updatedCount) {
+					self.db.update({_id: sessionId}, {$set: {expiresAt: renewSession.expiresAt}}, {}, function(error, updatedCount) {
 			
 						if (error) {
 				

@@ -1,13 +1,5 @@
 'use strict';
-if ('object' !== typeof validUwotListenerTypes || !(Array.isArray(validUwotListenerTypes))) {
 
-	var validUwotListenerTypes = [
-		'default',
-		'additional',
-		'exclusive'
-	];
-
-}
 const defaultUwotListenerOptions = {
 	type:		'additional'
 };
