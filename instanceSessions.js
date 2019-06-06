@@ -95,7 +95,7 @@ module.exports = class UwotInstanceSessions {
 			self.cnCallback = callback;
 			if ('number' === typeof expiryMs || 'string' === typeof expiryMs) {
 			
-				expiryMs = sanitize.cleanInt(expiryMs, null)
+				expiryMs = sanitize.cleanInt(expiryMs, null);
 			
 			}
 			else {
@@ -124,7 +124,7 @@ module.exports = class UwotInstanceSessions {
 		
 					try {
 					
-						var savedSession = new InstanceSession (
+						var savedSession = new InstanceSession(
 							data._id,
 							0,
 							data.createdAt,
@@ -155,7 +155,7 @@ module.exports = class UwotInstanceSessions {
 			throw new TypeError('invalid callback passed to remove.');
 		
 		}
-		else if ('string' !== typeof uId || '' === uId) {
+		else if ('string' !== typeof sessionId || '' === sessionId) {
 		
 			return callback(new TypeError('invalid session id passed to remove.'), null);
 		
@@ -322,7 +322,7 @@ module.exports = class UwotInstanceSessions {
 							return self.rnCallback(error, null);
 				
 						}
-						else if (!Array.isArray(data) || !data.length || 'object' !== typeof data[0]) {
+						else if (updatedCount < 1) {
 				
 							return self.rnCallback(false, false);
 				
