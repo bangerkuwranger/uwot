@@ -2,27 +2,30 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
-var Datastore = require('nedb-core');
-var uid = require('uid-safe');
 var sanitize = require('./helpers/valueConversion');
 const processRequest = require('./middleware/requestProcessor');
 const denyAllOthers = require('./middleware/denyAllOthers');
-const defaultUwotListenerOptions = {
-	type:			'default',
-	parser:			'cmdParser',
-	parserPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/cmdParser'),
-	output:			'ansi',
-	outputPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/ansi'),
-	routerPath:		path.join(global.Uwot.Constants.appRoot, 'routers/path'),
-	routeUriPath:	'/bin',		//path relative to /listeners or /path.........
-	cmdSet: 		global.Uwot.Constants.reserved
-};
 
 const STATUS_DISABLED = 'disabled';
 const STATUS_ENABLED = 'enabled';
 
 class UwotListener {
 
+	static get DEFAULT_UWOT_LISTENER_OPTIONS() {
+	
+		return {
+			type:			'default',
+			parser:			'cmdParser',
+			parserPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/cmdParser'),
+			output:			'ansi',
+			outputPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/ansi'),
+			routerPath:		path.join(global.Uwot.Constants.appRoot, 'routers/path'),
+			routeUriPath:	'/bin',		//path relative to /listeners or /path.........
+			cmdSet: 		global.Uwot.Constants.reserved
+		};
+	
+	}
+	
 	constructor(name, instanceSessionId, options) {
 	
 		if ('string' !== typeof name) {
@@ -49,7 +52,7 @@ class UwotListener {
 			}
 			if ('object' === typeof global.Uwot.Listeners[instanceSessionId][name]) {
 			
-				throw new Error ('listener name "' + name + '" not unique for isid "' + instanceSessionId + '"');
+				throw new Error('listener name "' + name + '" not unique for isid "' + instanceSessionId + '"');
 			
 			}
 			else {
@@ -57,22 +60,22 @@ class UwotListener {
 				this.name = name;
 				if ('object' === typeof options && null !== options) {
 				
-					options = Object.assign({}, defaultUwotListenerOptions);
+					options = Object.assign({}, UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS);
 				
 				}
-				this.type = 'string' === typeof options.type && -1 !== global.Uwot.Constants.listenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
+				this.type = 'string' === typeof options.type && -1 !== global.Uwot.Constants.listenerTypes.indexOf(options.type) ? options.type : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.type;
 				if (this.type === 'default' && (this.name !== 'default' || 'object' === typeof global.Uwot.Listeners[instanceSessionId]['default'])) {
 				
 					throw new Error('default listener already exists for isid "' + instanceSessionId + '"');
 				
 				}
-				this.parser = 'string' === typeof options.parser  && -1 !== global.Uwot.Constants.listenerParserTypes.indexOf(options.parser) ? options.parser : defaultUwotListenerOptions.parser;
-				this.parserPath = 'string' === typeof options.parserPath ? sanitize.cleansString(options.parserPath) : defaultUwotListenerOptions.parserPath;
-				this.output = 'string' === typeof options.output  && -1 !== global.Uwot.Constants.listenerOutputTypes.indexOf(options.output) ? options.output : defaultUwotListenerOptions.output;
-				this.outputPath = 'string' === typeof options.outputPath ? sanitize.cleansString(options.outputPath) : defaultUwotListenerOptions.outputPath;
-				this.routerPath = 'string' === typeof options.routerPath ? sanitize.cleansString(options.routerPath) : defaultUwotListenerOptions.routerPath;
-				this.routeUriPath = 'string' === typeof options.routeUriPath ? sanitize.cleansString(options.routeUriPath) : defaultUwotListenerOptions.routeUriPath;
-				this.cmdSet = 'object' === typeof cmdSet && Array.isArray(cmdSet) ? cmdSet : defaultUwotListenerOptions.cmdSet;
+				this.parser = 'string' === typeof options.parser  && -1 !== global.Uwot.Constants.listenerParserTypes.indexOf(options.parser) ? options.parser : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parser;
+				this.parserPath = 'string' === typeof options.parserPath ? sanitize.cleansString(options.parserPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parserPath;
+				this.output = 'string' === typeof options.output  && -1 !== global.Uwot.Constants.listenerOutputTypes.indexOf(options.output) ? options.output : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.output;
+				this.outputPath = 'string' === typeof options.outputPath ? sanitize.cleansString(options.outputPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.outputPath;
+				this.routerPath = 'string' === typeof options.routerPath ? sanitize.cleansString(options.routerPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routerPath;
+				this.routeUriPath = 'string' === typeof options.routeUriPath ? sanitize.cleansString(options.routeUriPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routeUriPath;
+				this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) ? options.cmdSet : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.cmdSet;
 				if ('additional' === this.type) {
 				
 					// TBD
@@ -158,7 +161,7 @@ class UwotListener {
 		
 			this.status = STATUS_DISABLED;
 		
-		};
+		}
 		return true;
 	
 	}

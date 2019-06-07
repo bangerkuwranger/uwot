@@ -1,3 +1,5 @@
+const Url = require('url');
+const nonceHandler = require('node-timednonce');
 module.exports = function(req, res, next) {
 
 	// default response assigned to resObj

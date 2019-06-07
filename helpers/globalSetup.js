@@ -7,7 +7,7 @@ var Users = require('../users');
 var InstanceSessions = require('../instanceSessions');
 var Cmd = require('../cmd');
 var Theme = require('../theme');
-var Listener = requeire('../listener');
+var Listener = require('../listener');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
 var filesystemLoader = require('./filesystemLoader');
@@ -300,8 +300,6 @@ module.exports = {
 	
 	initListeners: function initListeners(callback) {
 	
-		var listeners = {};
-		var error = false;
 		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to initListeners');
@@ -326,9 +324,9 @@ module.exports = {
 					for (let i = 0; i < validInstances.length; i++) {
 					
 						var currentInstanceId = validInstances[i]._id;
-						if ('object' === typeof global.Uwot.Listeners[currentInstanceId] && null !== global.Uwot.Listeners[currentInstanceId]) {
+						if ('object' === typeof global.Uwot.Listeners[currentInstanceId] && null !== global.Uwot.Listeners[currentInstanceId] && 'object' !== typeof global.Uwot.Listeners[currentInstanceId].default && null !== global.Uwot.Listeners[currentInstanceId].default) {
 						
-							
+							global.Uwot.Listeners[currentInstanceId].default = new Listener('default', currentInstanceId);
 						
 						}
 						else {

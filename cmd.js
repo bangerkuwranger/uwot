@@ -557,7 +557,7 @@ class UwotCmd {
 			}
 			if ('object' === typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
 			
-				return new Error ('listener name "' + name + '" not unique for isid "' + instanceSessionId + '"');
+				return new Error('listener name "' + name + '" not unique for isid "' + isid + '"');
 			
 			}
 			else {
