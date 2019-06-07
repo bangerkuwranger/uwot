@@ -72,7 +72,24 @@ global.Uwot.Bin.sudo = {
 // then add to reserved list
 globalSetupHelper.initBins();
 
-// set up sessions
+// create instance sessions to track listener states for any session
+globalSetupHelper.initListeners(function(error, currentListenerIsids) {
+
+	var infoOut = JSON.stringify(currentListenerIsids);
+	if (error) {
+	
+		console.error(error);
+	
+	}
+	if (app.get('env') === 'development') {
+	
+		console.log("Listeners for isids: " + infoOut);
+	
+	}
+
+});
+
+// set up sessions for authenticated users
 const sessionMs = global.Uwot.Config.getVal('users', 'authenticatedSessionExpiry');
 var sessionArgs = {
 	cookie: {

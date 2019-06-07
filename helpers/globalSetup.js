@@ -8,6 +8,7 @@ var InstanceSessions = require('../instanceSessions');
 var Cmd = require('../cmd');
 var Theme = require('../theme');
 var Listener = require('../listener');
+var isidListenerHelper = require('./isidListener');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');
 var filesystemLoader = require('./filesystemLoader');
@@ -324,17 +325,7 @@ module.exports = {
 					for (let i = 0; i < validInstances.length; i++) {
 					
 						var currentInstanceId = validInstances[i]._id;
-						if ('object' === typeof global.Uwot.Listeners[currentInstanceId] && null !== global.Uwot.Listeners[currentInstanceId] && 'object' !== typeof global.Uwot.Listeners[currentInstanceId].default && null !== global.Uwot.Listeners[currentInstanceId].default) {
-						
-							global.Uwot.Listeners[currentInstanceId].default = new Listener('default', currentInstanceId);
-						
-						}
-						else {
-						
-							global.Uwot.Listeners[currentInstanceId] = {};
-							global.Uwot.Listeners[currentInstanceId].default = new Listener('default', currentInstanceId);
-						
-						}
+						isidListenerHelper.newIsidDefaultListener(currentInstanceId);
 						if ((i + 1) > validInstances.length) {
 						
 							return callback(false, Object.keys(global.Uwot.Listeners));

@@ -9,6 +9,13 @@ const denyAllOthers = require('../middleware/denyAllOthers');
 
 router.post(
 	'/',
+	function(req, res, next) {
+	
+		res.locals.instanceSessionId =  ('object' === typeof req.cookies && 'string' === typeof req.cookies.instanceSessionId) ? req.cookies.instanceSessionId : '';
+		req.body.uwotListeners = ('' !== res.locals.instanceSessionId &&'object' === typeof global.Uwot.Listeners && 'object' === typeof global.Uwot.Listeners[res.locals.instanceSessionId]) ? global.Uwot.Listeners[res.locals.instanceSessionId] : {};
+		
+	
+	},
 	cmdParser(),	// get auth user or guest user, parse req.body.cmd to ast, assign new UwotRuntimeCmds obj using uid, req.app, & ast to req.body.runtime
 	ansiParser(),	// add ansi output method to res by assigning function to res.ansi
 	function(req, res, next) {

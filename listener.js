@@ -16,10 +16,10 @@ class UwotListener {
 		return {
 			type:			'default',
 			parser:			'cmdParser',
-			parserPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/cmdParser'),
+			parserPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/cmdParser.js'),
 			output:			'ansi',
-			outputPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/ansi'),
-			routerPath:		path.join(global.Uwot.Constants.appRoot, 'routers/path'),
+			outputPath:		path.join(global.Uwot.Constants.appRoot, 'middleware/ansi.js'),
+			routerPath:		path.join(global.Uwot.Constants.appRoot, 'routes/path.js'),
 			routeUriPath:	'/bin',		//path relative to /listeners or /path.........
 			cmdSet: 		global.Uwot.Constants.reserved
 		};
@@ -58,7 +58,7 @@ class UwotListener {
 			else {
 			
 				this.name = name;
-				if ('object' === typeof options && null !== options) {
+				if ('object' !== typeof options || null === options) {
 				
 					options = Object.assign({}, UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS);
 				
@@ -70,11 +70,11 @@ class UwotListener {
 				
 				}
 				this.parser = 'string' === typeof options.parser  && -1 !== global.Uwot.Constants.listenerParserTypes.indexOf(options.parser) ? options.parser : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parser;
-				this.parserPath = 'string' === typeof options.parserPath ? sanitize.cleansString(options.parserPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parserPath;
+				this.parserPath = 'string' === typeof options.parserPath ? sanitize.cleanString(options.parserPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parserPath;
 				this.output = 'string' === typeof options.output  && -1 !== global.Uwot.Constants.listenerOutputTypes.indexOf(options.output) ? options.output : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.output;
-				this.outputPath = 'string' === typeof options.outputPath ? sanitize.cleansString(options.outputPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.outputPath;
-				this.routerPath = 'string' === typeof options.routerPath ? sanitize.cleansString(options.routerPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routerPath;
-				this.routeUriPath = 'string' === typeof options.routeUriPath ? sanitize.cleansString(options.routeUriPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routeUriPath;
+				this.outputPath = 'string' === typeof options.outputPath ? sanitize.cleanString(options.outputPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.outputPath;
+				this.routerPath = 'string' === typeof options.routerPath ? sanitize.cleanString(options.routerPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routerPath;
+				this.routeUriPath = 'string' === typeof options.routeUriPath ? sanitize.cleanString(options.routeUriPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routeUriPath;
 				this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) ? options.cmdSet : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.cmdSet;
 				if ('additional' === this.type) {
 				
@@ -150,7 +150,7 @@ class UwotListener {
 		
 			this.status = STATUS_ENABLED;
 		
-		};
+		}
 		return true;
 
 	}

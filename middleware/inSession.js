@@ -1,4 +1,5 @@
 const INSTANCE_SESSION_COOKIE_NAME = 'instanceSessionId';
+const isidListenerHelper = require('../helpers/isidListener');
 
 module.exports = function(args) {
 
@@ -54,6 +55,7 @@ module.exports = function(args) {
 							if ('object' === typeof savedSession && null !== savedSession && 'string' === typeof savedSession._id) {
 							
 								res.cookie(INSTANCE_SESSION_COOKIE_NAME, savedSession._id, {expires: new Date(savedSession.expiresAt + 3000)});
+								isidListenerHelper.moveListeners(isidCookie, savedSession._id);
 							
 							}
 							next();
@@ -86,6 +88,7 @@ module.exports = function(args) {
 				if ('object' === typeof savedSession && null !== savedSession && 'string' === typeof savedSession._id) {
 				
 					res.cookie(INSTANCE_SESSION_COOKIE_NAME, savedSession._id, {expires: new Date(savedSession.expiresAt + 3000)});
+					isidListenerHelper.newIsidDefaultListener(savedSession._id);
 				
 				}
 				next();
