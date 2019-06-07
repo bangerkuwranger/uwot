@@ -7,7 +7,6 @@ var Users = require('../users');
 var InstanceSessions = require('../instanceSessions');
 var Cmd = require('../cmd');
 var Theme = require('../theme');
-var Listener = require('../listener');
 var isidListenerHelper = require('./isidListener');
 var binLoader = require('./binLoader');
 var themeLoader = require('./themeLoader');

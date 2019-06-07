@@ -213,6 +213,6 @@ module.exports = function(args) {
 		// Finally. resObj should have everything the frontend needs to process response, so we parse output prop to html and send the whole ball o' wax to the user as JSON
 		// parse resObj.output to html string from ansi objects, and respond with resObj encoded as JSON
 		return res.ansi(resObj);
-	}
+	};
 
 };

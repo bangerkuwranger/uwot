@@ -47,11 +47,11 @@ function newIsidDefaultListener(isid) {
 function moveListeners(currentIsid, newIsid) {
 
 	var currentListenersObj = ensureGlobalListener(currentIsid);
-	var currentListenerNames = Object.keys(currentListenerObj);
+	var currentListenerNames = Object.keys(currentListenersObj);
 	var newListenersObj = ensureGlobalListener(newIsid);
 	if (currentListenerNames.length < 1) {
 	
-		var newDefaultListener = newIsidDefaultListener(newIsid);
+		newIsidDefaultListener(newIsid);
 		return newListenersObj;
 	
 	}
@@ -84,4 +84,4 @@ module.exports = {
 	newIsidDefaultListener,
 	moveListeners
 
-}
+};
