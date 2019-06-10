@@ -1,10 +1,6 @@
 'use strict';
-var express = require('express');
-var router = express.Router();
 var path = require('path');
 var sanitize = require('./helpers/valueConversion');
-const processRequest = require('./middleware/requestProcessor');
-const denyAllOthers = require('./middleware/denyAllOthers');
 
 const STATUS_DISABLED = 'disabled';
 const STATUS_ENABLED = 'enabled';
@@ -84,59 +80,66 @@ class UwotListener {
 
 				}
 				var cmdFile = require(this.routerPath);
-				var parserMiddleware;
 				switch(this.parser) {
 				
 					case 'internal':
-						parserMiddleware = cmdFile[this.parserPath];
+						this.parserMiddleware = cmdFile[this.parserPath];
 						break;
 					case 'external':
-						parserMiddleware = require(this.parserPath);
+						this.parserMiddleware = require(this.parserPath);
 						break;
 					default:
-						parserMiddleware = require(this.parserPath);
+						this.parserMiddleware = require(this.parserPath);
 				
 				}
-				var outputMiddleware;
 				switch(this.output) {
 				
 					case 'internal':
-						outputMiddleware = cmdFile[this.outputPath];
+						this.outputMiddleware = cmdFile[this.outputPath];
 						break;
 					case 'external':
-						outputMiddleware = require(this.outputPath);
+						this.outputMiddleware = require(this.outputPath);
 						break;
 					default:
-						outputMiddleware = require(this.outputPath);
+						this.outputMiddleware = require(this.outputPath);
 				
 				}
-				this.router = router;
-				var self = this;
-				this.router.post('/', function(req, res, next) {
-				
-					if (self.status !== STATUS_ENABLED) {
-					
-						denyAllOthers(req,res, next);
-					
-					}
-					else {
-					
-						next();
-					
-					}
-				
-				}, parserMiddleware(), outputMiddleware(), processRequest());
-				this.router.all('/', denyAllOthers());
 				if ('default' === this.type) {
-				
+		
 					this.status = STATUS_ENABLED;
-				
+		
 				}
 				else {
-				
+		
 					this.status = STATUS_DISABLED;
-				
+		
 				}
+				var self = this;
+				this.handler = function(req, res, next) {
+				
+					if (self.status !== STATUS_ENABLED) {
+			
+						self.parserHandler = function(req, res, next) {
+						
+							next();
+						
+						}
+						self.outputHandler = function(req, res, next) {
+						
+							next();
+						
+						}
+						next();
+			
+					}
+					else {
+			
+						self.parserHandler = self.parserMiddleWare;
+						self.outputHandler = self.outputMiddleware;
+				
+					}
+			
+				};
 						
 			}
 		
@@ -146,22 +149,22 @@ class UwotListener {
 	
 	enable() {
 
-		if ('default' !== this.type) {
+// 		if ('default' !== this.type) {
 		
 			this.status = STATUS_ENABLED;
 		
-		}
+// 		}
 		return true;
 
 	}
 	
 	disable() {
 	
-		if ('default' !== this.type) {
+// 		if ('default' !== this.type) {
 		
 			this.status = STATUS_DISABLED;
 		
-		}
+// 		}
 		return true;
 	
 	}

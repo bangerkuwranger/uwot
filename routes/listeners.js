@@ -2,114 +2,59 @@ var express = require('express');
 var router = express.Router();
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../middleware/denyAllOthers');
+const ListenerError = require('../helpers/UwotListenerError');
+var listenerObj;
 
-router.post('/get', function(req, res, next) {
+router.post('/:isid/:lname', function(req, res, next) {
 
-	// default response assigned to resObj
-	var resObj = {
-		output: {
-			color: 'yellow',
-			content: 'Invalid Request'
-		}
-	};
-
-	// verify form nonce
-	if ('object' === typeof req.body && 'string' === typeof req.body.nonce) {
+	// if isid is invalid, reject request
+	if ('string' !== typeof req.params.isid) {
 	
-		var nv = nonceHandler.verify('index-get', req.body.nonce);
-		if (nv && 'object' !== typeof nv) {
-		
-			if ('string' === typeof req.body.listener) {
-			
-				// get details for specific listener
-			
-			}
-			else {
-			
-				// get current listener(s)
-			
-			}
-		
-		}
-		else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
-		
-			resObj.output = {
-				color: 'yellow',
-				content: 'Invalid Request -' + nv.message
-			};
-	
-		}
+		var denied = new ListenerError('', {type: 'NOISID', reason: 'ISID not in request path'});
+		return res.json(denied);
 	
 	}
+	// if listener name is invalid, reject request
+	else if ('string' !== typeof req.params.lname) {
+	
+		var denied = new ListenerError('', {type: 'NOLNAME', reason: 'Listener Name not in request path'});
+		return res.json(denied);
+	
+	}
+	// if no nonce, reject request
+	else if ('object' !== typeof req.body || 'string' !== typeof req.body.nonce) {
+	
+		var denied = new ListenerError('', {type: 'NONONCE', reason: 'Nonce not in request body', isid: req.params.isid, lname: req.params.lname});
+		return res.json(denied);
+	
+	}
+	// if nonce is invalid, reject request
+	var nv = nonceHandler.verify('get-listener-' + lname, req.body.nonce);
+	if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
+	
+		var denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: req.params.isid, lname: req.params.lname, reason: nv.message});
+		return res.json(denied);
+	
+	}
+	// otherwise, run handler and return results
 	else {
 	
-		resObj.output = {
-			color: 'yellow',
-			content: 'Invalid Request - Reload'
-		};
-
+		listenerObj = global.Uwot.Listeners[req.params.isid][req.params.lname];
+		next();
+	
 	}
-	// Finally. resObj should have everything the frontend needs to process response, so we parse output prop to html and send the whole ball o' wax to the user as JSON
-		// parse resObj.output to html string from ansi objects, and respond with resObj encoded as JSON
-	return res.ansi(resObj);
+
+}, listenerObj.handler(), listenerObj.parserHandler(), listenerObj.outputHandler(), function(req, res, next) {
+
+	resObj = {
+		cmd: req.body.cmd,
+		cmdAst: req.body.cmdAst,
+		runtime: req.body.runtime,
+		operations: req.body.operations
+	}
+	return res.json(resObj);
 
 });
-
-router.all('/get', denyAllOthers());
-
-router.post('/set', function(req, res, next) {
-
-	// default response assigned to resObj
-	var resObj = {
-		output: {
-			color: 'yellow',
-			content: 'Invalid Request'
-		}
-	};
-
-	// verify form nonce
-	if ('object' === typeof req.body && 'string' === typeof req.body.nonce) {
-	
-		var nv = nonceHandler.verify('index-get', req.body.nonce);
-		if (nv && 'object' !== typeof nv) {
-		
-			if ('string' === typeof req.body.listener) {
-			
-				// get details for specific listener
-			
-			}
-			else {
-			
-				// get current listener(s)
-			
-			}
-		
-		}
-		else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
-		
-			resObj.output = {
-				color: 'yellow',
-				content: 'Invalid Request -' + nv.message
-			};
-	
-		}
-	
-	}
-	else {
-	
-		resObj.output = {
-			color: 'yellow',
-			content: 'Invalid Request - Reload'
-		};
-
-	}
-	// Finally. resObj should have everything the frontend needs to process response, so we parse output prop to html and send the whole ball o' wax to the user as JSON
-		// parse resObj.output to html string from ansi objects, and respond with resObj encoded as JSON
-	return res.ansi(resObj);
-
-});
-
-router.all('/set', denyAllOthers());
 
 router.all('/', denyAllOthers());
 
