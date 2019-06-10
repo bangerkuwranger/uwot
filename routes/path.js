@@ -10,7 +10,7 @@ const request = require('request-promise-native');
 
 function sendToListeners(listeners, req) {
 
-	return new Promise(resolve, reject) {
+	return new Promise((resolve, reject) => {
 	
 		req.nonces = {};
 		if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
@@ -108,7 +108,7 @@ function sendToListeners(listeners, req) {
 	
 		}
 	
-	};
+	});
 
 };
 
@@ -123,6 +123,7 @@ router.post(
 				content: 'Invalid Request'
 			}
 		};
+		var nv;
 		// verify form nonce
 		if ('string' !== typeof req.body.nonce) {
 		
@@ -135,7 +136,7 @@ router.post(
 		}
 		else {
 		
-			var nv = nonceHandler.verify('index-get', req.body.nonce);
+			nv = nonceHandler.verify('index-get', req.body.nonce);
 		
 		}
 		if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {

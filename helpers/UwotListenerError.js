@@ -22,11 +22,11 @@ class UwotListenerError extends Error {
 		
 		var message = 'Access Denied';
 		var unknownContext = {
-				type: 'UNKNOWN',
-				reason: 'unknown',
-				isid: 'unknown',
-				lname: 'unknown'
-			}
+			type: 'UNKNOWN',
+			reason: 'unknown',
+			isid: 'unknown',
+			lname: 'unknown'
+		};
 		if ('object' !== typeof context || null === context) {
 		
 			context = unknownContext;
@@ -82,7 +82,7 @@ class UwotListenerError extends Error {
 		Object.defineProperty(this, 'kCode', {
 			configurable: false,
 			enumerable: false,
-			value: type,
+			value: context.type,
 			writable: true
 		});
 		Object.defineProperty(this, 'type', {
@@ -133,7 +133,7 @@ class UwotListenerError extends Error {
 			},
 			set(val) {
 	
-				this.kInfo.reason = reason;
+				this.kInfo.reason = val;
 	
 			}
 		});

@@ -123,12 +123,12 @@ class UwotListener {
 						
 							next();
 						
-						}
+						};
 						self.outputHandler = function(req, res, next) {
 						
 							next();
 						
-						}
+						};
 						next();
 			
 					}
@@ -136,6 +136,7 @@ class UwotListener {
 			
 						self.parserHandler = self.parserMiddleWare;
 						self.outputHandler = self.outputMiddleware;
+						next();
 				
 					}
 			
