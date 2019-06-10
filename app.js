@@ -13,8 +13,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var compass = require('node-compass');
 
-var indexRouter = require('./routes/index');
-
 var app = express();
 
 globalSetupHelper.initEnvironment();
@@ -155,6 +153,8 @@ if (app.get('env') === 'development') {
 }
 
 app.use(express.static(path.join(global.Uwot.Constants.appRoot, 'public')));
+
+var indexRouter = require('./routes/index');
 
 app.use('/', indexRouter);
 

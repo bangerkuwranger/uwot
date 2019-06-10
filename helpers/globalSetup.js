@@ -151,6 +151,23 @@ module.exports = {
 
 		}
 		
+		if ('object' !== typeof global.Uwot.Constants.commandTypes || !(Array.isArray(global.Uwot.Constants.commandTypes))) {
+		
+			global.Uwot.Constants.commandTypes = [
+				'LogicalExpression',
+				'Pipeline',
+				'Command',
+				'Function',
+				'Subshell',
+				'For',
+				'Case',
+				'if',
+				'While',
+				'Until'
+			];
+		
+		}
+		
 		if ('object' !== typeof global.Uwot.Constants.listenerTypes) {
 		
 			global.Uwot.Constants.listenerTypes = [
