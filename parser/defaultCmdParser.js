@@ -55,7 +55,7 @@ module.exports = function defaultCmdParser(args, callback) {
 			
 				}
 		
-			}.bind(this));
+			});
 	
 		}
 		else {
@@ -88,7 +88,7 @@ module.exports = function defaultCmdParser(args, callback) {
 			
 						}
 		
-					}.bind(this));
+					});
 			
 				}
 				// match found in DB; use auth user for runtime
@@ -100,7 +100,7 @@ module.exports = function defaultCmdParser(args, callback) {
 			
 				}
 		
-			}.bind(this));
+			});
 	
 		}
 

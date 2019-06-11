@@ -4,7 +4,10 @@ const VALID_TYPES = [
 	'NOISID',
 	'NOLNAME',
 	'NONONCE',
-	'NONCEINV'
+	'NONCEINV',
+	'CMDINV',
+	'APPINV',
+	'NOTEXCL'
 ];
 const TYPE_REASONS = new Map(
 	[
@@ -13,6 +16,9 @@ const TYPE_REASONS = new Map(
 		[VALID_TYPES[2], 'Listener Name not found'],
 		[VALID_TYPES[3], 'Nonce not found'],
 		[VALID_TYPES[4], 'Nonce value invalid'],
+		[VALID_TYPES[5], 'Cmd value invalid'],
+		[VALID_TYPES[6], 'App value invalid'],
+		[VALID_TYPES[7], 'Specified listener not exclusive'],
 	]
 );
 
@@ -34,12 +40,12 @@ class UwotListenerError extends Error {
 		}
 		else {
 		
-			if ('string' === typeof context.type || -1 === VALID_TYPES.indexOf(context.type)) {
+			if ('string' !== typeof context.type || -1 === VALID_TYPES.indexOf(context.type)) {
 			
 				context.type = unknownContext.type;
 			
 			}
-			if ('string' === typeof context.reason) {
+			if ('string' !== typeof context.reason) {
 			
 				context.reason = TYPE_REASONS.get(context.type);
 			
@@ -51,7 +57,7 @@ class UwotListenerError extends Error {
 			message += ' - ' + context.type;
 		
 		}
-		if ('string' === typeof msg) {
+		if ('string' === typeof msg && '' !== msg) {
 		
 			message += ': ' + msg;
 

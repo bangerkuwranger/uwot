@@ -96,16 +96,10 @@ function ansi(obj) {
 	if ('object' === typeof val && 'object' === typeof val.output) {
 	
 		obj.output = parseToAnsi(val.output);
-		return this.json(obj);
 	
 	}
-	else {
-		return this.json(obj);
-	}
+	return obj;
 
 }
 
-module.exports = {
-	outputAnsi: ansi,
-	parseToAnsi
-};
+module.exports = ansi;

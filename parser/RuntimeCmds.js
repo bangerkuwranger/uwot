@@ -2,6 +2,7 @@
 
 const sanitize = require('../helpers/valueConversion');
 const filesystem = require('../filesystem');
+const uid = require('uid-safe');
 const systemError = require('../helpers/systemError');
 
 class UwotRuntimeCmds {
@@ -64,8 +65,6 @@ class UwotRuntimeCmds {
 
 	}
 	
-	
-	
 	executeCommands() {
 	
 		// deferred execution starts here, traversing exes Map and returning results
@@ -89,6 +88,7 @@ class UwotRuntimeCmds {
 			// default redirects to null if unset
 			output = 'undefined' !== typeof output ? output : null;
 			input = 'undefined' !== typeof input ? input : null;
+			astCmd.id = uid.sync(24);
 			// choose valid type, assign appropriate args, run subparser
 			switch(astCmd.type) {
 		
@@ -845,4 +845,4 @@ class UwotRuntimeCmds {
 
 }
 
-module.export = UwotRuntimeCmds;
+module.exports = UwotRuntimeCmds;
