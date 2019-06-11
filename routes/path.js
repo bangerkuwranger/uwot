@@ -2,14 +2,11 @@
 
 var express = require('express');
 var router = express.Router();
-const Url = require('url');
 const nonceHandler = require('node-timednonce');
-const cmdParser = require('../middleware/cmdParser');
 const ansiParser = require('../middleware/ansi');
 var ansiOutput = require('../output/ansi');
 const requestProcessor = require('../middleware/requestProcessor');
 const denyAllOthers = require('../middleware/denyAllOthers');
-const request = require('request-promise-native');
 
 const sendAsAnsi = function(body, res) {
 
@@ -173,7 +170,6 @@ router.post(
 								return sendAsAnsi(errorObj, res);
 							
 							}
-							var listenerId = req.params.isid + '::' + req.params.lname;
 							req.uwot.cmdAst = resultObj.cmdAst;
 							req.uwot.runtime = resultObj.runtime;
 							req.uwot.outputHandler = resultObj.outputHandler;

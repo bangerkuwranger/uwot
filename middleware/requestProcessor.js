@@ -1,5 +1,4 @@
 const Url = require('url');
-const nonceHandler = require('node-timednonce');
 module.exports = function(args) {
 
 	return function(req, res, next) {

@@ -1,7 +1,6 @@
 'use-strict';
 
 const sanitize = require('../helpers/valueConversion');
-const filesystem = require('../filesystem');
 const uid = require('uid-safe');
 const systemError = require('../helpers/systemError');
 

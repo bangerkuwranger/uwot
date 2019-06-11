@@ -88,7 +88,6 @@ router.post('/:isid/:lname', function(req, res, next) {
 					return sendAsAnsi(errorObj, res);
 				
 				}
-				var listenerId = req.params.isid + '::' + req.params.lname;
 				req.uwot.cmdAst = resultObj.cmdAst;
 				req.uwot.runtime = resultObj.runtime;
 				req.uwot.outputHandler = resultObj.outputHandler;
