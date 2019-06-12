@@ -1,13 +1,17 @@
 'use-strict';
 
+const AbstractRuntime = require('./AbstractRuntime');
 const sanitize = require('../helpers/valueConversion');
 const uid = require('uid-safe');
 const systemError = require('../helpers/systemError');
 
-class UwotRuntimeCmds {
+class UwotRuntimeCmds extends AbstractRuntime {
 
 	constructor(ast, user) {
 	
+		// perform checks against AbstractRuntime spec
+		super(ast, user);
+		
 		// validate ast and its top level structure before parsing; throw error if invalid/undefined
 		if ('object' !== typeof ast || ast.type !== 'Script' || 'object' !== typeof ast.commands || !(Array.isArray(ast.commands))) {
 		
