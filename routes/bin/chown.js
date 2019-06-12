@@ -14,7 +14,7 @@ class UwotCmdChown extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		

@@ -9,6 +9,7 @@ const Runtime = require('./RuntimeCmds');
 * (boolean)isAuthenticated	value from PassportJS indicating whether valid user is authenticated for session 
 * (string)userId	value set by PassportJS identifying authenticated user by ID
 * (object)app	(required)	app instance added by ref to Runtime instance for reflection
+* (string)isid	(required)	instanceSession id value passed in req.cookies
 *
 ***/
 
@@ -50,7 +51,7 @@ module.exports = function defaultCmdParser(args, callback) {
 					// probably needless, but ensure guest cannot sudo
 					user.maySudo = function() { return false; };
 					// assign new runtime to response.runtime using parsed AST, args.app, and guest user
-					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app);
+					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
 					return callback(false, response);
 			
 				}

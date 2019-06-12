@@ -624,7 +624,7 @@ class UwotRuntimeCmds {
 												
 												}
 								
-											}.bind(this), exe.isSudo);
+											}.bind(this), exe.isSudo, this.isid);
 							
 										}
 										catch(e) {
@@ -689,7 +689,7 @@ class UwotRuntimeCmds {
 												
 												}
 								
-											}.bind(this), exe.isSudo);
+											}.bind(this), exe.isSudo, this.isid);
 							
 										}
 										catch(e) {
@@ -767,7 +767,7 @@ class UwotRuntimeCmds {
 												
 													}
 								
-												}.bind(this), exe.isSudo);
+												}.bind(this), exe.isSudo, this.isid);
 							
 											}
 											catch(e) {
@@ -838,6 +838,13 @@ class UwotRuntimeCmds {
 	addAppInstance(app) {
 	
 		this.app = app;
+		return this;
+	
+	}
+	
+	addInstanceSessionId(isid) {
+	
+		this.isid = isid;
 		return this;
 	
 	}

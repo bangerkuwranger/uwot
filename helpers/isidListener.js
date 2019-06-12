@@ -34,13 +34,13 @@ function removeGlobalListener(isid) {
 
 function newIsidDefaultListener(isid) {
 
-	var globalListener = ensureGlobalListener(isid);
-	if ('object' !== typeof globalListener.default && null !== globalListener.default) {
+	var globalListeners = ensureGlobalListener(isid);
+	if ('object' !== typeof globalListeners.default && null !== globalListeners.default) {
 	
-		globalListener.default = new Listener('default', isid);
+		globalListeners.default = new Listener('default', isid);
 	
 	}
-	return globalListener.default;
+	return globalListeners.default;
 
 }
 
@@ -77,11 +77,63 @@ function moveListeners(currentIsid, newIsid) {
 
 }
 
-module.exports = {
+function enableExclusiveState(isid) {
 
+	var globalListeners = ensureGlobalListener(isid);
+	var disabledForExclusive = [];
+	var allListenerNames = Object.keys(globalListeners);
+	for (let i = 0; i < allListenerNames.length; i++) {
+	
+		if (globalListeners[allListenerNames[i]].type !== exclusive && globalListeners[allListenerNames[i]].status === 'enabled') {
+		
+			disabledForExclusive.push(allListenerNames[i]);
+			globalListeners[allListenerNames[i]].disable();
+		
+		}
+		if ((i + 1) >= allListenerNames.length) {
+		
+			globalListeners.disabledForExclusive = disabledForExclusive;
+			return disabledForExclusive;
+		
+		}
+	
+	}
+
+}
+
+function disableExclusiveState(isid) {
+
+	var globalListeners = ensureGlobalListener(isid);
+	var enabledListeners = [];
+	if ('object' === globalListeners.disabledForExclusive && Array.isArray(globalListeners.disabledForExclusive) && globalListeners.disabledForExclusive.length > 0) {
+	
+		for (let i = 0; i < globalListeners.disabledForExclusive.length; i++) {
+		
+			globalListeners[globalListeners.disabledForExclusive[i]].enable;
+			enabledListeners.push(globalListeners.disabledForExclusive[i]);
+			if ((i + 1) >= globalListeners.length) {
+			
+				delete globalListeners.disabledForExclusive;
+				return enabledListeners;
+			
+			}
+		
+		}
+	
+	}
+	else {
+	
+		return enabledListeners;
+	
+	}
+
+}
+
+module.exports = {
 	ensureGlobalListener,
 	removeGlobalListener,
 	newIsidDefaultListener,
-	moveListeners
-
+	moveListeners,
+	enableExclusiveState,
+	disableExclusiveState
 };

@@ -16,7 +16,7 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 	
 	// TBD
 	// need to move flag processing into filesystem to keep filesystem functionally consistent if other binfiles use filesystem.cmd
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		

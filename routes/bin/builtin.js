@@ -64,7 +64,7 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
 		global.Uwot.FileSystems[user._id].cmd('cd', argsArray, function(error) {
@@ -110,7 +110,7 @@ class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		global.Uwot.FileSystems[user._id].cmd('pwd', [], function(error, pwdString) {
 		
@@ -149,7 +149,7 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 	
 	}
 
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -426,7 +426,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -527,7 +527,7 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		
 	}
 	
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		

@@ -124,7 +124,7 @@ describe('cmd.js', function() {
 			});
 		
 		});
-		describe('execute(args, options, app, user, callback, isSudo)', function() {
+		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 		
 			it('should be a function', function() {
 			
