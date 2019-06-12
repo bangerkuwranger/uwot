@@ -73,7 +73,6 @@ globalSetupHelper.initBins();
 // create instance sessions to track listener states for any session
 globalSetupHelper.initListeners(function(error, currentListenerIsids) {
 
-	var infoOut = JSON.stringify(currentListenerIsids);
 	if (error) {
 	
 		console.error(error);
@@ -81,9 +80,11 @@ globalSetupHelper.initListeners(function(error, currentListenerIsids) {
 	}
 	if (app.get('env') === 'development') {
 	
+		var infoOut = JSON.stringify(currentListenerIsids);
 		console.log("Listeners for isids: " + infoOut);
 	
 	}
+	return;
 
 });
 

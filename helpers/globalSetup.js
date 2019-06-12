@@ -342,7 +342,7 @@ module.exports = {
 					
 						var currentInstanceId = validInstances[i]._id;
 						isidListenerHelper.newIsidDefaultListener(currentInstanceId);
-						if ((i + 1) > validInstances.length) {
+						if ((i + 1) >= validInstances.length) {
 						
 							return callback(false, Object.keys(global.Uwot.Listeners));
 						
