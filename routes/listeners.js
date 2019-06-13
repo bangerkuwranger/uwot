@@ -68,12 +68,14 @@ router.post('/:isid/:lname', function(req, res, next) {
 		}
 		else {
 		
+			res.locals.instanceSessionId = req.params.isid;
 			req.uwot.listeners[req.params.lname] = (global.Uwot.Listeners[req.params.isid][req.params.lname]);
 			var args = {
 				cmd: req.body.cmd,
 				isAuthenticated: req.isAuthenticated(),
 				userId: 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null,
-				app: 'function' === typeof req.app ? req.app : null
+				app: 'function' === typeof req.app ? req.app : null,
+				isid: req.params.isid
 			};
 			global.Uwot.Listeners[req.params.isid][req.params.lname].handler(args).then((resultObj) => {
 			

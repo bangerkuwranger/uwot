@@ -144,7 +144,8 @@ router.post(
 						cmd: req.body.cmd,
 						isAuthenticated: req.isAuthenticated(),
 						userId: 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null,
-						app: 'function' === typeof req.app ? req.app : null
+						app: 'function' === typeof req.app ? req.app : null,
+						isid: res.locals.instanceSessionId
 					};
 					if (hasAdditional) {
 						
