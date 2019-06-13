@@ -21,7 +21,17 @@ class UwotAbstractRuntime {
 		
 		/***	property docs	***/
 		
+		// exes
+			// an instance of Map containing nested executable nodes, i.e. each key references a command or a nested chain of commands and their arguments and options
 		
+		// results
+			// an object with properties:
+			// output - instance of Array containing multidimensional output after running commands in order within exes
+			// operations - instance of Array containing objects representing each requested operation and any related arguments. Operations are distinct from commands in that the logic for these is performed almost entirely on the client, rather than server, and these are distinguished by having names as members of global.Uwot.Constants.cliOps.
+			// cookies - object with properties named by each cookie to be set's name, and values containing the set-cookie header value
+			// redirect = a Url object that the client will redirect to if set (typically only used for theme changes, or forcing a reload of the current environment by client)
+			// cwd - a string containing the current working directory's path relative to the VFS. This can be obtained from the filesystem class method getVcwd. If not included, the requestProcessor will use that method with the user's fileSystem to provide the value to the client.
+			
 		
 		/***	end property docs	***/
 		
