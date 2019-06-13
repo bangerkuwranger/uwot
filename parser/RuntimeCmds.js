@@ -197,7 +197,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						exe.args = [];
 						for (let argIdx = 0; argIdx < args.length; argIdx++) {
 					
-							if ('Word' === args[cIdx].type) {
+							if ('Word' === args[argIdx].type) {
 							
 								exe.args.push(args[argIdx]);
 							
@@ -708,7 +708,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 												}
 												else if ('sudo' === exe.name) {
 									
-													outputString = outputLine(result, 'string');
+													outputString = this.outputLine(result, 'string');
 													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
 													
 														if (fsError) {
