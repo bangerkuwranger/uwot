@@ -2,6 +2,21 @@ const bashParser = require('bash-parser');
 const Runtime = require('./RuntimeCmds');
 
 /***
+* CmdParser function
+* 
+* In concert with an implementation of the AbstractRuntime class, a parser must provide
+* a function that accepts arguments as an object (specified below) as well as a callback.
+* The function should then parse the cmd string into an AST parseable and executable by
+* the associated Runtime class, and instantiate that class with the AST, userId, app instance,
+* and isid. Both the AST and runtime should be included as the second argument of the
+* successful callback response object, and any error should be passed as the first arg.
+* The callback, set by the listener, will be processed and handled by the requestProcessor
+* middleware call the runtime instance's executeCommands method and return the results
+* in the response.
+*
+***/
+
+/***
 *
 * args object properties
 *
@@ -84,7 +99,7 @@ module.exports = function defaultCmdParser(args, callback) {
 							// probably needless, but ensure guest cannot sudo
 							user.maySudo = function() { return false; };
 							// assign new runtime to response.runtime using parsed AST, args.app, and guest user
-							response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app);
+							response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
 							return callback(false, response);
 			
 						}
@@ -96,7 +111,7 @@ module.exports = function defaultCmdParser(args, callback) {
 				else {
 			
 					// assign new runtime to response.runtime using parsed AST, args.app, and found user
-					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app);
+					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
 					return callback(false, response);
 			
 				}
