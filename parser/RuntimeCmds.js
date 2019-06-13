@@ -143,6 +143,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 		var exe = {isOp: false, type: 'Command', isSudo: false};
 		exe.name = sanitize.cleanString(astCommand.name.text);
+		exe.id = sanitize.cleanString(astCommand.id);
 		var args = [];
 		if ('string' === typeof exe.name && '' !== exe.name) {
 	
@@ -196,7 +197,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						exe.args = [];
 						for (let argIdx = 0; argIdx < args.length; argIdx++) {
 					
-							exe.args.push(args[argIdx]);
+							if ('Word' === args[cIdx].type) {
+							
+								exe.args.push(args[argIdx]);
+							
+							}
 					
 						}
 					
@@ -210,6 +215,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		
 				exe.input = 'undefined' !== typeof input ? input : null;
 				exe.output = 'undefined' !== typeof output ? output : null;
+				
 				if ('object' === typeof astCommand.prefix) {
 		
 					args = args.concat(astCommand.prefix);
@@ -228,7 +234,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					for (let argIdx = 0; argIdx < args.length; argIdx++) {
 				
 					
-						if (!eom) {
+						if (!eom && 'Word' === args[cIdx].type) {
 					
 							var optMatch = global.Uwot.Bin[exe.name].matchOpt(args[cIdx].text);
 							if (optMatch.isOpt) {
@@ -287,6 +293,37 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					
 							}
 					
+						}
+						else if (args[cIdx].type === 'Redirect' && typeof args[cIdx].op.type === 'string') {
+						
+							var ioFile = args[cIdx].file;
+							ioFile.options = {
+								noclobber: true,
+								append: false
+							};
+							switch(args[cIdx].op.type) {
+							
+								case 'lessgreat':
+									exe.input = ioFile;
+									exe.output = ioFile;
+									break;
+								case 'less':
+									exe.input = ioFile;
+									break;
+								case 'great':
+									exe.output = ioFile;
+									break;
+								case 'dgreat':
+									ioFile.options.append = true;
+									exe.output = ioFile;
+									break;
+								case 'clobber':
+									ioFile.options.noclobber = false;
+									exe.output = ioFile;
+									break;
+							
+							}
+						
 						}
 						else {
 					
@@ -639,9 +676,145 @@ class UwotRuntimeCmds extends AbstractRuntime {
 										}
 						
 									}
-									else if ('string' === typeof exe.output) {
-						
+									else if ('object' === typeof exe.output && 'string' === typeof exe.output.type && exe.output.type === 'Word') {
+
+										var outputString;
 										//attempt to output to file using synchronous user filesystem
+										try {
+										
+											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
+								
+												if (error) {
+									
+													outputString = this.outputLine(error, 'string');
+													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
+													
+														if (fsError) {
+														
+															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
+															results.output.push(this.outputLine(fsError, 'object'));
+															j++;
+														
+														}
+														else {
+														
+															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
+															j++;
+														
+														}
+													
+													}.bind(this));
+									
+												}
+												else if ('sudo' === exe.name) {
+									
+													outputString = outputLine(result, 'string');
+													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
+													
+														if (fsError) {
+														
+															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
+															results.output.push(this.outputLine(fsError, 'object'));
+															j++;
+														
+														}
+														else {
+														
+															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
+															j++;
+														
+														}
+													
+													}.bind(this));
+									
+												}
+												else if ('string' === typeof result.outputType && 'object' === result.outputType) {
+												
+													if ('string' === typeof result.redirect) {
+													
+														results.redirect = result.redirect;
+														delete result.redirect;
+													
+													} 
+													if ('object' === typeof result.cookies && result.cookies.length > 0) {
+													
+														results.cookies = results.cookies.concat(result.cookies);
+														delete result.cookies;
+													
+													}
+													outputString = this.outputLine(result, 'string');
+													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
+													
+														if (fsError) {
+														
+															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
+															results.output.push(this.outputLine(fsError, 'object'));
+															j++;
+														
+														}
+														else {
+														
+															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
+															j++;
+														
+														}
+													
+													}.bind(this));
+												
+												}
+												else {
+									
+													outputString = this.outputLine(result, 'string');
+													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
+													
+														if (fsError) {
+														
+															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
+															results.output.push(this.outputLine(fsError, 'object'));
+															j++;
+														
+														}
+														else {
+														
+															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
+															j++;
+														
+														}
+													
+													}.bind(this));
+									
+												}
+												if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
+												
+													results.cwd = result.cwd;
+												
+												}
+								
+											}.bind(this), exe.isSudo, this.isid);
+										
+										}
+										catch(e) {
+							
+											outputString = this.outputLine(e, 'string');
+											this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
+											
+												if (fsError) {
+												
+													fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
+													results.output.push(this.outputLine(fsError, 'object'));
+													j++;
+												
+												}
+												else {
+												
+													results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
+													j++;
+												
+												}
+											
+											}.bind(this));
+							
+										}
 						
 									}
 									else if ('number' === typeof exe.output) {
@@ -850,6 +1023,117 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	
 		this.isid = isid;
 		return this;
+	
+	}
+	
+	fileOutputConsoleString(fileName, opts, successful) {
+	
+		var consoleOutput = 'output to ' + fileName + ' via ';
+		if (successful) {
+		
+			if (opts.append) {
+			
+				consoleOutput += 'append was successful';
+			
+			}
+			else if (opts.noclobber) {
+			
+				consoleOutput += 'new file write was successful';
+			
+			}
+			else {
+			
+				consoleOutput += 'file overwrite was successful';
+			
+			}
+		
+		}
+		else {
+		
+			if (opts.append) {
+			
+				consoleOutput += 'append failed';
+			
+			}
+			else if (opts.noclobber) {
+			
+				consoleOutput += 'new file write failed';
+			
+			}
+			else {
+			
+				consoleOutput += 'file overwrite failed';
+			
+			}
+		
+		}
+		return consoleOutput;
+	
+	}
+	
+	outputToFile(outputString, outputFilename, outputOptions, callback) {
+	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to outputToFile');
+		
+		}
+		else if ('string' !== typeof outputString) {
+		
+			return callback(new TypeError('invalid outputString passed to outputToFile'));
+		
+		}
+		else if ('string' !== typeof outputFilename) {
+		
+			return callback(new TypeError('invalid outputFilename passed to outputToFile'));
+		
+		}
+		else if ('object' !== typeof outputOptions || null === outputOptions) {
+		
+			return callback(new TypeError('invalid outputOptions passed to outputToFile'));
+		
+		}
+		else {
+		
+			var fsError;
+			if (outputOptions.append) {
+			
+				fsError = global.Uwot.FileSystems[this.user._id].append(outputFilename, outputString);
+			
+			}
+			else {
+			
+				var fullPath =  global.Uwot.FileSystems[this.user._id].resolvePath(outputFilename, true);
+				var exists = true;
+				if (fullPath instanceof Error && 'string' === fullPath.code && 'ENOENT' === fullPath.code) {
+				
+					exists = false;
+				
+				}
+				if (outputOptions.noclobber && exists) {
+			
+					fsError = new Error('cannot overwrite: file exists and noclobber is true');
+			
+				}
+				else if (!exists || !outputOptions.noclobber) {
+				
+					fsError = global.Uwot.FileSystems[this.user._id].write(outputFilename, outputString);
+				
+				}
+			
+			}
+			if (fsError instanceof Error) {
+			
+				return callback(fsError);
+			
+			}
+			else {
+			
+				return callback(false);
+			
+			}
+		
+		}
 	
 	}
 
