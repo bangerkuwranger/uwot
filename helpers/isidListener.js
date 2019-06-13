@@ -84,7 +84,7 @@ function enableExclusiveState(isid) {
 	var allListenerNames = Object.keys(globalListeners);
 	for (let i = 0; i < allListenerNames.length; i++) {
 	
-		if (globalListeners[allListenerNames[i]].type !== exclusive && globalListeners[allListenerNames[i]].status === 'enabled') {
+		if (globalListeners[allListenerNames[i]].type !== 'exclusive' && globalListeners[allListenerNames[i]].status === 'enabled') {
 		
 			disabledForExclusive.push(allListenerNames[i]);
 			globalListeners[allListenerNames[i]].disable();
