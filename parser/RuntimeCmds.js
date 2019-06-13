@@ -4,6 +4,7 @@ const AbstractRuntime = require('./AbstractRuntime');
 const sanitize = require('../helpers/valueConversion');
 const uid = require('uid-safe');
 const systemError = require('../helpers/systemError');
+const ansiToText = require('../output/ansiToText');
 
 class UwotRuntimeCmds extends AbstractRuntime {
 
@@ -71,6 +72,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	executeCommands() {
 	
 		// deferred execution starts here, traversing exes Map and returning results
+		// this is where the results property is set for the instance, as well
 		this.results = this.executeMap(this.exes);
 		return this.results;
 	
@@ -534,9 +536,12 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 	}
 
+	// run deferred processing of the exe objects in the given map, outputting to a type specified in second arg.
 	executeMap(exeMap, outputType) {
 
+		// default to object with output property that is assigned objects for the ansi output parser
 		outputType = 'string' === typeof outputType ? outputType : 'ansi';
+		// make sure the map is a Map
 		if ('object' !== typeof exeMap && !(exeMap instanceof Map)) {
 	
 			return [this.outputLine(new TypeError('exeMap passed to executeMap must be an instance of Map'), outputType)];
@@ -544,37 +549,48 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		}
 		else {
 	
+			// create results container
 			var results = {
 				output: [],
 				operations: [],
 				cookies: {}
 			};
-// 			var promiseMap = new Map();
+			// return empty object if map has no keys
 			if (exeMap.size < 1) {
 		
 				return results;
 		
 			}
+			// otherwise, begin iteration
 			else {
 		
+				// j is external iterator incremented upon complete execution of a cmd
 				var j = 0;
+				// i is internal iterator incremented upon commencement of exeMap key processing
 				for (let i = 0; i < exeMap.size; i++) {
 		
+					// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
 					var exe = exeMap.get(i);
+					// if it's not a non-null object, it's not a valid exe. add an error to results.output array and move on to the next exe
 					if ('object' !== typeof exe || null === exe) {
 			
 						results.output.push(this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType));
 						j++;
 			
 					}
+					// if exe generated an error during the AST parsing, add it to results.output and move on to the next exe
 					else if ('undefined' !== typeof exe.error) {
 			
 						results.output.push(this.outputLine(exe.error, outputType));
 						j++;
 			
 					}
+					// still good to go? wonders may never cease... begin pre-execution logic
 					else {
 			
+						// isOp flag indicated this node is an operation (client-side), not a command (server-side)
+						// if it is true, user is logged in, guests are allowed, or the login operation is ongoing...
+						// then add the whole node (arga and all) to results.operations and add a line to results.output to indicate operation was approved
 						if (exe.isOp) {
 				
 							if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
@@ -583,6 +599,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 								results.operations.push(exe);
 								j++;
 							}
+							// if user isn't allowed, just move on to the next. this should be a quick loop...
 							else {
 							
 								j++;
@@ -590,10 +607,15 @@ class UwotRuntimeCmds extends AbstractRuntime {
 							}
 				
 						}
+						// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
 						else {
 				
+							// ...unless user isn't allowed. check again whether
+							// user is logged in or guests are allowed
 							if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
+								// check for i/o metadata in the object.
+								// null means we're sure there's no files to read or redirect
 								if (null === exe.input) {
 					
 									if (null === exe.output) {
@@ -801,7 +823,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 												if (fsError) {
 												
 													fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-													results.output.push(this.outputLine(fsError, 'object'));
+													results.output.push(this.outputLine(fsError, outputType));
 													j++;
 												
 												}
@@ -813,66 +835,6 @@ class UwotRuntimeCmds extends AbstractRuntime {
 												}
 											
 											}.bind(this));
-							
-										}
-						
-									}
-									else if ('number' === typeof exe.output) {
-						
-										//attempt to output to map[exe.output]
-										try {
-							
-											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
-								
-												if (error) {
-									
-													results.output.push(this.outputLine(error, 'object'));
-													j++;
-									
-												}
-												else if ('sudo' === exe.name) {
-									
-													results.output.push(result);
-													j++;
-									
-												}
-												else if ('string' === typeof result.outputType && 'object' === result.outputType) {
-												
-													if ('string' === typeof result.redirect) {
-													
-														results.redirect = result.redirect;
-														delete result.redirect;
-													
-													} 
-													if ('object' === typeof result.cookies && result.cookies.length > 0) {
-													
-														results.cookies = results.cookies.concat(result.cookies);
-														delete result.cookies;
-													
-													}
-													results.output.push(this.outputLine(result, 'object'));
-													j++;
-												
-												}
-												else {
-									
-													results.output.push(this.outputLine(result, 'object'));
-													j++;
-									
-												}
-												if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
-												
-													results.cwd = result.cwd;
-												
-												}
-								
-											}.bind(this), exe.isSudo, this.isid);
-							
-										}
-										catch(e) {
-							
-											results.output.push(this.outputLine(e, 'object'));
-											j++;
 							
 										}
 						
@@ -961,11 +923,6 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											//attempt to output to file using synchronous user filesystem
 						
 										}
-										else if ('number' === typeof exe.output) {
-						
-											//attempt to output to map[exe.output]
-						
-										}
 										else {
 						
 											results.output.push(this.outputLine(new TypeError('exe with index ' + j + ' has invalid output'), outputType));
@@ -984,6 +941,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 								}
 					
 							}
+							// if a user can't do stuff, don't do stuff and move on to the next thing they can't do
 							else {
 							
 								j++;
@@ -993,13 +951,18 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						}
 			
 					}
+					// when execution is completed for all exe commands, we can return the results object
 					if (j >= exeMap.size) {
 			
+						// if after all of that there's no output or operations and user isn't allowed to do stuff
+						// it means guests are disallowed by config and user isn't authenticated.
+						// poke the user with a stick so they log in.
 						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
 							results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
 			
 						}
+						// return results to the caller.
 						return results;
 			
 					}
@@ -1105,7 +1068,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 				var fullPath =  global.Uwot.FileSystems[this.user._id].resolvePath(outputFilename, true);
 				var exists = true;
-				if (fullPath instanceof Error && 'string' === fullPath.code && 'ENOENT' === fullPath.code) {
+				if (fullPath instanceof Error && 'string' === typeof fullPath.code && 'ENOENT' === fullPath.code) {
 				
 					exists = false;
 				
