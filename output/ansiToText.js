@@ -112,12 +112,12 @@ function parseToText(inputValue, inputType, isOrig) {
 	}
 	else if ('html' === inputType) {
 	
-		return ansiHtmlToText(inputValue;)
+		return ansiHtmlToText(inputValue);
 	
 	}
 	else {
 	
-		if ('boolean' !== typeof isOrig || true !=== isOrig) {
+		if ('boolean' !== typeof isOrig || true !== isOrig) {
 	
 			isOrig = false;
 	

@@ -69,11 +69,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 	}
 	
-	executeCommands() {
+	async executeCommands() {
 	
 		// deferred execution starts here, traversing exes Map and returning results
 		// this is where the results property is set for the instance, as well
-		this.results = this.executeMap(this.exes);
+		this.results = await this.executeMap(this.exes);
 		return this.results;
 	
 	}
@@ -537,7 +537,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	}
 
 	// run deferred processing of the exe objects in the given map, outputting to a type specified in second arg.
-	executeMap(exeMap, outputType) {
+	async executeMap(exeMap, outputType) {
 
 		// default to object with output property that is assigned objects for the ansi output parser
 		outputType = 'string' === typeof outputType ? outputType : 'ansi';
@@ -614,328 +614,148 @@ class UwotRuntimeCmds extends AbstractRuntime {
 							// user is logged in or guests are allowed
 							if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
-								// check for i/o metadata in the object.
-								// null means we're sure there's no files to read or redirect
-								if (null === exe.input) {
-					
-									if (null === exe.output) {
-						
-										try {
-							
-											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
+								var inputData, outputData;
+								try {
 								
-												if (error) {
-									
-													results.output.push(this.outputLine(error, outputType));
-													j++;
-									
-												}
-												else if ('sudo' === exe.name) {
-									
-													results.output.push(result);
-													j++;
-									
-												}
-												else if ('string' === typeof result.outputType && 'object' === result.outputType) {
-												
-													if ('string' === typeof result.redirect) {
-													
-														results.redirect = result.redirect;
-														delete result.redirect;
-													
-													} 
-													if ('object' === typeof result.cookies && null !== result.cookies) {
-													
-														var cnames = Object.keys(result.cookies);
-														cnames.forEach(function(cname) {
-														
-															results.cookies[cname] = result.cookies[cname];
-														
-														});
-														delete result.cookies;
-													
-													}
-													if ('object' === typeof result.output) {
-												
-														results.output.push(this.outputLine(result.output, outputType));
-														j++;
-												
-													}
-													else {
-													
-														results.output.push(this.outputLine(result, 'object'));
-														j++;
-													
-													}
-												
-												}
-												else if ('object' === typeof result.output) {
-												
-													results.output.push(this.outputLine(result.output, outputType));
-													j++;
-												
-												}
-												else {
-									
-													results.output.push(this.outputLine(result, outputType));
-													j++;
-									
-												}
-												if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
-												
-													results.cwd = result.cwd;
-												
-												}
+									inputData = await this.getInputForExe(exe.input, this.user._id);
 								
-											}.bind(this), exe.isSudo, this.isid);
-							
-										}
-										catch(e) {
-							
-											results.output.push(this.outputLine(e, outputType));
-											j++;
-							
-										}
-						
-									}
-									else if ('object' === typeof exe.output && 'string' === typeof exe.output.type && exe.output.type === 'Word') {
-
-										var outputString;
-										//attempt to output to file using synchronous user filesystem
-										try {
-										
-											global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
-								
-												if (error) {
-									
-													outputString = this.outputLine(error, 'string');
-													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
-													
-														if (fsError) {
-														
-															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-															results.output.push(this.outputLine(fsError, 'object'));
-															j++;
-														
-														}
-														else {
-														
-															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
-															j++;
-														
-														}
-													
-													}.bind(this));
-									
-												}
-												else if ('sudo' === exe.name) {
-									
-													outputString = this.outputLine(result, 'string');
-													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
-													
-														if (fsError) {
-														
-															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-															results.output.push(this.outputLine(fsError, 'object'));
-															j++;
-														
-														}
-														else {
-														
-															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
-															j++;
-														
-														}
-													
-													}.bind(this));
-									
-												}
-												else if ('string' === typeof result.outputType && 'object' === result.outputType) {
-												
-													if ('string' === typeof result.redirect) {
-													
-														results.redirect = result.redirect;
-														delete result.redirect;
-													
-													} 
-													if ('object' === typeof result.cookies && result.cookies.length > 0) {
-													
-														results.cookies = results.cookies.concat(result.cookies);
-														delete result.cookies;
-													
-													}
-													outputString = this.outputLine(result, 'string');
-													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
-													
-														if (fsError) {
-														
-															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-															results.output.push(this.outputLine(fsError, 'object'));
-															j++;
-														
-														}
-														else {
-														
-															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
-															j++;
-														
-														}
-													
-													}.bind(this));
-												
-												}
-												else {
-									
-													outputString = this.outputLine(result, 'string');
-													this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
-													
-														if (fsError) {
-														
-															fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-															results.output.push(this.outputLine(fsError, 'object'));
-															j++;
-														
-														}
-														else {
-														
-															results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
-															j++;
-														
-														}
-													
-													}.bind(this));
-									
-												}
-												if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
-												
-													results.cwd = result.cwd;
-												
-												}
-								
-											}.bind(this), exe.isSudo, this.isid);
-										
-										}
-										catch(e) {
-							
-											outputString = this.outputLine(e, 'string');
-											this.outputToFile(outputString, exe.output.text, exe.output.options, function(fsError) {
-											
-												if (fsError) {
-												
-													fsError.message = this.fileOutputConsoleString(exe.output.text, exe.output.options);
-													results.output.push(this.outputLine(fsError, outputType));
-													j++;
-												
-												}
-												else {
-												
-													results.output.push(this.outputLine(this.fileOutputConsoleString(exe.output.text, exe.output.options, true), 'string'));
-													j++;
-												
-												}
-											
-											}.bind(this));
-							
-										}
-						
-									}
-									else {
-						
-										results.output.push(this.outputLine(new TypeError('exe with has invalid output'), outputType));
-										j++;
-						
-									}
-					
 								}
-								else {
-					
-									if ('string' === typeof exe.input) {
-					
-										//attempt to input from file using synchronous user filesystem
-					
-									}
-									else if ('number' === typeof exe.input) {
-					
-										//attempt to input from map[exe.output]
-										exe.args.unshift(results.output[exe.input]);
-										if (null === exe.output) {
-							
-											try {
-							
-												global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, function(error, result) {
+								catch(inputError) {
 								
-													if (error) {
-									
-														results.output.push(this.outputLine(error, outputType));
-														j++;
-									
-													}
-													else if ('sudo' === exe.name) {
-									
-														results.output.push(result);
-														j++;
-									
-													}
-													else if ('string' === typeof result.outputType && 'object' === result.outputType) {
-													
-														if ('string' === typeof result.redirect) {
-													
-															results.redirect = result.redirect;
-															delete result.redirect;
-													
-														} 
-														if ('object' === typeof result.cookies && result.cookies.length > 0) {
-													
-															results.cookies = results.cookies.concat(result.cookies);
-															delete result.cookies;
-													
-														}
-														results.output.push(this.outputLine(result, 'object'));
-														j++;
-												
-													}
-													else {
-									
-														results.output.push(this.outputLine(result, outputType));
-														j++;
-									
-													}
-													if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
-												
-														results.cwd = result.cwd;
-												
-													}
+									results.output.push(this.outputLine(inputError, 'object'));
+									j++;
 								
-												}.bind(this), exe.isSudo, this.isid);
+								};
+								if ('string' === typeof inputData) {
+								
+									exe.args.unshift(inputData);
+								
+								}
+								try {
 							
-											}
-											catch(e) {
+									global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, async function(error, result) {
+						
+										if (error) {
 							
-												results.output.push(this.outputLine(e, outputType));
-												j++;
-							
-											}
-											
+											outputData = this.outputLine(error, outputType);
 							
 										}
-										else if ('string' === typeof exe.output) {
-						
-											//attempt to output to file using synchronous user filesystem
-						
+										else if ('sudo' === exe.name) {
+							
+											outputData = result;
+							
+										}
+										else if ('string' === typeof result.outputType && 'object' === result.outputType) {
+										
+											if ('string' === typeof result.redirect) {
+											
+												results.redirect = result.redirect;
+												delete result.redirect;
+											
+											} 
+											if ('object' === typeof result.cookies && null !== result.cookies) {
+											
+												var cnames = Object.keys(result.cookies);
+												cnames.forEach(function(cname) {
+												
+													results.cookies[cname] = result.cookies[cname];
+												
+												});
+												delete result.cookies;
+											
+											}
+											if ('object' === typeof result.output) {
+										
+												outputData = this.outputLine(result.output, outputType);
+										
+											}
+											else {
+											
+												outputData = this.outputLine(result, 'object');
+											
+											}
+										
+										}
+										else if ('object' === typeof result.output) {
+										
+											outputData = this.outputLine(result.output, outputType);
+										
 										}
 										else {
-						
-											results.output.push(this.outputLine(new TypeError('exe with index ' + j + ' has invalid output'), outputType));
+							
+											outputData = this.outputLine(result, outputType);
+							
+										}
+										if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
+										
+											results.cwd = result.cwd;
+										
+										}
+										try {
+										
+											var consoleOutput = await this.getConsoleOutputForExe(outputData, exe.output, this.user._id);
+											results.output.push(exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
 											j++;
-						
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= exeMap.size) {
+			
+												// if after all of that there's no output or operations and user isn't allowed to do stuff
+												// it means guests are disallowed by config and user isn't authenticated.
+												// poke the user with a stick so they log in.
+												if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+													results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+												}
+												// return results to the caller.
+												return results;
+			
+											}
+										
+										}
+										catch(outputError) {
+										
+											results.output.push(this.outputLine(outputError, outputType));
+											j++;
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= exeMap.size) {
+			
+												// if after all of that there's no output or operations and user isn't allowed to do stuff
+												// it means guests are disallowed by config and user isn't authenticated.
+												// poke the user with a stick so they log in.
+												if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+													results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+												}
+												// return results to the caller.
+												return results;
+			
+											}
+										
 										}
 						
-									}
-									else {
+									}.bind(this), exe.isSudo, this.isid);
 					
-										results.output.push(this.outputLine(new TypeError('exe with index ' + j + ' has invalid input'), outputType));
-										j++;
+								}
+								catch(e) {
 					
+									results.output.push(this.outputLine(e, outputType));
+									j++;
+									// when execution is completed for all exe commands, we can return the results object
+									if (j >= exeMap.size) {
+			
+										// if after all of that there's no output or operations and user isn't allowed to do stuff
+										// it means guests are disallowed by config and user isn't authenticated.
+										// poke the user with a stick so they log in.
+										if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+											results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+										}
+										// return results to the caller.
+										return results;
+			
 									}
 					
 								}
@@ -945,27 +765,28 @@ class UwotRuntimeCmds extends AbstractRuntime {
 							else {
 							
 								j++;
+								// when execution is completed for all exe commands, we can return the results object
+								if (j >= exeMap.size) {
+			
+									// if after all of that there's no output or operations and user isn't allowed to do stuff
+									// it means guests are disallowed by config and user isn't authenticated.
+									// poke the user with a stick so they log in.
+									if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+										results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+									}
+									// return results to the caller.
+									return results;
+			
+								}
 							
 							}
 				
 						}
 			
 					}
-					// when execution is completed for all exe commands, we can return the results object
-					if (j >= exeMap.size) {
-			
-						// if after all of that there's no output or operations and user isn't allowed to do stuff
-						// it means guests are disallowed by config and user isn't authenticated.
-						// poke the user with a stick so they log in.
-						if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-			
-							results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-			
-						}
-						// return results to the caller.
-						return results;
-			
-					}
+					
 		
 				}
 		
@@ -1034,69 +855,118 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	
 	}
 	
-	outputToFile(outputString, outputFilename, outputOptions, callback) {
+	getConsoleOutputForExe(outputData, exeOutput, userId) {
 	
-		if ('function' !== typeof callback) {
+		return new Promise((resolve, reject) => {
 		
-			throw new TypeError('invalid callback passed to outputToFile');
+			if ('object' !== typeof exeOutput) {
 		
-		}
-		else if ('string' !== typeof outputString) {
+				reject(new TypeError('invalid output object passed to getConsoleOutputForExe'));
 		
-			return callback(new TypeError('invalid outputString passed to outputToFile'));
-		
-		}
-		else if ('string' !== typeof outputFilename) {
-		
-			return callback(new TypeError('invalid outputFilename passed to outputToFile'));
-		
-		}
-		else if ('object' !== typeof outputOptions || null === outputOptions) {
-		
-			return callback(new TypeError('invalid outputOptions passed to outputToFile'));
-		
-		}
-		else {
-		
-			var fsError;
-			if (outputOptions.append) {
+			}
+			else if (null === exeOutput) {
 			
-				fsError = global.Uwot.FileSystems[this.user._id].append(outputFilename, outputString);
+				resolve(outputData)
+			
+			}
+			else if ('string' !== typeof exeOutput.text) {
+		
+				reject(new TypeError('invalid output filename passed to getConsoleOutputForExe'));
+		
+			}
+			else if ('object' !== typeof exeOutput.options || null === exeOutput.options) {
+		
+				reject(new TypeError('invalid output options passed to getConsoleOutputForExe'));
+		
+			}
+			else {
+		
+				var fsError;
+				var outputText = ansiToText(outputData);
+				if (exeOutput.options.append) {
+			
+					fsError = global.Uwot.FileSystems[this.user._id].append(exeOutput.text, outputText);
+			
+				}
+				else {
+			
+					var fullPath =  global.Uwot.FileSystems[userId].resolvePath(exeOutput.text, true);
+					var exists = true;
+					if (fullPath instanceof Error && 'string' === typeof fullPath.code && 'ENOENT' === fullPath.code) {
+				
+						exists = false;
+				
+					}
+					if (exeOutput.options.noclobber && exists) {
+			
+						fsError = new Error('cannot overwrite: file exists and noclobber is true');
+			
+					}
+					else if (!exists || !exeOutput.options.noclobber) {
+				
+						fsError = global.Uwot.FileSystems[userId].write(exeOutput.text, outputText);
+				
+					}
+			
+				}
+				if (fsError instanceof Error) {
+			
+					fsError.message = this.fileOutputConsoleString(exeOutput.text, exeOutput.options) + ' - ' + fsError.message;
+					reject(fsError);
+			
+				}
+				else {
+			
+					resolve(this.fileOutputConsoleString(exeOutput.text, exeOutput.options, true));
+			
+				}
+		
+			}
+		
+		});
+	
+	}
+	
+	getInputForExe(exeInput, userId) {
+	
+		return new Promise((resolve, reject) => {
+		
+			if ('object' === typeof exeInput && null !== exeInput && 'string' === typeof exeInput.type && exeInput.type === 'Word') {
+			
+				try {
+				
+					var inputData = global.Uwot.FileSystems[userId].readFile(exeInput.text);
+					if (inputData instanceof Error) {
+					
+						reject(inputData);
+					
+					}
+					else {
+					
+						resolve(inputData);
+					
+					}
+				
+				}
+				catch(e) {
+				
+					reject(e);
+				
+				}
+			
+			}
+			else if (null === exeInput) {
+			
+				resolve(null);
 			
 			}
 			else {
 			
-				var fullPath =  global.Uwot.FileSystems[this.user._id].resolvePath(outputFilename, true);
-				var exists = true;
-				if (fullPath instanceof Error && 'string' === typeof fullPath.code && 'ENOENT' === fullPath.code) {
-				
-					exists = false;
-				
-				}
-				if (outputOptions.noclobber && exists) {
-			
-					fsError = new Error('cannot overwrite: file exists and noclobber is true');
-			
-				}
-				else if (!exists || !outputOptions.noclobber) {
-				
-					fsError = global.Uwot.FileSystems[this.user._id].write(outputFilename, outputString);
-				
-				}
-			
-			}
-			if (fsError instanceof Error) {
-			
-				return callback(fsError);
-			
-			}
-			else {
-			
-				return callback(false);
+				reject(new TypeError('exe with index ' + j + ' has invalid output'));
 			
 			}
 		
-		}
+		});
 	
 	}
 
