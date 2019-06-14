@@ -69,12 +69,17 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 	}
 	
-	async executeCommands() {
+	executeCommands(cb) {
 	
 		// deferred execution starts here, traversing exes Map and returning results
 		// this is where the results property is set for the instance, as well
-		this.results = await this.executeMap(this.exes);
-		return this.results;
+		this.executeMap(this.exes).then((results) => {
+		
+			this.results = results;
+			return cb(results);
+		
+		});
+		
 	
 	}
 	
@@ -537,210 +542,305 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	}
 
 	// run deferred processing of the exe objects in the given map, outputting to a type specified in second arg.
-	async executeMap(exeMap, outputType) {
+	executeMap(exeMap, outputType) {
 
 		// default to object with output property that is assigned objects for the ansi output parser
 		outputType = 'string' === typeof outputType ? outputType : 'ansi';
-		// make sure the map is a Map
-		if ('object' !== typeof exeMap && !(exeMap instanceof Map)) {
-	
-			return [this.outputLine(new TypeError('exeMap passed to executeMap must be an instance of Map'), outputType)];
-	
-		}
-		else {
-	
-			// create results container
-			var results = {
-				output: [],
-				operations: [],
-				cookies: {}
-			};
-			// return empty object if map has no keys
-			if (exeMap.size < 1) {
+		return new Promise(async (resolve, reject) => {
 		
-				return results;
-		
+			// make sure the map is a Map
+			if ('object' !== typeof exeMap && !(exeMap instanceof Map)) {
+	
+				resolve([this.outputLine(new TypeError('exeMap passed to executeMap must be an instance of Map'), outputType)]);
+	
 			}
-			// otherwise, begin iteration
 			else {
+	
+				// create results container
+				var results = {
+					output: [],
+					operations: [],
+					cookies: {}
+				};
+				// return empty object if map has no keys
+				if (exeMap.size < 1) {
 		
-				// j is external iterator incremented upon complete execution of a cmd
-				var j = 0;
-				// i is internal iterator incremented upon commencement of exeMap key processing
-				for (let i = 0; i < exeMap.size; i++) {
+					resolve(results);
 		
-					// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
-					var exe = exeMap.get(i);
-					// if it's not a non-null object, it's not a valid exe. add an error to results.output array and move on to the next exe
-					if ('object' !== typeof exe || null === exe) {
+				}
+				// otherwise, begin iteration
+				else {
+		
+					// j is external iterator incremented upon complete execution of a cmd
+					var j = 0;
+					// i is internal iterator incremented upon commencement of exeMap key processing
+					for (let i = 0; i < exeMap.size; i++) {
+		
+						// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
+						var exe = exeMap.get(i);
+						// if it's not a non-null object, it's not a valid exe. add an error to results.output array and move on to the next exe
+						if ('object' !== typeof exe || null === exe) {
 			
-						results.output.push(this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType));
-						j++;
+							results.output.push(this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType));
+							j++;
+							if (j >= exeMap.size) {
 			
-					}
-					// if exe generated an error during the AST parsing, add it to results.output and move on to the next exe
-					else if ('undefined' !== typeof exe.error) {
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
-						results.output.push(this.outputLine(exe.error, outputType));
-						j++;
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
 			
-					}
-					// still good to go? wonders may never cease... begin pre-execution logic
-					else {
+													}
+													// return results to the caller.
+													resolve(results);
 			
-						// isOp flag indicated this node is an operation (client-side), not a command (server-side)
-						// if it is true, user is logged in, guests are allowed, or the login operation is ongoing...
-						// then add the whole node (arga and all) to results.operations and add a line to results.output to indicate operation was approved
-						if (exe.isOp) {
-				
-							if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
-					
-								results.output.push(this.outputLine('operation ' + exe.name, outputType));
-								results.operations.push(exe);
-								j++;
-							}
-							// if user isn't allowed, just move on to the next. this should be a quick loop...
-							else {
-							
-								j++;
-							
-							}
-				
+												}
+			
 						}
-						// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
+						// if exe generated an error during the AST parsing, add it to results.output and move on to the next exe
+						else if ('undefined' !== typeof exe.error) {
+			
+							results.output.push(this.outputLine(exe.error, outputType));
+							j++;
+							if (j >= exeMap.size) {
+			
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
+			
+												}
+			
+						}
+						// still good to go? wonders may never cease... begin pre-execution logic
 						else {
+			
+							// isOp flag indicated this node is an operation (client-side), not a command (server-side)
+							// if it is true, user is logged in, guests are allowed, or the login operation is ongoing...
+							// then add the whole node (arga and all) to results.operations and add a line to results.output to indicate operation was approved
+							if (exe.isOp) {
 				
-							// ...unless user isn't allowed. check again whether
-							// user is logged in or guests are allowed
-							if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
+								if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
-								var inputData, outputData;
-								try {
-								
-									inputData = await this.getInputForExe(exe.input, this.user._id);
-								
-								}
-								catch(inputError) {
-								
-									results.output.push(this.outputLine(inputError, 'object'));
+									results.output.push(this.outputLine('operation ' + exe.name, outputType));
+									results.operations.push(exe);
 									j++;
-								
-								};
-								if ('string' === typeof inputData) {
-								
-									exe.args.unshift(inputData);
-								
+									if (j >= exeMap.size) {
+			
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
+			
+												}
 								}
-								try {
+								// if user isn't allowed, just move on to the next. this should be a quick loop...
+								else {
 							
-									global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, async function(error, result) {
+									j++;
+									if (j >= exeMap.size) {
+			
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
+			
+												}
+							
+								}
+				
+							}
+							// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
+							else {
+				
+								// ...unless user isn't allowed. check again whether
+								// user is logged in or guests are allowed
+								if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
+					
+									var inputData, outputData;
+									try {
+								
+										inputData = await this.getInputForExe(exe.input, this.user._id);
+								
+									}
+									catch(inputError) {
+								
+										results.output.push(this.outputLine(inputError, 'object'));
+										j++;
+										if (j >= exeMap.size) {
+			
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
+			
+												}
+								
+									};
+									if ('string' === typeof inputData) {
+								
+										exe.args.unshift(inputData);
+								
+									}
+									try {
+							
+										global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, async function(error, result) {
 						
-										if (error) {
+											if (error) {
 							
-											outputData = this.outputLine(error, outputType);
+												outputData = this.outputLine(error, outputType);
 							
-										}
-										else if ('sudo' === exe.name) {
-							
-											outputData = result;
-							
-										}
-										else if ('string' === typeof result.outputType && 'object' === result.outputType) {
-										
-											if ('string' === typeof result.redirect) {
-											
-												results.redirect = result.redirect;
-												delete result.redirect;
-											
-											} 
-											if ('object' === typeof result.cookies && null !== result.cookies) {
-											
-												var cnames = Object.keys(result.cookies);
-												cnames.forEach(function(cname) {
-												
-													results.cookies[cname] = result.cookies[cname];
-												
-												});
-												delete result.cookies;
-											
 											}
-											if ('object' === typeof result.output) {
+											else if ('sudo' === exe.name) {
+							
+												outputData = result;
+							
+											}
+											else if ('string' === typeof result.outputType && 'object' === result.outputType) {
+										
+												if ('string' === typeof result.redirect) {
+											
+													results.redirect = result.redirect;
+													delete result.redirect;
+											
+												} 
+												if ('object' === typeof result.cookies && null !== result.cookies) {
+											
+													var cnames = Object.keys(result.cookies);
+													cnames.forEach(function(cname) {
+												
+														results.cookies[cname] = result.cookies[cname];
+												
+													});
+													delete result.cookies;
+											
+												}
+												if ('object' === typeof result.output) {
+										
+													outputData = this.outputLine(result.output, outputType);
+										
+												}
+												else {
+											
+													outputData = this.outputLine(result, 'object');
+											
+												}
+										
+											}
+											else if ('object' === typeof result.output) {
 										
 												outputData = this.outputLine(result.output, outputType);
 										
 											}
 											else {
-											
-												outputData = this.outputLine(result, 'object');
-											
+							
+												outputData = this.outputLine(result, outputType);
+							
 											}
+											if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
 										
-										}
-										else if ('object' === typeof result.output) {
+												results.cwd = result.cwd;
 										
-											outputData = this.outputLine(result.output, outputType);
+											}
+											try {
 										
-										}
-										else {
-							
-											outputData = this.outputLine(result, outputType);
-							
-										}
-										if ('object' === typeof result && null !== result && 'string' === typeof result.cwd) {
-										
-											results.cwd = result.cwd;
-										
-										}
-										try {
-										
-											var consoleOutput = await this.getConsoleOutputForExe(outputData, exe.output, this.user._id);
-											results.output.push(exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
-											j++;
-											// when execution is completed for all exe commands, we can return the results object
-											if (j >= exeMap.size) {
+												var consoleOutput = await this.getConsoleOutputForExe(outputData, exe.output, this.user._id);
+												results.output.push(exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
+												j++;
+												// when execution is completed for all exe commands, we can return the results object
+												if (j >= exeMap.size) {
 			
-												// if after all of that there's no output or operations and user isn't allowed to do stuff
-												// it means guests are disallowed by config and user isn't authenticated.
-												// poke the user with a stick so they log in.
-												if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
-													results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
 			
 												}
-												// return results to the caller.
-												return results;
-			
+										
 											}
+											catch(outputError) {
 										
-										}
-										catch(outputError) {
-										
-											results.output.push(this.outputLine(outputError, outputType));
-											j++;
-											// when execution is completed for all exe commands, we can return the results object
-											if (j >= exeMap.size) {
+												results.output.push(this.outputLine(outputError, outputType));
+												j++;
+												// when execution is completed for all exe commands, we can return the results object
+												if (j >= exeMap.size) {
 			
-												// if after all of that there's no output or operations and user isn't allowed to do stuff
-												// it means guests are disallowed by config and user isn't authenticated.
-												// poke the user with a stick so they log in.
-												if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+													// if after all of that there's no output or operations and user isn't allowed to do stuff
+													// it means guests are disallowed by config and user isn't authenticated.
+													// poke the user with a stick so they log in.
+													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
-													results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+													}
+													// return results to the caller.
+													resolve(results);
 			
 												}
-												// return results to the caller.
-												return results;
-			
-											}
 										
-										}
+											}
 						
-									}.bind(this), exe.isSudo, this.isid);
+										}.bind(this), exe.isSudo, this.isid);
+					
+									}
+									catch(e) {
+					
+										results.output.push(this.outputLine(e, outputType));
+										j++;
+										// when execution is completed for all exe commands, we can return the results object
+										if (j >= exeMap.size) {
+			
+											// if after all of that there's no output or operations and user isn't allowed to do stuff
+											// it means guests are disallowed by config and user isn't authenticated.
+											// poke the user with a stick so they log in.
+											if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+			
+												results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+			
+											}
+											// return results to the caller.
+											resolve(results);
+			
+										}
+					
+									}
 					
 								}
-								catch(e) {
-					
-									results.output.push(this.outputLine(e, outputType));
+								// if a user can't do stuff, don't do stuff and move on to the next thing they can't do
+								else {
+							
 									j++;
 									// when execution is completed for all exe commands, we can return the results object
 									if (j >= exeMap.size) {
@@ -754,45 +854,24 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 										}
 										// return results to the caller.
-										return results;
+										resolve(results);
 			
 									}
-					
-								}
-					
-							}
-							// if a user can't do stuff, don't do stuff and move on to the next thing they can't do
-							else {
 							
-								j++;
-								// when execution is completed for all exe commands, we can return the results object
-								if (j >= exeMap.size) {
-			
-									// if after all of that there's no output or operations and user isn't allowed to do stuff
-									// it means guests are disallowed by config and user isn't authenticated.
-									// poke the user with a stick so they log in.
-									if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-			
-										results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-			
-									}
-									// return results to the caller.
-									return results;
-			
 								}
-							
-							}
 				
-						}
+							}
 			
-					}
+						}
 					
+		
+					}
 		
 				}
-		
-			}
 	
-		}
+			}
+		
+		});
 
 	}
 	
