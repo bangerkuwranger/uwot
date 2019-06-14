@@ -73,12 +73,13 @@ function ansiHtmlToText(htmlText) {
 	var $ = cheerio.load(htmlText);
 	var textString = '';
 	var $all = $('*');
+	var elCount = $($all).length;
 	$('*').each(function(i, element) {
 	
-		var nextEl = $($all).eq(i + 1);
-		var nextUsesCR = -1 === getCRElementTags().indexOf($(nextEl).prop('tagName'));
 		if (-1 === getCRElementTags().indexOf($(element).prop('tagName'))) {
 		
+			var nextEl = $($all).eq(i + 1);
+			var nextUsesCR = ((i + 1) >= elCount) ? false : -1 === getCRElementTags().indexOf($(nextEl).prop('tagName'));
 			textString += EOL + $(element).text();
 			if (nextUsesCR) {
 			
@@ -98,6 +99,8 @@ function ansiHtmlToText(htmlText) {
 
 }
 
+// TBD
+// This needs some work; recursion is having trouble with nesting...
 function parseToText(inputValue, inputType, isOrig) {
 
 	if ('string' !== typeof inputType || -1 === getValidInputTypes().indexOf(inputType)) {
@@ -206,7 +209,7 @@ function parseToText(inputValue, inputType, isOrig) {
 				}
 				else if ('object' === typeof el) {
 			
-					ansiString += parseToAnsi(el, object);
+					ansiString += parseToText(el, 'object');
 			
 				}
 		

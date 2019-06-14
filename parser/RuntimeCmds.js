@@ -961,7 +961,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			else {
 		
 				var fsError;
-				var outputText = ansiToText(outputData);
+				var outputText = ansiToText(outputData, 'object', true);
 				if (exeOutput.options.append) {
 			
 					fsError = global.Uwot.FileSystems[this.user._id].append(exeOutput.text, outputText);
