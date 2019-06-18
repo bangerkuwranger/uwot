@@ -74,13 +74,16 @@ function ansiHtmlToText(htmlText) {
 	var textString = '';
 	var $all = $('*');
 	var elCount = $($all).length;
-	$('*').each(function(i, element) {
+	$('html > body *').each(function(i, element) {
 	
-		if (-1 === getCRElementTags().indexOf($(element).prop('tagName'))) {
+		var thisText = $(element).first().contents().filter(function() {
+			return this.type === 'text';
+		}).text();
+		if (-1 !== getCRElementTags().indexOf($(element).prop('tagName').toLowerCase()) && 'string' === typeof thisText && '' !== thisText) {
 		
 			var nextEl = $($all).eq(i + 1);
 			var nextUsesCR = ((i + 1) >= elCount) ? false : -1 === getCRElementTags().indexOf($(nextEl).prop('tagName'));
-			textString += EOL + $(element).text();
+			textString += EOL + thisText;
 			if (nextUsesCR) {
 			
 				textString += EOL;
@@ -88,9 +91,14 @@ function ansiHtmlToText(htmlText) {
 			}
 		
 		}
-		else {
+		else if ('string' === typeof thisText && '' !== thisText) {
 		
-			textString += $(element).text();
+			textString += thisText;
+		
+		}
+		else if ('br' === element.name.toLowerCase()) {
+		
+			textString += EOL;
 		
 		}
 	
