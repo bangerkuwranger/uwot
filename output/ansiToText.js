@@ -134,7 +134,6 @@ function parseToText(inputValue, inputType, isOrig) {
 	
 		}
 		var ansiObj = inputValue;
-		var recursionDone = false;
 		if ('json' === inputType && 'string' === typeof inputValue) {
 	
 			ansiObj = global.Uwot.Constants.tryParseJSON(inputValue);
@@ -207,7 +206,6 @@ function parseToText(inputValue, inputType, isOrig) {
 		else if ('object' === typeof ansiObj.content && Array.isArray(ansiObj.content)) {
 	
 			ansiString = openTag;
-			var i = 0;
 			ansiObj.content.forEach(function(el) {
 		
 				if ('string' === typeof el) {

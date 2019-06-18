@@ -702,7 +702,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 												}
 								
-									};
+									}
 									if ('string' === typeof inputData) {
 								
 										exe.args.unshift(inputData);
@@ -945,7 +945,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			}
 			else if (null === exeOutput) {
 			
-				resolve(outputData)
+				resolve(outputData);
 			
 			}
 			else if ('string' !== typeof exeOutput.text) {
@@ -1041,7 +1041,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			}
 			else {
 			
-				reject(new TypeError('exe with index ' + j + ' has invalid output'));
+				reject(new TypeError('exe input "' + exe.text + '" is invalid'));
 			
 			}
 		

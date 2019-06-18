@@ -2,7 +2,7 @@ const Url = require('url');
 
 function executeRuntime(runtime) {
 
-	return new Promise(function(resolve, reject) {
+	return new Promise(function(resolve) {
 	
 		runtime.executeCommands(function(runtimeResults) {
 		
