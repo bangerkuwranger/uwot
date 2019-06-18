@@ -151,6 +151,23 @@ module.exports = {
 
 		}
 		
+		if ('object' !== typeof global.Uwot.Constants.commandTypes || !(Array.isArray(global.Uwot.Constants.commandTypes))) {
+		
+			global.Uwot.Constants.commandTypes = [
+				'LogicalExpression',
+				'Pipeline',
+				'Command',
+				'Function',
+				'Subshell',
+				'For',
+				'Case',
+				'if',
+				'While',
+				'Until'
+			];
+		
+		}
+		
 		if ('object' !== typeof global.Uwot.Constants.listenerTypes) {
 		
 			global.Uwot.Constants.listenerTypes = [
@@ -325,7 +342,7 @@ module.exports = {
 					
 						var currentInstanceId = validInstances[i]._id;
 						isidListenerHelper.newIsidDefaultListener(currentInstanceId);
-						if ((i + 1) > validInstances.length) {
+						if ((i + 1) >= validInstances.length) {
 						
 							return callback(false, Object.keys(global.Uwot.Listeners));
 						

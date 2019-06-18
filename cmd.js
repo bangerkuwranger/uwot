@@ -3,6 +3,7 @@ var path = require('path');
 var sanitize = require('./helpers/valueConversion');
 const EOL = require('os').EOL;
 const Listener = require('./listener');
+const isidListenerHelper = require('./helpers/isidListener');
 
 class UwotCmdCommand {
 
@@ -212,7 +213,7 @@ class UwotCmd {
 	
 	// just says what it's sent. shouldn't be used outside of testing...
 	// subclasses should implement their own logic.
-	execute(args, options, app, user, callback, isSudo) {
+	execute(args, options, app, user, callback, isSudo, isid) {
 	
 		if ('function' !== typeof callback) {
 		
@@ -545,17 +546,8 @@ class UwotCmd {
 		}
 		else {
 		
-			if ('object' !== typeof global.Uwot.Listeners) {
-			
-				global.Uwot.Listeners = {};
-			
-			}
-			if ('object' !== typeof global.Uwot.Listeners[isid]) {
-			
-				global.Uwot.Listeners[isid] = {};
-			
-			}
-			if ('object' === typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+			var globalListeners = isidListenerHelper.ensureGlobalListener(isid);
+			if ('object' === typeof globalListeners[this.listenerSettings.name]) {
 			
 				return new Error('listener name "' + name + '" not unique for isid "' + isid + '"');
 			
@@ -564,7 +556,7 @@ class UwotCmd {
 			
 				try {
 				
-					global.Uwot.Listeners[isid][this.listenerSettings.name] = new Listener(this.listenerSettings.name, isid, this.listenerSettings.options);
+					globalListeners[this.listenerSettings.name] = new Listener(this.listenerSettings.name, isid, this.listenerSettings.options);
 					return true;
 				
 				}
@@ -588,7 +580,8 @@ class UwotCmd {
 			return false;
 		
 		}
-		else if ('object' !== typeof global.Uwot.Listeners || 'object' !== typeof global.Uwot.Listeners[isid] || 'object' !== typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+		var globalListeners = isidListenerHelper.ensureGlobalListener(isid);
+		if ('object' !== typeof globalListeners[this.listenerSettings.name]) {
 		
 			isRegistered = this.registerListener(isid);
 		
@@ -606,7 +599,12 @@ class UwotCmd {
 		}
 		else {
 		
-			global.Uwot.Listeners[isid][this.listenerSettings.name].enable();
+			globalListeners[this.listenerSettings.name].enable();
+			if (this.listenerSettings.type === 'exclusive') {
+			
+				isidListenerHelper.enableExclusiveState(isid);
+			
+			}
 			return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
 		
 		}
@@ -621,7 +619,8 @@ class UwotCmd {
 			return false;
 		
 		}
-		else if ('object' !== typeof global.Uwot.Listeners || 'object' !== typeof global.Uwot.Listeners[isid] || 'object' !== typeof global.Uwot.Listeners[isid][this.listenerSettings.name]) {
+		var globalListeners = isidListenerHelper.ensureGlobalListener(isid);
+		if ('object' !== typeof globalListeners[this.listenerSettings.name]) {
 		
 			isRegistered = this.registerListener(isid);
 		
@@ -639,7 +638,12 @@ class UwotCmd {
 		}
 		else {
 		
-			global.Uwot.Listeners[isid][this.listenerSettings.name].disable();
+			globalListeners[this.listenerSettings.name].disable();
+			if (this.listenerSettings.type === 'exclusive') {
+			
+				isidListenerHelper.disableExclusiveState(isid);
+			
+			}
 			return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
 		
 		}

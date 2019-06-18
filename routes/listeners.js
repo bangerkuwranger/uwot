@@ -1,115 +1,146 @@
+// handles active exclusive listeners only
+
 var express = require('express');
 var router = express.Router();
 const nonceHandler = require('node-timednonce');
 const denyAllOthers = require('../middleware/denyAllOthers');
+const ListenerError = require('../helpers/UwotListenerError');
+const requestProcessor = require('../middleware/requestProcessor');
+var ansiOutput = require('../output/ansi');
 
-router.post('/get', function(req, res, next) {
+const sendAsAnsi = function(body, res) {
 
-	// default response assigned to resObj
-	var resObj = {
-		output: {
-			color: 'yellow',
-			content: 'Invalid Request'
-		}
-	};
+	return res.json(ansiOutput(body));
 
-	// verify form nonce
-	if ('object' === typeof req.body && 'string' === typeof req.body.nonce) {
+};
+
+router.post('/:isid/:lname', function(req, res, next) {
+
+	var denied = false;
+	// if isid is invalid, reject request
+	if ('string' !== typeof req.params.isid) {
 	
-		var nv = nonceHandler.verify('index-get', req.body.nonce);
-		if (nv && 'object' !== typeof nv) {
-		
-			if ('string' === typeof req.body.listener) {
-			
-				// get details for specific listener
-			
-			}
-			else {
-			
-				// get current listener(s)
-			
-			}
-		
-		}
-		else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
-		
-			resObj.output = {
-				color: 'yellow',
-				content: 'Invalid Request -' + nv.message
-			};
-	
-		}
+		denied = new ListenerError('', {type: 'NOISID', reason: 'ISID not in request path'});
+		return res.json(denied);
 	
 	}
+	// if listener name is invalid, reject request
+	else if ('string' !== typeof req.params.lname) {
+	
+		denied = new ListenerError('', {type: 'NOLNAME', reason: 'Listener Name not in request path'});
+		return res.json(denied);
+	
+	}
+	// if no nonce, reject request
+	else if ('object' !== typeof req.body || 'string' !== typeof req.body.nonce) {
+	
+		denied = new ListenerError('', {type: 'NONONCE', reason: 'Nonce not in request body', isid: req.params.isid, lname: req.params.lname});
+		return res.json(denied);
+	
+	}
+	// if nonce is invalid, reject request
+	var nv = nonceHandler.verify('get-listener-' + req.params.lname, req.body.nonce);
+	if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
+	
+		denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: req.params.isid, lname: req.params.lname, reason: nv.message});
+		return res.json(denied);
+	
+	}
+	// otherwise, get listener and continue processing request
 	else {
 	
-		resObj.output = {
-			color: 'yellow',
-			content: 'Invalid Request - Reload'
-		};
-
-	}
-	// Finally. resObj should have everything the frontend needs to process response, so we parse output prop to html and send the whole ball o' wax to the user as JSON
-		// parse resObj.output to html string from ansi objects, and respond with resObj encoded as JSON
-	return res.ansi(resObj);
-
-});
-
-router.all('/get', denyAllOthers());
-
-router.post('/set', function(req, res, next) {
-
-	// default response assigned to resObj
-	var resObj = {
-		output: {
-			color: 'yellow',
-			content: 'Invalid Request'
-		}
-	};
-
-	// verify form nonce
-	if ('object' === typeof req.body && 'string' === typeof req.body.nonce) {
-	
-		var nv = nonceHandler.verify('index-get', req.body.nonce);
-		if (nv && 'object' !== typeof nv) {
+		if ('object' !== typeof req.uwot) {
 		
-			if ('string' === typeof req.body.listener) {
-			
-				// get details for specific listener
-			
-			}
-			else {
-			
-				// get current listener(s)
-			
-			}
+			req.uwot = {};
 		
 		}
-		else if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
+		if ('object' !== typeof req.uwot.listeners || !(Array.isArray(req.uwot.listeners))) {
 		
-			resObj.output = {
-				color: 'yellow',
-				content: 'Invalid Request -' + nv.message
+			req.uwot.listeners = {};
+		
+		}
+		// deny if not an exclusive listener
+		if ('string' !== typeof global.Uwot.Listeners[req.params.isid][req.params.lname].type || 'exclusive' !== global.Uwot.Listeners[req.params.isid][req.params.lname].type) {
+		
+			denied = new ListenerError('', {type: 'NOTEXCL', isid: req.params.isid, lname: req.params.lname});
+			return res.json(denied);
+		
+		}
+		else {
+		
+			res.locals.instanceSessionId = req.params.isid;
+			req.uwot.listeners[req.params.lname] = (global.Uwot.Listeners[req.params.isid][req.params.lname]);
+			var args = {
+				cmd: req.body.cmd,
+				isAuthenticated: req.isAuthenticated(),
+				userId: 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null,
+				app: 'function' === typeof req.app ? req.app : null,
+				isid: req.params.isid
 			};
-	
+			global.Uwot.Listeners[req.params.isid][req.params.lname].handler(args).then((resultObj) => {
+			
+				if (resultObj instanceof Error) {
+				
+					var errorObj = {
+						output: {
+							color: 'red',
+							content: resultObj.message
+						}
+					};
+					return sendAsAnsi(errorObj, res);
+				
+				}
+				req.uwot.cmdAst = resultObj.cmdAst;
+				req.uwot.runtime = resultObj.runtime;
+				req.uwot.outputHandler = resultObj.outputHandler;
+				res.ansi = (outputObj, resp) => {
+				
+					return resultObj.outputHandler(outputObj).then((jsonOutput) => {
+					
+						if (jsonOutput instanceof Error) {
+				
+							var errorObj = {
+								output: {
+									color: 'red',
+									content: jsonOutput.message
+								}
+							};
+							return sendAsAnsi(errorObj, resp);
+				
+						}
+						return resp.json(jsonOutput);
+					
+					}).catch((outputError) => {
+					
+						var errorObj = {
+							output: {
+								color: 'red',
+								content: 'Output Error: ' + outputError.message
+							}
+						};
+						return sendAsAnsi(errorObj, resp);
+					
+					});
+				
+				};
+			
+			}).catch((parserError) => {
+			
+				var errorObj = {
+					output: {
+						color: 'red',
+						content: 'Parser Error: ' + parserError.message
+					}
+				};
+				return sendAsAnsi(errorObj, res);
+			
+			});
+
 		}
 	
 	}
-	else {
-	
-		resObj.output = {
-			color: 'yellow',
-			content: 'Invalid Request - Reload'
-		};
 
-	}
-	// Finally. resObj should have everything the frontend needs to process response, so we parse output prop to html and send the whole ball o' wax to the user as JSON
-		// parse resObj.output to html string from ansi objects, and respond with resObj encoded as JSON
-	return res.ansi(resObj);
-
-});
-
-router.all('/set', denyAllOthers());
+}, requestProcessor());
 
 router.all('/', denyAllOthers());
 
