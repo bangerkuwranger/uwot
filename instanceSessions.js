@@ -7,7 +7,7 @@ var sanitize = require('./helpers/valueConversion');
  * String	_id
  * Date		createdAt
  * Date		expiresAt
- * Number	expires
+ * Number	expiry
  */
  
 class InstanceSession {

@@ -7,6 +7,7 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 var Datastore = require('nedb-core');
 var filesystemLoader = require('../helpers/filesystemLoader');
+var isidListenerHelper = require('../helpers/isidListener');
 
 var gsh = require('../helpers/globalSetup');
 
@@ -237,6 +238,11 @@ describe('globalSetup.js', function() {
 			expect(global.Uwot.Users.constructor.name).to.equal('UwotUsers');
 		
 		});
+		it('should instantiate a UwotInstanceSessions instance and assign it to global.Uwot.InstanceSessions', function() {
+		
+			expect(global.Uwot.InstanceSessions.constructor.name).to.equal('UwotInstanceSessions');
+		
+		});
 	
 	});
 	describe('initExports()', function() {
@@ -368,6 +374,166 @@ describe('globalSetup.js', function() {
 			expect(gsh.initThemes).to.throw(Error, 'this function is not yet implemented');
 
 			configGetStub.restore();
+		
+		});
+	
+	});
+	describe('initListeners(callback)', function() {
+	
+		before(function() {
+		
+			if ('object' !== typeof global.Uwot.Constants || 'string' !== typeof global.Uwot.Constants.appRoot) {
+			
+				gsh.initConstants();
+			
+			}
+			if ('object' !== typeof global.Uwot.Config || 'function' !== typeof global.Uwot.Config.get) {
+			
+				gsh.initEnvironment();
+			
+			}
+		
+		});
+		it('should be a function', function() {
+		
+			expect(gsh.initListeners).to.be.a('function');
+		
+		});
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			expect(gsh.initListeners).to.throw(TypeError, 'invalid callback passed to initListeners');
+		
+		});
+		it('should return an Error to the first argument of callback if global.Uwot.InstanceSessions.getValidInstances returns an error', function(done) {
+		
+			var getValidInstancesStub = sinon.stub(global.Uwot.InstanceSessions, 'getValidInstances').callsFake(function returnErrorToCb(cb) {
+			
+				return cb(new Error('test getValidInstances error'));
+			
+			});
+			gsh.initListeners(function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test getValidInstances error');
+				expect(result).to.be.null;
+				getValidInstancesStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an callback(false, false) if global.Uwot.InstanceSessions.getValidInstances returns without error and the result is not a non-empty array', function(done) {
+		
+			var getValidInstancesStub = sinon.stub(global.Uwot.InstanceSessions, 'getValidInstances');
+			getValidInstancesStub.onCall(0).callsFake(function returnStringToCb(cb) {
+			
+				return cb(false, 'notAnArray');
+			
+			});
+			getValidInstancesStub.onCall(1).callsFake(function returnEmptyArrayToCb(cb) {
+			
+				return cb(false, []);
+			
+			});
+			getValidInstancesStub.onCall(2).callsFake(function returnNonArrayObjToCb(cb) {
+			
+				return cb(false, {_id: 'notAnArray'});
+			
+			});
+			gsh.initListeners(function(error, result) {
+			
+				expect(error).to.be.false;
+				expect(result).to.be.false;
+				gsh.initListeners(function(error, result) {
+			
+					expect(error).to.be.false;
+					expect(result).to.be.false;
+					gsh.initListeners(function(error, result) {
+			
+						expect(error).to.be.false;
+						expect(result).to.be.false;
+						getValidInstancesStub.restore();
+						done();
+			
+					});
+			
+				});
+			
+			});
+		
+		});
+		it('should return an callback(false, results), where results is an array of session object ids, if global.Uwot.InstanceSessions.getValidInstances returns without error and the result is a non-empty array', function(done) {
+		
+			var isArray = [
+				{
+					_id: 'triumvirateofmediocrity',
+					createdAt: new Date(),
+					expiresAt: new Date(new Date().getTime() + 36000)
+				}
+			];
+			var getValidInstancesStub = sinon.stub(global.Uwot.InstanceSessions, 'getValidInstances').callsFake(function returnISArrayToCb(cb) {
+			
+				return cb(false, isArray);
+			
+			});
+			var newIsidDefaultListenerStub = sinon.stub(isidListenerHelper, 'newIsidDefaultListener').callsFake(function createFakeGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid] || null === global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {
+						default: true
+					};
+				
+				}
+				return true;
+			
+			});
+			gsh.initListeners(function(error, result) {
+			
+				expect(error).to.be.false;
+				expect(result[0]).to.equal(isArray[0]._id);
+				getValidInstancesStub.restore();
+				newIsidDefaultListenerStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should call isidListenerHelper.newIsidDefaultListener to instantiate a default listener for each instance session id in the results array', function(done) {
+		
+			var isArray = [
+				{
+					_id: 'triumvirateofmediocrity',
+					createdAt: new Date(),
+					expiresAt: new Date(new Date().getTime() + 36000)
+				}
+			];
+			var getValidInstancesStub = sinon.stub(global.Uwot.InstanceSessions, 'getValidInstances').callsFake(function returnISArrayToCb(cb) {
+			
+				return cb(false, isArray);
+			
+			});
+			var newIsidDefaultListenerStub = sinon.stub(isidListenerHelper, 'newIsidDefaultListener').callsFake(function createFakeGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid] || null === global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {
+						default: true
+					};
+				
+				}
+				return true;
+			
+			});
+			gsh.initListeners(function(error, result) {
+			
+				expect(error).to.be.false;
+				expect(newIsidDefaultListenerStub.called).to.be.true;
+				expect(global.Uwot.Listeners[isArray[0]._id]).to.be.an('object').with.property('default').that.is.true;
+				getValidInstancesStub.restore();
+				newIsidDefaultListenerStub.restore();
+				done();
+			
+			});
 		
 		});
 	
