@@ -35,9 +35,18 @@ function removeGlobalListener(isid) {
 function newIsidDefaultListener(isid) {
 
 	var globalListeners = ensureGlobalListener(isid);
-	if ('object' !== typeof globalListeners.default && null !== globalListeners.default) {
+	if ('object' !== typeof globalListeners.default || null === globalListeners.default) {
 	
-		globalListeners.default = new Listener('default', isid);
+		try {
+		
+			globalListeners.default = new Listener('default', isid);
+		
+		}
+		catch(e) {
+		
+			return e;
+		
+		}
 	
 	}
 	return globalListeners.default;
