@@ -13,6 +13,11 @@
 
 function parseToAnsi(ansiObj) {
 
+	if ('object' !== typeof ansiObj || null === ansiObj) {
+	
+		return '';
+	
+	}
 	var tagName = 'string' === typeof ansiObj.tag ? ansiObj.tag : 'span';
 	var classesString = "ansi";
 	if ('string' === typeof ansiObj.color) {
