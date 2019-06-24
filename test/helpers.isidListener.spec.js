@@ -453,10 +453,143 @@ describe('isidListener.js', function() {
 			expect(isidListener.enableExclusiveState).to.be.a('function');
 		
 		});
-		it('should call ensureGlobalListener');
-		it('should add the names of all currently enabled non-exclusive listeners to the array global.Uwot.Listeners[isid].disabledForExclusive');
-		it('should change the status of all disabledForExclusive Listeners to "disabled"');
-		it('should return the disabledForExclusive array');
+		it('should call ensureGlobalListener', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			isidListener.enableExclusiveState(testIsid);
+			delete global.Uwot.Listeners[testIsid];
+			expect(ensureGlobalListenerStub.calledWith(testIsid)).to.be.true;
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should add the names of all currently enabled non-exclusive listeners to the array global.Uwot.Listeners[isid].disabledForExclusive', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'enabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var finalDisabled = [testListener1.name, testListener2.name];
+			var disableResult = isidListener.enableExclusiveState(testIsid);
+			expect(global.Uwot.Listeners[testIsid].disabledForExclusive).to.deep.equal(finalDisabled);
+			expect(testListener4.status).to.equal('disabled');
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should change the status of all disabledForExclusive Listeners to "disabled"', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'enabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var disableResult = isidListener.enableExclusiveState(testIsid);
+			expect(testListener1.status).to.equal('disabled');
+			expect(testListener2.status).to.equal('disabled');
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should return the disabledForExclusive array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'enabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var finalDisabled = [testListener1.name, testListener2.name];
+			var disableResult = isidListener.enableExclusiveState(testIsid);
+			expect(disableResult).to.deep.equal(finalDisabled);
+			expect(testListener4.status).to.equal('disabled');
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
 		
 	});
 	describe('disableExclusiveState(isid)', function() {
@@ -466,11 +599,175 @@ describe('isidListener.js', function() {
 			expect(isidListener.disableExclusiveState).to.be.a('function');
 		
 		});
-		it('should call ensureGlobalListener');
-		it('should return an empty array if global.Uwot.Listeners[isid].disabledForExclusive is not a non-empty array');
-		it('should enable all listeners in global.Uwot.Listeners[isid] matching names in the disabledForExclusive array if it is a non-empty array');
-		it('should remove global.Uwot.Listeners[isid].disabledForExclusive if it is a non-empty array');
-		it('should return an array of all enabled Listener instances if global.Uwot.Listeners[isid].disabledForExclusive is a non-empty array');
+		it('should call ensureGlobalListener', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			isidListener.disableExclusiveState(testIsid);
+			delete global.Uwot.Listeners[testIsid];
+			expect(ensureGlobalListenerStub.calledWith(testIsid)).to.be.true;
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should return an empty array if global.Uwot.Listeners[isid].disabledForExclusive is not a non-empty array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			delete global.Uwot.Listeners[testIsid];
+			var nonObjResult = isidListener.disableExclusiveState(testIsid);
+			global.Uwot.Listeners[testIsid].disabledForExclusive = null;
+			var nullResult = isidListener.disableExclusiveState(testIsid);
+			global.Uwot.Listeners[testIsid].disabledForExclusive = [];
+			var emptyArrayResult = isidListener.disableExclusiveState(testIsid);
+			expect(nonObjResult).to.deep.equal([]);
+			expect(nullResult).to.deep.equal([]);
+			expect(emptyArrayResult).to.deep.equal([]);
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should enable all listeners in global.Uwot.Listeners[isid] matching names in the disabledForExclusive array if it is a non-empty array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'disabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			testListener1.enable = function() { this.status = 'enabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var disabledForExclusive = [testListener1.name, testListener2.name];
+			global.Uwot.Listeners[testIsid].disabledForExclusive = disabledForExclusive;
+			var enableResult = isidListener.disableExclusiveState(testIsid);
+			expect(testListener1.status).to.equal('enabled');
+			expect(testListener2.status).to.equal('enabled');
+			expect(testListener3.status).to.equal('disabled');
+			expect(testListener4.status).to.equal('disabled');
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should remove global.Uwot.Listeners[isid].disabledForExclusive if it is a non-empty array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'disabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			testListener1.enable = function() { this.status = 'enabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var disabledForExclusive = [testListener1.name, testListener2.name];
+			global.Uwot.Listeners[testIsid].disabledForExclusive = disabledForExclusive;
+			var enableResult = isidListener.disableExclusiveState(testIsid);
+			expect(global.Uwot.Listeners[testIsid].disabledForExclusive).to.be.undefined;
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
+		it('should return an array of all enabled Listener instance names if global.Uwot.Listeners[isid].disabledForExclusive is a non-empty array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function setGlobal(isid) {
+			
+				if ('object' !== typeof global.Uwot.Listeners[isid]) {
+				
+					global.Uwot.Listeners[isid] = {};
+				
+				}
+				return global.Uwot.Listeners[isid];
+			
+			});
+			var testNewIsid = 'ladypig';
+			var testListener1 = Object.assign({}, testDefaultListener);
+			testListener1.status = 'disabled';
+			testListener1.disable = function() { this.status = 'disabled'; return; };
+			testListener1.enable = function() { this.status = 'enabled'; return; };
+			var testListener2 = Object.assign({}, testListener1);
+			var testListener3 =  Object.assign({}, testListener1);
+			var testListener4 =  Object.assign({}, testListener1);
+			testListener2.name = 'testadd';
+			testListener2.type = 'additional';
+			testListener3.name = 'testexcl';
+			testListener3.type = 'exclusive';
+			testListener4.name = 'testadddis';
+			testListener4.type = 'additional';
+			testListener4.disable();
+			global.Uwot.Listeners[testIsid] = {
+				default: testListener1,
+				testadd: testListener2,
+				testexcl: testListener3,
+				testadddis: testListener4
+			};
+			var disabledForExclusive = [testListener1.name, testListener2.name];
+			global.Uwot.Listeners[testIsid].disabledForExclusive = disabledForExclusive;
+			var enableResult = isidListener.disableExclusiveState(testIsid);
+			expect(enableResult).to.deep.equal(disabledForExclusive);
+			delete global.Uwot.Listeners[testIsid];
+			ensureGlobalListenerStub.restore();
+		
+		});
 		
 	});
 

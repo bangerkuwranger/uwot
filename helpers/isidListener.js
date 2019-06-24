@@ -118,13 +118,13 @@ module.exports = {
 
 		var globalListeners = this.ensureGlobalListener(isid);
 		var enabledListeners = [];
-		if ('object' === globalListeners.disabledForExclusive && Array.isArray(globalListeners.disabledForExclusive) && globalListeners.disabledForExclusive.length > 0) {
+		if ('object' === typeof globalListeners.disabledForExclusive && Array.isArray(globalListeners.disabledForExclusive) && globalListeners.disabledForExclusive.length > 0) {
 	
 			for (let i = 0; i < globalListeners.disabledForExclusive.length; i++) {
 		
-				globalListeners[globalListeners.disabledForExclusive[i]].enable;
+				globalListeners[globalListeners.disabledForExclusive[i]].enable();
 				enabledListeners.push(globalListeners.disabledForExclusive[i]);
-				if ((i + 1) >= globalListeners.length) {
+				if ((i + 1) >= globalListeners.disabledForExclusive.length) {
 			
 					delete globalListeners.disabledForExclusive;
 					return enabledListeners;
