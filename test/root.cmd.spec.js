@@ -69,7 +69,24 @@ describe('cmd.js', function() {
 					optionalArguments: []
 				}
 			],
-			path: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js')
+			path: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js'),
+			listenerSettings: {
+				name: 'testCmdListener',
+				type: 'exclusive',
+				parser: 'external',
+				output: 'external',
+				parserPath: path.join(global.Uwot.Constants.appRoot, 'test/cmd.zsh.js'),
+				outputPath: path.join(global.Uwot.Constants.appRoot, 'test/cmd.tty.js'),
+				routerPath: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js'),
+				routeUriPath: 'testCmd',
+				cmdSet: [
+					'fwd',
+					'back',
+					'slideToTheLeft',
+					'slideToTheRight',
+					'scream'
+				]
+			}
 		};
 	
 	});
@@ -122,6 +139,7 @@ describe('cmd.js', function() {
 				expect(cmd.path).to.be.a('string').that.includes(testCmdArgs.path);
 			
 			});
+			it('should set the listenerSettings property to an instance of UwotListenerSettings if the fourth argument is a non-null object');
 		
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
@@ -713,6 +731,42 @@ describe('cmd.js', function() {
 			});
 		
 		});
+		describe('registerListener(isid)', function() {
+		
+			it('should be a function');
+			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');
+			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string');
+			it('should return an Error if listener for isid and command are already registered');
+			it('should create a new Listener object as a property of global.Uwot.Listeners[isid] and return true if listener can be successfully instantiated');
+			it('should return an Error if the Listener constructor throws an Error');
+		
+		});
+		describe('enableListener(isid)', function() {
+		
+			it('should be a function');
+			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');
+			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string');
+			it('should call registerListener if global listener does not exist');
+			it('should return an Error if global listener does not exist and cannot be created');
+			it('should return an Error if global listener does not exist and registerListener returns an error');
+			it('should call "enable" method of listener if global listener exists or was successfully created');
+			it('should call isidListenerHelper.enableExclusiveState if global listener exists or was successfully created and is an exclusive listener');
+			it('should return the status of listener if processes complete without error');
+		
+		});
+		describe('enableListener(isid)', function() {
+		
+			it('should be a function');
+			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');
+			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string');
+			it('should call registerListener if global listener does not exist');
+			it('should return an Error if global listener does not exist and cannot be created');
+			it('should return an Error if global listener does not exist and registerListener returns an error');
+			it('should call "disable" method of listener if global listener exists or was successfully created');
+			it('should call isidListenerHelper.disableExclusiveState if global listener exists or was successfully created and is an exclusive listener');
+			it('should return the status of listener if processes complete without error');
+		
+		});
 	
 	});
 	describe('UwotCmdCommand', function() {
@@ -1007,6 +1061,15 @@ describe('cmd.js', function() {
 				expect(testOptions[0].optionalArguments).to.be.an('array').that.includes('');
 			
 			});
+		
+		});
+	
+	});
+	describe('UwotListenerSettings', function() {
+	
+		describe('constructor(settingsObj)', function() {
+		
+			
 		
 		});
 	
