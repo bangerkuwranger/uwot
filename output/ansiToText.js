@@ -13,6 +13,7 @@
 
 const cheerio = require('cheerio');
 const EOL = require('os').EOL;
+const toHtml = require('./ansi');
 
 const getValidInputTypes = function() {
 
@@ -72,9 +73,9 @@ function ansiHtmlToText(htmlText) {
 
 	var $ = cheerio.load(htmlText);
 	var textString = '';
-	var $all = $('*');
+	var $all = $('html > body *');
 	var elCount = $($all).length;
-	$('html > body *').each(function(i, element) {
+	$($all).each(function(i, element) {
 	
 		var thisText = $(element).first().contents().filter(function() {
 			return this.type === 'text';
@@ -82,9 +83,8 @@ function ansiHtmlToText(htmlText) {
 		if (-1 !== getCRElementTags().indexOf($(element).prop('tagName').toLowerCase()) && 'string' === typeof thisText && '' !== thisText) {
 		
 			var nextEl = $($all).eq(i + 1);
-			var nextUsesCR = ((i + 1) >= elCount) ? false : -1 === getCRElementTags().indexOf($(nextEl).prop('tagName'));
 			textString += EOL + thisText;
-			if (nextUsesCR) {
+			if ((i + 1) < elCount && -1 === getCRElementTags().indexOf($(nextEl).prop('tagName').toLowerCase())) {
 			
 				textString += EOL;
 			
@@ -109,7 +109,7 @@ function ansiHtmlToText(htmlText) {
 
 // TBD
 // This needs some work; recursion is having trouble with nesting...
-function parseToText(inputValue, inputType, isOrig) {
+function parseToText(inputValue, inputType) {
 
 	if ('string' !== typeof inputType || -1 === getValidInputTypes().indexOf(inputType)) {
 	
@@ -123,16 +123,11 @@ function parseToText(inputValue, inputType, isOrig) {
 	}
 	else if ('html' === inputType) {
 	
-		return ansiHtmlToText(inputValue);
+		return module.exports.ansiHtmlToText(inputValue);
 	
 	}
 	else {
 	
-		if ('boolean' !== typeof isOrig || true !== isOrig) {
-	
-			isOrig = false;
-	
-		}
 		var ansiObj = inputValue;
 		if ('json' === inputType && 'string' === typeof inputValue) {
 	
@@ -141,106 +136,26 @@ function parseToText(inputValue, inputType, isOrig) {
 			if ('object' === typeof ansiObj && 'object' === typeof ansiObj.output) {
 	
 				ansiObj = ansiObj.output;
+			
 			}
 	
-		}
-		if ('object' === inputType) {
-	
-			if ('object' === typeof inputValue && 'object' === typeof inputValue.output) {
-	
-				ansiObj = inputValue.output;
-			}
-	
-		}
-	
-		var tagName = 'string' === typeof ansiObj.tag ? ansiObj.tag : 'span';
-		var classesString = "ansi";
-		if ('string' === typeof ansiObj.color) {
-	
-			classesString += ' fg-' + ansiObj.color;
-	
-		}
-		if ('string' === typeof ansiObj.backgroundColor) {
-	
-			classesString += ' bg-' + ansiObj.backgroundColor;
-	
-		}
-		if (ansiObj.isReversed) {
-	
-			classesString += ' reversed';
-	
-		}
-		if (ansiObj.isBold) {
-	
-			classesString += ' bold';
-	
-		}
-		if (ansiObj.isUnderline) {
-	
-			classesString += ' underline';
-	
-		}
-		if ('object' === typeof ansiObj.classes && Array.isArray(ansiObj.classes) && ansiObj.classes.length > 0) {
-	
-			ansiObj.classes.forEach((className) => {
+		}	
+		if ('object' === typeof ansiObj && 'object' !== typeof ansiObj.output) {
+
+			ansiObj = {
+				output: ansiObj
+			};
 		
-				classesString += 'string' === typeof className && '' !== className ? ' ' + global.Uwot.Constants.escapeHtml(className.trim()) : '';
-				return;
-		
-			});
-	
 		}
-		var openTag = '<' + tagName + ' class="' + classesString + '">';
-		var closeTag = '</' + tagName + '>';
-		var ansiString;
-		if ('undefined' === typeof ansiObj.content) {
-	
-			ansiString = '<' + tagName + ' class="' + classesString + '" />';
-	
-		}
-		else if ('string' === typeof ansiObj.content) {
-	
-			ansiString = openTag + ansiObj.content + closeTag;
-	
-		}
-		else if ('object' === typeof ansiObj.content && Array.isArray(ansiObj.content)) {
-	
-			ansiString = openTag;
-			ansiObj.content.forEach(function(el) {
-		
-				if ('string' === typeof el) {
-			
-					ansiString += el;
-			
-				}
-				else if ('object' === typeof el) {
-			
-					ansiString += parseToText(el, 'object');
-			
-				}
-		
-			});
-			ansiString += closeTag;
-	
-		}
-		else {
-	
-			ansiString = openTag + closeTag;
-	
-		}
-		if (isOrig) {
-	
-			return ansiHtmlToText(ansiString);
-	
-		}
-		else {
-	
-			return ansiString;
-	
-		}
+		var htmlString = toHtml(ansiObj).output;
+		return module.exports.ansiHtmlToText(htmlString);
 	
 	}
 
 }
 
 module.exports = parseToText;
+Object.defineProperty(module.exports, 'ansiHtmlToText', {
+	writable: true,
+	value: ansiHtmlToText
+});
