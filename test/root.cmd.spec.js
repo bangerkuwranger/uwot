@@ -9,6 +9,7 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
 const sanitize = require('../helpers/valueConversion');
+const isidListenerHelper = require('../helpers/isidListener');
 const Cmd = require('../cmd');
 var cmd, testCmdArgs;
 
@@ -140,7 +141,11 @@ describe('cmd.js', function() {
 				expect(cmd.path).to.be.a('string').that.includes(testCmdArgs.path);
 			
 			});
-			it('should set the listenerSettings property to an instance of UwotListenerSettings if the fourth argument is a non-null object');
+			it('should set the listenerSettings property to an instance of UwotListenerSettings if the fourth argument is a non-null object', function() {
+			
+				expect(cmd.listenerSettings).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotListenerSettings');
+			
+			});
 		
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
@@ -734,11 +739,52 @@ describe('cmd.js', function() {
 		});
 		describe('registerListener(isid)', function() {
 		
-			it('should be a function');
-			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');
-			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string');
-			it('should return an Error if listener for isid and command are already registered');
-			it('should create a new Listener object as a property of global.Uwot.Listeners[isid] and return true if listener can be successfully instantiated');
+			it('should be a function', function() {
+			
+				expect(cmd.registerListener).to.be.a('function');
+			
+			});
+			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string', function() {
+			
+				expect(cmd.registerListener()).to.be.false;
+				delete cmd.listenerSettings;
+				expect(cmd.registerListener('noSettings')).to.be.false;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testCmdArgs.listenerSettings
+				);
+			
+			});
+			it('should call isidListenerHelper.ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string', function() {
+			
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns(true);
+				var newListener = cmd.registerListener('testIsid');
+				expect(ensureGlobalListenerStub.called).to.be.true;
+				ensureGlobalListenerStub.restore();
+			
+			});
+			it('should return an Error if listener for isid and command are already registered', function() {
+			
+				var testIsid = 'testIsid';
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns({
+					testCmdListener: null
+				});
+				var newListener = cmd.registerListener(testIsid);
+				expect(newListener).to.be.an.instanceof(Error).with.property('message').that.contains('not unique for isid');
+				ensureGlobalListenerStub.restore();
+			
+			});
+			it('should create a new Listener object as a property of global.Uwot.Listeners[isid] and return true if listener can be successfully instantiated', function() {
+			
+				// var testIsid = 'testIsid';
+// 				delete global.Uwot.Listeners[testIsid];
+// 				var newListener = cmd.registerListener(testIsid);
+// 				expect(newListener).to.deep.equal(global.Uwot.Listeners[testIsid].testCmdListener);
+// 				delete global.Uwot.Listeners[testIsid];
+			
+			});
 			it('should return an Error if the Listener constructor throws an Error');
 		
 		});

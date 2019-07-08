@@ -551,7 +551,7 @@ class UwotCmd {
 			var globalListeners = isidListenerHelper.ensureGlobalListener(isid);
 			if ('object' === typeof globalListeners[this.listenerSettings.name]) {
 			
-				return new Error('listener name "' + name + '" not unique for isid "' + isid + '"');
+				return new Error('listener name "' + this.listenerSettings.name + '" not unique for isid "' + isid + '"');
 			
 			}
 			else {
