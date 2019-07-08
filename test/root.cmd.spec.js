@@ -836,7 +836,7 @@ describe('cmd.js', function() {
 				expect(testCommand.description).to.equal('Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet no');
 			
 			});
-			it('should set requiredArguments property to an empty array if argument passed is not an array.', function() {
+			it('should set requiredArguments property to an empty array if argument passed is not an array', function() {
 			
 				testCommand.requiredArguments = 'test command argument';
 				cmd = new Cmd(
@@ -848,9 +848,9 @@ describe('cmd.js', function() {
 				expect(testCommand.requiredArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set requiredArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			it('should set requiredArguments property to an empty array if argument passed is an array with no string elements', function() {
 			
-				testCommand.requiredArguments = [null, 'testCommandArgument'];
+				testCommand.requiredArguments = [null, 144];
 				cmd = new Cmd(
 					testCommand,
 					testCmdArgs.options,
@@ -860,7 +860,7 @@ describe('cmd.js', function() {
 				expect(testCommand.requiredArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set requiredArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			it('should set requiredArguments property to an array matching the passed array with any non-string elements removed', function() {
 			
 				testCommand.requiredArguments = ['testCommandArgment', null, 'testCommandArgumentThree'];
 				cmd = new Cmd(
@@ -869,10 +869,10 @@ describe('cmd.js', function() {
 					testCmdArgs.path
 				);
 				testCommand = cmd.command;
-				expect(testCommand.requiredArguments).to.be.an('array').that.includes('');
+				expect(testCommand.requiredArguments).to.deep.equal(['testCommandArgment', 'testCommandArgumentThree']);
 			
 			});
-			it('should set optionalArguments property to an empty array if argument passed is not an array.', function() {
+			it('should set optionalArguments property to an empty array if argument passed is not an array', function() {
 			
 				testCommand.optionalArguments = 'test command argument';
 				cmd = new Cmd(
@@ -884,9 +884,9 @@ describe('cmd.js', function() {
 				expect(testCommand.optionalArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set optionalArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			it('should set optionalArguments property to an empty array if argument passed is an array with no string elements', function() {
 			
-				testCommand.optionalArguments = [null, 'testCommandArgument'];
+				testCommand.optionalArguments = [null, 256];
 				cmd = new Cmd(
 					testCommand,
 					testCmdArgs.options,
@@ -896,7 +896,7 @@ describe('cmd.js', function() {
 				expect(testCommand.optionalArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set optionalArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			it('should set optionalArguments property to an array with an array matching passed array with non-string members removed', function() {
 			
 				testCommand.optionalArguments = ['testCommandArgment', null, 'testCommandArgumentThree'];
 				cmd = new Cmd(
@@ -905,7 +905,7 @@ describe('cmd.js', function() {
 					testCmdArgs.path
 				);
 				testCommand = cmd.command;
-				expect(testCommand.optionalArguments).to.be.an('array').that.includes('');
+				expect(testCommand.optionalArguments).to.deep.equal(['testCommandArgment', 'testCommandArgumentThree']);
 			
 			});
 		
@@ -990,7 +990,7 @@ describe('cmd.js', function() {
 				expect(testOptions[0].description).to.equal('Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test options instance');
 			
 			});
-			it('should set requiredArguments property to an empty array if argument passed is not an array.', function() {
+			it('should set requiredArguments property to an empty array if argument passed is not an array', function() {
 			
 				testOptions[0].requiredArguments = 'test options argument';
 				cmd = new Cmd(
@@ -1002,9 +1002,9 @@ describe('cmd.js', function() {
 				expect(testOptions[0].requiredArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set requiredArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			it('should set requiredArguments property to an empty array if argument passed is an array with no string elements', function() {
 			
-				testOptions[0].requiredArguments = [null, 'testOptionsArgument'];
+				testOptions[0].requiredArguments = [null, 1024];
 				cmd = new Cmd(
 					testCmdArgs.command,
 					testOptions,
@@ -1014,7 +1014,7 @@ describe('cmd.js', function() {
 				expect(testOptions[0].requiredArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set requiredArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			it('should set requiredArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings', function() {
 			
 				testOptions[0].requiredArguments = ['testOptionsArgment', null, 'testOptionsArgumentThree'];
 				cmd = new Cmd(
@@ -1023,10 +1023,10 @@ describe('cmd.js', function() {
 					testCmdArgs.path
 				);
 				testOptions = cmd.options;
-				expect(testOptions[0].requiredArguments).to.be.an('array').that.includes('');
+				expect(testOptions[0].requiredArguments).to.deep.equal(['testOptionsArgment', 'testOptionsArgumentThree']);
 			
 			});
-			it('should set optionalArguments property to an empty array if argument passed is not an array.', function() {
+			it('should set optionalArguments property to an empty array if argument passed is not an array', function() {
 			
 				testOptions[0].optionalArguments = 'test options argument';
 				cmd = new Cmd(
@@ -1038,9 +1038,9 @@ describe('cmd.js', function() {
 				expect(testOptions[0].optionalArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set optionalArguments property to an empty array if argument passed is not an array with a string as first element.', function() {
+			it('should set optionalArguments property to an empty array if argument passed is an array with no string elements', function() {
 			
-				testOptions[0].optionalArguments = [null, 'testOptionsArgument'];
+				testOptions[0].optionalArguments = [null, 2];
 				cmd = new Cmd(
 					testCmdArgs.command,
 					testOptions,
@@ -1050,7 +1050,7 @@ describe('cmd.js', function() {
 				expect(testOptions[0].optionalArguments).to.be.an('array').that.is.empty;
 			
 			});
-			it('should set optionalArguments property to an array with an empty string replacing non-leading elements in passed array that are not strings.', function() {
+			it('should set optionalArguments property to an array matching elements in passed array that are strings.', function() {
 			
 				testOptions[0].optionalArguments = ['testOptionsArgment', null, 'testOptionsArgumentThree'];
 				cmd = new Cmd(
@@ -1059,7 +1059,7 @@ describe('cmd.js', function() {
 					testCmdArgs.path
 				);
 				testOptions = cmd.options;
-				expect(testOptions[0].optionalArguments).to.be.an('array').that.includes('');
+				expect(testOptions[0].optionalArguments).to.deep.equal(['testOptionsArgment', 'testOptionsArgumentThree']);
 			
 			});
 		

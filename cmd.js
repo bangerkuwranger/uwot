@@ -16,8 +16,8 @@ class UwotCmdCommand {
 	
 		this.name = sanitize.stringNoSpaces(sanitize.cleanString(name, 255), 'cc');
 		this.description = sanitize.cleanString(description, 1024);
-		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
-		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
+		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments, true);
+		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments, true);
 	
 	}
 
@@ -36,8 +36,8 @@ class UwotCmdOption {
 		this.description = sanitize.cleanString(description, 255);
 		this.shortOpt = sanitize.cleanString(shortOpt, 1);
 		this.longOpt = sanitize.stringNoSpaces(sanitize.cleanString(longOpt), 'cc');
-		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments);
-		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments);
+		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments, true);
+		this.optionalArguments = sanitize.arrayOfStringsOrEmpty(optionalArguments, true);
 	
 	}
 
