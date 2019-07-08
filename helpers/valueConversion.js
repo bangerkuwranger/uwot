@@ -286,13 +286,29 @@ module.exports = {
 		
 	},
 	
-	arrayOfStringsOrEmpty: function arrayOfStringsOrEmpty(value) {
+	arrayOfStringsOrEmpty: function arrayOfStringsOrEmpty(value, discardEmpty) {
 
+		discardEmpty = ('boolean' !== typeof discardEmpty || false === discardEmpty) ? false : true;
 		value = 'object' === typeof value && null !== value && Array.isArray(value) && 'string' === typeof value[0] ? value : [];
 		var stringArray = [];
+		var discardIndices = [];
 		for (let i = 0; i < value.length; i++) {
 		
 			stringArray[i] = 'string' === typeof value[i] ? value[i].trim() : '';
+			if ('' === stringArray[i] && discardEmpty) {
+			
+				discardIndices.unshift(i);
+			
+			}
+		
+		}
+		if (discardEmpty && discardIndices.length > 0) {
+		
+			for (let j = 0; j < discardIndices.length; j++) {
+			
+				stringArray.splice(discardIndices[j], 1);
+			
+			}
 		
 		}
 		return stringArray;

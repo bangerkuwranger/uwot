@@ -47,7 +47,7 @@ class UwotListenerSettings {
 
 	constructor(settingsObj) {
 	
-		this.name = sanitize.cleanString(settingsObj.name, 255);
+		this.name = sanitize.stringNoSpaces(sanitize.cleanString(settingsObj.name, 255), 'cc');
 		this.options = {};
 		if ('string' === typeof settingsObj.type) {
 		
@@ -101,7 +101,7 @@ class UwotListenerSettings {
 		}
 		if ('object' === typeof settingsObj.cmdSet && Array.isArray(settingsObj.cmdSet)) {
 		
-			this.options.cmdSet = sanitize.arrayOfStringsOrEmpty(settingsObj.cmdSet);
+			this.options.cmdSet = sanitize.arrayOfStringsOrEmpty(settingsObj.cmdSet, true);
 		
 		}
 		else {
@@ -140,6 +140,8 @@ class UwotCmd {
 	 * (string)path //note: absolute path from root expected UNLESS
 	 *				// cmd is being added from an external pkg, 
 	 *				// then path can be the pkg name as arg of require()
+	 * 
+	 * (UwotListenerSettings)listenerSettings
 	 */
 	constructor(
 		command,

@@ -97,7 +97,8 @@ describe('cmd.js', function() {
 			cmd = new Cmd(
 				testCmdArgs.command,
 				testCmdArgs.options,
-				testCmdArgs.path
+				testCmdArgs.path,
+				testCmdArgs.listenerSettings
 			);
 		
 		});
@@ -106,7 +107,7 @@ describe('cmd.js', function() {
 			sinon.restore();
 
 		});
-		describe('constructor(command, options, path)', function() {
+		describe('constructor(command, options, path, listenerSettings)', function() {
 		
 			it('should be a function', function() {
 			
@@ -1069,7 +1070,309 @@ describe('cmd.js', function() {
 	
 		describe('constructor(settingsObj)', function() {
 		
+			var testListenerSettings;
+			beforeEach(function() {
+		
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testCmdArgs.listenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+		
+			});
+			it('should not be callable outside of UwotCmd methods', function() {
 			
+				function returnNewCmdListenerSettings() {
+				
+					return new UwotListenerSettings();
+				
+				}
+				expect(returnNewCmdListenerSettings).to.throw(ReferenceError, 'UwotListenerSettings is not defined');
+			
+			});
+			it('should remove spaces from passed name property by camelCapping the string', function() {
+			
+				testListenerSettings.name = 'test cmd listener';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.name).to.equal(sanitize.stringNoSpaces(sanitize.cleanString(testCmdArgs.listenerSettings.name), 'cc'));
+			
+			});
+			it('should trim leading & trailing whitespace from passed name property', function() {
+			
+				testListenerSettings.name = '    testCmdListener    ';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.name).to.equal(testCmdArgs.listenerSettings.name);
+			
+			});
+			it('should truncate passed description property to 255 characters (excluding trimmed whitespace)', function() {
+			
+				testListenerSettings.name = 'Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.';
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.name).to.equal('MaecenasSedDiamEgetRisusVariusBlanditSitAmetNonMagnaNullamIdDolorIdNibhUltriciesVehiculaUtIdElitNullamIdDolorIdNibhUltriciesVehiculaUtIdElitDuisMollisEstNonCommodoLuctusNisiEratPorttitorliaTestCommandInstance');
+			
+			});
+			it('should set the options property to an object a single property "cmdSet" set to an empty array if settingsObj does not have strings for type, parser, output, parserPath, outputPath, routerPath, or routeUriPath property values, and its cmdSet property is not an Array', function() {
+			
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					{}
+				);
+				testListenerSettings = cmd.listenerSettings;
+				var testResult = {
+					cmdSet: []
+				};
+				expect(testListenerSettings.options).to.deep.equal(testResult);
+			
+			});
+			it('should set the value of options.type property to the value of settingsObj.type, with trimmed whitespace and truncated to 10 characters not counting trimeed whitespace, if the value is a string that matches a value in global.Uwot.Constants.listenerTypes', function() {
+			
+				var testType = '     exclusive     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.type = testType;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.type).to.equal(sanitize.cleanString(testType, 10));
+				testType = '     exclusiveish     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.type = testType;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.type).to.be.undefined;
+			
+			});
+			it('should set the value of options.parser property to the value of settingsObj.parser, with trimmed whitespace and truncated to 10 characters not counting trimeed whitespace, if the value is a string that matches a value in global.Uwot.Constants.listenerParserTypes', function() {
+			
+				var testParser = '     external     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.parser = testParser;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.parser).to.equal(sanitize.cleanString(testParser, 10));
+				testParser = '     externalish     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.parser = testParser;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.parser).to.be.undefined;
+			
+			});
+			it('should set the value of options.output property to the value of settingsObj.output, with trimmed whitespace and truncated to 10 characters not counting trimeed whitespace, if the value is a string that matches a value in global.Uwot.Constants.listenerOutputTypes', function() {
+			
+				var testOutput = '     external     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.output = testOutput;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.output).to.equal(sanitize.cleanString(testOutput, 10));
+				testOutput = '     externalish     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.output = testOutput;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.output).to.be.undefined;
+			
+			});
+			it('should set the value of options.parserPath property to the value of settingsObj.parserPath, with trimmed whitespace and truncated to 1024 characters not counting trimeed whitespace, if the value is a string', function() {
+			
+				var testParserPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.parserPath = testParserPath;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.parserPath).to.equal(sanitize.cleanString(testParserPath, 1024));
+			
+			});
+			it('should set the value of options.outputPath property to the value of settingsObj.outputPath, with trimmed whitespace and truncated to 1024 characters not counting trimeed whitespace, if the value is a string', function() {
+			
+				var testOutputPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.outputPath = testOutputPath;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.outputPath).to.equal(sanitize.cleanString(testOutputPath, 1024));
+			
+			});
+			it('should set the value of options.routerPath property to the value of settingsObj.routerPath, with trimmed whitespace and truncated to 1024 characters not counting trimeed whitespace, if the value is a string', function() {
+			
+				var testRouterPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.routerPath = testRouterPath;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.routerPath).to.equal(sanitize.cleanString(testRouterPath, 1024));
+			
+			});
+			it('should set the value of options.routeUriPath property to the value of settingsObj.routeUriPath, with trimmed whitespace and truncated to 255 characters not counting trimeed whitespace, if the value is a string', function() {
+			
+				var testRouteUriPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.routeUriPath = testRouteUriPath;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.routeUriPath).to.equal(sanitize.cleanString(testRouteUriPath, 255));
+			
+			});
+			it('should set the value of options.cmdSet property to an empty Array if the value of settingsObj.cmdSet is not an object', function() {
+			
+				var testCmdSet = 'next';
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.cmdSet = testCmdSet;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal([]);
+			
+			});
+			it('should set the value of options.cmdSet property to an empty Array if the value of settingsObj.cmdSet is not an Array', function() {
+			
+				var testCmdSet = {next: 'next'};
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.cmdSet = testCmdSet;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal([]);
+			
+			});
+			it('should set the value of options.cmdSet property to an empty Array if the value of settingsObj.cmdSet is an empty Array', function() {
+			
+				var testCmdSet = [];
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.cmdSet = testCmdSet;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal([]);
+			
+			});
+			it('should set the value of options.cmdSet property to an empty Array if the value of settingsObj.cmdSet is an array with no string members', function() {
+			
+				var testCmdSet = [{next: 'next'}, null, 42];
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.cmdSet = testCmdSet;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal([]);
+			
+			});
+			it('should set the value of options.cmdSet property to the value of settingsObj.cmdSet if the value is an Array with only string members', function() {
+			
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal(testCmdArgs.listenerSettings.cmdSet);
+			
+			});
+			it('should set the value of options.cmdSet property to an array containing only string members of settingsObj.cmdSet if the value is an Array with mixed member types', function() {
+			
+				var testCmdSet = [{next: 'next'}, null, 42];
+				testCmdSet = testCmdArgs.listenerSettings.cmdSet.concat(testCmdSet);
+				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
+				testListenerSettings.cmdSet = testCmdSet;
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				testListenerSettings = cmd.listenerSettings;
+				expect(testListenerSettings.options.cmdSet).to.deep.equal(testCmdArgs.listenerSettings.cmdSet);
+			
+			});
 		
 		});
 	
