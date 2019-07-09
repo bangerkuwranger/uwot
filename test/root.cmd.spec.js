@@ -820,18 +820,101 @@ describe('cmd.js', function() {
 		});
 		describe('enableListener(isid)', function() {
 		
-			it('should be a function');
-			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');
-			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string');
-			it('should call registerListener if global listener does not exist');
-			it('should return an Error if global listener does not exist and cannot be created');
-			it('should return an Error if global listener does not exist and registerListener returns an error');
-			it('should call "enable" method of listener if global listener exists or was successfully created');
+			it('should be a function', function() {
+			
+				expect(cmd.enableListener).to.be.a('function');
+			
+			});
+			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string', function() {
+			
+				expect(cmd.enableListener()).to.be.false;
+				var testIsid = 'testIsid';
+				cmd.listenerSettings = false;
+				expect(cmd.enableListener(testIsid)).to.be.false;
+			
+			});
+			it('should call ensureGlobalListener(isid) if there are listenerSettings set and isid arg is a string', function() {
+			
+				var testIsid = 'testIsid';
+				delete global.Uwot.Listeners[testIsid];
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns(true);
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(ensureGlobalListenerStub.called).to.be.true;
+				ensureGlobalListenerStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
+			it('should call registerListener if global listener does not exist', function() {
+			
+				var testIsid = 'testIsid';
+				delete global.Uwot.Listeners[testIsid];
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns(true);
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(false);
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(registerListenerStub.called).to.be.true;
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
+			it('should return an Error if global listener does not exist and cannot be created', function() {
+			
+				var testIsid = 'testIsid';
+				delete global.Uwot.Listeners[testIsid];
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns(true);
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(false);
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(listenerEnabled).to.be.an.instanceof(Error).with.property('message').that.contains('could not register listener ');
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
+			it('should return an Error if global listener does not exist and registerListener returns an error', function() {
+			
+				var testIsid = 'testIsid';
+				delete global.Uwot.Listeners[testIsid];
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').returns(true);
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(new Error('test registerListener error'));
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(listenerEnabled).to.be.an.instanceof(Error).with.property('message').that.contains('test registerListener error');
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
+			it('should call "enable" method of listener if global listener exists or was successfully created', function() {
+			
+				var testIsid = 'testIsid';
+				global.Uwot.Listeners[testIsid] = {};
+				var wasEnabled = false;
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').callsFake(function returnFakeGlobals(isid) {
+				
+					var fakeGlobals = {};
+					fakeGlobals[testCmdArgs.listenerSettings.name] = {
+						name: testCmdArgs.listenerSettings.name,
+						isid: isid,
+						type: 'additional',
+						cmdSet: testCmdArgs.listenerSettings.cmdSet,
+						enable: function() { wasEnabled = true; this.status = true; return true; }
+					};
+					global.Uwot.Listeners[isid] = fakeGlobals;
+					return global.Uwot.Listeners[isid]; 
+				
+				});
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(true);
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(listenerEnabled).to.be.true;
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
 			it('should call isidListenerHelper.enableExclusiveState if global listener exists or was successfully created and is an exclusive listener');
 			it('should return the status of listener if processes complete without error');
 		
 		});
-		describe('enableListener(isid)', function() {
+		describe('diableListener(isid)', function() {
 		
 			it('should be a function');
 			it('should return false if there is no listenerSettings property set for the object or if isid arg is not a string');

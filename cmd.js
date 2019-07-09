@@ -576,7 +576,7 @@ class UwotCmd {
 	
 	enableListener(isid) {
 	
-		var isRegistered = false;
+		var isRegistered = true;
 		if ('string' !== typeof isid || !this.listenerSettings) {
 		
 			return false;
