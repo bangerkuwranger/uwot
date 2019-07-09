@@ -904,14 +904,87 @@ describe('cmd.js', function() {
 				});
 				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(true);
 				var listenerEnabled = cmd.enableListener(testIsid);
-				expect(listenerEnabled).to.be.true;
+				expect(wasEnabled).to.be.true;
 				ensureGlobalListenerStub.restore();
 				registerListenerStub.restore();
 				delete global.Uwot.Listeners[testIsid];
 			
 			});
-			it('should call isidListenerHelper.enableExclusiveState if global listener exists or was successfully created and is an exclusive listener');
-			it('should return the status of listener if processes complete without error');
+			it('should call isidListenerHelper.enableExclusiveState if global listener exists or was successfully created and is an exclusive listener', function() {
+			
+				var testIsid = 'testIsid';
+				global.Uwot.Listeners[testIsid] = {};
+				var wasEnabled = false;
+				var exclusiveStateEnabledIsid;
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').callsFake(function returnFakeGlobals(isid) {
+				
+					var fakeGlobals = {};
+					fakeGlobals[testCmdArgs.listenerSettings.name] = {
+						name: testCmdArgs.listenerSettings.name,
+						isid: isid,
+						type: 'exclusive',
+						cmdSet: testCmdArgs.listenerSettings.cmdSet,
+						enable: function() { wasEnabled = true; this.status = true; return true; }
+					};
+					global.Uwot.Listeners[isid] = fakeGlobals;
+					return global.Uwot.Listeners[isid]; 
+				
+				});
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(true);
+				var enableExclusiveStateStub = sinon.stub(isidListenerHelper, 'enableExclusiveState').callsFake(function setTestVar(isid) {
+				
+					exclusiveStateEnabledIsid = isid;
+					return;
+				
+				});
+				cmd.listenerSettings.options.type = 'exclusive';
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(wasEnabled).to.be.true;
+				expect(exclusiveStateEnabledIsid).to.equal(testIsid);
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				enableExclusiveStateStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+				cmd.listenerSettings.options.type = testCmdArgs.listenerSettings.type;
+			
+			});
+			it('should return the status of listener if processes complete without error', function() {
+			
+				var testIsid = 'testIsid';
+				global.Uwot.Listeners[testIsid] = {};
+				var wasEnabled = false;
+				var exclusiveStateEnabledIsid;
+				var ensureGlobalListenerStub = sinon.stub(isidListenerHelper, 'ensureGlobalListener').callsFake(function returnFakeGlobals(isid) {
+				
+					var fakeGlobals = {};
+					fakeGlobals[testCmdArgs.listenerSettings.name] = {
+						name: testCmdArgs.listenerSettings.name,
+						isid: isid,
+						type: 'exclusive',
+						cmdSet: testCmdArgs.listenerSettings.cmdSet,
+						enable: function() { wasEnabled = true; this.status = true; return true; }
+					};
+					global.Uwot.Listeners[isid] = fakeGlobals;
+					return global.Uwot.Listeners[isid]; 
+				
+				});
+				var registerListenerStub = sinon.stub(cmd, 'registerListener').returns(true);
+				var enableExclusiveStateStub = sinon.stub(isidListenerHelper, 'enableExclusiveState').callsFake(function setTestVar(isid) {
+				
+					exclusiveStateEnabledIsid = isid;
+					return;
+				
+				});
+				cmd.listenerSettings.options.type = 'exclusive';
+				var listenerEnabled = cmd.enableListener(testIsid);
+				expect(listenerEnabled).to.be.true;
+				ensureGlobalListenerStub.restore();
+				registerListenerStub.restore();
+				enableExclusiveStateStub.restore();
+				delete global.Uwot.Listeners[testIsid];
+				cmd.listenerSettings.options.type = testCmdArgs.listenerSettings.type;
+			
+			});
 		
 		});
 		describe('diableListener(isid)', function() {

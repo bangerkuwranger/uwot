@@ -602,7 +602,7 @@ class UwotCmd {
 		else {
 		
 			globalListeners[this.listenerSettings.name].enable();
-			if (this.listenerSettings.type === 'exclusive') {
+			if (this.listenerSettings.options.type === 'exclusive') {
 			
 				isidListenerHelper.enableExclusiveState(isid);
 			
