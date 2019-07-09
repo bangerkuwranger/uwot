@@ -778,14 +778,44 @@ describe('cmd.js', function() {
 			});
 			it('should create a new Listener object as a property of global.Uwot.Listeners[isid] and return true if listener can be successfully instantiated', function() {
 			
-				// var testIsid = 'testIsid';
-// 				delete global.Uwot.Listeners[testIsid];
-// 				var newListener = cmd.registerListener(testIsid);
-// 				expect(newListener).to.deep.equal(global.Uwot.Listeners[testIsid].testCmdListener);
-// 				delete global.Uwot.Listeners[testIsid];
+				var testIsid = 'testIsid';
+				var testListenerSettings = {
+					name: testCmdArgs.listenerSettings.name,
+					type: testCmdArgs.listenerSettings.type,
+					cmdSet: testCmdArgs.listenerSettings.cmdSet
+				};
+				delete global.Uwot.Listeners[testIsid];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				var newListener = cmd.registerListener(testIsid);
+				expect(newListener).to.be.true;
+				expect(global.Uwot.Listeners[testIsid][testCmdArgs.listenerSettings.name]).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotListener');
+				delete global.Uwot.Listeners[testIsid];
 			
 			});
-			it('should return an Error if the Listener constructor throws an Error');
+			it('should return an Error if the Listener constructor throws an Error', function() {
+			
+				var testIsid = 'testIsid';
+				var testListenerSettings = {
+					name: testCmdArgs.listenerSettings.name,
+					cmdSet: testCmdArgs.listenerSettings.cmdSet
+				};
+				delete global.Uwot.Listeners[testIsid];
+				cmd = new Cmd(
+					testCmdArgs.command,
+					testCmdArgs.options,
+					testCmdArgs.path,
+					testListenerSettings
+				);
+				var newListener = cmd.registerListener(testIsid);
+				expect(newListener).to.be.an.instanceof(Error).with.property('message').that.contains('default listener already exists');
+				delete global.Uwot.Listeners[testIsid];
+			
+			});
 		
 		});
 		describe('enableListener(isid)', function() {
