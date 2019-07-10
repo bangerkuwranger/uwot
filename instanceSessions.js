@@ -426,7 +426,7 @@ module.exports = class UwotInstanceSessions {
 							foundSessions[0]._id,
 							null,
 							foundSessions[0].createdAt,
-							data[foundSessions].expiresAt
+							foundSessions[0].expiresAt
 						);
 						return self.fbiCallback(false, foundIS);
 					
