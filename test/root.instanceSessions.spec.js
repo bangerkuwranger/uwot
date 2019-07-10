@@ -92,6 +92,12 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.createNew).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should use the config users:instanceSessionExpiry value for expiryMs if the arg value is not a string or number that can be parsed to an integer');
+			it('should return callback(Error, null) if db.insert returns an error');
+			it('should return callback(false, false) if db.insert does not return a non-null object with a string value for its "_id" property');
+			it('should return callback(Error, null) if creating a new InstanceSession with saved data throws an error');
+			it('should return callback(false, InstanceSession) if record was created without error and InstanceSession instance was created without error');
 		
 		});
 		describe('remove(sessionId, callback)', function() {
@@ -101,6 +107,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.remove).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
+			it('should return callback(Error, null) if db.remove returns an error');
+			it('should return callback(false, false) if db.remove failed to remove any records');
+			it('should return callback(false, true) if db.remove removed any records');
 		
 		});
 		describe('validate(sessionId, callback)', function() {
@@ -110,6 +121,12 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.validate).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
+			it('should return callback(Error, null) if db.find returns an error');
+			it('should return callback(false, false) if db.find failed to match any records');
+			it('should return callback(false, false) if InstanceSession from matched db data returns false from validate() method');
+			it('should return callback(false, true) if InstanceSession from matched db data returns true from validate() method');
 		
 		});
 		describe('invalidate(sessionId, callback)', function() {
