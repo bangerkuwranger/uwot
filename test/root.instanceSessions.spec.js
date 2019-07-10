@@ -85,6 +85,69 @@ describe('instanceSessions.js', function() {
 			});
 	
 		});
+		describe('createNew(expiryMs, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.createNew).to.be.a('function');
+			
+			});
+		
+		});
+		describe('remove(sessionId, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.remove).to.be.a('function');
+			
+			});
+		
+		});
+		describe('validate(sessionId, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.validate).to.be.a('function');
+			
+			});
+		
+		});
+		describe('invalidate(sessionId, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.invalidate).to.be.a('function');
+			
+			});
+		
+		});
+		describe('renew(sessionId, expiryExtensionMs, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.renew).to.be.a('function');
+			
+			});
+		
+		});
+		describe('getValidInstances(callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.getValidInstances).to.be.a('function');
+			
+			});
+		
+		});
+		describe('findById(sessionId, callback)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(instanceSessions.findById).to.be.a('function');
+			
+			});
+		
+		});
 
 	});
 	describe('InstanceSession', function() {
@@ -128,17 +191,29 @@ describe('instanceSessions.js', function() {
 		});
 		describe('validate()', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(testInstanceSession.validate).to.be.a('function');
+			
+			});
 		
 		});
 		describe('renew()', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(testInstanceSession.renew).to.be.a('function');
+			
+			});
 		
 		});
 		describe('toDB()', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				expect(testInstanceSession.toDB).to.be.a('function');
+			
+			});
 		
 		});
 	
