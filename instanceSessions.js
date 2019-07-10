@@ -394,5 +394,56 @@ module.exports = class UwotInstanceSessions {
 		}
 	
 	}
+	
+	findById(sessionId, callback) {
+	
+		var self = this;
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to findById.');
+		
+		}
+		else {
+		
+			this.fbiCallback = callback;
+			self.db.find({_id: sessionId}, {}, function(error, foundSessions) {
+			
+				if (error) {
+				
+					return self.fbiCallback(error, null);
+				
+				}
+				else if ('object' !== typeof foundSessions || !(Array.isArray(foundSessions)) || 'object' !== typeof foundSessions[0] || null === foundSessions[0]) {
+				
+					return self.fbiCallback(false, false);
+				
+				}
+				else {
+				
+					try {
+					
+						var foundIS = new InstanceSession(
+							foundSessions[0]._id,
+							null,
+							foundSessions[0].createdAt,
+							data[foundSessions].expiresAt
+						);
+						return self.fbiCallback(false, foundIS);
+					
+					}
+					catch(e) {
+					
+						return self.fbiCallback(e, foundSessions[0]);
+					
+					}
+					
+				
+				}
+			
+			});
+		
+		}
+	
+	}
 
 };
