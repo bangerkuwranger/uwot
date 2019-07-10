@@ -136,6 +136,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.invalidate).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
+			it('should return callback(Error, null) if db.update returns an error');
+			it('should return callback(false, false) if db.update failed to update any records');
+			it('should set expiresAt timestamp to current time and return callback(false, sessionId)');
 		
 		});
 		describe('renew(sessionId, expiryExtensionMs, callback)', function() {
@@ -145,6 +150,13 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.renew).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
+			it('should return callback(Error, null) if db.find returns an error');
+			it('should return callback(false, false) if db.find failed to match any records');
+			it('should return callback(Error, null) if db.update returns an error');
+			it('should return callback(false, false) if db.update failed to update any records');
+			it('should set expiresAt timestamp to current time plus value of expiryExtensionMs and return callback(false, sessionId)');
 		
 		});
 		describe('getValidInstances(callback)', function() {
@@ -154,6 +166,10 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.getValidInstances).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(Error, null) if db.find returns an error');
+			it('should return callback(false, false) if db.find failed to match any records');
+			it('should return an array of objects that for valid sessions if they exist and db operations complete without error');
 		
 		});
 		describe('findById(sessionId, callback)', function() {
@@ -163,6 +179,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.findById).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
+			it('should return callback(Error, null) if db.find returns an error');
+			it('should return callback(false, false) if db.find failed to match any records');
+			it('should return callback(false, object) with an object created by InstanceSession.toDB() from db data matching given ID');
 		
 		});
 
