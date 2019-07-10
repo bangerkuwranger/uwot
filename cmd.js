@@ -615,7 +615,7 @@ class UwotCmd {
 	
 	disableListener(isid) {
 	
-		var isRegistered = false;
+		var isRegistered = true;
 		if ('string' !== typeof isid || !this.listenerSettings) {
 		
 			return false;
@@ -641,7 +641,7 @@ class UwotCmd {
 		else {
 		
 			globalListeners[this.listenerSettings.name].disable();
-			if (this.listenerSettings.type === 'exclusive') {
+			if (this.listenerSettings.options.type === 'exclusive') {
 			
 				isidListenerHelper.disableExclusiveState(isid);
 			
