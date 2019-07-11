@@ -193,7 +193,7 @@ describe('instanceSessions.js', function() {
 		var testInstanceSession;
 		beforeEach('getting fresh User instance as testUser', function(done) {
 	
-			const dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnUserDoc(searchTerms, searchSettings, callback) {
+			var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
 				
 				var now = new Date();
 				return callback(false, [
@@ -208,6 +208,7 @@ describe('instanceSessions.js', function() {
 			instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
 		
 				testInstanceSession = instanceSessionObj;
+				dbFindStub.restore();
 				done();
 		
 			});
@@ -225,13 +226,220 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.constructor).to.be.a('function');
 			
 			});
-			it('should assign the value of the _id arg, truncated to 255 characters, to its _id property if the arg value is a non-empty string');
-			it('should generate a secure random string and assign it to its _id value if the _id arg value is null or not a non-empty string');
-			it('should assign a Date object from the value of the createdAt arg value to its createdAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor');
-			it('should assign a Date object with the current timestamp to its createdAt property if the createdAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor');
-			it('should assign a Date object from the value of the expiresAt arg value to its expiresAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor');
-			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the expiry argument if to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can be parsed to a valid positive integer');
-			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the config setting users:instanceSessionExpiry to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can not be parsed to a valid positive integer');
+			it('should assign the value of the _id arg, truncated to 255 characters, to its _id property if the arg value is a non-empty string', function(done) {
+			
+				var test_id = "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Sed posuere consectetur est at lobortis. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Vestibulum id ligula porta felis euismod semper. Cras mattis consectetur purus sit amet fermentum. Vestibulum id ligula porta felis euismod semper. Integer posuere erat a ante venenatis dapibus posuere velit aliquet. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.";
+				var now = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": test_id,
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 30000)
+						}
+					]);
+			
+				});
+				instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
+	
+					expect(instanceSessionObj._id).to.equal(test_id.trim().substring(0, 255));
+					dbFindStub.restore();
+					done();
+	
+				});
+			
+			});
+			it('should generate a secure random 24 character string and assign it to its _id value if the _id arg value is null or not a non-empty string', function(done) {
+			
+				var test_id = null;
+				var now = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": test_id,
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 30000)
+						}
+					]);
+			
+				});
+				instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
+	
+					expect(instanceSessionObj['_id']).to.be.a('string');
+					expect(instanceSessionObj['_id']).to.have.lengthOf(24);
+					dbFindStub.restore();
+					done();
+	
+				});
+			
+			});
+			it('should assign a Date object from the value of the createdAt arg value to its createdAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor', function(done) {
+			
+				var now = new Date(1562861100000);
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find');
+				dbFindStub.onCall(0).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 3600000)
+						}
+					]);
+		
+				});
+				dbFindStub.onCall(1).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": '2019-07-11T16:05:00.000Z',
+							"expiresAt": new Date(now.getTime() + 3600000)
+						}
+					]);
+		
+				});
+				instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
+		
+					expect(instanceSessionObj.createdAt).to.deep.equal(now);
+					instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj2) {
+		
+						expect(instanceSessionObj2.createdAt).to.deep.equal(now);
+						dbFindStub.restore();
+						done();
+					
+					});
+		
+				});
+			
+			});
+			it('should assign a Date object with the current timestamp to its createdAt property if the createdAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor', function(done) {
+			
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find');
+				dbFindStub.onCall(0).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": null,
+							"expiresAt": new Date(new Date().getTime() + 3600000)
+						}
+					]);
+		
+				});
+				dbFindStub.onCall(1).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": "sometime last january... I forget",
+							"expiresAt": new Date(new Date().getTime() + 3600000)
+						}
+					]);
+		
+				});
+				instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
+		
+					expect(instanceSessionObj.createdAt.getTime() <= new Date().getTime()).to.be.true;
+					instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj2) {
+					
+						expect(instanceSessionObj2.createdAt.getTime() <= new Date().getTime()).to.be.true;
+						dbFindStub.restore();
+						done();
+					
+					});
+		
+				});
+			
+			});
+			it('should assign a Date object from the value of the expiresAt arg value to its expiresAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor', function(done) {
+			
+				var now = new Date(1562861100000);
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find');
+				dbFindStub.onCall(0).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 3600000)
+						}
+					]);
+		
+				});
+				dbFindStub.onCall(1).callsFake(function returnInstanceSessionDoc(searchTerms, searchSettings, callback) {
+				
+					return callback(false, [
+						{
+							"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+							"createdAt": '2019-07-11T16:05:00.000Z',
+							"expiresAt": '2019-07-11T17:05:00.000Z'
+						}
+					]);
+		
+				});
+				instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj) {
+		
+					expect(instanceSessionObj.expiresAt.getTime()).to.equal(now.getTime() + 3600000);
+					instanceSessions.findById('SBuXMoJxjj-uEDzF2gy0n8g6', function(error, instanceSessionObj2) {
+		
+						expect(instanceSessionObj2.expiresAt.getTime()).to.equal(new Date('2019-07-11T17:05:00.000Z').getTime());
+						dbFindStub.restore();
+						done();
+					
+					});
+		
+				});
+			
+			});
+			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the expiry argument if to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can be parsed to a valid positive integer', function() {
+			
+				var now = new Date(1562861100000);
+				var instanceSessionObj = instanceSessions.getInstanceSessionObject(
+					{
+						"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+						"createdAt": now,
+						"expiresAt": null,
+						"expiry": 3600000
+					}
+				);
+				var instanceSessionObj2 = instanceSessions.getInstanceSessionObject(
+					{
+						"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+						"createdAt": now,
+						"expiry": '3600000'
+					}
+				);
+				expect(instanceSessionObj.expiresAt.getTime()).to.equal(now.getTime() + 3600000);
+				expect(instanceSessionObj2.expiresAt.getTime()).to.equal(now.getTime() + 3600000);
+			
+			});
+			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the config setting users:instanceSessionExpiry to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can not be parsed to a valid positive integer', function() {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var now = new Date(1562861100000);
+				var instanceSessionObj = instanceSessions.getInstanceSessionObject(
+					{
+						"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+						"createdAt": now,
+						"expiresAt": null,
+						"expiry": -3600000
+					}
+				);
+				var instanceSessionObj2 = instanceSessions.getInstanceSessionObject(
+					{
+						"_id": "SBuXMoJxjj-uEDzF2gy0n8g6",
+						"createdAt": now,
+						"expiry": 0
+					}
+				);
+				expect(instanceSessionObj.expiresAt.getTime()).to.equal(now.getTime() + 7200000);
+				expect(instanceSessionObj2.expiresAt.getTime()).to.equal(now.getTime() + 7200000);
+				configGetValStub.restore();
+			
+			});
 		
 		});
 		describe('validate()', function() {
@@ -241,9 +449,28 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.validate).to.be.a('function');
 			
 			});
-			it('should return false if its expiresAt property is not a Date object');
-			it('should return false if the expiresAt property is a Date object set to a timestamp older than or equal to the current timestamp');
-			it('should return false if the expiresAt property is a Date object set to a timestamp further in the future than the current timestamp');
+			it('should return false if its expiresAt property is not a Date object', function() {
+			
+				testInstanceSession.expiresAt = null;
+				expect(testInstanceSession.validate()).to.be.false;
+				testInstanceSession.expiresAt = 'next friday';
+				expect(testInstanceSession.validate()).to.be.false;
+			
+			});
+			it('should return false if the expiresAt property is a Date object set to a timestamp older than or equal to the current timestamp', function() {
+			
+				testInstanceSession.expiresAt = testInstanceSession.createdAt;
+				expect(testInstanceSession.validate()).to.be.false;
+				testInstanceSession.expiresAt = new Date(testInstanceSession.createdAt.getTime() - 3600000);
+				expect(testInstanceSession.validate()).to.be.false;
+			
+			});
+			it('should return true if the expiresAt property is a Date object set to a timestamp further in the future than the current timestamp', function() {
+			
+				testInstanceSession.expiresAt = new Date(testInstanceSession.createdAt.getTime() + 3600000);
+				expect(testInstanceSession.validate()).to.be.true;
+			
+			});
 		
 		});
 		describe('renew(expiryExtension)', function() {
@@ -253,9 +480,33 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.renew).to.be.a('function');
 			
 			});
-			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of the expiryExtension arg if it can be parsed to a positive integer');
-			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of config setting users:instanceSessionExpiry if the expiryExtension arg is undefined or otherwise cannot be parsed to a positive integer');
-			it('should return the updated expiresAt property value');
+			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of the expiryExtension arg if it can be parsed to a positive integer', function() {
+			
+				const oldExpiresAt = testInstanceSession.expiresAt;
+				var newExpiresAt = testInstanceSession.renew(10);
+				expect(testInstanceSession.expiresAt.getTime()).to.equal(oldExpiresAt.getTime() + 10);
+			
+			});
+			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of config setting users:instanceSessionExpiry if the expiryExtension arg is undefined or otherwise cannot be parsed to a positive integer', function() {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				const oldExpiresAt = testInstanceSession.expiresAt;
+				var newExpiresAt = testInstanceSession.renew(-10);
+				expect(testInstanceSession.expiresAt.getTime()).to.equal(oldExpiresAt.getTime() + 7200000);
+				testInstanceSession.expiresAt = oldExpiresAt;
+				var newExpiresAt = testInstanceSession.renew();
+				expect(testInstanceSession.expiresAt.getTime()).to.equal(oldExpiresAt.getTime() + 7200000);
+				configGetValStub.restore();
+			
+			});
+			it('should return the updated expiresAt property value', function() {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var newExpiresAt = testInstanceSession.renew();
+				expect(testInstanceSession.expiresAt).to.deep.equal(newExpiresAt);
+				configGetValStub.restore();
+			
+			});
 		
 		});
 		describe('toDB()', function() {
@@ -265,7 +516,18 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.toDB).to.be.a('function');
 			
 			});
-			it('should return a generic object with the _id, createdAt, and expiresAt properties and values matching the object instance the method was called on');
+			it('should return a generic object with the _id, createdAt, and expiresAt properties and values matching the object instance the method was called on', function() {
+			
+				var genericInstanceSessionObj = testInstanceSession.toDB();
+				expect(genericInstanceSessionObj).to.be.an('object').with.property('constructor').with.property('name').that.equals('Object');
+				expect(genericInstanceSessionObj).to.have.property('_id').that.equals(testInstanceSession._id);
+				expect(genericInstanceSessionObj).to.have.property('createdAt').that.equals(testInstanceSession.createdAt);
+				expect(genericInstanceSessionObj).to.have.property('expiresAt').that.equals(testInstanceSession.expiresAt);
+				expect(genericInstanceSessionObj).to.not.have.property('validate');
+				expect(genericInstanceSessionObj).to.not.have.property('renew');
+				expect(genericInstanceSessionObj).to.not.have.property('toDB');
+			
+			});
 		
 		});
 	

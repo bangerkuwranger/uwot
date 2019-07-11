@@ -421,29 +421,30 @@ module.exports = class UwotInstanceSessions {
 				}
 				else {
 				
-					try {
-					
-						var foundIS = new InstanceSession(
-							foundSessions[0]._id,
-							null,
-							foundSessions[0].createdAt,
-							foundSessions[0].expiresAt
-						);
-						return self.fbiCallback(false, foundIS);
-					
-					}
-					catch(e) {
-					
-						return self.fbiCallback(e, foundSessions[0]);
-					
-					}
-					
+					var foundIS = new InstanceSession(
+						foundSessions[0]._id,
+						null,
+						foundSessions[0].createdAt,
+						foundSessions[0].expiresAt
+					);
+					return self.fbiCallback(false, foundIS);
 				
 				}
 			
 			});
 		
 		}
+	
+	}
+	
+	getInstanceSessionObject(args) {
+	
+		return new InstanceSession(
+			args._id,
+			args.expiry,
+			args.createdAt,
+			args.expiresAt
+		);
 	
 	}
 
