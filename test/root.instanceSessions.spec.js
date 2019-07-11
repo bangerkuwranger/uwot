@@ -225,6 +225,13 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.constructor).to.be.a('function');
 			
 			});
+			it('should assign the value of the _id arg, truncated to 255 characters, to its _id property if the arg value is a non-empty string');
+			it('should generate a secure random string and assign it to its _id value if the _id arg value is null or not a non-empty string');
+			it('should assign a Date object from the value of the createdAt arg value to its createdAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor');
+			it('should assign a Date object with the current timestamp to its createdAt property if the createdAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor');
+			it('should assign a Date object from the value of the expiresAt arg value to its expiresAt property if the arg value is a valid Date object or a string that can be parsed by the Date constructor');
+			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the expiry argument if to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can be parsed to a valid positive integer');
+			it('should assign a Date object with the value of the createdAt Ms from epoch plus the integer value of the config setting users:instanceSessionExpiry to its expiresAt property if the expiresAt arg value is neither a valid Date object nor a string that can be parsed by the Date constructor and the expiry arg value can not be parsed to a valid positive integer');
 		
 		});
 		describe('validate()', function() {
@@ -234,15 +241,21 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.validate).to.be.a('function');
 			
 			});
+			it('should return false if its expiresAt property is not a Date object');
+			it('should return false if the expiresAt property is a Date object set to a timestamp older than or equal to the current timestamp');
+			it('should return false if the expiresAt property is a Date object set to a timestamp further in the future than the current timestamp');
 		
 		});
-		describe('renew()', function() {
+		describe('renew(expiryExtension)', function() {
 		
 			it('should be a function', function() {
 			
 				expect(testInstanceSession.renew).to.be.a('function');
 			
 			});
+			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of the expiryExtension arg if it can be parsed to a positive integer');
+			it('should update its expiresAt property to a Date object with the value of the current expiresAt Ms from epoch plus the integer value of config setting users:instanceSessionExpiry if the expiryExtension arg is undefined or otherwise cannot be parsed to a positive integer');
+			it('should return the updated expiresAt property value');
 		
 		});
 		describe('toDB()', function() {
@@ -252,6 +265,7 @@ describe('instanceSessions.js', function() {
 				expect(testInstanceSession.toDB).to.be.a('function');
 			
 			});
+			it('should return a generic object with the _id, createdAt, and expiresAt properties and values matching the object instance the method was called on');
 		
 		});
 	

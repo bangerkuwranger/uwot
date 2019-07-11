@@ -59,6 +59,7 @@ class InstanceSession {
 		var cleanExpiry = sanitize.cleanInt(expiryExtension);
 		var expireMs = cleanExpiry <= 0 ? global.Uwot.Config.getVal('users', 'instanceSessionExpiry') : cleanExpiry;
 		this.expiresAt = new Date(this.expiresAt.getTime() + expireMs);
+		return this.expiresAt;
 	
 	}
 	
