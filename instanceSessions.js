@@ -86,6 +86,12 @@ module.exports = class UwotInstanceSessions {
 	createNew(expiryMs, callback) {
 	
 		var self = this;
+		if('function' === typeof expiryMs && 'undefined' === typeof callback) {
+		
+			callback = expiryMs;
+			expiryMs = null;
+		
+		}
 		if ('function' !== typeof callback) {
 		
 			throw new TypeError('invalid callback passed to createNew.');
@@ -123,22 +129,13 @@ module.exports = class UwotInstanceSessions {
 				}
 				else {
 		
-					try {
-					
-						var savedSession = new InstanceSession(
-							data._id,
-							0,
-							data.createdAt,
-							data.expiresAt
-						);
-						return self.cnCallback(false, savedSession);
-					
-					}
-					catch(e) {
-					
-						return self.cnCallback(e, null);
-					
-					}
+					var savedSession = new InstanceSession(
+						data._id,
+						0,
+						data.createdAt,
+						data.expiresAt
+					);
+					return self.cnCallback(false, savedSession);
 				
 				}
 	

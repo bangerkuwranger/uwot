@@ -92,12 +92,123 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.createNew).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
-			it('should use the config users:instanceSessionExpiry value for expiryMs if the arg value is not a string or number that can be parsed to an integer');
-			it('should return callback(Error, null) if db.insert returns an error');
-			it('should return callback(false, false) if db.insert does not return a non-null object with a string value for its "_id" property');
-			it('should return callback(Error, null) if creating a new InstanceSession with saved data throws an error');
-			it('should return callback(false, InstanceSession) if record was created without error and InstanceSession instance was created without error');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.createNew).to.throw(TypeError, 'invalid callback passed to createNew.');
+			
+			});
+			it('should use the config users:instanceSessionExpiry value for expiryMs if the arg value is not a string or number that can be parsed to an integer', function(done) {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var dbInsertStub = sinon.stub(instanceSessions.db, 'insert').callsFake(function returnArg0(obj, cb) {
+				
+					return cb(false, obj);
+				
+				});
+				instanceSessions.createNew(function(error, newSession) {
+				
+					expect(newSession.expiresAt.getTime()).to.equal(newSession.createdAt.getTime() + 7200000);
+					configGetValStub.restore();
+					dbInsertStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should use the the arg value for expiryMs if the it is a string or number that can be parsed to an integer', function(done) {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var dbInsertStub = sinon.stub(instanceSessions.db, 'insert').callsFake(function returnArg0(obj, cb) {
+				
+					return cb(false, obj);
+				
+				});
+				instanceSessions.createNew(3600000, function(error, newSession) {
+				
+					expect(newSession.expiresAt.getTime()).to.equal(newSession.createdAt.getTime() + 3600000);
+					instanceSessions.createNew('1800000', function(error, newSession) {
+				
+						expect(newSession.expiresAt.getTime()).to.equal(newSession.createdAt.getTime() + 1800000);
+						configGetValStub.restore();
+						dbInsertStub.restore();
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.insert returns an error', function(done) {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var dbInsertStub = sinon.stub(instanceSessions.db, 'insert').callsFake(function returnError(obj, cb) {
+				
+					return cb(new Error('test insert error'), null);
+				
+				});
+				instanceSessions.createNew(function(error, newSession) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test insert error');
+					configGetValStub.restore();
+					dbInsertStub.restore();
+					done();
+				
+				});
+			
+			});
+			it('should return callback(false, false) if db.insert does not return a non-null object with a string value for its "_id" property', function(done) {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var dbInsertStub = sinon.stub(instanceSessions.db, 'insert');
+				dbInsertStub.onCall(0).callsFake(function returnNull(obj, cb) {
+				
+					return cb(false, null);
+				
+				});
+				dbInsertStub.onCall(1).callsFake(function returnNullId(obj, cb) {
+				
+					obj._id = null;
+					return cb(false, obj);
+				
+				});
+				instanceSessions.createNew(3600000, function(error, newSession) {
+				
+					expect(newSession).to.be.false;
+					instanceSessions.createNew('1800000', function(error, newSession) {
+				
+						expect(newSession).to.be.false;
+						configGetValStub.restore();
+						dbInsertStub.restore();
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(false, InstanceSession) if record was created without error', function(done) {
+			
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(7200000);
+				var savedObj;
+				var dbInsertStub = sinon.stub(instanceSessions.db, 'insert').callsFake(function returnArg0andSave(obj, cb) {
+				
+					savedObj = obj;
+					return cb(false, obj);
+				
+				});
+				instanceSessions.createNew(function(error, newSession) {
+				
+					expect(savedObj).to.be.an('object');
+					expect(newSession._id).to.equal(savedObj._id);
+					expect(newSession.createdAt).to.deep.equal(savedObj.createdAt);
+					expect(newSession.expiresAt).to.deep.equal(savedObj.expiresAt);
+					configGetValStub.restore();
+					dbInsertStub.restore();
+					done();
+				
+				});
+			
+			});
 		
 		});
 		describe('remove(sessionId, callback)', function() {
@@ -107,11 +218,77 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.remove).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
-			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
-			it('should return callback(Error, null) if db.remove returns an error');
-			it('should return callback(false, false) if db.remove failed to remove any records');
-			it('should return callback(false, true) if db.remove removed any records');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.remove).to.throw(TypeError, 'invalid callback passed to remove.');
+			
+			});
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string', function(done) {
+			
+				instanceSessions.remove(null, function(error, wasRemoved) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid session id passed to remove.');
+					instanceSessions.remove('', function(error, wasRemoved) {
+				
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid session id passed to remove.');
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.remove returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbRemoveStub = sinon.stub(instanceSessions.db, 'remove').callsFake(function returnError(searchObj, opts, cb) {
+				
+					return cb(new Error('test remove error'), null);
+				
+				});
+				instanceSessions.remove(testId, function(error, wasRemoved) {
+			
+					expect(wasRemoved).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test remove error');
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.remove failed to remove any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbRemoveStub = sinon.stub(instanceSessions.db, 'remove').callsFake(function return0(searchObj, opts, cb) {
+				
+					return cb(false, 0);
+				
+				});
+				instanceSessions.remove(testId, function(error, wasRemoved) {
+			
+					expect(wasRemoved).to.be.false;
+					expect(error).to.be.false;
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, true) if db.remove removed any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbRemoveStub = sinon.stub(instanceSessions.db, 'remove').callsFake(function return1(searchObj, opts, cb) {
+				
+					return cb(false, 1);
+				
+				});
+				instanceSessions.remove(testId, function(error, wasRemoved) {
+			
+					expect(wasRemoved).to.be.true;
+					expect(error).to.be.false;
+					done();
+			
+				});
+			
+			});
 		
 		});
 		describe('validate(sessionId, callback)', function() {
@@ -121,7 +298,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.validate).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.validate).to.throw(TypeError, 'invalid callback passed to validate.');
+			
+			});
 			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
 			it('should return callback(Error, null) if db.find returns an error');
 			it('should return callback(false, false) if db.find failed to match any records');
@@ -136,7 +317,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.invalidate).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.invalidate).to.throw(TypeError, 'invalid callback passed to invalidate.');
+			
+			});
 			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
 			it('should return callback(Error, null) if db.update returns an error');
 			it('should return callback(false, false) if db.update failed to update any records');
@@ -150,7 +335,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.renew).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.renew).to.throw(TypeError, 'invalid callback passed to renew.');
+			
+			});
 			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
 			it('should return callback(Error, null) if db.find returns an error');
 			it('should return callback(false, false) if db.find failed to match any records');
@@ -166,7 +355,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.getValidInstances).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.getValidInstances).to.throw(TypeError, 'invalid callback passed to getValidInstances.');
+			
+			});
 			it('should return callback(Error, null) if db.find returns an error');
 			it('should return callback(false, false) if db.find failed to match any records');
 			it('should return an array of objects that for valid sessions if they exist and db operations complete without error');
@@ -179,7 +372,11 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.findById).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				expect(instanceSessions.findById).to.throw(TypeError, 'invalid callback passed to findById.');
+			
+			});
 			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
 			it('should return callback(Error, null) if db.find returns an error');
 			it('should return callback(false, false) if db.find failed to match any records');
