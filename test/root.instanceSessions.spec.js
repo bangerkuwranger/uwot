@@ -250,6 +250,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(wasRemoved).to.be.null;
 					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test remove error');
+					dbRemoveStub.restore();
 					done();
 			
 				});
@@ -267,6 +268,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(wasRemoved).to.be.false;
 					expect(error).to.be.false;
+					dbRemoveStub.restore();
 					done();
 			
 				});
@@ -284,6 +286,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(wasRemoved).to.be.true;
 					expect(error).to.be.false;
+					dbRemoveStub.restore();
 					done();
 			
 				});
@@ -303,11 +306,113 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.validate).to.throw(TypeError, 'invalid callback passed to validate.');
 			
 			});
-			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
-			it('should return callback(Error, null) if db.find returns an error');
-			it('should return callback(false, false) if db.find failed to match any records');
-			it('should return callback(false, false) if InstanceSession from matched db data returns false from validate() method');
-			it('should return callback(false, true) if InstanceSession from matched db data returns true from validate() method');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string', function(done) {
+			
+				instanceSessions.validate(null, function(error, wasRemoved) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to validate.');
+					instanceSessions.validate('', function(error, wasRemoved) {
+				
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to validate.');
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.find returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnError(searchObj, opts, cb) {
+				
+					return cb(new Error('test find error'), null);
+				
+				});
+				instanceSessions.validate(testId, function(error, isValid) {
+			
+					expect(isValid).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test find error');
+					dbFindStub.restore()
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.find failed to match any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnNoResults(searchObj, opts, cb) {
+				
+					return cb(false, []);
+				
+				});
+				instanceSessions.validate(testId, function(error, isValid) {
+			
+					expect(isValid).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore()
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if InstanceSession from matched db data returns false from validate() method', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var testDate = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnInvalidResult(searchObj, opts, cb) {
+				
+					return cb(
+						false,
+						[
+							{
+								_id: testId,
+								createdAt: testDate,
+								expiresAt: testDate
+							}
+						]
+					);
+				
+				});
+				instanceSessions.validate(testId, function(error, isValid) {
+			
+					expect(isValid).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore()
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, true) if InstanceSession from matched db data returns true from validate() method', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var testDate = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnValidResult(searchObj, opts, cb) {
+				
+					return cb(
+						false,
+						[
+							{
+								_id: testId,
+								createdAt: testDate,
+								expiresAt: new Date(testDate.getTime() + 3600000)
+							}
+						]
+					);
+				
+				});
+				instanceSessions.validate(testId, function(error, isValid) {
+			
+					expect(isValid).to.be.true;
+					expect(error).to.be.false;
+					dbFindStub.restore()
+					done();
+			
+				});
+			
+			});
 		
 		});
 		describe('invalidate(sessionId, callback)', function() {
