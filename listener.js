@@ -152,7 +152,7 @@ class UwotListener {
 				
 				}
 				args.userId = sanitize.cleanString(args.userId, 255);
-				args.isid = 'string' === args.isid && '' !== args.isid ? sanitize.cleanString(args.isid) : this.isid;
+				args.isid = 'string' === typeof args.isid && '' !== args.isid ? sanitize.cleanString(args.isid) : this.isid;
 				self.parserFunction(args, function(error, parsedObj) {
 				
 					if (error) {
