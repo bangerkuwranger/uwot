@@ -88,8 +88,6 @@ class UwotListener {
 						this.parserFunction = cmdFile[this.parserPath];
 						break;
 					case 'external':
-						this.parserFunction = require(this.parserPath);
-						break;
 					default:
 						this.parserFunction = require(this.parserPath);
 				
@@ -100,8 +98,6 @@ class UwotListener {
 						this.outputFunction = cmdFile[this.outputPath];
 						break;
 					case 'external':
-						this.outputFunction = require(this.outputPath);
-						break;
 					default:
 						this.outputFunction = require(this.outputPath);
 				
@@ -156,7 +152,7 @@ class UwotListener {
 				
 				}
 				args.userId = sanitize.cleanString(args.userId, 255);
-				args.isid = 'string' === args.isid && '' !== args.isid ? sanitize.cleanString(args.isis) : this.isid;
+				args.isid = 'string' === args.isid && '' !== args.isid ? sanitize.cleanString(args.isid) : this.isid;
 				self.parserFunction(args, function(error, parsedObj) {
 				
 					if (error) {
@@ -213,7 +209,7 @@ class UwotListener {
 			this.status = STATUS_ENABLED;
 		
 // 		}
-		return true;
+		return this.status;
 
 	}
 	
@@ -224,7 +220,7 @@ class UwotListener {
 			this.status = STATUS_DISABLED;
 		
 // 		}
-		return true;
+		return this.status;
 	
 	}
 
