@@ -333,7 +333,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(isValid).to.be.null;
 					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test find error');
-					dbFindStub.restore()
+					dbFindStub.restore();
 					done();
 			
 				});
@@ -351,7 +351,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(isValid).to.be.false;
 					expect(error).to.be.false;
-					dbFindStub.restore()
+					dbFindStub.restore();
 					done();
 			
 				});
@@ -379,7 +379,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(isValid).to.be.false;
 					expect(error).to.be.false;
-					dbFindStub.restore()
+					dbFindStub.restore();
 					done();
 			
 				});
@@ -407,7 +407,7 @@ describe('instanceSessions.js', function() {
 			
 					expect(isValid).to.be.true;
 					expect(error).to.be.false;
-					dbFindStub.restore()
+					dbFindStub.restore();
 					done();
 			
 				});
@@ -427,10 +427,79 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.invalidate).to.throw(TypeError, 'invalid callback passed to invalidate.');
 			
 			});
-			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
-			it('should return callback(Error, null) if db.update returns an error');
-			it('should return callback(false, false) if db.update failed to update any records');
-			it('should set expiresAt timestamp to current time and return callback(false, sessionId)');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string', function(done) {
+			
+				instanceSessions.invalidate(null, function(error, sessionId) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to invalidate.');
+					instanceSessions.invalidate('', function(error, sessionId) {
+				
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to invalidate.');
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.update returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnError(searchObj, changes, opts, cb) {
+				
+					return cb(new Error('test update error'), null);
+				
+				});
+				instanceSessions.invalidate(testId, function(error, sessionId) {
+			
+					expect(sessionId).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test update error');
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.update failed to update any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnNoUpdates(searchObj, changes, opts, cb) {
+				
+					return cb(false, 0);
+				
+				});
+				instanceSessions.invalidate(testId, function(error, sessionId) {
+			
+					expect(sessionId).to.be.false;
+					expect(error).to.be.false;
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should set expiresAt timestamp to current time and return callback(false, sessionId)', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var newExpires;
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnUpdated(searchObj, changes, opts, cb) {
+				
+					newExpires = changes.$set.expiresAt;
+					return cb(false, 1);
+				
+				});
+				instanceSessions.invalidate(testId, function(error, sessionId) {
+			
+					expect(sessionId).to.equal(testId);
+					expect(newExpires.getTime()).to.equal(now.getTime());
+					expect(error).to.be.false;
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
 		
 		});
 		describe('renew(sessionId, expiryExtensionMs, callback)', function() {
@@ -445,12 +514,183 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.renew).to.throw(TypeError, 'invalid callback passed to renew.');
 			
 			});
-			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
-			it('should return callback(Error, null) if db.find returns an error');
-			it('should return callback(false, false) if db.find failed to match any records');
-			it('should return callback(Error, null) if db.update returns an error');
-			it('should return callback(false, false) if db.update failed to update any records');
-			it('should set expiresAt timestamp to current time plus value of expiryExtensionMs and return callback(false, sessionId)');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string', function(done) {
+			
+				instanceSessions.renew(null, 1200000, function(error, sessionId) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to renew.');
+					instanceSessions.renew('', 1200000, function(error, sessionId) {
+				
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to renew.');
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.find returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnError(searchObj, opts, cb) {
+				
+					return cb(new Error('test find error'), null);
+				
+				});
+				instanceSessions.renew(testId, 1200000, function(error, session) {
+			
+					expect(session).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test find error');
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.find failed to match any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnNotFound(searchObj, opts, cb) {
+				
+					return cb(false, []);
+				
+				});
+				instanceSessions.renew(testId, 1200000, function(error, session) {
+			
+					expect(session).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(Error, null) if db.update returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var oldExpiresAt;
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnRecord(searchObj, opts, cb) {
+				
+					oldExpiresAt = new Date(now.getTime() + 30000);
+					return cb(false, [{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": oldExpiresAt
+						}]);
+				
+				});
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnError(searchObj, changes, opts, cb) {
+				
+					return cb(new Error('test update error'))
+				
+				});
+				instanceSessions.renew(testId, 1200000, function(error, session) {
+			
+					expect(session).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test update error');
+					dbFindStub.restore();
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.update failed to update any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var oldExpiresAt;
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnRecord(searchObj, opts, cb) {
+				
+					oldExpiresAt = new Date(now.getTime() + 30000);
+					return cb(false, [{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": oldExpiresAt
+						}]);
+				
+				});
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnNoUpdates(searchObj, changes, opts, cb) {
+				
+					return cb(false, 0);
+				
+				});
+				instanceSessions.renew(testId, 1200000, function(error, session) {
+			
+					expect(session).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should set expiresAt timestamp to current time plus value of expiryExtensionMs and return callback(false, InstanceSession) if expiryExtensionMs is a positive integer', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var oldExpiresAt;
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnRecord(searchObj, opts, cb) {
+				
+					oldExpiresAt = new Date(now.getTime() + 30000);
+					return cb(false, [{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": oldExpiresAt
+						}]);
+				
+				});
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnNoUpdates(searchObj, changes, opts, cb) {
+				
+					return cb(false, 1);
+				
+				});
+				instanceSessions.renew(testId, 1200000, function(error, session) {
+			
+					expect(session.expiresAt.getTime()).to.equal(oldExpiresAt.getTime() + 1200000);
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should set expiresAt timestamp to current time from epoch plus the integer value of config setting users:instanceSessionExpiry and return callback(false, InstanceSession) if expiryExtensionMs is not a positive integer', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var oldExpiresAt;
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(6000000);
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnRecord(searchObj, opts, cb) {
+				
+					oldExpiresAt = new Date(now.getTime() + 30000);
+					return cb(false, [{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": oldExpiresAt
+						}]);
+				
+				});
+				var dbUpdateStub = sinon.stub(instanceSessions.db, 'update').callsFake(function returnNoUpdates(searchObj, changes, opts, cb) {
+				
+					return cb(false, 1);
+				
+				});
+				instanceSessions.renew(testId, 0, function(error, session) {
+			
+					expect(session.expiresAt.getTime()).to.equal(oldExpiresAt.getTime() + 6000000);
+					expect(error).to.be.false;
+					configGetValStub.restore();
+					dbFindStub.restore();
+					dbUpdateStub.restore();
+					done();
+			
+				});
+			
+			});
 		
 		});
 		describe('getValidInstances(callback)', function() {
@@ -465,9 +705,68 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.getValidInstances).to.throw(TypeError, 'invalid callback passed to getValidInstances.');
 			
 			});
-			it('should return callback(Error, null) if db.find returns an error');
-			it('should return callback(false, false) if db.find failed to match any records');
-			it('should return an array of objects that for valid sessions if they exist and db operations complete without error');
+			it('should return callback(Error, null) if db.find returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnError(searchObj, opts, cb) {
+				
+					return cb(new Error('test find error'), null);
+				
+				});
+				instanceSessions.getValidInstances(function(error, sessionArray) {
+			
+					expect(sessionArray).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test find error');
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.find failed to match any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnEmptyArray(searchObj, opts, cb) {
+				
+					return cb(false, []);
+				
+				});
+				instanceSessions.getValidInstances(function(error, sessionArray) {
+			
+					expect(sessionArray).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return an array of objects that for valid sessions if they exist and db operations complete without error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnArray(searchObj, opts, cb) {
+				
+					return cb(false, [
+						{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 300000)
+						}
+					]);
+				
+				});
+				instanceSessions.getValidInstances(function(error, sessionArray) {
+			
+					expect(sessionArray).to.be.an('array').that.is.not.empty;
+					expect(sessionArray[0]._id).to.equal(testId);
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
 		
 		});
 		describe('findById(sessionId, callback)', function() {
@@ -482,10 +781,84 @@ describe('instanceSessions.js', function() {
 				expect(instanceSessions.findById).to.throw(TypeError, 'invalid callback passed to findById.');
 			
 			});
-			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string');
-			it('should return callback(Error, null) if db.find returns an error');
-			it('should return callback(false, false) if db.find failed to match any records');
-			it('should return callback(false, object) with an object created by InstanceSession.toDB() from db data matching given ID');
+			it('should return callback(TypeError, null) if sessionId arg value is not a non-empty string', function(done) {
+			
+				instanceSessions.findById(null, function(error, session) {
+				
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to findById.');
+					instanceSessions.findById('', function(error, session) {
+				
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid sessionId passed to findById.');
+						done();
+				
+					});
+				
+				});
+			
+			});
+			it('should return callback(Error, null) if db.find returns an error', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnError(searchObj, opts, cb) {
+				
+					return cb(new Error('test find error'), null);
+				
+				});
+				instanceSessions.findById(testId, function(error, foundSession) {
+			
+					expect(foundSession).to.be.null;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test find error');
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, false) if db.find failed to match any records', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnNotFound(searchObj, opts, cb) {
+				
+					return cb(false, []);
+				
+				});
+				instanceSessions.findById(testId, function(error, foundSession) {
+			
+					expect(foundSession).to.be.false;
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
+			it('should return callback(false, object) with an object created by InstanceSession.toDB() from db data matching given ID', function(done) {
+			
+				var testId = "SBuXMoJxjj-uEDzF2gy0n8g6";
+				var now = new Date();
+				var dbFindStub = sinon.stub(instanceSessions.db, 'find').callsFake(function returnArray(searchObj, opts, cb) {
+				
+					return cb(false, [
+						{
+							"_id": testId,
+							"createdAt": now,
+							"expiresAt": new Date(now.getTime() + 300000)
+						}
+					]);
+				
+				});
+				instanceSessions.findById(testId, function(error, foundSession) {
+			
+					expect(foundSession).to.be.an('object').with.property('_id').that.equals(testId);
+					expect(foundSession.createdAt).to.deep.equal(now);
+					expect(foundSession.expiresAt).to.deep.equal(new Date(now.getTime() + 300000));
+					expect(error).to.be.false;
+					dbFindStub.restore();
+					done();
+			
+				});
+			
+			});
 		
 		});
 

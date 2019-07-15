@@ -327,7 +327,7 @@ module.exports = class UwotInstanceSessions {
 						}
 						else {
 				
-							return self.rnCallback(false, sessionId);
+							return self.rnCallback(false, renewSession);
 				
 						}
 			
@@ -352,7 +352,7 @@ module.exports = class UwotInstanceSessions {
 		else {
 		
 			this.gviCallback = callback;
-			self.db.find({'expiresAt': { $gt: new Date() } }, function(error, currentInSessions) {
+			self.db.find({'expiresAt': { $gt: new Date() } }, {}, function(error, currentInSessions) {
 			
 				if (error) {
 				
@@ -404,31 +404,40 @@ module.exports = class UwotInstanceSessions {
 		else {
 		
 			this.fbiCallback = callback;
-			self.db.find({_id: sessionId}, {}, function(error, foundSessions) {
+			if ('string' !== typeof sessionId || '' === sessionId) {
 			
-				if (error) {
-				
-					return self.fbiCallback(error, null);
-				
-				}
-				else if ('object' !== typeof foundSessions || !(Array.isArray(foundSessions)) || 'object' !== typeof foundSessions[0] || null === foundSessions[0]) {
-				
-					return self.fbiCallback(false, false);
-				
-				}
-				else {
-				
-					var foundIS = new InstanceSession(
-						foundSessions[0]._id,
-						null,
-						foundSessions[0].createdAt,
-						foundSessions[0].expiresAt
-					);
-					return self.fbiCallback(false, foundIS);
-				
-				}
+				return this.fbiCallback(new TypeError('invalid sessionId passed to findById.'));
 			
-			});
+			}
+			else {
+			
+				self.db.find({_id: sessionId}, {}, function(error, foundSessions) {
+			
+					if (error) {
+				
+						return self.fbiCallback(error, null);
+				
+					}
+					else if ('object' !== typeof foundSessions || !(Array.isArray(foundSessions)) || 'object' !== typeof foundSessions[0] || null === foundSessions[0]) {
+				
+						return self.fbiCallback(false, false);
+				
+					}
+					else {
+				
+						var foundIS = new InstanceSession(
+							foundSessions[0]._id,
+							null,
+							foundSessions[0].createdAt,
+							foundSessions[0].expiresAt
+						);
+						return self.fbiCallback(false, foundIS);
+				
+					}
+			
+				});
+			
+			}
 		
 		}
 	
