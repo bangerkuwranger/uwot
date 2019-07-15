@@ -153,7 +153,7 @@ describe('isidListener.js', function() {
 				return global.Uwot.Listeners[isid];
 			
 			});
-			expect(isidListener.newIsidDefaultListener(1234)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid instanceSessionId passed to UwotCliListener contstructor');
+			expect(isidListener.newIsidDefaultListener(1234)).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid instanceSessionId passed to UwotListener contstructor');
 			delete global.Uwot.Listeners[testIsid];
 			delete global.Uwot.Listeners[1324];
 			ensureGlobalListenerStub.restore();

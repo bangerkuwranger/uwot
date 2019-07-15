@@ -27,12 +27,12 @@ class UwotListener {
 	
 		if ('string' !== typeof name) {
 		
-			throw new TypeError('invalid name passed to UwotCliListener contstructor');
+			throw new TypeError('invalid name passed to UwotListener contstructor');
 		
 		}
 		else if ('string' !== typeof instanceSessionId) {
 		
-			throw new TypeError('invalid instanceSessionId passed to UwotCliListener contstructor');
+			throw new TypeError('invalid instanceSessionId passed to UwotListener contstructor');
 		
 		}
 		else {
