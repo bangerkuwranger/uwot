@@ -121,5 +121,10 @@ module.exports = function defaultCmdParser(args, callback) {
 		}
 
 	}
+	else {
+	
+		return callback(new TypeError('invalid args passed to defaultCmdParser'));
+	
+	}
 
 };
