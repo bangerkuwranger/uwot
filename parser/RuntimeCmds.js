@@ -875,20 +875,6 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 	}
 	
-	addAppInstance(app) {
-	
-		this.app = app;
-		return this;
-	
-	}
-	
-	addInstanceSessionId(isid) {
-	
-		this.isid = isid;
-		return this;
-	
-	}
-	
 	fileOutputConsoleString(fileName, opts, successful) {
 	
 		var consoleOutput = 'output to ' + fileName + ' via ';
