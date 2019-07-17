@@ -318,7 +318,13 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('buildCommands()', function() {
 		
-			it('should be a function');
+			it('should be a function', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
 			it('should initialize its exes property with an empty Map');
 			it('should loop through each node in this.ast.commands and set a Map value for an increasing integer key to the result of the parseCommandNode method called with the node as an arg');
 			it('should return the final value of the exes property');
