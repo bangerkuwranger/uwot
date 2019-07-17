@@ -48,6 +48,16 @@ const getTestGuest = function() {
 	return Object.assign({}, testGuestUser);
 
 }
+const getTestExe = function() {
+
+	return {
+		isOp: false,
+		type: 'Command',
+		isSudo: false,
+		name: 'invalid'
+	};
+
+};
 
 describe('RuntimeCmds.js', function() {
 
@@ -323,11 +333,54 @@ describe('RuntimeCmds.js', function() {
 				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
 				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
 				buildCommandsStub.restore();
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returns(getTestExe());
+				expect(testRuntime.buildCommands).to.be.a('function');
 			
 			});
-			it('should initialize its exes property with an empty Map');
-			it('should loop through each node in this.ast.commands and set a Map value for an increasing integer key to the result of the parseCommandNode method called with the node as an arg');
-			it('should return the final value of the exes property');
+			it('should initialize its exes property with an empty Map', function() {
+			
+				var noCommandsAst = {
+					type: 'Script',
+					commands: [
+						{
+							type: 'Command',
+							name: {
+								type: 'Word',
+								text: 'invalid'
+							}
+						}
+					]
+				};
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
+				var testRuntime = new RuntimeCmds(noCommandsAst, getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returns(getTestExe());
+				testRuntime.buildCommands();
+				expect(testRuntime.exes).to.be.a('Map');
+			
+			});
+			it('should loop through each node in this.ast.commands and set a Map value for an increasing integer key to the result of the parseCommandNode method called with the node as an arg', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returns(getTestExe());
+				testRuntime.buildCommands();
+				expect(testRuntime.exes).to.be.a('Map');
+				expect(testRuntime.exes.get(0)).to.deep.equal(getTestExe());
+			
+			});
+			it('should return the final value of the exes property', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returns(getTestExe());
+				var testReturn = testRuntime.buildCommands();
+				expect(testRuntime.exes).to.be.a('Map');
+				expect(testRuntime.exes).to.deep.equal(testReturn);
+			
+			});
 		
 		});
 		describe('executeCommands(cb)', function() {
