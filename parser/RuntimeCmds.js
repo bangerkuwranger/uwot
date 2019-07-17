@@ -16,7 +16,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		// validate ast and its top level structure before parsing; throw error if invalid/undefined
 		if ('object' !== typeof ast || ast.type !== 'Script' || 'object' !== typeof ast.commands || !(Array.isArray(ast.commands))) {
 		
-			throw new TypeError('invalid ast node passed to buildCommands');
+			throw new TypeError('invalid ast node passed to UwotRuntimeCmds constructor');
 		
 		}
 		else {
