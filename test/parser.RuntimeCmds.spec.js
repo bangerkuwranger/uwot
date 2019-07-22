@@ -721,24 +721,52 @@ describe('RuntimeCmds.js', function() {
 		describe('parseConditional(condType, condNodes, condArgs)', function() {
 		
 			it('should be a function');
+			it('should throw a TypeError if condType is not a string matching "If" or "LogicalExpression"');
+			it('should throw a TypeError if condNodes values is not an array');
+			it('should throw a TypeError if condType is LogicalExpression and condArgs is not an array with a property op that is a string');
+			it('should throw a TypeError if condType is If and condArgs is not an object with a property clause that is an Array');
+			it('should return an exe object if the operations complete without error');
+			it('should return an exe object with name property "LogicalExpression", op property "or" or "and", a left property that is an exe resulting from running parseCommandNode on condNodes[0], and a right property that is an exe resulting from running parseCommandNode on condNodes[1] if condType is "LogicalExpression"');
+			it('should return an exe object with name property "If", clause property that is an exe resulting from running parseCommandNode on condArgs.clause, and then property that is an exe resulting from running parseCommandNode on condNodes if condType is "If"');
+			it('should return an exe object with a property else that is an exe that results from running parseCommandNode on condArgs.else if condType is "If" and condArgs.else is an Array');
 		
 		});
 		describe('parseFunction(fName, fBody, fRedirect)', function() {
 		
 			it('should be a function');
+			it('is not implemented and only returns void or undefined');
 		
 		});
 		describe('parsePipeline(astCommands)', function() {
 		
 			it('should be a function');
+			it('should return a Promise resolved with a static exe if executeChainedMap completes without error');
+			it('should return a Promise rejected with an error if executeChainedMap returns an error');
+			it('should create the chained map from the array of nodes passed in astCommands by running parseCommandNode on each element');
 		
 		});
 		describe('outputLine(output, type)', function() {
 		
 			it('should be a function');
+			it('should default type arg to "ansi" if passed type arg value is not a string');
+			it('should serialize the output arg value to JSON prior to processing if it is not a string and output type is not "object" or "ansi"');
+			it('should serialize the output arg value to JSON prior to processing if type is "ansi" and it is passed as a non-array, non-Error object that does not have an array as its content property');
+			it('should return the output arg value as a string if type is not "object" or "ansi"');
+			it('should return the output arg value unchanged if type arg value is "object" and output is an object');
+			it('should return an object with property "content" assigned output value if type arg value is "object" and output arg value is not an object');
+			it('should return an object with a content property that is an array if type arg value is "ansi"');
+			it('should add an empty br tag member to the end of the content property array of the returned object if type arg value is "ansi"');
+			it('should add a red text span element member with content property "Error: \r\n", and a second member that is a string with the value of error message if type arg value is "ansi" and output arg value is an Error');
+			it('should add the value of the output arg to the return object content property array as a memeber if type arg value is "ansi" and it is an object with a content property that is an Array');
+			it('should add the value of the output arg as a string to the return object content property array as a memeber if type arg value is "ansi" and it is an not an Error or object with an array property "content"');
 		
 		});
 		describe('executeMap(exeMap, outputType)', function() {
+		
+			it('should be a function');
+		
+		});
+		describe('executeChainedMap(chainedExeMap)', function() {
 		
 			it('should be a function');
 		

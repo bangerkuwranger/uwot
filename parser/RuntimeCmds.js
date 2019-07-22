@@ -198,7 +198,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 				}
 				else {
 				
-					args = args = args.concat(astCommand.suffix);
+					args = args.concat(astCommand.suffix);
 					if (0 < args.length) {
 					
 						exe.args = [];
@@ -403,7 +403,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		}
 		else if (condType === 'If') {
 	
-			if ('object' !== typeof condArgs || 'object' !== typeof condArgs.clause || !Array.isArray(condArgs.clause) || 'object' !== typeof condNodes || !Array.isArray(condNodes)) {
+			if ('object' !== typeof condArgs || 'object' !== typeof condArgs.clause || !Array.isArray(condArgs.clause)) {
 		
 				throw new TypeError('condArgs.clause and condNodes passed to parseConditional must be arrays');
 		
@@ -460,7 +460,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			let pipeExes = new Map();
 			for (let i = 0; i < astCommands.length; i++) {
 		
-				var input=null, output=null;
+				var input = null, output = null;
 				if (0 < i) {
 			
 					input = i - 1;
@@ -474,7 +474,20 @@ class UwotRuntimeCmds extends AbstractRuntime {
 				pipeExes.set(i, this.parseCommandNode(astCommands[i], output, input));
 		
 			}
-			return pipeExes;
+			return this.executeChainedMap.then((result) => {
+			
+				return Promise.resolve({
+					isOp: false, 
+					type: 'Static',
+					isSudo: false,
+					result: result
+				});
+			
+			}).catch((e) => {
+			
+				return Promise.reject(e);
+			
+			});
 	
 		}
 
@@ -492,7 +505,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			outputString = JSON.stringify(output);
 	
 		}
-		else if (type === 'ansi' && 'object' === typeof output && !Array.isArray(output)) {
+		else if (type === 'ansi' && 'object' === typeof output && !Array.isArray(output) && !('object' === typeof output.content && Array.isArray(output.content)) && !(output instanceof Error)) {
 		
 			outputString = JSON.stringify(output);
 		
@@ -869,6 +882,203 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		
 				}
 	
+			}
+		
+		});
+
+	}
+	
+	// run immediate processing of the exe objects in the given map in series, passing the result of each node as args of the next node
+	executeChainedMap(chainedExeMap) {
+
+		return new Promise(async (resolve, reject) => {
+		
+			// make sure the map is a Map
+			if ('object' !== typeof chainedExeMap && !(chainedExeMap instanceof Map)) {
+	
+				reject(new TypeError('chainedExeMap passed to executeChainedMap must be an instance of Map'));
+	
+			}
+			else {
+	
+				// create results container
+				var finalResult, prevResult, resultMap = new Map();
+				// return empty object if map has no keys
+				if (chainedExeMap.size < 1) {
+		
+					reject(new TypeError('chainedExeMap passed to executeChainedMap must not be empty'));
+		
+				}
+				// otherwise, begin iteration
+				else {
+		
+					// j is external iterator incremented upon complete execution of a cmd
+					var j = 0;
+					// finalResult initialized with properties to allow it to act as an actual results obj during deferred execution
+					finalResult = {
+						output: [],
+						redirect: null,
+						cwd: '',
+						cookies: {}
+					};
+					// i is internal iterator incremented upon commencement of exeMap key processing
+					for (let i = 0; i < chainedExeMap.size; i++) {
+		
+						// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
+						var exe = chainedExeMap.get(i);
+						// if it's not a non-null object, it's not a valid exe. chained result is an error.
+						if ('object' !== typeof exe || null === exe) {
+			
+							reject(new TypeError('exe with index ' + i + ' is invalid'));
+							i = chainedExeMap.size;
+							
+						}
+						// if exe generated an error during the AST parsing; chained result is that error.
+						else if ('undefined' !== typeof exe.error) {
+			
+							reject(exe.error);
+							i = chainedExeMap.size;
+						
+						}
+						// isOp flag indicated this node is an operation (client-side), not a command (server-side)
+						// if it is true, chain is invalid (cannot pipe operations). chained result is an error
+						else if (exe.isOp) {
+				
+							reject(new Error('exe with index ' + i + ' is an operation, which invalidates the pipeline'));
+							i = chainedExeMap.size;
+			
+						}
+						// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
+						else {
+			
+							// ...unless user isn't allowed. check again whether
+							// user is logged in or guests are allowed
+							if (this.user.uName !== 'guest' || global.Uwot.Config.getVal('users', 'allowGuest')) {
+				
+								// pass previous cmd results to this command as first arg
+								if ('undefined' !== typeof prevResult) {
+								
+									exe.args.unshift(prevResult);
+								
+								}
+								try {
+						
+									global.Uwot.Bin[exe.name].execute(exe.args, exe.opts, this.app, this.user, async function(error, result) {
+					
+										if (error) {
+						
+											prevResult = error;
+											resultMap.set(j, prevResult);
+											j++;
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= chainedExeMap.size) {
+		
+												// return results to the caller.
+												resolve(finalResult);
+		
+											}
+						
+										}
+										else if ('sudo' === exe.name) {
+						
+											prevResult = result;
+											resultMap.set(j, prevResult);
+											j++;
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= chainedExeMap.size) {
+		
+												// return results to the caller.
+												resolve(finalResult);
+		
+											}
+						
+										}
+										else if ('object' === typeof result && null !== result) {
+										
+											if ('string' === typeof result.redirect) {
+										
+												results.redirect = result.redirect;
+												delete result.redirect;
+										
+											} 
+											if ('object' === typeof result.cookies && null !== result.cookies) {
+										
+												var cnames = Object.keys(result.cookies);
+												cnames.forEach(function(cname) {
+											
+													results.cookies[cname] = result.cookies[cname];
+											
+												});
+												delete result.cookies;
+										
+											}
+											if ('string' === typeof result.cwd) {
+									
+												results.cwd = result.cwd;
+												delete result.cwd
+									
+											}
+											prevResult = result.output;
+											resultMap.set(j, prevResult);
+											j++;
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= chainedExeMap.size) {
+		
+												// return results to the caller.
+												resolve(finalResult);
+		
+											}
+										
+										}
+										else {
+										
+											prevResult = result;
+											resultMap.set(j, prevResult);
+											j++;
+											// when execution is completed for all exe commands, we can return the results object
+											if (j >= chainedExeMap.size) {
+		
+												// return results to the caller.
+												resolve(finalResult);
+		
+											}
+										
+										}
+					
+									}.bind(this), exe.isSudo, this.isid);
+				
+								}
+								catch(e) {
+				
+									prevResult = e;
+									resultMap.set(j, prevResult);
+									j++;
+									// when execution is completed for all exe commands, we can return the results object
+									if (j >= chainedExeMap.size) {
+		
+										// return results to the caller.
+										resolve(finalResult);
+		
+									}
+				
+								}
+				
+							}
+							// if a user can't do stuff, don't do stuff and chained result is an error
+							else {
+						
+								j++;
+								reject(new Error('user does not have permissions to execute this command'));
+								i = chainedExeMap.size;
+						
+							}
+			
+						}
+			
+					}
+		
+				}
+		
 			}
 		
 		});
