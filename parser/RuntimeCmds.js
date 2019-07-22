@@ -480,7 +480,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					isOp: false, 
 					type: 'Static',
 					isSudo: false,
-					result: result
+					result
 				});
 			
 			}).catch((e) => {
@@ -997,7 +997,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 										
 											if ('string' === typeof result.redirect) {
 										
-												results.redirect = result.redirect;
+												finalResult.redirect = result.redirect;
 												delete result.redirect;
 										
 											} 
@@ -1006,7 +1006,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 												var cnames = Object.keys(result.cookies);
 												cnames.forEach(function(cname) {
 											
-													results.cookies[cname] = result.cookies[cname];
+													finalResult.cookies[cname] = result.cookies[cname];
 											
 												});
 												delete result.cookies;
@@ -1014,8 +1014,8 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											}
 											if ('string' === typeof result.cwd) {
 									
-												results.cwd = result.cwd;
-												delete result.cwd
+												finalResult.cwd = result.cwd;
+												delete result.cwd;
 									
 											}
 											prevResult = result.output;
