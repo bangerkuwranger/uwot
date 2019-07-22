@@ -688,11 +688,34 @@ describe('RuntimeCmds.js', function() {
 		describe('parseCommand(astCommand, output, input)', function() {
 		
 			it('should be a function');
+			it('should return an object with an Error in error property if astCommand.name.text is not a non-empty string');
+			it('should return an object with an Error in error property if astCommand.name.text is not a string with value "sudo" or that matches a member of global.Uwot.Constants.cliOps or global.Uwot.Constants.reserved');
+			it('should return an exe object if name is a valid command (has minimal properties isOp, type, isSudo, name, id)');
+			it('should assign value of astCommand.name.text to return object property name');
+			it('should assign value of astCommand.id to return object property id');
+			it('should return an object with a SystemError assigned to error property if name is "sudo" and this.user.maySudo() returns false');
+			it('should recurse with a command node containing the sudo command arguments if name is "sudo" and this.user.maySudo() returns true; the resulting object should have true assigned to the isSudo property');
+			it('should set the isOp property of the returned object to true if name matches a member of global.Uwot.Constants.cliOps');
+			it('should assign an array of arg nodes derived from astCommand.suffix members that have type property "Word" to the args property of the returned object if name matches a member of global.Uwot.Constants.cliOps and astCommand.suffix length is greater than 0');
+			it('should derive args and opts properties from an array containing nodes from astCommand.prefix and astCommand.suffix if name matches a member of global.Uwot.Constants.reserved');
+			it('should include any nodes from prefix and suffix that are not type Word or Redirect in the returned object if name matches a member of global.Uwot.Constants.reserved');
+			it('should add a node to the return object property args array if name matches a member of global.Uwot.Constants.reserved, suffix/prefix node type is Word, and matchOpt.isOpt is false');
+			it('should not add node to return object property opts array if name matches a member of global.Uwot.Constants.reserved, matchOpt.isOpt is true, and name is an empty string; all subsequent suffix/prefix nodes should not be considered options and therefore also not be added to opts');
+			it('should add a prefix/suffix node with only the option name defined to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, and optMatch.isDefined is false');
+			it('should add a prefix/suffix node with an args property array containing optMatch.assignedArg values separated by any commas in the string to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.assignedArg is not an empty string');
+			it('should add a prefix/suffix node with an args property array containing any subsequent nodes as args if assignedArg has not yet filled all required arg values to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.reqArg length is greater than 0');
+			it('should add any prefix/suffix nodes that are type Word to the return object args property array if name matches a member of global.Uwot.Constants.reserved and optMatch.isOpt is false');
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is less');
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is great');
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input and output properties if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is lessgreat');
+			it('should assign an ioFile object with options.noclobber property true, options.append property true, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is dgreat');
+			it('should assign an ioFile object with options.noclobber property false, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is clobber');
 		
 		});
 		describe('parseLoop(loopType, loopNodes)', function() {
 		
 			it('should be a function');
+			it('is not currently implemented and will only return an empty object');
 		
 		});
 		describe('parseConditional(condType, condNodes, condArgs)', function() {
