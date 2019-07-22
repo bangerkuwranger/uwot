@@ -88,7 +88,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	parseCommandNode(astCmd, output, input) {
 
 		// throw error if commandNode is invalid or type is not one of the supported types
-		if ('object' !== typeof astCmd || -1 === global.Uwot.Constants.commandTypes.indexOf(astCmd.type)) {
+		if ('object' !== typeof astCmd || null === astCmd || 'string' !== typeof astCmd.type || -1 === global.Uwot.Constants.commandTypes.indexOf(astCmd.type)) {
 	
 			throw new TypeError('invalid ast command node passed to parseCommandNode');
 	

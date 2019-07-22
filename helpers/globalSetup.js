@@ -161,7 +161,7 @@ module.exports = {
 				'Subshell',
 				'For',
 				'Case',
-				'if',
+				'If',
 				'While',
 				'Until'
 			];

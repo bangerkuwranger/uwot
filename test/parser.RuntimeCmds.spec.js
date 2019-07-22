@@ -488,16 +488,201 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('parseCommandNode(astCmd, output, input)', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if astCmd is not an object with property type that is a string with value matching a member of global.Uwot.Constants.commandTypes');
-			it('should set output to null if arg is undefined');
-			it('should use output arg value if defined');
-			it('should set input to null if arg is undefined');
-			it('should use input arg value if defined');
-			it('should return the value of this.parsePipeline(astCmd) if astCmd.type is "Pipeline"');
-			it('should return the value for this.parseFunction(astCmd) if astCmd.type is "Function"');
-			it('should return the value for this.parseConditional(astCmd.type, astCmd.then, args) if astCmd.type is "If"');
-			it('should return the value for this.parseCommand(astCmd, output, input) if astCmd.type is "Command"');
+			it('should be a function', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				expect(testRuntime.parseCommandNode).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if astCmd is not an object with property type that is a string with value matching a member of global.Uwot.Constants.commandTypes', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var testAstCmd1 = 'QuizzicalExpression';
+				var testAstCmd2 = {type: testAstCmd1};
+				var testAstCmd3 = null;
+				function throwError1() {
+				
+					return testRuntime.parseCommandNode(testAstCmd1);
+				
+				};
+				function throwError2() {
+				
+					return testRuntime.parseCommandNode(testAstCmd2);
+				
+				};
+				function throwError3() {
+				
+					return testRuntime.parseCommandNode(testAstCmd3);
+				
+				};
+				expect(throwError1).to.throw(TypeError, 'invalid ast command node passed to parseCommandNode');
+				expect(throwError2).to.throw(TypeError, 'invalid ast command node passed to parseCommandNode');
+				expect(throwError3).to.throw(TypeError, 'invalid ast command node passed to parseCommandNode');
+			
+			});
+			it('should return the value for this.parseCommand(astCmd, output, input) if astCmd.type is "Command"', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandStub = sinon.stub(testRuntime, 'parseCommand').returns('test parseCommand output');
+				var testAstCmd = {type: 'Command'};
+				var returned = testRuntime.parseCommandNode(testAstCmd);
+				expect(returned).to.equal('test parseCommand output');
+				parseCommandStub.restore();
+			
+			});
+			it('should set output to null if arg is undefined', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandStub = sinon.stub(testRuntime, 'parseCommand').returns({});
+				var testAstCmd = {type: 'Command'};
+				var returned = testRuntime.parseCommandNode(testAstCmd);
+				expect(parseCommandStub.calledWith(testAstCmd, null, null)).to.be.true;
+				parseCommandStub.restore();
+			
+			});
+			it('should use output arg value if defined', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandStub = sinon.stub(testRuntime, 'parseCommand').returns({});
+				var testAstCmd = {type: 'Command'};
+				var testOutput = 'test output';
+				var returned = testRuntime.parseCommandNode(testAstCmd, testOutput);
+				expect(parseCommandStub.calledWith(testAstCmd, testOutput, null)).to.be.true;
+				parseCommandStub.restore();
+			
+			});
+			it('should set input to null if arg is undefined', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandStub = sinon.stub(testRuntime, 'parseCommand').returns({});
+				var testAstCmd = {type: 'Command'};
+				var testOutput = 'test output';
+				var returned = testRuntime.parseCommandNode(testAstCmd, testOutput);
+				expect(parseCommandStub.calledWith(testAstCmd, testOutput, null)).to.be.true;
+				parseCommandStub.restore();
+			
+			});
+			it('should use input arg value if defined', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseCommandStub = sinon.stub(testRuntime, 'parseCommand').returns({});
+				var testAstCmd = {type: 'Command'};
+				var testInput = 'test input';
+				var returned = testRuntime.parseCommandNode(testAstCmd, null, testInput);
+				expect(parseCommandStub.calledWith(testAstCmd, null, testInput)).to.be.true;
+				parseCommandStub.restore();
+			
+			});
+			it('should return the value of this.parsePipeline(astCmd) if astCmd.type is "Pipeline"', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parsePipelineStub = sinon.stub(testRuntime, 'parsePipeline').returns('test parsePipeline output');
+				var testAstCmd = {type: 'Pipeline'};
+				var returned = testRuntime.parseCommandNode(testAstCmd);
+				expect(returned).to.equal('test parsePipeline output');
+				parsePipelineStub.restore();
+			
+			});
+			it('should return the value for this.parseFunction(astCmd) if astCmd.type is "Function"', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseFunctionStub = sinon.stub(testRuntime, 'parseFunction').returns('test parseFunction output');
+				var testAstCmd = {type: 'Function'};
+				var returned = testRuntime.parseCommandNode(testAstCmd);
+				expect(returned).to.equal('test parseFunction output');
+				parseFunctionStub.restore();
+			
+			});
+			it('should return the value for this.parseConditional(astCmd.type, astCmd.then, args) if astCmd.type is "If"', function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+				var parseConditionalStub = sinon.stub(testRuntime, 'parseConditional').returns('test parseConditional output');
+				var testAstCmd = {type: 'If'};
+				var returned = testRuntime.parseCommandNode(testAstCmd);
+				expect(returned).to.equal('test parseConditional output');
+				parseConditionalStub.restore();
+			
+			});
 		
 		});
 		describe('parseCommand(astCommand, output, input)', function() {
