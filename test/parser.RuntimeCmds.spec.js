@@ -845,16 +845,43 @@ describe('RuntimeCmds.js', function() {
 		describe('fileOutputConsoleString(fileName, opts, successful)', function() {
 		
 			it('should be a function');
+			it('should return a string containing value of fileName arg');
+			it('should return a string containing "successful" if value of successful arg is truthy');
+			it('should return a string containing "failed" if value of successful arg is falsey');
+			it('should return a string containing "append" if value of opts.append is truthy');
+			it('should return a string containing "new file write" if value of opts.noclobber is truthy');
+			it('should return a string containing "file overwrite" if value of opts.append and opts.noclobber is falsey');
 		
 		});
 		describe('getConsoleOutputForExe(outputData, exeOutput, userId)', function() {
 		
 			it('should be a function');
+			it('should return a Promise');
+			it('should return a Promise rejected with a TypeError if exeOutput arg is not an object');
+			it('should return a Promise resolved with the value of outputData if exeOutput is null');
+			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.text arg is not a string');
+			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.options arg is not a non-null object');
+			it('should use the result of ansiToText with outputData arg value to generate text to output to file if exeOutput is a valid output object');
+			it('should use the user FileSystem append method to write outputText to existing file if exeOutput.options.append is truthy');
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is truthy, and append method call returns an error');
+			it('should use the user FileSystem resolvePath method to verify if file exists prior to write operation if exeOutput.options.append is falsey');
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is truthy, and file exists');
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is falsey & file exists, or file does not exist, and FileSystem write method call returns an error');
+			it('should use the user FileSystem write method to verify if file exists prior to write operation if exeOutput.options.append is falsey and noclobber is falsey & file exists, or file does not exist');
+			it('should return a Promise resolved with the result of fileOutputConsoleString if the FileSystem write or append operation completes without error');
 		
 		});
 		describe('getInputForExe(exeInput, userId)', function() {
 		
 			it('should be a function');
+			it('should return a Promise');
+			it('should return a Promise resolved with null if exeInput is null');
+			it('should return a Promise rejected with a TypeError if exeInput is not null or an object with a property type that equals "Word"');
+			it('should include the value of exeInput.text in the TypeError message if exeInput is not null or an object with a property type that equals "Word" but exeInput.text is a string');
+			it('should attempt to use user FileSystem method readFile called with exeInput.text to read data from specified input');
+			it('should return a Promise rejected with an Error if the readFile method call throws an error');
+			it('should return a Promise rejected with an Error if the readFile method call returns an error');
+			it('should return a Promise resolved with the result of the readFile method call if the process completes without error');
 		
 		});
 
