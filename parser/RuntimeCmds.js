@@ -103,9 +103,13 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			switch(astCmd.type) {
 		
 				case 'Pipeline':
-					this.parsePipeline(astCommand).then((staticExe) => {
+					this.parsePipeline(astCmd).then((staticExe) => {
 					
 						return staticExe;
+					
+					}).catch((e) => {
+					
+						return e;
 					
 					});
 					break;
@@ -454,46 +458,50 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	// execute map and return piped result as static exe instead of returning exes
 	parsePipeline(astCommands) {
 
-		if ('object' !== typeof astCommands || !Array.isArray(astCommands)) {
-	
-			throw new TypeError('astCommands passed to parsePipeline must be an array');
-	
-		}
-		else {
-	
-			let pipeExes = new Map();
-			for (let i = 0; i < astCommands.length; i++) {
+		return new Promise((resolve, reject) => {
 		
-				var input = null, output = null;
-				if (0 < i) {
-			
-					input = i - 1;
-			
-				}
-				if ((i+1) < astCommands.length) {
-			
-					output = i + 1;
-			
-				}
-				pipeExes.set(i, this.parseCommandNode(astCommands[i], output, input));
-		
+			if ('object' !== typeof astCommands || !Array.isArray(astCommands)) {
+	
+				reject(new TypeError('astCommands passed to parsePipeline must be an array'));
+	
 			}
-			return this.executeChainedMap.then((result) => {
-			
-				return Promise.resolve({
-					isOp: false, 
-					type: 'Static',
-					isSudo: false,
-					result
-				});
-			
-			}).catch((e) => {
-			
-				return Promise.reject(e);
-			
-			});
+			else {
 	
-		}
+				let pipeExes = new Map();
+				for (let i = 0; i < astCommands.length; i++) {
+		
+					var input = null, output = null;
+					if (0 < i) {
+			
+						input = i - 1;
+			
+					}
+					if ((i+1) < astCommands.length) {
+			
+						output = i + 1;
+			
+					}
+					pipeExes.set(i, this.parseCommandNode(astCommands[i], output, input));
+		
+				}
+				this.executeChainedMap.then((result) => {
+		
+					return resolve({
+						isOp: false, 
+						type: 'Static',
+						isSudo: false,
+						result
+					});
+		
+				}).catch((e) => {
+		
+					return reject(e);
+		
+				});
+
+			}
+		
+		});
 
 	}
 	
