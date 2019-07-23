@@ -1271,7 +1271,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			}
 			else {
 			
-				exeName = '';
+				var exeName = '';
 				if ('object' === typeof exeInput && 'string' === typeof exeInput.text) {
 				
 					exeName = ' "' + exeInput.text + '"';
