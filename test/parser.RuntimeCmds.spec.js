@@ -1,3 +1,4 @@
+const path = require('path');
 const sinon = require("sinon");
 const chai = require("chai");
 const sinonChai = require('sinon-chai');
@@ -11,6 +12,8 @@ const AbstractRuntime = require('../parser/AbstractRuntime');
 const sanitize = require('../helpers/valueConversion');
 const systemError = require('../helpers/systemError');
 const ansiToText = require('../output/ansiToText');
+
+const uid = require('uid-safe');
 
 const RuntimeCmds = require('../parser/RuntimeCmds');
 
@@ -41,7 +44,8 @@ const getTestUser = function() {
 		"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
 		"createdAt": new Date(1546450800498),
 		"updatedAt": new Date(1546450800498),
-		"_id": "CDeOOrH0gOg791cZ"
+		"_id": "CDeOOrH0gOg791cZ",
+		"maySudo": function() { return this.sudoer; }
 	};
 
 };
@@ -79,6 +83,26 @@ describe('RuntimeCmds.js', function() {
 		if ('object' !== typeof global.Uwot.Config || 'UwotConfigBase' !== global.Uwot.Config.constructor.name) {
 		
 			globalSetupHelper.initEnvironment();
+		
+		}
+		if ('function' !== typeof global.Uwot.Exports.Cmd || global.Uwot.Exports.Cmd.name !== 'UwotCmd') {
+
+			global.Uwot.Exports.Cmd = require('../cmd');
+
+		}
+		if (-1 === global.Uwot.Constants.reserved.indexOf('pwd')) {
+		
+			global.Uwot.Constants.reserved.push('pwd');
+		
+		}
+		if (-1 === global.Uwot.Constants.reserved.indexOf('theme')) {
+		
+			global.Uwot.Constants.reserved.push('theme');
+		
+		}
+		if (-1 === Object.keys(global.Uwot.Bin).indexOf('theme')) {
+		
+			global.Uwot.Bin.theme = require(path.resolve(global.Uwot.Constants.appRoot, 'routes/bin/theme'));
 		
 		}
 		global.Uwot.Users.getGuest(function(error, guestUser) {
@@ -171,7 +195,7 @@ describe('RuntimeCmds.js', function() {
 			
 				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').returns(new Map());
 				var testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
-				expect(testRuntime.user).to.deep.equal(getTestUser());
+				expect(JSON.stringify(testRuntime.user)).to.deep.equal(JSON.stringify(getTestUser()));
 				buildCommandsStub.restore();
 			
 			});
@@ -659,21 +683,195 @@ describe('RuntimeCmds.js', function() {
 				expect(testRuntime.parseCommand).to.be.a('function');
 			
 			});
-			it('should return an object with an Error in error property if astCommand.name.text is not a non-empty string');
-			it('should return an object with an Error in error property if astCommand.name.text is not a string with value "sudo" or that matches a member of global.Uwot.Constants.cliOps or global.Uwot.Constants.reserved');
-			it('should return an exe object if name is a valid command (has minimal properties isOp, type, isSudo, name, id)');
-			it('should assign value of astCommand.name.text to return object property name');
-			it('should assign value of astCommand.id to return object property id');
-			it('should return an object with a SystemError assigned to error property if name is "sudo" and this.user.maySudo() returns false');
-			it('should recurse with a command node containing the sudo command arguments if name is "sudo" and this.user.maySudo() returns true; the resulting object should have true assigned to the isSudo property');
-			it('should set the isOp property of the returned object to true if name matches a member of global.Uwot.Constants.cliOps');
-			it('should assign an array of arg nodes derived from astCommand.suffix members that have type property "Word" to the args property of the returned object if name matches a member of global.Uwot.Constants.cliOps and astCommand.suffix length is greater than 0');
-			it('should derive args and opts properties from an array containing nodes from astCommand.prefix and astCommand.suffix if name matches a member of global.Uwot.Constants.reserved');
-			it('should include any nodes from prefix and suffix that are not type Word or Redirect in the returned object if name matches a member of global.Uwot.Constants.reserved');
-			it('should add a node to the return object property args array if name matches a member of global.Uwot.Constants.reserved, suffix/prefix node type is Word, and matchOpt.isOpt is false');
-			it('should not add node to return object property opts array if name matches a member of global.Uwot.Constants.reserved, matchOpt.isOpt is true, and name is an empty string; all subsequent suffix/prefix nodes should not be considered options and therefore also not be added to opts');
-			it('should add a prefix/suffix node with only the option name defined to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, and optMatch.isDefined is false');
-			it('should add a prefix/suffix node with an args property array containing optMatch.assignedArg values separated by any commas in the string to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.assignedArg is not an empty string');
+			it('should return an object with an Error in error property if astCommand.name.text is not a non-empty string', function() {
+			
+				var testAst = getTestAst();
+				var testCmd1 = Object.assign({}, testAst.commands[0]);
+				testCmd1.id = uid.sync(24);
+				testCmd1.name.text = null;
+				var testCmd2 = Object.assign({}, testCmd1);
+				testCmd2.name.text = '';
+				expect(testRuntime.parseCommand(testCmd1)).to.be.an('object').with.property('error').that.is.an.instanceof(Error).with.property('message').that.equals('command is not a string');
+				expect(testRuntime.parseCommand(testCmd2)).to.be.an('object').with.property('error').that.is.an.instanceof(Error).with.property('message').that.equals('command is not a string');
+			
+			});
+			it('should return an object with an Error in error property if astCommand.name.text is not a string with value "sudo" or that matches a member of global.Uwot.Constants.cliOps or global.Uwot.Constants.reserved', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'explodingDonkey';
+				expect(testRuntime.parseCommand(testCmd)).to.be.an('object').with.property('error').that.is.an.instanceof(Error).with.property('message').that.equals(testCmd.name.text + ': command not found');
+			
+			});
+			it('should return an exe object if name is a valid command (has minimal properties isOp, type, isSudo, name, id)', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.a('boolean');
+				expect(testExe).to.have.property('type').that.is.a('string');
+				expect(testExe).to.have.property('isSudo').that.is.a('boolean');
+				expect(testExe).to.have.property('name').that.is.a('string');
+				expect(testExe).to.have.property('input').that.is.null;
+				expect(testExe).to.have.property('output').that.is.null;
+			
+			});
+			it('should assign value of astCommand.name.text to return object property name', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('name').that.is.a('string').that.equals(testCmd.name.text);
+			
+			});
+			it('should assign value of astCommand.id to return object property id', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('id').that.is.a('string').that.equals(testCmd.id);
+			
+			});
+			it('should return an object with a SystemError assigned to error property if name is "sudo" and this.user.maySudo() returns false', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'sudo';
+				testCmd.suffix = [{text:"pwd", type:"Word"}];
+				testRuntime.user.sudoer = false;
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('error').with.property('code').that.equals('EPERM');
+			
+			});
+			it('should recurse with a command node containing the sudo command arguments if name is "sudo" and this.user.maySudo() returns true; the resulting object should have true assigned to the isSudo property', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'sudo';
+				testCmd.suffix = [{text:"pwd", type:"Word"}];
+				testRuntime.user.sudoer = true;
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isSudo').that.is.true;
+				expect(testExe.name).to.equal(testCmd.suffix[0].text);
+			
+			});
+			it('should set the isOp property of the returned object to true if name matches a member of global.Uwot.Constants.cliOps', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'clear';
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.true;
+			
+			});
+			it('should assign an array of arg nodes derived from astCommand.suffix members that have type property "Word" to the args property of the returned object if name matches a member of global.Uwot.Constants.cliOps and astCommand.suffix length is greater than 0', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'echo';
+				testCmd.suffix = [{text: "exploding", type: "Word"}, {text: "Donkey", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.true;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.suffix);
+			
+			});
+			it('should derive args and opts properties from an array containing nodes from astCommand.prefix and astCommand.suffix if name matches a member of global.Uwot.Constants.reserved', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "-s", type: "Word"}];
+				testCmd.suffix = [{text: "cac", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.suffix);
+				expect(testExe).to.have.property('opts').that.is.an('array');
+				expect(testExe.opts[0]).to.be.an('object').that.has.property('name').that.equals('s');
+			
+			});
+			it('should include any nodes from prefix and suffix that are not type Word or Redirect in the returned object args property array if name matches a member of global.Uwot.Constants.reserved', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "--sadness", type: "Command"}];
+				testCmd.suffix = [{text: "bliss", type: "Feeling"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.prefix.concat(testCmd.suffix));
+			
+			});
+			it('should add a node to the return object property args array if name matches a member of global.Uwot.Constants.reserved, suffix/prefix node type is Word, and matchOpt.isOpt is false', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "silverstart", type: "Word"}];
+				testCmd.suffix = [{text: "cac", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.prefix.concat(testCmd.suffix));
+				expect(testExe).to.have.property('opts').that.is.an('array').that.is.empty;
+			
+			});
+			it('should not add node to return object property opts array if name matches a member of global.Uwot.Constants.reserved, matchOpt.isOpt is true, and name is an empty string; all subsequent suffix/prefix nodes should not be considered options and therefore also not be added to opts', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "-", type: "Word"}];
+				testCmd.suffix = [{text: "cac", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.suffix);
+				expect(testExe).to.have.property('opts').that.is.an('array').that.is.empty;
+			
+			});
+			it('should add a prefix/suffix node with only the option name defined to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, and optMatch.isDefined is false', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "--cookietime=42", type: "Word"}];
+				testCmd.suffix = [{text: "cac", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.suffix);
+				expect(testExe).to.have.property('opts').that.is.an('array');
+				expect(testExe.opts[0]).to.deep.equal({name: 'cookietime'});
+			
+			});
+			it('should add a prefix/suffix node with an args property array containing optMatch.assignedArg values separated by any commas in the string to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.assignedArg is not an empty string', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "--s=42,54", type: "Word"}];
+				testCmd.suffix = [{text: "cac", type: "Word"}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals(testCmd.suffix);
+				expect(testExe).to.have.property('opts').that.is.an('array');
+				expect(testExe.opts[0]).to.deep.equal({name: 's', args: ['42', '54']});
+			
+			});
 			it('should add a prefix/suffix node with an args property array containing any subsequent nodes as args if assignedArg has not yet filled all required arg values to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.reqArg length is greater than 0');
 			it('should add any prefix/suffix nodes that are type Word to the return object args property array if name matches a member of global.Uwot.Constants.reserved and optMatch.isOpt is false');
 			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is less');
