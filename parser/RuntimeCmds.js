@@ -103,7 +103,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			switch(astCmd.type) {
 		
 				case 'Pipeline':
-					return this.parsePipeline(astCmd);
+					this.parsePipeline(astCommand).then((staticExe) => {
+					
+						return staticExe;
+					
+					});
 					break;
 				case 'LogicalExpression':
 					return this.parseConditional(astCmd.type, [astCmd.left, astCmd.right], {op: 'string' === typeof astCmd.op ? astCmd.op : 'and'});
@@ -636,10 +640,32 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						// still good to go? wonders may never cease... begin pre-execution logic
 						else {
 			
+							
+							// TBD
+							// parse output of static exe
+							if('Static' === exe.type) {
+							
+								j++;
+								if (j >= exeMap.size) {
+
+									// if after all of that there's no output or operations and user isn't allowed to do stuff
+									// it means guests are disallowed by config and user isn't authenticated.
+									// poke the user with a stick so they log in.
+									if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
+
+										results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
+
+									}
+									// return results to the caller.
+									resolve(results);
+
+								}
+							
+							}
 							// isOp flag indicated this node is an operation (client-side), not a command (server-side)
 							// if it is true, user is logged in, guests are allowed, or the login operation is ongoing...
 							// then add the whole node (arga and all) to results.operations and add a line to results.output to indicate operation was approved
-							if (exe.isOp) {
+							else if (exe.isOp) {
 				
 								if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
@@ -929,23 +955,23 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						// if it's not a non-null object, it's not a valid exe. chained result is an error.
 						if ('object' !== typeof exe || null === exe) {
 			
-							reject(new TypeError('exe with index ' + i + ' is invalid'));
 							i = chainedExeMap.size;
+							return reject(new TypeError('exe with index ' + i + ' is invalid'));
 							
 						}
 						// if exe generated an error during the AST parsing; chained result is that error.
 						else if ('undefined' !== typeof exe.error) {
 			
-							reject(exe.error);
 							i = chainedExeMap.size;
+							return reject(exe.error);
 						
 						}
 						// isOp flag indicated this node is an operation (client-side), not a command (server-side)
 						// if it is true, chain is invalid (cannot pipe operations). chained result is an error
 						else if (exe.isOp) {
 				
-							reject(new Error('exe with index ' + i + ' is an operation, which invalidates the pipeline'));
 							i = chainedExeMap.size;
+							return reject(new Error('exe with index ' + i + ' is an operation, which invalidates the pipeline'));
 			
 						}
 						// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
@@ -974,7 +1000,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											if (j >= chainedExeMap.size) {
 		
 												// return results to the caller.
-												resolve(finalResult);
+												return resolve(finalResult);
 		
 											}
 						
@@ -1068,8 +1094,8 @@ class UwotRuntimeCmds extends AbstractRuntime {
 							else {
 						
 								j++;
-								reject(new Error('user does not have permissions to execute this command'));
 								i = chainedExeMap.size;
+								return reject(new Error('user does not have permissions to execute this command'));
 						
 							}
 			

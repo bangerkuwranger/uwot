@@ -811,6 +811,25 @@ describe('RuntimeCmds.js', function() {
 		describe('executeChainedMap(chainedExeMap)', function() {
 		
 			it('should be a function');
+			it('should return a Promise');
+			it('should return a Promise rejected with a TypeError if chainedExeMap is not a Map object');
+			it('should return a Promise rejected with a TypeError if chainedExeMap is an empty Map object');
+			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is not a non-null object');
+			it('should return a Promise rejected with the value of the member error property if any member of chainedExeMap has a defined error property');
+			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is an operation');
+			it('should add the result of the previous command execution to the beginning of the current node args array prior to execution if it is not the first member of chainedExeMap');
+			it('should return a Promise rejected with an Error if user does not have permission to execute any member of chainedExeMap');
+			it('should assign error value to prevResult, add the error to the resultMap, and move to the next node execution if calling the execute method for a command returns an error to the callback');
+			it('should return the Promise resolved with a finalResult object if execute method call returns an error to callback and all commands in chainedExeMap have been executed');
+			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and exe.name is "sudo"');
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, exe.name is sudo, and all commands in chainedExeMap have been executed');
+			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is not a non-null object');
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is not a non-null object, and all commands in chainedExeMap have been executed');
+			it('should assign result output property value to prevResult, add prevResult to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is a non-null object');
+			it('should assign value of result.redirect to the finalResult object property redirect if result is a non-null object with a string redirect property');
+			it('should assign values of result.cookies to matching keys in the finalResult object property cookies if result is a non-null object with a non-null object cookies property');
+			it('should assign value of result.cwd to the finalResult object property redirect if result is a non-null object with a string cwd property');
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is a non-null object, and all commands in chainedExeMap have been executed');
 		
 		});
 		describe('fileOutputConsoleString(fileName, opts, successful)', function() {
