@@ -277,10 +277,20 @@ class UwotRuntimeCmds extends AbstractRuntime {
 									
 										}
 										cIdx++;
-										for (let oArgIdx = cIdx; oArgIdx < reqCount; oArgIdx++) {
+										for (let oArgIdx = 0; oArgIdx < reqCount; oArgIdx++) {
 									
-											thisOpt.args.push(args[oArgIdx]);
+											if ('object' === typeof args[cIdx] && 'string' === typeof args[cIdx].text) {
+											
+												thisOpt.args.push(args[cIdx].text);
+											
+											}
+											else {
+											
+												thisOpt.args.push(args[cIdx]);
+											
+											}
 											cIdx++;
+											argIdx++;
 									
 										} 
 								

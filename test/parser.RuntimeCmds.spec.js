@@ -872,8 +872,38 @@ describe('RuntimeCmds.js', function() {
 				expect(testExe.opts[0]).to.deep.equal({name: 's', args: ['42', '54']});
 			
 			});
-			it('should add a prefix/suffix node with an args property array containing any subsequent nodes as args if assignedArg has not yet filled all required arg values to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.reqArg length is greater than 0');
-			it('should add any prefix/suffix nodes that are type Word to the return object args property array if name matches a member of global.Uwot.Constants.reserved and optMatch.isOpt is false');
+			it('should add a prefix/suffix node with an args property array containing any subsequent nodes as args if assignedArg has not yet filled all required arg values to return object opts property array if name matches a member of global.Uwot.Constants.reserved, optMatch.isOpt is true, node name is not an empty string, optMatch.isDefined is true, and optMatch.reqArg length is greater than 0', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'theme';
+				testCmd.prefix = [{text: "--s=42", type: "Word"}];
+				testCmd.suffix = [{text: "54", type: "Word"}, {text: "cac", type: "Word"}];
+				var themeMatchOptStub = sinon.stub(global.Uwot.Bin.theme, 'matchOpt')
+				themeMatchOptStub.withArgs('--s=42').callsFake(function oneAndDone(opt) {
+				
+					return {
+						name: 's',
+						isOpt: true,
+						isLong: false,
+						isDefined: true,
+						hasArgs: true,
+						reqArgs: ['minLength', 'maxLength'],
+						optArgs: ['themeLength'],
+						assignedArg: '42'
+					};
+				
+				});
+				themeMatchOptStub.callThrough();
+				var testExe = testRuntime.parseCommand(testCmd);
+				themeMatchOptStub.restore();
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('args').that.is.an('array').that.deep.equals([testCmd.suffix[1]]);
+				expect(testExe).to.have.property('opts').that.is.an('array');
+				expect(testExe.opts[0]).to.deep.equal({name: 's', args: ['42', '54']});
+			
+			});
 			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is less');
 			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is great');
 			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input and output properties if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is lessgreat');
