@@ -904,11 +904,95 @@ describe('RuntimeCmds.js', function() {
 				expect(testExe.opts[0]).to.deep.equal({name: 's', args: ['42', '54']});
 			
 			});
-			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is less');
-			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is great');
-			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input and output properties if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is lessgreat');
-			it('should assign an ioFile object with options.noclobber property true, options.append property true, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is dgreat');
-			it('should assign an ioFile object with options.noclobber property false, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is clobber');
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is less', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				testCmd.suffix = [{op: {type: "less", symbol: "<"}, type: "Redirect", file: {type: "Word", text: "up/uranus"}}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('output').that.is.null;
+				expect(testExe).to.have.property('input').that.is.an('object');
+				expect(testExe.input).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.input).to.have.property('options').that.is.an('object');
+				expect(testExe.input.options).to.have.property('noclobber').that.is.true;
+				expect(testExe.input.options).to.have.property('append').that.is.false;
+			
+			});
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is great', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				testCmd.suffix = [{op: {type: "great", symbol: ">"}, type: "Redirect", file: {type: "Word", text: "up/uranus"}}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('input').that.is.null;
+				expect(testExe).to.have.property('output').that.is.an('object');
+				expect(testExe.output).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.output).to.have.property('options').that.is.an('object');
+				expect(testExe.output.options).to.have.property('noclobber').that.is.true;
+				expect(testExe.output.options).to.have.property('append').that.is.false;
+			
+			});
+			it('should assign an ioFile object with options.noclobber property true, options.append property false, and other properties derived from the prefix/suffix node to return object input and output properties if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is lessgreat', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				testCmd.suffix = [{op: {type: "lessgreat", symbol: "<>"}, type: "Redirect", file: {type: "Word", text: "up/uranus"}}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('input').that.is.an('object');
+				expect(testExe.input).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.input).to.have.property('options').that.is.an('object');
+				expect(testExe.input.options).to.have.property('noclobber').that.is.true;
+				expect(testExe.input.options).to.have.property('append').that.is.false;
+				expect(testExe).to.have.property('output').that.is.an('object');
+				expect(testExe.output).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.output).to.have.property('options').that.is.an('object');
+				expect(testExe.output.options).to.have.property('noclobber').that.is.true;
+				expect(testExe.output.options).to.have.property('append').that.is.false;
+			
+			});
+			it('should assign an ioFile object with options.noclobber property true, options.append property true, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is dgreat', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				testCmd.suffix = [{op: {type: "dgreat", symbol: ">>"}, type: "Redirect", file: {type: "Word", text: "up/uranus"}}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('input').that.is.null;
+				expect(testExe).to.have.property('output').that.is.an('object');
+				expect(testExe.output).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.output).to.have.property('options').that.is.an('object');
+				expect(testExe.output.options).to.have.property('noclobber').that.is.true;
+				expect(testExe.output.options).to.have.property('append').that.is.true;
+			
+			});
+			it('should assign an ioFile object with options.noclobber property false, options.append property false, and other properties derived from the prefix/suffix node to return object output property if command name matches a member of global.Uwot.Constants.reserved, node type is Redirect, and node op.type is clobber', function() {
+			
+				var testAst = getTestAst();
+				var testCmd = Object.assign({}, testAst.commands[0]);
+				testCmd.id = uid.sync(24);
+				testCmd.name.text = 'pwd';
+				testCmd.suffix = [{op: {type: "clobber", symbol: ">|"}, type: "Redirect", file: {type: "Word", text: "up/uranus"}}];
+				var testExe = testRuntime.parseCommand(testCmd);
+				expect(testExe).to.have.property('isOp').that.is.false;
+				expect(testExe).to.have.property('input').that.is.null;
+				expect(testExe).to.have.property('output').that.is.an('object');
+				expect(testExe.output).to.have.property('text').that.equals(testCmd.suffix[0].file.text);
+				expect(testExe.output).to.have.property('options').that.is.an('object');
+				expect(testExe.output.options).to.have.property('noclobber').that.is.false;
+				expect(testExe.output.options).to.have.property('append').that.is.false;
+			
+			});
 		
 		});
 		describe('parseLoop(loopType, loopNodes)', function() {
