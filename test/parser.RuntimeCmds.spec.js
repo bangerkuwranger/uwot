@@ -997,17 +997,117 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('parseLoop(loopType, loopNodes)', function() {
 		
-			it('should be a function');
-			it('is not currently implemented and will only return an empty object');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.parseLoop).to.be.a('function');
+			
+			});
+			it('is not currently implemented and will only return an empty object', function() {
+			
+				expect(testRuntime.parseLoop()).to.be.an('object').that.is.empty;
+			
+			});
 		
 		});
 		describe('parseConditional(condType, condNodes, condArgs)', function() {
 		
-			it('should be a function');
-			it('should throw a TypeError if condType is not a string matching "If" or "LogicalExpression"');
-			it('should throw a TypeError if condNodes values is not an array');
-			it('should throw a TypeError if condType is LogicalExpression and condArgs is not an array with a property op that is a string');
-			it('should throw a TypeError if condType is If and condArgs is not an object with a property clause that is an Array');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.parseConditional).to.be.a('function');
+			
+			});
+			it('should throw a TypeError if condType is not a string matching "If" or "LogicalExpression"', function() {
+			
+				function testError1() {
+				
+					return testRuntime.parseConditional(null);
+				
+				}
+				function testError2() {
+				
+					return testRuntime.parseConditional('Nope');
+				
+				}
+				expect(testError1).to.throw(TypeError, 'invalid condType passed to parseConditional');
+				expect(testError2).to.throw(TypeError, 'invalid condType passed to parseConditional');
+			
+			});
+			it('should throw a TypeError if condNodes values is not an array', function() {
+			
+				function testError1() {
+				
+					return testRuntime.parseConditional('If');
+				
+				}
+				function testError2() {
+				
+					return testRuntime.parseConditional('If', null);
+				
+				}
+				expect(testError1).to.throw(TypeError, 'invalid condNodes passed to parseConditional');
+				expect(testError2).to.throw(TypeError, 'invalid condNodes passed to parseConditional');
+			
+			});
+			it('should throw a TypeError if condType is LogicalExpression and condArgs is not an object with a property op that is a string', function() {
+			
+				function testError1() {
+				
+					return testRuntime.parseConditional('LogicalExpression', ['obj'], {});
+				
+				}
+				function testError2() {
+				
+					return testRuntime.parseConditional('LogicalExpression', ['obj'], {op: {theOp: 'stuff'}});
+				
+				}
+				expect(testError1).to.throw(TypeError, 'condArgs.op passed to parseConditional must be a string');
+				expect(testError2).to.throw(TypeError, 'condArgs.op passed to parseConditional must be a string');
+			
+			});
+			it('should throw a TypeError if condType is If and condArgs is not an object with a property clause that is an Array', function() {
+			
+				function testError1() {
+				
+					return testRuntime.parseConditional('If', ['obj'], {});
+				
+				}
+				function testError2() {
+				
+					return testRuntime.parseConditional('If', ['obj'], {clause: {theClause: 'stuff'}});
+				
+				}
+				expect(testError1).to.throw(TypeError, 'condArgs.clause passed to parseConditional must be an array');
+				expect(testError2).to.throw(TypeError, 'condArgs.clause passed to parseConditional must be an array');
+			
+			});
 			it('should return an exe object if the operations complete without error');
 			it('should return an exe object with name property "LogicalExpression", op property "or" or "and", a left property that is an exe resulting from running parseCommandNode on condNodes[0], and a right property that is an exe resulting from running parseCommandNode on condNodes[1] if condType is "LogicalExpression"');
 			it('should return an exe object with name property "If", clause property that is an exe resulting from running parseCommandNode on condArgs.clause, and then property that is an exe resulting from running parseCommandNode on condNodes if condType is "If"');

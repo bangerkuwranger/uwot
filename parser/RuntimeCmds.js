@@ -423,7 +423,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	
 			if ('object' !== typeof condArgs || 'object' !== typeof condArgs.clause || !Array.isArray(condArgs.clause)) {
 		
-				throw new TypeError('condArgs.clause and condNodes passed to parseConditional must be arrays');
+				throw new TypeError('condArgs.clause passed to parseConditional must be an array');
 		
 			}
 			else {
