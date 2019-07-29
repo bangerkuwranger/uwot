@@ -1108,16 +1108,78 @@ describe('RuntimeCmds.js', function() {
 				expect(testError2).to.throw(TypeError, 'condArgs.clause passed to parseConditional must be an array');
 			
 			});
-			it('should return an exe object if the operations complete without error');
-			it('should return an exe object with name property "LogicalExpression", op property "or" or "and", a left property that is an exe resulting from running parseCommandNode on condNodes[0], and a right property that is an exe resulting from running parseCommandNode on condNodes[1] if condType is "LogicalExpression"');
-			it('should return an exe object with name property "If", clause property that is an exe resulting from running parseCommandNode on condArgs.clause, and then property that is an exe resulting from running parseCommandNode on condNodes if condType is "If"');
-			it('should return an exe object with a property else that is an exe that results from running parseCommandNode on condArgs.else if condType is "If" and condArgs.else is an Array');
+			it('should return an exe object if the operations complete without error', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				testResult = testRuntime.parseConditional('LogicalExpression', ['leftSide', 'rightSide'], {op: 'OR'});
+				expect(testResult).to.be.an('object').with.property('type').that.equals('LogicalExpression');
+				parseCommandNodeStub.restore();
+			
+			});
+			it('should return an exe object with name property "LogicalExpression", op property "or" or "and", a left property that is an exe resulting from running parseCommandNode on condNodes[0], and a right property that is an exe resulting from running parseCommandNode on condNodes[1] if condType is "LogicalExpression"', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				testResult = testRuntime.parseConditional('LogicalExpression', ['leftSide', 'rightSide'], {op: 'orr'});
+				expect(testResult).to.be.an('object').with.property('type').that.equals('LogicalExpression');
+				expect(testResult.left).to.equal('leftSide');
+				expect(testResult.right).to.equal('rightSide');
+				expect(testResult.op).to.equal('and');
+				parseCommandNodeStub.restore();
+			
+			});
+			it('should return an exe object with name property "If", clause property that is an exe resulting from running parseCommandNode on condArgs.clause, and then property that is an exe resulting from running parseCommandNode on condNodes if condType is "If"', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				testResult = testRuntime.parseConditional('If', ['firstThen', 'secondThen'], {clause: ['clause']});
+				expect(testResult).to.be.an('object').with.property('type').that.equals('If');
+				expect(testResult.clause).to.deep.equal(['clause']);
+				expect(testResult.then).to.deep.equal(['firstThen', 'secondThen']);
+				parseCommandNodeStub.restore();
+			
+			});
+			it('should return an exe object with a property else that is an exe that results from running parseCommandNode on condArgs.else if condType is "If" and condArgs.else is an Array', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				testResult = testRuntime.parseConditional('If', ['firstThen', 'secondThen'], {clause: ['clause'], else: ['elseClause']});
+				expect(testResult).to.be.an('object').with.property('type').that.equals('If');
+				expect(testResult.clause).to.deep.equal(['clause']);
+				expect(testResult.then).to.deep.equal(['firstThen', 'secondThen']);
+				expect(testResult.else).to.deep.equal(['elseClause']);
+				parseCommandNodeStub.restore();
+			
+			});
 		
 		});
 		describe('parseFunction(fName, fBody, fRedirect)', function() {
 		
-			it('should be a function');
-			it('is not implemented and only returns void or undefined');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.parseFunction).to.be.a('function');
+			
+			});
+			it('is not implemented and only returns void or undefined', function() {
+			
+				var testResult = testRuntime.parseFunction();
+				expect(testResult).to.be.undefined;
+				testRuntime.fx = new Map();
+				testResult = testRuntime.parseFunction();
+				expect(testResult).to.be.undefined;
+			
+			});
 		
 		});
 		describe('parsePipeline(astCommands)', function() {
