@@ -1300,18 +1300,110 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('outputLine(output, type)', function() {
 		
-			it('should be a function');
-			it('should default type arg to "ansi" if passed type arg value is not a string');
-			it('should serialize the output arg value to JSON prior to processing if it is not a string and output type is not "object" or "ansi"');
-			it('should serialize the output arg value to JSON prior to processing if type is "ansi" and it is passed as a non-array, non-Error object that does not have an array as its content property');
-			it('should return the output arg value as a string if type is not "object" or "ansi"');
-			it('should return the output arg value unchanged if type arg value is "object" and output is an object');
-			it('should return an object with property "content" assigned output value if type arg value is "object" and output arg value is not an object');
-			it('should return an object with a content property that is an array if type arg value is "ansi"');
-			it('should add an empty br tag member to the end of the content property array of the returned object if type arg value is "ansi"');
-			it('should add a red text span element member with content property "Error: \r\n", and a second member that is a string with the value of error message if type arg value is "ansi" and output arg value is an Error');
-			it('should add the value of the output arg to the return object content property array as a memeber if type arg value is "ansi" and it is an object with a content property that is an Array');
-			it('should add the value of the output arg as a string to the return object content property array as a memeber if type arg value is "ansi" and it is an not an Error or object with an array property "content"');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.outputLine).to.be.a('function');
+			
+			});
+			it('should default type arg to "ansi" if passed type arg value is not a string', function() {
+			
+				var testOutput = 'by the rivers of Babylon';
+				var testResult = testRuntime.outputLine(testOutput);
+				expect(testResult).to.be.an('object').with.property('content').that.contains(testOutput);
+			
+			});
+			it('should serialize the output arg value to JSON prior to processing if it is not a string and output type is not "object" or "ansi"', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'string');
+				expect(testResult).to.equal(JSON.stringify(testOutput));
+			
+			});
+			it('should serialize the output arg value to JSON prior to processing if type is "ansi" and it is passed as a non-array, non-Error object that does not have an array as its content property', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').that.contains(JSON.stringify(testOutput));
+			
+			});
+			it('should return the output arg value as a string if type is not "object" or "ansi"', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'string');
+				expect(testResult).to.be.a('string');
+			
+			});
+			it('should return the output arg value unchanged if type arg value is "object" and output is an object', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'object');
+				expect(testResult).to.deep.equal(testOutput);
+			
+			});
+			it('should return an object with property "content" assigned output value if type arg value is "object" and output arg value is not an object', function() {
+			
+				var testOutput = 'by the rivers of Babylon';
+				var testResult = testRuntime.outputLine(testOutput, 'object');
+				expect(testResult).to.be.an('object').with.property('content').that.contains(testOutput);
+			
+			});
+			it('should return an object with a content property that is an array if type arg value is "ansi"', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').is.an('array').that.contains(JSON.stringify(testOutput));
+			
+			});
+			it('should add an empty br tag member to the end of the content property array of the returned object if type arg value is "ansi"', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').is.an('array');
+				expect(testResult.content[1]).to.deep.equal({tag: 'br'});
+			
+			});
+			it('should add a red text span element member with content property "Error: \r\n", and a second member that is a string with the value of error message if type arg value is "ansi" and output arg value is an Error', function() {
+			
+				var testOutput = new Error('cannot remember Zion');
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').is.an('array');
+				expect(testResult.content[0]).to.deep.equal({
+					content: 'Error:' + "\r\n",
+					color: 'red'
+				});
+				expect(testResult.content[1]).to.equal(testOutput.message);
+			
+			});
+			it('should add the value of the output arg to the return object content property array as a member if type arg value is "ansi" and it is an object with a content property that is an Array', function() {
+			
+				var testOutput = {content: ['by the rivers of Babylon', 'there we sat down']};
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').is.an('array');
+				expect(testResult.content[0]).to.deep.equal(testOutput);
+			
+			});
+			it('should add the value of the output arg as a string to the return object content property array as a memeber if type arg value is "ansi" and it is an not an Error or object with an array property "content"', function() {
+			
+				var testOutput = {satDown: 'by the rivers of Babylon'};
+				var testResult = testRuntime.outputLine(testOutput, 'ansi');
+				expect(testResult).to.be.an('object').with.property('content').is.an('array')
+				expect(testResult.content[0]).to.equal(JSON.stringify(testOutput));
+			
+			});
 		
 		});
 		describe('executeMap(exeMap, outputType)', function() {
