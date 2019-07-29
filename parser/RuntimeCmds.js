@@ -701,7 +701,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 										}
 										// return results to the caller.
-										resolve(results);
+										return resolve(results);
 
 									}
 								
@@ -721,7 +721,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 
 										}
 										// return results to the caller.
-										resolve(results);
+										return resolve(results);
 
 									}
 							
@@ -739,6 +739,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 									try {
 								
 										inputData = await this.getInputForExe(exe.input, this.user._id);
+										if (inputData instanceof Error) {
+										
+											throw inputData;
+										
+										}
 								
 									}
 									catch(inputError) {
@@ -756,7 +761,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 	
 											}
 											// return results to the caller.
-											resolve(results);
+											return resolve(results);
 	
 										}
 						
@@ -843,7 +848,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 													}
 													// return results to the caller.
-													resolve(results);
+													return resolve(results);
 			
 												}
 										
@@ -864,7 +869,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 													}
 													// return results to the caller.
-													resolve(results);
+													return resolve(results);
 			
 												}
 										
@@ -889,7 +894,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 											}
 											// return results to the caller.
-											resolve(results);
+											return resolve(results);
 			
 										}
 					
@@ -912,7 +917,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			
 										}
 										// return results to the caller.
-										resolve(results);
+										return resolve(results);
 			
 									}
 							

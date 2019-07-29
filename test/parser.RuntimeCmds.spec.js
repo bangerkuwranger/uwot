@@ -90,6 +90,55 @@ describe('RuntimeCmds.js', function() {
 			global.Uwot.Exports.Cmd = require('../cmd');
 
 		}
+		if (-1 === Object.keys(global.Uwot.Bin).indexOf('sudo')) {
+		
+			global.Uwot.Bin.sudo = {
+				command: {
+					name: 'sudo',
+					description: 'Allows user to run commands with elevated privileges.',
+					requiredArguments: [],
+					optionalArguments: []
+				},
+				options: [],
+				path: global.Uwot.Constants.appRoot,
+				execute: function execute(args, options, app, user, callback, isSudo) {
+	
+					return callback(
+						false,
+						{
+							content: ['sudo what? sudo please...'],
+							color: 'magenta'
+						}
+					);
+	
+				},
+				help: function help(cb) {
+	
+					return cb(false, 'sudo &lt;command&gt; <br/> Either you can or you can\'t. There is no "maybe" in sudo.');
+	
+				},
+				matchOpt: function matchOpt(opt) {
+	
+					return {
+						name: '',
+						isOpt: false,
+						isLong: false,
+						isDefined: false,
+						hasArgs: false,
+						reqArgs: [],
+						optArgs: [],
+						assignedArg: ''
+					};
+	
+				}
+			};
+		
+		}
+		if (-1 === global.Uwot.Constants.reserved.indexOf('sudo')) {
+		
+			global.Uwot.Constants.reserved.push('sudo');
+		
+		}
 		if (-1 === global.Uwot.Constants.reserved.indexOf('pwd')) {
 		
 			global.Uwot.Constants.reserved.push('pwd');
@@ -1492,27 +1541,975 @@ describe('RuntimeCmds.js', function() {
 				});
 			
 			});
-			it('should include the result of this.outputLine called with a TypeError in return object output property array if a value in exeMap is not a non-null object');
-			it('should include the result of this.outputLine called with the value of its error property in return object output property array if a value in exeMap has a defined error property');
-			it('should not include a value in return object output array for a value in exeMap that is an operation if user is a guest, config value users:allowGuest is false, and its name property is not "login"');
-			it('should include a value in return object output array containing the result of this.outputLine called with a string containing the operation name for a value in exeMap that is an operation if user is a guest while config value users:allowGuest is true, user is an authenticated user, or its name property is "login"');
-			it('should include a value in return object operations array that matches the exeMap node value for a value in exeMap that is an operation if user is a guest while config value users:allowGuest is true, user is an authenticated user, or its name property is "login"');
-			it('should not include a value in return object output array for a value in exeMap that is not an operation if user is a guest and config value users:allowGuest is false');
-			it('should attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe if user is a guest and config value users:allowGuest is true or user is authenticated');
-			it('should add a member to return object output array value containing the result of this.outputLine called with an input error if user is a guest and config value users:allowGuest is true or user is authenticated and attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe results in an input error');
-			it('should add inputData as the first element in exe.args array prior to execution attempt if attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe successfully returns a string of inputData and user is a guest while config value users:allowGuest is true or user is an authenticated user');
-			it('should use an Error as the first argument in getConsoleOutputForExe if the execute method call returns an error to callback for a non-operation member of exeMap for an allowed user');
-			it('should use the result returned to the execute method callback as the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback and its name property is "sudo" for a non-operation member of exeMap for an allowed user');
-			it('should use the result of this.outputLine called with the result returned to the execute method callback and "object" for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback and the result.outputType is "object" for a non-operation member of exeMap for an allowed user');
-			it('should use the result of this.outputLine called with the output property of result returned to the execute method callback and "object" for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback and the result.outputType is "object" and result.output is an object for a non-operation member of exeMap for an allowed user');
-			it('should assign value of redirect property of result returned to the execute method callback to return object redirect property if the execute method call does not return an error to callback, the result.outputType is "object", and the result redirect property is a string for a non-operation member of exeMap for an allowed user');
-			it('should assign values of cookies property of result returned to the execute method callback to to matched keys of return object cookies property if the execute method call does not return an error to callback, the result.outputType is "object", and the result cookies property is a non-null object for a non-operation member of exeMap for an allowed user');
-			it('should use the result of this.outputLine called with the result returned to the execute method callback and its outputType property value for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback, the result.outputType is not "object", and result.output is not an object for a non-operation member of exeMap for an allowed user');
-			it('should use the result of this.outputLine called with the output property of result returned to the execute method callback and its outputType property value for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback, the result.outputType is not "object", and result.output is an object for a non-operation member of exeMap for an allowed user');
-			it('should assign value of cwd property of result returned to the execute method callback to return object cwd property if the execute method call does not return an error to callback, the result is an object, and the result cwd property is a string for a non-operation member of exeMap for an allowed user');
-			it('should attempt to get consoleOutput value using getConsoleOutputForExe with outputData for a non-operation member of exeMap for an allowed user if execute method call does not return an error, and should add the result to the return object output array if the exeMap member output property is null');
-			it('should add the value of exeMap member output property to the return object output array if the exeMap member output property is not null and the getConsoleOutputForExe call does not throw an error');
-			it('should add the result of outputLine called with the output error to the return object output array if the getConsoleOutputForExe call does throw an error');
+			it('should include the result of this.outputLine called with a TypeError in return object output property array if a value in exeMap is not a non-null object', function() {
+			
+				var testMap = new Map([[0, null]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnErrorMessageString(err) {
+				
+					return err.message;
+				
+				});
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains('exe with index 0 is invalid')
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should include the result of this.outputLine called with the value of its error property in return object output property array if a value in exeMap has a defined error property', function() {
+			
+				var testError = new Error('test exe error');
+				var testMap = new Map([[0, {error: testError}]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnErrorMessageString(err) {
+				
+					return err.message;
+				
+				});
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains(testError.message);
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should not include a value in return object output array for a value in exeMap that is an operation if user is a guest, config value users:allowGuest is false, and its name property is not "login"', function() {
+			
+				var testExe = getTestExe();
+				testExe.isOp = true;
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnErrorMessageString(err) {
+				
+					return err.message;
+				
+				});
+				testRuntime.user.uName = 'guest';
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains('config does not allow guest users. use the "login" command to begin your session.');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should include a value in return object output array containing the result of this.outputLine called with a string containing the operation name for a value in exeMap that is an operation if user is a guest while config value users:allowGuest is true, user is an authenticated user, or its name property is "login"', function() {
+			
+				var testExe = getTestExe();
+				testExe.isOp = true;
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal');
+				configGetValStub.onCall(0).returns(false);
+				configGetValStub.onCall(1).returns(false);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains('operation ' + testExe.name);
+					testRuntime.user.uName = 'guest';
+					testExe.name = 'login';
+					testMap.set(0, testExe);
+					return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+					
+						expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains('operation ' + testExe.name);
+					
+					}).catch((e) => {
+				
+						throw e;
+				
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should include a value in return object operations array that matches the exeMap node value for a value in exeMap that is an operation if user is a guest while config value users:allowGuest is true, user is an authenticated user, or its name property is "login"', function() {
+			
+				var testExe = getTestExe();
+				testExe.isOp = true;
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal');
+				configGetValStub.onCall(0).returns(false);
+				configGetValStub.onCall(1).returns(false);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('operations').that.is.an('array').that.contains(testExe);
+					testRuntime.user.uName = 'guest';
+					testExe.name = 'login';
+					testMap.set(0, testExe);
+					return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+					
+						expect(testResult).to.be.an('object').with.property('operations').that.is.an('array').that.contains(testExe);
+					
+					}).catch((e) => {
+				
+						throw e;
+				
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should not include a value in return object output array for a value in exeMap that is not an operation if user is a guest and config value users:allowGuest is false', function() {
+			
+				var testExe = getTestExe();
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnErrorMessageString(err) {
+				
+					return err.message;
+				
+				});
+				testRuntime.user.uName = 'guest';
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array').that.contains('config does not allow guest users. use the "login" command to begin your session.');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe if user is a guest and config value users:allowGuest is true or user is authenticated', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.output = null;
+				var testMap = new Map([[0, testExe]]);
+				var testInputs = [];
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					testInputs.push(null);
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						outputType: 'object',
+						output: JSON.stringify(args)
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testInputs[0]).to.be.null;
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should add a member to return object output array value containing the result of this.outputLine called with an input error if user is a guest and config value users:allowGuest is true or user is authenticated and attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe results in an input error', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnError(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return reject(new Error('test input Error'));
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						outputType: 'object',
+						output: JSON.stringify(args)
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test input Error');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should add inputData as the first element in exe.args array prior to execution attempt if attempt to get the input for a command for a value in exeMap that is not an operation using this.getInputFoeExe successfully returns a string of inputData and user is a guest while config value users:allowGuest is true or user is an authenticated user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = [];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnString(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve('testInputArg');
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						outputType: 'object',
+						output: JSON.stringify(args)
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an('object').with.property('output').that.equals('["testInputArg"]');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use an Error as the first argument in getConsoleOutputForExe if the execute method call returns an error to callback for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = [];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					return cb(new Error('test theme execute error'), null);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test theme execute error');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use the result returned to the execute method callback as the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback and its name property is "sudo" for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'sudo';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = [];
+				var testSudoArg = getTestExe();
+				testSudoArg.input = null;
+				testSudoArg.output = null;
+				testSudoArg.name = 'theme';
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: 'test theme output'
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.deep.equal({
+						content: ['sudo what? sudo please...'],
+						color: 'magenta'
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use the result of this.outputLine called with the result returned to the execute method callback and "object" for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback, result.output is not an object, and the result.outputType is "object" for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					return {content: op.output};
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: 'test theme execute result',
+						outputType: 'object'
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an('object').with.property('content').that.equals('test theme execute result');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use the result of this.outputLine called with the output property of result returned to the execute method callback and "object" for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback and the result.outputType is "object" and result.output is an object for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						},
+						outputType: 'object'
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an('object').with.property('content').that.equals('test theme execute result');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should assign value of redirect property of result returned to the execute method callback to return object redirect property if the execute method call does not return an error to callback, the result.outputType is "object", and the result redirect property is a string for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						},
+						redirect: 'test theme execute redirect',
+						outputType: 'object'
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					console.log(testResult);
+					expect(testResult).to.be.an('object').with.property('redirect').that.equals('test theme execute redirect');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should assign values of cookies property of result returned to the execute method callback to to matched keys of return object cookies property if the execute method call does not return an error to callback, the result.outputType is "object", and the result cookies property is a non-null object for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						},
+						cookies: {
+							ok: 'chocoChip',
+							fav: 'pb',
+							death: 'raisin'
+						},
+						outputType: 'object'
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('cookies').that.is.an('object');
+					expect(testResult.cookies).to.have.property('ok').that.equals('chocoChip');
+					expect(testResult.cookies).to.have.property('fav').that.equals('pb');
+					expect(testResult.cookies).to.have.property('death').that.equals('raisin');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use the result of this.outputLine called with the result returned to the execute method callback and its outputType property value for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback, the result.outputType is not "object", and result.output is not an object for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testExecuteresult = {
+					output: 'test theme execute result',
+					cookies: {
+						ok: 'chocoChip',
+						fav: 'pb',
+						death: 'raisin'
+					},
+				};
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string' && 'object' === typeof op) {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					
+					return cb(false, testExecuteresult);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'string')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.equal(JSON.stringify(testExecuteresult));
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should use the result of this.outputLine called with the output property of result returned to the execute method callback and its outputType property value for the first argument in getConsoleOutputForExe if the execute method call does not return an error to callback, the result.outputType is not "object", and result.output is an object for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string') {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						},
+						cookies: {
+							ok: 'chocoChip',
+							fav: 'pb',
+							death: 'raisin'
+						},
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'string')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.equal('{"content":"test theme execute result","tag":"p"}');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should assign value of cwd property of result returned to the execute method callback to return object cwd property if the execute method call does not return an error to callback, the result is an object, and the result cwd property is a string for a non-operation member of exeMap for an allowed user', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string') {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						},
+						cwd: '/run/for/the/hills',
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'string')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('cwd').that.equals('/run/for/the/hills');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should attempt to get consoleOutput value using getConsoleOutputForExe with outputData for a non-operation member of exeMap for an allowed user if execute method call does not return an error, and should add the result to the return object output array if the exeMap member output property is null', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string') {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						}
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'ansi')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.deep.equal({
+						content: 'test theme execute result',
+						tag: 'p'
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should add the value of exeMap member output property to the return object output array if the exeMap member output property is not null and the getConsoleOutputForExe call does not throw an error', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = {
+					text: '/tmp/themeOut',
+					options: {
+						append: false,
+						noclobber: true
+					}
+				};
+				var testConsoleOutput = 'output to /tmp/themeOut via new file write was successful';
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string') {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(testConsoleOutput);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						}
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'ansi')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.equal(testConsoleOutput);
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should add the result of outputLine called with the output error to the return object output array if the getConsoleOutputForExe call does throw an error', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = {
+					text: '/tmp/themeOut',
+					options: {
+						append: false,
+						noclobber: true
+					}
+				};
+				var testOutputError = new Error('test output error');
+				testExe.args = ['cac'];
+				var testMap = new Map([[0, testExe]]);
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnOutputAsObj(op, tp) {
+				
+					if (tp === 'string') {
+					
+						return JSON.stringify(op);
+					
+					}
+					return op;
+				
+				});
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(null);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return reject(testOutputError);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = {
+						output: {
+							content: 'test theme execute result',
+							tag: 'p'
+						}
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeMap(testMap, 'ansi')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					console.log(testResult);
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.deep.equal(testOutputError);
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
 			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after determining that user is not allowed to execute current member of exeMap, all members of exeMap have attempted to execute');
 			it('should finally resolve if, after determining that user is not allowed to execute current member of exeMap, all members of exeMap have attempted to execute');
 			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after catching a thrown error during execute method call, all members of exeMap have attempted to execute');
