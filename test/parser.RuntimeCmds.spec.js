@@ -1265,7 +1265,7 @@ describe('RuntimeCmds.js', function() {
 				
 				});
 				var testResult = testRuntime.parsePipeline(testAstCommands);
-				expect(testResult).to.eventually.be.fulfilled.then((testStaticExe) => {
+				return expect(testResult).to.eventually.be.fulfilled.then((testStaticExe) => {
 				
 					expect(testStaticExe).to.be.an('object').with.property('type').that.equals('Static');
 				
@@ -1293,7 +1293,7 @@ describe('RuntimeCmds.js', function() {
 				
 				});
 				var testResult = testRuntime.parsePipeline(testAstCommands);
-				expect(testResult).to.eventually.be.rejectedWith(Error).that.has.property('message').that.equals('warp drive offline');
+				return expect(testResult).to.eventually.be.rejectedWith(Error).that.has.property('message').that.equals('warp drive offline');
 			
 			});
 		
@@ -1408,10 +1408,90 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('executeMap(exeMap, outputType)', function() {
 		
-			it('should be a function');
-			it('should return a Promise');
-			it('should return a Promise resolved with the result of this.outputLine called with a TypeError if exeMap arg value is not a Map object');
-			it('should return a Promise resolved with a unfilled results object (output & operations props are empty arrays, cookies is an empty object) if exeMap arg value is a Map with size less than one');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.executeMap).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				expect(testRuntime.executeMap()).to.be.an.instanceof(Promise);
+			
+			});
+			it('should return a Promise resolved with an array the result of this.outputLine called with a TypeError and specified outputType if exeMap arg value is not a Map object', function() {
+			
+				var testError = new TypeError('exeMap passed to executeMap must be an instance of Map');
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').callsFake(function returnErrorMessageString(err) {
+				
+					return err.message;
+				
+				});
+				return expect(testRuntime.executeMap(null, 'object')).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(outputLineStub.getCall(0).args[0]).to.be.an.instanceof(TypeError).with.property('message').that.equals(testError.message);
+					expect(outputLineStub.getCall(0).args[1]).to.equal('object');
+					expect(testResult).to.be.an('array').that.contains(testError.message);
+					return expect(testRuntime.executeMap()).to.eventually.be.fulfilled.then((testResult) => {
+				
+						expect(outputLineStub.getCall(1).args[0]).to.be.an.instanceof(TypeError).with.property('message').that.equals(testError.message);
+						expect(outputLineStub.getCall(1).args[1]).to.equal('ansi');
+						expect(testResult).to.be.an('array').that.contains(testError.message);
+						return expect(testRuntime.executeMap(null, 'string')).to.eventually.be.fulfilled.then((testResult) => {
+				
+							expect(outputLineStub.getCall(2).args[0]).to.be.an.instanceof(TypeError).with.property('message').that.equals(testError.message);
+							expect(outputLineStub.getCall(2).args[1]).to.equal('string');
+							expect(testResult).to.be.an('array').that.contains(testError.message);
+				
+						}).catch((e) => {
+				
+							throw e;
+				
+						});
+				
+					}).catch((e) => {
+				
+						throw e;
+				
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should return a Promise resolved with a unfilled results object (output & operations props are empty arrays, cookies is an empty object) if exeMap arg value is a Map with size less than one', function() {
+			
+				return expect(testRuntime.executeMap(new Map())).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.deep.equal({
+						output: [],
+						operations: [],
+						cookies: {}
+					});
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
 			it('should include the result of this.outputLine called with a TypeError in return object output property array if a value in exeMap is not a non-null object');
 			it('should include the result of this.outputLine called with the value of its error property in return object output property array if a value in exeMap has a defined error property');
 			it('should not include a value in return object output array for a value in exeMap that is an operation if user is a guest, config value users:allowGuest is false, and its name property is not "login"');

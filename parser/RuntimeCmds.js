@@ -584,7 +584,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		return new Promise(async (resolve, reject) => {
 		
 			// make sure the map is a Map
-			if ('object' !== typeof exeMap && !(exeMap instanceof Map)) {
+			if ('object' !== typeof exeMap || !(exeMap instanceof Map)) {
 	
 				resolve([this.outputLine(new TypeError('exeMap passed to executeMap must be an instance of Map'), outputType)]);
 	
