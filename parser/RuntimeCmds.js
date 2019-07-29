@@ -494,7 +494,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					pipeExes.set(i, this.parseCommandNode(astCommands[i], output, input));
 		
 				}
-				this.executeChainedMap.then((result) => {
+				this.executeChainedMap(pipeExes).then((result) => {
 		
 					return resolve({
 						isOp: false, 

@@ -1184,10 +1184,118 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('parsePipeline(astCommands)', function() {
 		
-			it('should be a function');
-			it('should return a Promise resolved with a static exe if executeChainedMap completes without error');
-			it('should return a Promise rejected with an error if executeChainedMap returns an error');
-			it('should create the chained map from the array of nodes passed in astCommands by running parseCommandNode on each element');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.parsePipeline).to.be.a('function');
+			
+			});
+			it('should return a Promise rejected with a TypeError if astCommands arg value is not an Array', function() {
+			
+				expect(testRuntime.parsePipeline()).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('astCommands passed to parsePipeline must be an array');
+			
+			});
+			it('should loop through members of astCommands and generate a Map containing the result of parseCommandNode for each member prior to calling executeChainedMap', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				var testAstNode1 = getTestAst().commands[0];
+				var testAstNode2 = getTestAst().commands[0];
+				testAstNode1.name.text = 'set course';
+				testAstNode2.name.text = 'engage';
+				var testAstCommands = [testAstNode1, testAstNode2];
+				var resultChainedMap;
+				var testChainedMap = new Map([[0, testAstNode1], [1, testAstNode2]]);
+				var executeChainedMapStub = sinon.stub(testRuntime, 'executeChainedMap').callsFake(function returnResolved(cmap) {
+				
+					testChainedMap = cmap;
+					return new Promise((resolve, reject) => {
+					
+						return resolve({
+							output: cmap,
+							redirect: null,
+							cwd: '',
+							cookies: {}
+						});
+					
+					});
+				
+				});
+				var testResult = testRuntime.parsePipeline(testAstCommands);
+				expect(testChainedMap).to.be.an.instanceof(Map);
+				expect(testChainedMap.get(0)).to.deep.equal(testAstNode1);
+				expect(testChainedMap.get(1)).to.deep.equal(testAstNode2);
+			
+			});
+			it('should return a Promise resolved with a static exe if executeChainedMap completes without error', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				var testAstNode1 = getTestAst().commands[0];
+				var testAstNode2 = getTestAst().commands[0];
+				testAstNode1.name.text = 'set course';
+				testAstNode2.name.text = 'engage';
+				var testAstCommands = [testAstNode1, testAstNode2];
+				var resultChainedMap;
+				var testChainedMap = new Map([[0, testAstNode1], [1, testAstNode2]]);
+				var executeChainedMapStub = sinon.stub(testRuntime, 'executeChainedMap').callsFake(function returnResolved(cmap) {
+				
+					testChainedMap = cmap;
+					return new Promise((resolve, reject) => {
+					
+						return resolve({
+							output: cmap,
+							redirect: null,
+							cwd: '',
+							cookies: {}
+						});
+					
+					});
+				
+				});
+				var testResult = testRuntime.parsePipeline(testAstCommands);
+				expect(testResult).to.eventually.be.fulfilled.then((testStaticExe) => {
+				
+					expect(testStaticExe).to.be.an('object').with.property('type').that.equals('Static');
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an error if executeChainedMap returns an error', function() {
+			
+				var parseCommandNodeStub = sinon.stub(testRuntime, 'parseCommandNode').returnsArg(0);
+				var testAstNode1 = getTestAst().commands[0];
+				var testAstNode2 = getTestAst().commands[0];
+				testAstNode1.name.text = 'set course';
+				testAstNode2.name.text = 'engage';
+				var testAstCommands = [testAstNode1, testAstNode2];
+				var resultChainedMap;
+				var testChainedMap = new Map([[0, testAstNode1], [1, testAstNode2]]);
+				var executeChainedMapStub = sinon.stub(testRuntime, 'executeChainedMap').callsFake(function returnRejected(cmap) {
+				
+					testChainedMap = cmap;
+					return new Promise((resolve, reject) => {
+					
+						return reject(new Error('warp drive offline'));
+					
+					});
+				
+				});
+				var testResult = testRuntime.parsePipeline(testAstCommands);
+				expect(testResult).to.eventually.be.rejectedWith(Error).that.has.property('message').that.equals('warp drive offline');
+			
+			});
 		
 		});
 		describe('outputLine(output, type)', function() {
