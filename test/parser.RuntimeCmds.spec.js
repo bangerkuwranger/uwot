@@ -3209,6 +3209,27 @@ describe('RuntimeCmds.js', function() {
 				});
 			
 			});
+			it('should assign error value to prevResult, add the error to the resultMap, and move to the next node execution if calling the execute method for a command throws an error', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [3];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function throwError(args, opts, app, user, cb) {
+				
+					throw new Error('panic on the streets of London');
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.be.an.instanceof(Error).with.property('message').that.equals('panic on the streets of London');
+				
+				});
+			
+			});
 			it('should return the Promise resolved with a finalResult object if execute method call returns an error to callback and all commands in chainedExeMap have been executed', function() {
 			
 				var testFirstExe = getTestExe();
@@ -3315,13 +3336,263 @@ describe('RuntimeCmds.js', function() {
 				});
 			
 			});
-			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is not a non-null object');
-			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is not a non-null object, and all commands in chainedExeMap have been executed');
-			it('should assign result output property value to prevResult, add prevResult to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is a non-null object');
-			it('should assign value of result.redirect to the finalResult object property redirect if result is a non-null object with a string redirect property');
-			it('should assign values of result.cookies to matching keys in the finalResult object property cookies if result is a non-null object with a non-null object cookies property');
-			it('should assign value of result.cwd to the finalResult object property redirect if result is a non-null object with a string cwd property');
-			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is a non-null object, and all commands in chainedExeMap have been executed');
+			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is not a non-null object', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += args[i];
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(12);
+					expect(testArgs).to.deep.equal([3, 3, 9]);
+				
+				});
+			
+			});
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is not a non-null object, and all commands in chainedExeMap have been executed', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += args[i];
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(12);
+					expect(testArgs).to.deep.equal([3, 3, 9]);
+				
+				});
+			
+			});
+			it('should assign result output property value to prevResult, add prevResult to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is a non-null object', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var output = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							output += args[i];
+						
+						}
+					
+					}
+					var result = {
+						output
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(12);
+					expect(testArgs).to.deep.equal([3, 3, 9]);
+				
+				});
+			
+			});
+			it('should assign value of result.redirect to the finalResult object property redirect if result is a non-null object with a string redirect property; the last returned value of redirect should be the only one returned in the redirect property', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var output = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							output += args[i];
+						
+						}
+					
+					}
+					var result = {
+						output,
+						redirect: '/three/hundred/thirty/nine/' + output
+					};
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.redirect).to.equal('/three/hundred/thirty/nine/' + testResult.output);
+				
+				});
+			
+			});
+			it('should assign values of result.cookies to matching keys in the finalResult object property cookies if result is a non-null object with a non-null object cookies property; matching keys in different call results should be overwritten with the last value for the cookies key', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var output = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							output += args[i];
+						
+						}
+					
+					}
+					var result = {
+						output,
+						redirect: '/three/hundred/thirty/nine/' + output,
+						cookies: {overWrite: 'lastNo' + output}
+					};
+					result.cookies['c' + output] = 'cval' + output;
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.cookies).to.be.an('object');
+					expect(testResult.cookies.c3).to.equal('cval3');
+					expect(testResult.cookies.c12).to.equal('cval12');
+					expect(testResult.cookies.overWrite).to.equal('lastNo12');
+				
+				});
+			
+			});
+			it('should assign value of result.cwd to the finalResult object property redirect if result is a non-null object with a string cwd property; last cwd property passed should be the only string returned in cwd property', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [3];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var output = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							output += args[i];
+						
+						}
+					
+					}
+					var result = {
+						output,
+						redirect: '/three/hundred/thirty/nine/' + output,
+						cookies: {overWrite: 'lastNo' + output},
+						cwd: output + '/feet/under'
+					};
+					result.cookies['c' + output] = 'cval' + output;
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.cwd).to.equal('6/feet/under');
+				
+				});
+			
+			});
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is a non-null object, and all commands in chainedExeMap have been executed', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [3];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var output = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							output += args[i];
+						
+						}
+					
+					}
+					var result = {
+						output,
+						redirect: '/three/hundred/thirty/nine/' + output,
+						cookies: {overWrite: 'lastNo' + output},
+						cwd: output + '/feet/under'
+					};
+					result.cookies['c' + output] = 'cval' + output;
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(6);
+				
+				});
+			
+			});
 		
 		});
 		describe('fileOutputConsoleString(fileName, opts, successful)', function() {
