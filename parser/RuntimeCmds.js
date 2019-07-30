@@ -943,13 +943,14 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					// i is internal iterator incremented upon commencement of exeMap key processing
 					for (let i = 0; i < chainedExeMap.size; i++) {
 		
+						let exeIdx = i;
 						// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
 						var exe = chainedExeMap.get(i);
 						// if it's not a non-null object, it's not a valid exe. chained result is an error.
 						if ('object' !== typeof exe || null === exe) {
 			
 							i = chainedExeMap.size;
-							return reject(new TypeError('exe with index ' + i + ' is invalid'));
+							return reject(new TypeError('exe with index ' + exeIdx + ' is invalid'));
 							
 						}
 						// if exe generated an error during the AST parsing; chained result is that error.
@@ -964,7 +965,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						else if (exe.isOp) {
 				
 							i = chainedExeMap.size;
-							return reject(new Error('exe with index ' + i + ' is an operation, which invalidates the pipeline'));
+							return reject(new TypeError('exe with index ' + exeIdx + ' is an operation, which invalidates the pipeline'));
 			
 						}
 						// this isn't a drill (or an operation). The node is a command, and the server is gonna have to do stuff.
@@ -993,6 +994,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											if (j >= chainedExeMap.size) {
 		
 												// return results to the caller.
+												finalResult.output = prevResult;
 												return resolve(finalResult);
 		
 											}
@@ -1007,6 +1009,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											if (j >= chainedExeMap.size) {
 		
 												// return results to the caller.
+												finalResult.output = prevResult;
 												resolve(finalResult);
 		
 											}
@@ -1044,6 +1047,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											if (j >= chainedExeMap.size) {
 		
 												// return results to the caller.
+												finalResult.output = prevResult;
 												resolve(finalResult);
 		
 											}
@@ -1058,6 +1062,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											if (j >= chainedExeMap.size) {
 		
 												// return results to the caller.
+												finalResult.output = prevResult;
 												resolve(finalResult);
 		
 											}
@@ -1076,6 +1081,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 									if (j >= chainedExeMap.size) {
 		
 										// return results to the caller.
+										finalResult.output = prevResult;
 										resolve(finalResult);
 		
 									}

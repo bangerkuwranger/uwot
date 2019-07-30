@@ -3058,19 +3058,263 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('executeChainedMap(chainedExeMap)', function() {
 		
-			it('should be a function');
-			it('should return a Promise');
-			it('should return a Promise rejected with a TypeError if chainedExeMap is not a Map object');
-			it('should return a Promise rejected with a TypeError if chainedExeMap is an empty Map object');
-			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is not a non-null object');
-			it('should return a Promise rejected with the value of the member error property if any member of chainedExeMap has a defined error property');
-			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is an operation');
-			it('should add the result of the previous command execution to the beginning of the current node args array prior to execution if it is not the first member of chainedExeMap');
-			it('should return a Promise rejected with an Error if user does not have permission to execute any member of chainedExeMap');
-			it('should assign error value to prevResult, add the error to the resultMap, and move to the next node execution if calling the execute method for a command returns an error to the callback');
-			it('should return the Promise resolved with a finalResult object if execute method call returns an error to callback and all commands in chainedExeMap have been executed');
-			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and exe.name is "sudo"');
-			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, exe.name is sudo, and all commands in chainedExeMap have been executed');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.executeChainedMap).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				expect(testRuntime.executeChainedMap().catch((e) => {})).to.be.an.instanceof(Promise);
+			
+			});
+			it('should return a Promise rejected with a TypeError if chainedExeMap is not a Map object', function() {
+			
+				return expect(testRuntime.executeChainedMap()).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('chainedExeMap passed to executeChainedMap must be an instance of Map');
+			
+			});
+			it('should return a Promise rejected with a TypeError if chainedExeMap is an empty Map object', function() {
+			
+				return expect(testRuntime.executeChainedMap(new Map())).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('chainedExeMap passed to executeChainedMap must not be empty');
+			
+			});
+			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is not a non-null object', function() {
+			
+				return expect(testRuntime.executeChainedMap(new Map([[0, null]]))).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('exe with index 0 is invalid');
+			
+			});
+			it('should return a Promise rejected with the value of the member error property if any member of chainedExeMap has a defined error property', function() {
+			
+				var testErrorExe = getTestExe();
+				testErrorExe.error = new Error('test exe prop error');
+				return expect(testRuntime.executeChainedMap(new Map([[0, testErrorExe]]))).to.eventually.be.rejectedWith(Error).with.property('message').that.equals('test exe prop error');
+			
+			});
+			it('should return a Promise rejected with a TypeError if any member of chainedExeMap is an operation', function() {
+			
+				var testOpExe = getTestExe();
+				testOpExe.isOp = true;
+				return expect(testRuntime.executeChainedMap(new Map([[0, testOpExe]]))).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('exe with index 0 is an operation, which invalidates the pipeline');
+			
+			});
+			it('should add the result of the previous command execution to the beginning of the current node args array prior to execution if it is not the first member of chainedExeMap', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += args[i];
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(12);
+					expect(testArgs).to.deep.equal([3, 3, 9]);
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error if user does not have permission to execute any member of chainedExeMap', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [9];
+				testArgs = [];
+				testRuntime.user.uName = 'guest';
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += args[i];
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.rejectedWith(Error).with.property('message').that.equals('user does not have permissions to execute this command');
+			
+			});
+			it('should assign error value to prevResult, add the error to the resultMap, and move to the next node execution if calling the execute method for a command returns an error to the callback', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [3];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+						
+						}
+						return cb(false, result);
+					
+					}
+					return cb(new Error('test execute error'), null);
+					
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(3);
+					expect(testArgs[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test execute error');
+				
+				});
+			
+			});
+			it('should return the Promise resolved with a finalResult object if execute method call returns an error to callback and all commands in chainedExeMap have been executed', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [];
+				testSecondExe.name = 'theme';
+				testSecondExe.args = [3];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 1;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							if (args[i] === 4) {
+							
+								return cb(new Error('test execute error'), null);
+							
+							}
+							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+						
+						}
+						return cb(false, result);
+					
+					}
+					return cb(new Error('test execute error'), null);
+					
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[1, testFirstExe], [0, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.be.an.instanceof(Error).with.property('message').that.equals('test execute error');
+				
+				});
+			
+			});
+			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and exe.name is "sudo"', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'sudo';
+				testSecondExe.args = [testFirstExe, 9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[1, testFirstExe], [0, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult.output).to.equal(3);
+					expect(testArgs[0]).to.deep.equal({ content: [ 'sudo what? sudo please...' ], color: 'magenta' });
+					expect(testArgs[1]).to.equal(3);
+				
+				});
+			
+			});
+			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, exe.name is sudo, and all commands in chainedExeMap have been executed', function() {
+			
+				var testFirstExe = getTestExe();
+				var testSecondExe = getTestExe();
+				testFirstExe.name = 'theme';
+				testFirstExe.args = [3];
+				testSecondExe.name = 'sudo';
+				testSecondExe.args = [testFirstExe, 9];
+				testArgs = [];
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnError(args, opts, app, user, cb) {
+				
+					var result = 0;
+					if ('object' == typeof args && Array.isArray(args) && args.length > 0) {
+					
+						testArgs = testArgs.concat(args);
+						for (let i = 0; i < args.length; i++) {
+						
+							result += args[i];
+						
+						}
+					
+					}
+					return cb(false, result);
+				
+				});
+				return expect(testRuntime.executeChainedMap(new Map([[0, testFirstExe], [1, testSecondExe]]))).to.eventually.be.fulfilled.then((testResult) => {
+
+					expect(testResult.output).to.be.an('object').with.property('color').that.equals('magenta');
+					expect(testArgs).to.deep.equal([3]);
+				
+				});
+			
+			});
 			it('should assign result value to prevResult, add the result to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is not a non-null object');
 			it('should return the Promise resolved with a finalResult object if execute method call does not return an error to callback, result is not a non-null object, and all commands in chainedExeMap have been executed');
 			it('should assign result output property value to prevResult, add prevResult to the resultMap, and move to the next node execution if calling the execute method for a command does not return an error to the callback and result is a non-null object');
