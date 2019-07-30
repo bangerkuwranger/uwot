@@ -611,23 +611,19 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					// i is internal iterator incremented upon commencement of exeMap key processing
 					for (let i = 0; i < exeMap.size; i++) {
 		
+						let exeIdx = i;
+// 						console.log(exeMap.get(exeIdx) + ", idx " + exeIdx);
 						// exe is a node with cmd and metadata for processing it, including args, opts, whether it is an operation, redirect i/o, etc.
 						var exe = exeMap.get(i);
 						// if it's not a non-null object, it's not a valid exe. add an error to results.output array and move on to the next exe
 						if ('object' !== typeof exe || null === exe) {
 			
-							results.output.push(this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType));
+							results.output[exeIdx] = this.outputLine(new TypeError('exe with index ' + i + ' is invalid'), outputType);
 							j++;
 							if (j >= exeMap.size) {
-			
-								// if after all of that there's no output or operations and user isn't allowed to do stuff
-								// it means guests are disallowed by config and user isn't authenticated.
-								// poke the user with a stick so they log in.
-								if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 
-									results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-
-								}
+								// previous logic will insure there is at least one member of results.output
+								// no need to check if it is empty
 								// return results to the caller.
 								resolve(results);
 
@@ -637,18 +633,12 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						// if exe generated an error during the AST parsing, add it to results.output and move on to the next exe
 						else if ('undefined' !== typeof exe.error) {
 			
-							results.output.push(this.outputLine(exe.error, outputType));
+							results.output[exeIdx] = (this.outputLine(exe.error, outputType));
 							j++;
 							if (j >= exeMap.size) {
 			
-								// if after all of that there's no output or operations and user isn't allowed to do stuff
-								// it means guests are disallowed by config and user isn't authenticated.
-								// poke the user with a stick so they log in.
-								if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-
-									results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-
-								}
+								// previous logic will insure there is at least one member of results.output
+								// no need to check if it is empty
 								// return results to the caller.
 								resolve(results);
 
@@ -658,7 +648,6 @@ class UwotRuntimeCmds extends AbstractRuntime {
 						// still good to go? wonders may never cease... begin pre-execution logic
 						else {
 			
-							
 							// TBD
 							// parse output of static exe
 							if('Static' === exe.type) {
@@ -687,19 +676,13 @@ class UwotRuntimeCmds extends AbstractRuntime {
 				
 								if (this.user.uName !== 'guest' || exe.name === 'login' || global.Uwot.Config.getVal('users', 'allowGuest')) {
 					
-									results.output.push(this.outputLine('operation ' + exe.name, outputType));
+									results.output[exeIdx] = (this.outputLine('operation ' + exe.name, outputType));
 									results.operations.push(exe);
 									j++;
 									if (j >= exeMap.size) {
 
-										// if after all of that there's no output or operations and user isn't allowed to do stuff
-										// it means guests are disallowed by config and user isn't authenticated.
-										// poke the user with a stick so they log in.
-										if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-
-											results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-
-										}
+										// previous logic will insure there is at least one member of results.output
+										// no need to check if it is empty
 										// return results to the caller.
 										return resolve(results);
 
@@ -748,18 +731,12 @@ class UwotRuntimeCmds extends AbstractRuntime {
 									}
 									catch(inputError) {
 								
-										results.output.push(this.outputLine(inputError, 'object'));
+										results.output[exeIdx] = (this.outputLine(inputError, 'object'));
 										j++;
 										if (j >= exeMap.size) {
 	
-											// if after all of that there's no output or operations and user isn't allowed to do stuff
-											// it means guests are disallowed by config and user isn't authenticated.
-											// poke the user with a stick so they log in.
-											if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-	
-												results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-	
-											}
+											// previous logic will insure there is at least one member of results.output
+											// no need to check if it is empty
 											// return results to the caller.
 											return resolve(results);
 	
@@ -834,7 +811,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											try {
 										
 												var consoleOutput = await this.getConsoleOutputForExe(outputData, exe.output, this.user._id);
-												results.output.push(exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
+												results.output[exeIdx] = ('object' !== typeof exe || null === exe || exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
 												j++;
 												// when execution is completed for all exe commands, we can return the results object
 												if (j >= exeMap.size) {
@@ -855,7 +832,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											}
 											catch(outputError) {
 										
-												results.output.push(this.outputLine(outputError, outputType));
+												results.output[exeIdx] = (this.outputLine(outputError, outputType));
 												j++;
 												// when execution is completed for all exe commands, we can return the results object
 												if (j >= exeMap.size) {
@@ -880,7 +857,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 									}
 									catch(e) {
 					
-										results.output.push(this.outputLine(e, outputType));
+										results.output[exeIdx] = (this.outputLine(e, outputType));
 										j++;
 										// when execution is completed for all exe commands, we can return the results object
 										if (j >= exeMap.size) {
