@@ -2058,7 +2058,6 @@ describe('RuntimeCmds.js', function() {
 				});
 				return expect(testRuntime.executeMap(testMap, 'object')).to.eventually.be.fulfilled.then((testResult) => {
 				
-					console.log(testResult);
 					expect(testResult).to.be.an('object').with.property('redirect').that.equals('test theme execute redirect');
 				
 				}).catch((e) => {
@@ -2509,14 +2508,259 @@ describe('RuntimeCmds.js', function() {
 				});
 			
 			});
-			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after determining that user is not allowed to execute current member of exeMap, all members of exeMap have attempted to execute');
-			it('should finally resolve if, after determining that user is not allowed to execute current member of exeMap, all members of exeMap have attempted to execute');
-			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after catching a thrown error during execute method call, all members of exeMap have attempted to execute');
-			it('should finally resolve if, after catching a thrown error during execute method call, all members of exeMap have attempted to execute');
-			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after catching an output error, all members of exeMap have attempted to execute');
-			it('should finally resolve if, after catching an output error, all members of exeMap have attempted to execute');
-			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after successfully adding consoleOutput or exe.output to return object output property array, all members of exeMap have attempted to execute');
-			it('should finally resolve if, after successfully adding consoleOutput or exe.output to return object output property array, all members of exeMap have attempted to execute');
+			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output and finally resolve if, after determining that user is not allowed to execute current member of exeMap, all members of exeMap have attempted to execute', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testExecuteErrorExe = getTestExe();
+				testExecuteErrorExe.name = 'theme';
+				testExecuteErrorExe.input = null;
+				testExecuteErrorExe.output = null;
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal');
+				configGetValStub.onCall(0).returns(false);
+				configGetValStub.onCall(1).returns(false);
+				testRuntime.user.uName = 'guest';
+				var testMap = new Map([[0, testExe], [1, testExecuteErrorExe]]);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(ei);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(eo instanceof Error ? eo : od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					if ('object' === typeof args && Array.isArray(args) && args.length > 1) {
+					
+						throw new Error('test execute error');
+					
+					}
+					var result = 'test theme execute result ' + globalBinThemeExecuteStub.callCount;
+					return cb(false, result);
+				
+				});
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an.instanceof(Error).with.property('message').that.equals('config does not allow guest users. use the "login" command to begin your session.');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should finally resolve if, after catching a thrown error during execute method call, all members of exeMap have attempted to execute', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testExecuteErrorExe = getTestExe();
+				testExecuteErrorExe.name = 'theme';
+				testExecuteErrorExe.input = null;
+				testExecuteErrorExe.output = null;
+				testExecuteErrorExe.args = ['throw', 'an', 'error'];
+				var testMap = new Map([[0, testExe], [1, testExecuteErrorExe]]);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(ei);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(eo instanceof Error ? eo : od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					if ('object' === typeof args && Array.isArray(args) && args.length > 1) {
+					
+						throw new Error('test execute error');
+					
+					}
+					var result = 'test theme execute result ' + globalBinThemeExecuteStub.callCount;
+					return cb(false, result);
+				
+				});
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[1]).to.be.an.instanceof(Error).with.property('message').that.equals('test execute error');
+					expect(testResult.output[0]).to.equal('test theme execute result 1');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should finally resolve if, after catching an output error, all members of exeMap have attempted to execute', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testOutputErrorExe = getTestExe();
+				testOutputErrorExe.name = 'theme';
+				testOutputErrorExe.input = null;
+				testOutputErrorExe.output = new Error('test output Error');
+				var testMap = new Map([[0, testExe], [1, testOutputErrorExe]]);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(ei);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(eo instanceof Error ? eo : od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = 'test theme execute result ' + globalBinThemeExecuteStub.callCount;
+					return cb(false, result);
+				
+				});
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[1]).to.be.an.instanceof(Error).with.property('message').that.equals(testOutputErrorExe.output.message);
+					expect(testResult.output[0]).to.equal('test theme execute result 1');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should check if a disallowed user has a return object with no output or operations, and add a message to implore user to login to output, if, after successfully adding consoleOutput or exe.output to return object output property array, all members of exeMap have attempted to execute', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testMap = new Map([[0, testExe], [1, testExe]]);
+				testRuntime.user.uName = 'guest';
+				var configGetValStub = sinon.stub(global.Uwot.Config, 'getVal').returns(false);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(ei);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve();
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = 'test theme execute result ' + globalBinThemeExecuteStub.callCount;
+					return cb(false, result);
+				
+				});
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.be.an.instanceof(Error).with.property('message').that.equals('config does not allow guest users. use the "login" command to begin your session.');
+					expect(testResult.output[1]).to.be.undefined;
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
+			it('should finally resolve if, after successfully adding consoleOutput or exe.output to return object output property array, all members of exeMap have attempted to execute', function() {
+			
+				var testExe = getTestExe();
+				testExe.name = 'theme';
+				testExe.input = null;
+				testExe.output = null;
+				var testMap = new Map([[0, testExe], [1, testExe]]);
+				var getInputForExeStub = sinon.stub(testRuntime, 'getInputForExe').callsFake(async function returnNull(ei, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(ei);
+					
+					});
+				
+				});
+				var getConsoleOutputForExeStub = sinon.stub(testRuntime, 'getConsoleOutputForExe').callsFake(async function returnOd(od, eo, uid) {
+				
+					return new Promise((resolve, reject) => {
+					
+						return resolve(od);
+					
+					});
+				
+				});
+				var globalBinThemeExecuteStub = sinon.stub(global.Uwot.Bin.theme, 'execute').callsFake(function returnArgsInResult(args, opts, app, user, cb) {
+				
+					var result = 'test theme execute result ' + globalBinThemeExecuteStub.callCount;
+					return cb(false, result);
+				
+				});
+				var outputLineStub = sinon.stub(testRuntime, 'outputLine').returnsArg(0);
+				return expect(testRuntime.executeMap(testMap)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.an('object').with.property('output').that.is.an('array');
+					expect(testResult.output[0]).to.equal('test theme execute result 1');
+					expect(testResult.output[1]).to.equal('test theme execute result 2');
+				
+				}).catch((e) => {
+				
+					throw e;
+				
+				});
+			
+			});
 			it('should finally resolve if, after catching an input error, all members of exeMap have attempted to execute', function() {
 			
 				var testExe = getTestExe();

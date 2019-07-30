@@ -811,7 +811,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 											try {
 										
 												var consoleOutput = await this.getConsoleOutputForExe(outputData, exe.output, this.user._id);
-												results.output[exeIdx] = ('object' !== typeof exe || null === exe || exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
+												if ('undefined' !== typeof consoleOutput) {
+												
+													results.output[exeIdx] = ('object' !== typeof exe || null === exe || exe.output === null ? consoleOutput : this.outputLine(consoleOutput, outputType));
+												
+												}
 												j++;
 												// when execution is completed for all exe commands, we can return the results object
 												if (j >= exeMap.size) {
@@ -819,6 +823,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 													// if after all of that there's no output or operations and user isn't allowed to do stuff
 													// it means guests are disallowed by config and user isn't authenticated.
 													// poke the user with a stick so they log in.
+													// this is highly unlikely to occur at this point in the logic flow.
 													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
 			
 														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
@@ -837,14 +842,8 @@ class UwotRuntimeCmds extends AbstractRuntime {
 												// when execution is completed for all exe commands, we can return the results object
 												if (j >= exeMap.size) {
 			
-													// if after all of that there's no output or operations and user isn't allowed to do stuff
-													// it means guests are disallowed by config and user isn't authenticated.
-													// poke the user with a stick so they log in.
-													if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-			
-														results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-			
-													}
+													// previous logic will insure there is at least one member of results.output
+													// no need to check if it is empty
 													// return results to the caller.
 													return resolve(results);
 			
@@ -862,14 +861,8 @@ class UwotRuntimeCmds extends AbstractRuntime {
 										// when execution is completed for all exe commands, we can return the results object
 										if (j >= exeMap.size) {
 			
-											// if after all of that there's no output or operations and user isn't allowed to do stuff
-											// it means guests are disallowed by config and user isn't authenticated.
-											// poke the user with a stick so they log in.
-											if (results.output.length < 1 && results.operations.length < 1 && this.user.uName === 'guest' && !global.Uwot.Config.getVal('users', 'allowGuest')) {
-			
-												results.output.push(this.outputLine(new Error('config does not allow guest users. use the "login" command to begin your session.'), outputType));
-			
-											}
+											// previous logic will insure there is at least one member of results.output
+											// no need to check if it is empty
 											// return results to the caller.
 											return resolve(results);
 			
