@@ -45,7 +45,7 @@ module.exports = function defaultCmdParser(args, callback) {
 	
 	}
 	var response = {};
-	if ('object' === typeof args && 'string' === typeof args.cmd && '' !== args.cmd) {
+	if ('object' === typeof args && null !== args && 'string' === typeof args.cmd && '' !== args.cmd) {
 
 		// get user id from args
 		var uid = args.isAuthenticated && 'string' === typeof args.userId && '' !== args.userId ? args.userId : null;
