@@ -1183,6 +1183,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		
 				var fsError;
 				var outputText = ansiToText(outputData, 'object');
+				if ('string' !== typeof userId) {
+				
+					userId = this.user._id;
+				
+				}
 				if (exeOutput.options.append) {
 			
 					fsError = global.Uwot.FileSystems[this.user._id].append(exeOutput.text, outputText);

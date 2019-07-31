@@ -15,6 +15,9 @@ const ansiToText = require('../output/ansiToText');
 
 const uid = require('uid-safe');
 
+var att = {};
+att.ansiToText = require('../output/ansiToText');
+
 const RuntimeCmds = require('../parser/RuntimeCmds');
 
 const getTestAst = function() {
@@ -160,6 +163,30 @@ describe('RuntimeCmds.js', function() {
 			return;
 
 		});
+		var fUid = getTestUser()._id;
+		global.Uwot.FileSystems[fUid] = {
+			resolvePath(path, exists) {
+			
+				return '/' + path;
+			
+			},
+			append(file, text) {
+			
+				return text;
+			
+			},
+			write(file, text) {
+			
+				return text;
+			
+			}
+		};
+	
+	});
+	after('remove global FS', function() {
+	
+		var fUid = getTestUser()._id;
+		delete global.Uwot.FileSystems[fUid];
 	
 	});
 	describe('UwotRuntimeCmds', function() {
@@ -3597,31 +3624,363 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('fileOutputConsoleString(fileName, opts, successful)', function() {
 		
-			it('should be a function');
-			it('should return a string containing value of fileName arg');
-			it('should return a string containing "successful" if value of successful arg is truthy');
-			it('should return a string containing "failed" if value of successful arg is falsey');
-			it('should return a string containing "append" if value of opts.append is truthy');
-			it('should return a string containing "new file write" if value of opts.noclobber is truthy');
-			it('should return a string containing "file overwrite" if value of opts.append and opts.noclobber is falsey');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.fileOutputConsoleString).to.be.a('function');
+			
+			});
+			it('should return a string containing value of fileName arg', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains(testFileName);
+			
+			});
+			it('should return a string containing "successful" if value of successful arg is truthy', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('successful');
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, 1)).to.be.a('string').that.contains('successful');
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, 'false')).to.be.a('string').that.contains('successful');
+			
+			});
+			it('should return a string containing "failed" if value of successful arg is falsey', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, false)).to.be.a('string').that.contains('failed');
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts)).to.be.a('string').that.contains('failed');
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, 0)).to.be.a('string').that.contains('failed');
+			
+			});
+			it('should return a string containing "append" if value of opts.append is truthy', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: true,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('append');
+				testOpts.append = 1;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('append');
+				testOpts.append = 'false';
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('append');
+			
+			});
+			it('should return a string containing "new file write" if value of opts.noclobber is truthy', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('new file write');
+				testOpts.noclobber = 1;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('new file write');
+				testOpts.noclobber = 'false';
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('new file write');
+			
+			});
+			it('should return a string containing "file overwrite" if value of opts.append and opts.noclobber is falsey', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: false
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('file overwrite');
+				testOpts.noclobber = 0;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('file overwrite');
+				delete testOpts.noclobber;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, true)).to.be.a('string').that.contains('file overwrite');
+			
+			});
+			it('should return a string containing "file overwrite" and "failed" if value of opts.append and opts.noclobber is falsey and successful is falsey', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: false,
+					noclobber: false
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, false)).to.be.a('string').that.contains('file overwrite failed');
+				testOpts.noclobber = 0;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts)).to.be.a('string').that.contains('file overwrite failed');
+				delete testOpts.noclobber;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, 0)).to.be.a('string').that.contains('file overwrite failed');
+			
+			});
+			it('should return a string containing "file overwrite" and "failed" if value of opts.append and opts.noclobber is falsey and successful is falsey', function() {
+			
+				var testFileName = 'Drisma';
+				var testOpts = {
+					append: true,
+					noclobber: true
+				};
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, false)).to.be.a('string').that.contains('append failed');
+				testOpts.append = 1;
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts)).to.be.a('string').that.contains('append failed');
+				testOpts.append = 'false';
+				expect(testRuntime.fileOutputConsoleString(testFileName, testOpts, 0)).to.be.a('string').that.contains('append failed');
+			
+			});
 		
 		});
 		describe('getConsoleOutputForExe(outputData, exeOutput, userId)', function() {
 		
-			it('should be a function');
-			it('should return a Promise');
-			it('should return a Promise rejected with a TypeError if exeOutput arg is not an object');
-			it('should return a Promise resolved with the value of outputData if exeOutput is null');
-			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.text arg is not a string');
-			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.options arg is not a non-null object');
-			it('should use the result of ansiToText with outputData arg value to generate text to output to file if exeOutput is a valid output object');
-			it('should use the user FileSystem append method to write outputText to existing file if exeOutput.options.append is truthy');
-			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is truthy, and append method call returns an error');
-			it('should use the user FileSystem resolvePath method to verify if file exists prior to write operation if exeOutput.options.append is falsey');
-			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is truthy, and file exists');
-			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is falsey & file exists, or file does not exist, and FileSystem write method call returns an error');
-			it('should use the user FileSystem write method to verify if file exists prior to write operation if exeOutput.options.append is falsey and noclobber is falsey & file exists, or file does not exist');
-			it('should return a Promise resolved with the result of fileOutputConsoleString if the FileSystem write or append operation completes without error');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.getConsoleOutputForExe).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				expect(testRuntime.getConsoleOutputForExe().catch((e) => { return; })).to.be.a('Promise');
+			
+			});
+			it('should return a Promise rejected with a TypeError if exeOutput arg is not an object', function() {
+			
+				return expect(testRuntime.getConsoleOutputForExe()).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('invalid output object passed to getConsoleOutputForExe');
+			
+			});
+			it('should return a Promise resolved with the value of outputData if exeOutput is null', function() {
+			
+				var testOutputData = 'I was having a sunny day';
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, null)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.equal(testOutputData);
+				
+				});
+			
+			});
+			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.text arg is not a string', function() {
+			
+				var testOutputData = 'I was having a sunny day';
+				var testExeOutput = {};
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('invalid output filename passed to getConsoleOutputForExe');
+			
+			});
+			it('should return a Promise rejected with a TypeError if exeOutput is not null and exeOutput.options arg is not a non-null object', function() {
+			
+				var testOutputData = 'I was having a sunny day';
+				var testExeOutput = {
+					text: 'Drisma'
+				};
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('invalid output options passed to getConsoleOutputForExe');
+				testExeOutput.options = null;
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('invalid output options passed to getConsoleOutputForExe');
+			
+			});
+			it('should use the result of ansiToText with outputData arg value to generate text to output to file if exeOutput is a valid output object', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: false,
+						noclobber: false
+					}
+				};
+				var fsWriteStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'write').callsFake(function returnErrorWithText(file, text) {
+				
+					return new Error(text);
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.rejectedWith(Error).with.property('message').that.contains(testOutputData.content[0]);
+			
+			});
+			it('should use the user FileSystem append method to write outputText to existing file if exeOutput.options.append is truthy', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: true,
+						noclobber: false
+					}
+				};
+				var fsAppendStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'append').callsFake(function returnTrue(file, text) {
+				
+					return true;
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.a('string').that.contains('append was successful');
+					expect(fsAppendStub.called).to.be.true;
+					expect(fsAppendStub.getCall(0).args[0]).to.equal(testExeOutput.text);
+					expect(fsAppendStub.getCall(0).args[1]).to.equal(testOutputData.content[0]);
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is truthy, and append method call returns an error', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: true,
+						noclobber: false
+					}
+				};
+				var fsAppendStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'append').callsFake(function returnError(file, text) {
+				
+					return new Error('test append error');
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.rejectedWith(Error).with.property('message').that.contains('test append error');
+			
+			});
+			it('should use the user FileSystem resolvePath method to verify if file exists prior to write operation if exeOutput.options.append is falsey', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: false,
+						noclobber: true
+					}
+				};
+				var fsResolvePathStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'resolvePath').callsFake(function returnErrorWithPath(path) {
+				
+					return new Error(path);
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.be.rejectedWith(Error).then((testResult) => {
+				
+					expect(fsResolvePathStub.called).to.be.true;
+					expect(fsResolvePathStub.getCall(0).args[0]).to.equal(testExeOutput.text);
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is truthy, and file exists', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: false,
+						noclobber: true
+					}
+				};
+				var fsResolvePathStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'resolvePath').callsFake(function returnErrorWithPath(path) {
+				
+					return '/' + path;
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(Error).with.property('message').that.contains('cannot overwrite: file exists and noclobber is true');
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error with a message containing result of fileOutputConsoleString if append is falsey, noclobber is falsey & file exists, or file does not exist, and FileSystem write method call returns an error', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: false,
+						noclobber: false
+					}
+				};
+				var fsResolvePathStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'resolvePath').callsFake(function returnErrorWithPath(path) {
+				
+					return '/' + path;
+				
+				});
+				var fsWriteStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'write').returns(new Error('test write error'));
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(Error).with.property('message').that.contains('test write error');
+				
+				});
+			
+			});
+			it('should return a Promise resolved with the result of fileOutputConsoleString if exeOutput.options.append is falsey and noclobber is falsey & file exists, or file does not exist, and the FileSystem write operation completes without error', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: false,
+						noclobber: true
+					}
+				};
+				var fsResolvePathStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'resolvePath').callsFake(function returnErrorWithPath(path) {
+				
+					return systemError.ENOENT({syscall: 'stat', target: path});
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.a('string').that.contains('new file write was successful');
+				
+				});
+			
+			});
+			it('should return a Promise resolved with the result of fileOutputConsoleString if the FileSystem append operation completes without error', function() {
+			
+				var testOutputData = {content: ['I was having a sunny day']};
+				var testExeOutput = {
+					text: 'Drisma',
+					options: {
+						append: true,
+						noclobber: false
+					}
+				};
+				var fsAppendStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'append').callsFake(function returnTrue(file, text) {
+				
+					return true;
+				
+				});
+				return expect(testRuntime.getConsoleOutputForExe(testOutputData, testExeOutput)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.a('string').that.contains('append was successful');
+				
+				});
+			
+			});
 		
 		});
 		describe('getInputForExe(exeInput, userId)', function() {
