@@ -179,6 +179,11 @@ describe('RuntimeCmds.js', function() {
 			
 				return text;
 			
+			},
+			readFile(file) {
+			
+				return file;
+			
 			}
 		};
 	
@@ -3985,15 +3990,119 @@ describe('RuntimeCmds.js', function() {
 		});
 		describe('getInputForExe(exeInput, userId)', function() {
 		
-			it('should be a function');
-			it('should return a Promise');
-			it('should return a Promise resolved with null if exeInput is null');
-			it('should return a Promise rejected with a TypeError if exeInput is not null or an object with a property type that equals "Word"');
-			it('should include the value of exeInput.text in the TypeError message if exeInput is not null or an object with a property type that equals "Word" but exeInput.text is a string');
-			it('should attempt to use user FileSystem method readFile called with exeInput.text to read data from specified input');
-			it('should return a Promise rejected with an Error if the readFile method call throws an error');
-			it('should return a Promise rejected with an Error if the readFile method call returns an error');
-			it('should return a Promise resolved with the result of the readFile method call if the process completes without error');
+			var testRuntime;
+			beforeEach(function() {
+			
+				var buildCommandsStub = sinon.stub(RuntimeCmds.prototype, 'buildCommands').callsFake(function setExes() {
+				
+					var exes = new Map();
+					this.exes = exes;
+					return exes;
+				
+				});
+				testRuntime = new RuntimeCmds(getTestAst(), getTestUser());
+				buildCommandsStub.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(testRuntime.getInputForExe).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				expect(testRuntime.getInputForExe().catch((e) => { return; })).to.be.a('Promise');
+			
+			});
+			it('should return a Promise resolved with null if exeInput is null', function() {
+			
+				return expect(testRuntime.getInputForExe(null)).to.eventually.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.be.null;
+				
+				});
+			
+			});
+			it('should return a Promise rejected with a TypeError if exeInput is not null or an object with a property type that equals "Word"', function() {
+			
+				return expect(testRuntime.getInputForExe('null')).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(TypeError).with.property('message').that.equals('exe input is invalid');
+				
+				});
+			
+			});
+			it('should include the value of exeInput.text in the TypeError message if exeInput is not null or an object with a property type that equals "Word" but exeInput.text is a string', function() {
+			
+				var testExeInput = {
+					type: 'Command',
+					text: 'theme'
+				};
+				return expect(testRuntime.getInputForExe(testExeInput)).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(TypeError).with.property('message').that.equals('exe input "theme" is invalid');
+				
+				});
+			
+			});
+			it('should attempt to use user FileSystem method readFile called with exeInput.text to read data from specified input', function() {
+			
+				var testExeInput = {
+					type: 'Word',
+					text: 'Drisma'
+				};
+				var fsReadFileStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'readFile').returns('I was having a sunny day, and so were you.');
+				return expect(testRuntime.getInputForExe(testExeInput)).to.be.fulfilled.then((testResult) => {
+				
+					expect(fsReadFileStub.called).to.be.true;
+					expect(fsReadFileStub.calledWith(testExeInput.text)).to.be.true;
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error if the readFile method call throws an error', function() {
+			
+				var testExeInput = {
+					type: 'Word',
+					text: 'Drisma'
+				};
+				var fsReadFileStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'readFile').throws(new Error('At night the fires had spread.'));
+				return expect(testRuntime.getInputForExe(testExeInput)).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(Error).with.property('message').that.equals('At night the fires had spread.');
+				
+				});
+			
+			});
+			it('should return a Promise rejected with an Error if the readFile method call returns an error', function() {
+			
+				var testExeInput = {
+					type: 'Word',
+					text: 'Drisma'
+				};
+				var fsReadFileStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'readFile').returns(new Error('At night the fires had spread.'));
+				return expect(testRuntime.getInputForExe(testExeInput)).to.be.rejected.then((testResult) => {
+				
+					expect(testResult).to.be.an.instanceof(Error).with.property('message').that.equals('At night the fires had spread.');
+				
+				});
+			
+			});
+			it('should return a Promise resolved with the result of the readFile method call if the process completes without error', function() {
+			
+				var drisma = "The Day in Drisma \n\r I was having a sunny day and so were you. We were all eating chocolate and birds didnÕt choke on our balloons. We had all won the war. Slavers and slaves made peace and drank nicely in little rows or however they felt like sitting without being rude. Many were taking lovely potions and you were so beautiful. We danced and I donÕt dance. We sang and you donÕt sing. Everyone was laughing and painting and dreaming the beautiful thoughts like bubbles. Money and war and oppression and religion had all died in their last battle. There were just enough clouds in the sky and there was just enough wind. I held your face in my arms and we wept. \n\r I kept waiting for something terrible to happen. A zeppelin was going to fall from the sky in flames, or the ground would shift and we would all be swallowed up. The armies of darkness would be sewn together from the dead and we would be forced to labor again until the end of the stars. Our sun would burn us to shit and die, cold and black. Music and love and art would die dramatic deaths while we died like hounds. Our wounds would never heal and our chains would strain, oiled with sweat and often blood. \n\r But our sun continued to shed photons at an even rate. Our slavers and our fathers said no cross words. All remained in Balance and wisdom grew. The simple and the stellar shared their gifts as the afternoonÕs brilliant blue faded into eveningÕs gentle gold. We all slept by the fires, friends and lovers in repose, rocking with the planetÕs great ocean. You smiled, and I peacefully faded away. \n\r At night the fires had spread. As I slept on, you screamed your murder on in the night as the fires grew. You fought on and on, but the fire was far too strong. You began to lose and cried out to me a gentle apology. I rose, slow and blurry, and could not see the fire. He had hidden himself in his great container. I remember now that you were born of the fire, not of the plain as I was. I grew confused, your sadness out of place in the quiet black night. I slipped back to my rest, and you were taken far away. \n\r None spoke of the spreading fire. None noticed. I was having a sunny day, and we relaxed by the waves. You were no longer there, but I refused to not see you. I was having a goddamn sunny day.";
+				var testExeInput = {
+					type: 'Word',
+					text: 'Drisma'
+				};
+				var fsReadFileStub = sinon.stub(global.Uwot.FileSystems[testRuntime.user._id], 'readFile').returns(drisma);
+				return expect(testRuntime.getInputForExe(testExeInput)).to.be.fulfilled.then((testResult) => {
+				
+					expect(testResult).to.equal(drisma);
+				
+				});
+			
+			});
 		
 		});
 

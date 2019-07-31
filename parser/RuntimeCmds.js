@@ -1238,6 +1238,11 @@ class UwotRuntimeCmds extends AbstractRuntime {
 		
 			if ('object' === typeof exeInput && null !== exeInput && 'string' === typeof exeInput.type && exeInput.type === 'Word') {
 			
+				if ('string' !== typeof userId) {
+				
+					userId = this.user._id;
+				
+				}
 				try {
 				
 					var inputData = global.Uwot.FileSystems[userId].readFile(exeInput.text);
