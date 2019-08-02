@@ -131,21 +131,254 @@ describe('defaultCmdParser.js', function() {
 			
 				delete r.cmdAst.commands[0].id;
 				expect(r).to.be.an('object').with.property('cmdAst').that.deep.equals(testCmdAst);
+				usersFindByIdStub.restore();
 				done();
 			
 			});
 		
 		});
-		it('should get a guest user instance from global.Uwot.Users if args.isAuthenticated is not truthy, or if args.userId is not a non-empty string');
-		it('should return an error if global.Uwot.Users.getGuest returns an error');
-		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful');
-		it('should get a user instance for args.userId from global.Uwot.Users if args.isAuthenticated is truthy, and args.userId is a non-empty string');
-		it('should return an error if global.Uwot.Users.findById returns an error');
-		it('should get a guest user instance from global.Uwot.Users if findById does not return a valid user object');
-		it('should return an error if global.Uwot.Users.getGuest returns an error after findById does not return a valid user object');
-		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful');
-		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful after findById does not return a valid user object');
-		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and valid user instance as args if findById returns a valid user object');
+		it('should get a guest user instance from global.Uwot.Users if args.isAuthenticated is not truthy, or if args.userId is not a non-empty string', function(done) {
+		
+			var testArgs = {isAuthenticated: false, userId: null, cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, getTestUser());
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(usersGetGuestStub.called).to.be.true;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error if global.Uwot.Users.getGuest returns an error', function(done) {
+		
+			var testArgs = {isAuthenticated: false, userId: null, cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, getTestUser());
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(new Error('test getGuest error'), null);
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r).to.be.null;
+				expect(e).to.be.an('Error').with.property('message').that.equals('test getGuest error');
+				expect(usersGetGuestStub.called).to.be.true;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return a response object with a runtime property resulting from calling the UwotRuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful', function(done) {
+		
+			var testArgs = {isAuthenticated: false, userId: null, cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, getTestUser());
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				delete r.cmdAst.commands[0].id;
+				expect(r).to.be.an('object').with.property('cmdAst').that.deep.equals(testCmdAst);
+				expect(r.runtime).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotRuntimeCmds');
+				expect(r.runtime.user.uName).to.equal('guest');
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should get a user instance for args.userId from global.Uwot.Users if args.isAuthenticated is truthy, and args.userId is a non-empty string', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, getTestUser());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				delete r.cmdAst.commands[0].id;
+				expect(r).to.be.an('object').with.property('runtime').with.property('user').that.has.property('uName').that.equals(getTestUser().uName);
+				usersFindByIdStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error if global.Uwot.Users.findById returns an error', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(new Error('test Users findById error'), null);
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r).null;
+				expect(e).to.be.an('Error').with.property('message').that.equals('test Users findById error');
+				usersFindByIdStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should get a guest user instance from global.Uwot.Users if findById does not return a valid user object', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, false);
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(usersGetGuestStub.called).to.be.true;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error if global.Uwot.Users.getGuest returns an error after findById does not return a valid user object', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, false);
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(new Error('test getGuest error'), null);
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r).to.be.null;
+				expect(e).to.be.an('Error').with.property('message').that.equals('test getGuest error');
+				expect(usersGetGuestStub.called).to.be.true;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful', function(done) {
+		
+			var testArgs = {isAuthenticated: false, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, false);
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r.runtime).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotRuntimeCmds');
+				expect(r.runtime.user).to.have.property('uName').that.equals('guest');
+				expect(usersFindByIdStub.called).to.be.false;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and guest user as args if calling getGuest is successful after findById does not return a valid user object', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, false);
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r.runtime).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotRuntimeCmds');
+				expect(r.runtime.user).to.have.property('uName').that.equals('guest');
+				expect(usersFindByIdStub.called).to.be.true;
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return a response object with a runtime property resulting from calling the RuntimeCmds constructor with response.cmdAst and valid user instance as args if findById returns a valid user object', function(done) {
+		
+			var testArgs = {isAuthenticated: true, userId: 'CDeOOrH0gOg791cZ', cmd: 'test command'};
+			var testCmdAst = bashParser(testArgs.cmd);
+			var usersFindByIdStub = sinon.stub(global.Uwot.Users, 'findById').callsFake(function returnTestUserToCb(uid, cb) {
+			
+				return cb(false, getTestUser());
+			
+			});
+			var usersGetGuestStub = sinon.stub(global.Uwot.Users, 'getGuest').callsFake(function returnTestUserToCb(cb) {
+			
+				return cb(false, getTestGuest());
+			
+			});
+			defaultCmdParser(testArgs, function(e, r) {
+			
+				expect(r.runtime).to.be.an('object').with.property('constructor').with.property('name').that.equals('UwotRuntimeCmds');
+				expect(r.runtime.user).to.have.property('uName').that.equals(getTestUser().uName);
+				usersFindByIdStub.restore();
+				usersGetGuestStub.restore();
+				done();
+			
+			});
+		
+		});
 		it('should call addAppInstance method with args.app as the argument on response.runtime prior to callback');
 		it('should call addInstanceSessionId with args.isid as the argument on response.runtime prior to callback');
 
