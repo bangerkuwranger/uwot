@@ -1,10 +1,14 @@
-var ansi = require('../output/ansi').outputAnsi;
+var ansi = require('../output/ansi');
 
 module.exports = function(args) {
 
 	return function(req, res, next) {
 	
-		res.ansi = ansi;
+		res.ansi = function outputAnsi(obj) {
+		
+			return this.json(ansi(obj));
+		
+		};
 		next();
 	
 	};
