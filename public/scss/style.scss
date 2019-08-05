@@ -166,6 +166,22 @@ body {
 						.ansi {
 							word-break: break-word;
 							text-indent: 4ch;
+
+							&.autoColContainer {
+								display: flex;
+								flex-wrap: wrap;
+								justify-content: space-between;
+								align-content: flex-start;
+								flex-direction: column;
+								max-height: 18vh;
+								max-width: 90vw;
+
+								> .autoColElement {
+									line-height: 1.5em;
+								}
+
+							}
+
 						}
 
 					}

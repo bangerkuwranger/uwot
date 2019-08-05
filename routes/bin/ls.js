@@ -92,10 +92,10 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 					else {
 					
 						i = 0;
-						executeResult.output.content = {tag: 'div', content: [], classes: ['autoColContainer']};
+						executeResult.output = {tag: 'div', content: [], classes: ['autoColContainer']};
 						resArr.forEach((fileName) => {
 						
-							executeResult.output.content.content.push({content: fileName, classes: ['autoColElement']});
+							executeResult.output.content.push({content: fileName, classes: ['autoColElement']});
 							if (++i >= resArr.length) {
 							
 								return callback(false, executeResult);

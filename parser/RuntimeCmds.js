@@ -78,6 +78,10 @@ class UwotRuntimeCmds extends AbstractRuntime {
 			this.results = results;
 			return cb(results);
 		
+		}).catch((e) => {
+		
+			return cb(e);
+		
 		});
 		
 	
