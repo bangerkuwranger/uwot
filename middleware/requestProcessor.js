@@ -8,7 +8,7 @@ function executeRuntime(runtime) {
 		
 			if (runtimeResults instanceof Error) {
 			
-				return reject(runtimeResults)
+				return reject(runtimeResults);
 			
 			}
 			return resolve(runtimeResults);
