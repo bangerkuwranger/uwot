@@ -150,8 +150,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 var sassResults = sassCompiler.renderAll();
-console.log('Stylesheet Compilation:');
-console.log(sassResults.processed.length + ' files processed with ' + sassResults.errors.length + ' errors');
+console.log('Stylesheet Compilation: ' + sassResults.processed.length + ' files processed with ' + sassResults.errors.length + ' errors');
 if (app.get('env') === 'development') {
 
 	var sassFiles = sassResults.processed.map((pFile) => {

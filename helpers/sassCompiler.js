@@ -47,7 +47,20 @@ function getArgs(filePath) {
 // filePath is relative to public/scss and does not include file ext
 function renderFile(filePath) {
 
-	var argsObj = getArgs(filePath);
+	var argsObj;
+	try {
+	
+		argsObj = module.exports.getArgs(filePath);
+	
+	}
+	catch(e) {
+	
+		return {
+			errors: [e],
+			source: filePath
+		};
+	
+	}
 	var renderData = sass.renderSync(argsObj);
 	var returnObj = {
 		source: argsObj.file,
@@ -99,7 +112,7 @@ function renderMainStyle() {
 		processed: [],
 		errors: []
 	};
-	var result = renderFile(MAIN_STYLE);
+	var result = module.exports.renderFile(MAIN_STYLE);
 	if (result.errors.length > 0) {
 	
 		returnObj.errors = returnObj.errors.concat(result.errors);
@@ -114,7 +127,6 @@ function renderMainStyle() {
 function renderLocalThemes() {
 
 	const THEME_DIR = path.join(BASE_DIR, 'scss/theme');
-	
 	var themes, returnObj = {
 		processed: [],
 		errors: []
@@ -144,7 +156,7 @@ function renderLocalThemes() {
 				
 					fileStat = fs.statSync(filePath);
 					var renderPath = 'theme/' + themes[i] + '/main';
-					var result = renderFile(renderPath);
+					var result = module.exports.renderFile(renderPath);
 					if (result.errors.length > 0) {
 	
 						returnObj.errors = returnObj.errors.concat(result.errors);
@@ -167,6 +179,15 @@ function renderLocalThemes() {
 			
 					}
 				
+				}
+			
+			}
+			else {
+			
+				if ((i + 1) >= themes.length) {
+		
+					return returnObj;
+		
 				}
 			
 			}
@@ -240,5 +261,6 @@ module.exports = {
 	renderMainStyle,
 	renderLocalThemes,
 	renderExternalThemes,
+	renderFile,
 	getArgs
 };
