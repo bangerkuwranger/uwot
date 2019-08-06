@@ -11,7 +11,7 @@ var session = require('express-session');
 var nedbSessionStore = require('nedb-session-store')(session);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var sassCompiler = require('./middleware/sassCompiler');
+var sassCompiler = require('./helpers/sassCompiler');
 
 var app = express();
 app.disable('x-powered-by');
@@ -148,7 +148,30 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-// app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(global.Uwot.Constants.etcDev, 'config.rb') : path.resolve(global.Uwot.Constants.etcProd, 'config.rb')}));
+
+var sassResults = sassCompiler.renderAll();
+console.log('Stylesheet Compilation:');
+console.log(sassResults.processed.length + ' files processed with ' + sassResults.errors.length + ' errors');
+if (app.get('env') === 'development') {
+
+	var sassFiles = sassResults.processed.map((pFile) => {
+	
+		return pFile.source;
+	
+	});
+	console.log('SCSS Files:');
+	sassFiles.forEach((fName) => {
+	
+		console.log(fName);
+	
+	});
+	sassResults.errors.forEach((sassError) => {
+	
+		console.error(sassError);
+	
+	});
+
+}
 
 if (app.get('env') === 'development') {
 	app.use(fileLog.info);
