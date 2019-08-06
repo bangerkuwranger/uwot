@@ -11,9 +11,10 @@ var session = require('express-session');
 var nedbSessionStore = require('nedb-session-store')(session);
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var compass = require('node-compass');
+var sassCompiler = require('./middleware/sassCompiler');
 
 var app = express();
+app.disable('x-powered-by');
 
 globalSetupHelper.initEnvironment();
 
@@ -147,7 +148,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(global.Uwot.Constants.etcDev, 'config.rb') : path.resolve(global.Uwot.Constants.etcProd, 'config.rb')}));
+// app.use(compass({ config_file: app.get('env') === 'development' ? path.resolve(global.Uwot.Constants.etcDev, 'config.rb') : path.resolve(global.Uwot.Constants.etcProd, 'config.rb')}));
 
 if (app.get('env') === 'development') {
 	app.use(fileLog.info);
