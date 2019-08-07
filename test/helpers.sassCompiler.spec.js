@@ -44,9 +44,15 @@ const getTestRender = function() {
 
 };
 
-const getTestRenderFile = function() {
+const getTestRenderFile = function(testPth) {
 
 	var argsObj = getTestArgs();
+	if ('string' === typeof testPth) {
+	
+		argsObj.file = `public/scss/${testPth}.scss`;
+		argsObj.outFile = `public/css/${testPth}.css`;
+	
+	}
 	return {
 		source: argsObj.file,
 		devMode: argsObj.outputStyle === 'expanded',
@@ -54,6 +60,20 @@ const getTestRenderFile = function() {
 		mapFile: argsObj.outFile + '.map',
 		errors: []
 	};
+
+};
+
+const getTestDirs = function() {
+
+	return [
+		'beard',
+		'bind',
+		'borg',
+		'bot',
+		'cac',
+		'clone',
+		'default'
+	];
 
 };
 
@@ -465,12 +485,128 @@ describe('sassCompiler.js', function() {
 			expect(sassCompiler.renderLocalThemes).to.be.a('function');
 		
 		});
-		it('should return an object with array properties "processed" and "errors"');
-		it('should call fs.readdirSync with an absolute path to public/scss/theme');
-		it('should add an Error to the errors property array of the returned object and return immediately if the fs.readdirSync call throws an error');
-		it('should return with empty array values for the processed and errors properties if the theme dir is empty (fs.readdirSync returns an empty array without error)');
-		it('should loop through every value in array returned by fs.readdirSync');
-		it('should call fs.statSync on each value returned by fs.readdirSync');
+		it('should return an object with array properties "processed" and "errors"', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').throws(new Error('test readdirSync error'));
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array');
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			readdirSyncStub.restore();
+		
+		});
+		it('should call fs.readdirSync with an absolute path to public/scss/theme', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').throws(new Error('test readdirSync error'));
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(readdirSyncStub.calledWith(themeDirPath)).to.be.true;
+			readdirSyncStub.restore();
+		
+		});
+		it('should add an Error to the errors property array of the returned object and return immediately if the fs.readdirSync call throws an error', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').throws(new Error('test readdirSync error'));
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test readdirSync error');
+			expect(testResult.processed).to.be.an('array').that.is.empty;
+			readdirSyncStub.restore();
+		
+		});
+		it('should return with empty array values for the processed and errors properties if the theme dir is empty (fs.readdirSync returns an empty array without error)', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.empty;
+			readdirSyncStub.restore();
+		
+		});
+		it('should loop through every value in array returned by fs.readdirSync', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			var processedThemes = testResult.processed.map((pt) => {
+			
+				var sourceArr = pt.source.split('/');
+				return sourceArr[3];
+			
+			});
+			expect(processedThemes).to.deep.equal(testDirs);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should call fs.statSync on each value returned by fs.readdirSync', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			for (let i = 0; i < testDirs.length; i++) {
+			
+				var themePath = path.join(themeDirPath, testDirs[i]);
+				expect(statSyncStub.calledWith(themePath)).to.be.true;
+			
+			}
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
 		it('should not add values to errors or processed array properties of returned object for any value in themes dir that is not a dir');
 		it('should return without adding values to errors or processed array properties of returned object if last value in themes dir is not a dir');
 		it('should call fs.statSync for a file "main.scss" in each directory in themes dir');
