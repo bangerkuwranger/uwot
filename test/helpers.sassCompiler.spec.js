@@ -1034,23 +1034,232 @@ describe('sassCompiler.js', function() {
 			expect(sassCompiler.renderExternalThemes).to.be.a('function');
 		
 		});
-		it('should not be implemented and should throw an Error indicating such');
+		it('should not be implemented and should throw an Error indicating such', function() {
+		
+			expect(sassCompiler.renderExternalThemes).to.throw(Error, 'this function is not yet implemented');
+		
+		});
 	
 	});
 	describe('renderAll()', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.renderAll).to.be.a('function');
 		
 		});
-		it('should return an object with array properties "processed" and "errors"');
-		it('should call renderMainStyle and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error');
-		it('should add an Error to the errors property array of the returned object if renderMainStyle call throws an error');
-		it('should call renderLocalThemes and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error');
-		it('should add an Error to the errors property array of the returned object if renderLocalThemes call throws an error');
-		it('should call renderExternalThemes and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error');
-		it('should add an Error to the errors property array of the returned object if renderExternalThemes call throws an error');
+		it('should return an object with array properties "processed" and "errors"', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [],
+				errors: []
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnEmpty() {
+			
+				return {
+					processed: [],
+					errors: []
+				};
+			
+			});
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array');
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should call renderMainStyle and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [
+					testRenderFileMain
+				],
+				errors: [
+					new Error('test renderMainStyle renderFile error')
+				]
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnEmpty() {
+			
+				return {
+					processed: [],
+					errors: []
+				};
+			
+			});
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.contains(testRenderFileMain);
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderMainStyle renderFile error');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should add an Error to the errors property array of the returned object if renderMainStyle call throws an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').throws(new Error('test renderMainStyle error'));
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnEmpty() {
+			
+				return {
+					processed: [],
+					errors: []
+				};
+			
+			});
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.is.empty;
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderMainStyle error');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should call renderLocalThemes and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [],
+				errors: []
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnProcs() {
+			
+				var procArr = [];
+				for (let i = 0; i < testDirs.length; i++) {
+			
+					let procVal = getTestRenderFile(`${testDirs[i]}/main`);
+					delete procVal.errors;
+					procArr.push(procVal);
+			
+				}
+				return {
+					processed: procArr,
+					errors: [
+						new Error('test renderLocalThemes renderFile error')
+					]
+				};
+			
+			});
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.is.not.empty;
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderLocalThemes renderFile error');
+			for (let i = 0; i < testDirs.length; i++) {
+		
+				let procSrc = `public/scss/${testDirs[i]}/main.scss`;
+				expect(testResult.processed[i].source).to.equal(procSrc);
+		
+			}
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should add an Error to the errors property array of the returned object if renderLocalThemes call throws an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [],
+				errors: []
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').throws(new Error('test renderLocalThemes error'));
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.is.empty;
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderLocalThemes error');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should call renderExternalThemes and add any values in its result property arrays, errors and processed, to the respective property arrays in the returned object if the call does not throw an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [],
+				errors: []
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnEmpty() {
+			
+				return {
+					processed: [],
+					errors: []
+				};
+			
+			});
+			var extThemeResult = getTestRenderFile('ext/tacoTuesday/main');
+			delete extThemeResult.errors;
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').returns({
+				processed: [
+					extThemeResult
+				],
+				errors: [
+					new Error('test renderExternalThemes renderFile error')
+				]
+			});
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.contains(extThemeResult);
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderExternalThemes renderFile error');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
+		it('should add an Error to the errors property array of the returned object if renderExternalThemes call throws an error', function() {
+		
+			var testDirs = getTestDirs();
+			var testRenderFileMain = getTestRenderFile('style');
+			delete testRenderFileMain.errors;
+			var renderMainStyleStub = sinon.stub(sassCompiler, 'renderMainStyle').returns({
+				processed: [],
+				errors: []
+			});
+			var renderLocalThemesStub = sinon.stub(sassCompiler, 'renderLocalThemes').callsFake(function returnEmpty() {
+			
+				return {
+					processed: [],
+					errors: []
+				};
+			
+			});
+			var renderExternalThemesStub = sinon.stub(sassCompiler, 'renderExternalThemes').throws(new Error('this function is not yet implemented'));
+			var testResult = sassCompiler.renderAll();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array').that.is.empty;
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('this function is not yet implemented');
+			renderMainStyleStub.restore();
+			renderLocalThemesStub.restore();
+			renderExternalThemesStub.restore();
+		
+		});
 	
 	});
 
