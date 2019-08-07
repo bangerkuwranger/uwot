@@ -64,20 +64,32 @@ function renderFile(filePath) {
 	}
 	catch(e) {
 	
+		filePath = 'string' === typeof filePath ? filePath : '';
 		return {
 			errors: [e],
 			source: filePath
 		};
 	
 	}
-	var renderData = sass.renderSync(argsObj);
-	var returnObj = {
+	var renderData, returnObj = {
 		source: argsObj.file,
 		devMode: argsObj.outputStyle === DEV_STYLE,
 		cssFile: argsObj.outFile,
 		mapFile: argsObj.outFile + '.map',
 		errors: []
 	};
+	try {
+	
+		renderData = sass.renderSync(argsObj);
+	
+	}
+	catch(e) {
+	
+		e.message = 'rendering ' + filePath + ' failed. - ' + e.message;
+		returnObj.errors.push(e);
+		return returnObj;
+	
+	}
 	if (renderData instanceof Error) {
 	
 		renderData.message = 'rendering ' + filePath + ' failed. - ' + renderData.message;

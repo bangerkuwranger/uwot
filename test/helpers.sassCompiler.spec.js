@@ -10,6 +10,40 @@ const expect = chai.expect;
 
 var sassCompiler;
 
+const getTestArgs = function() {
+
+	return {
+		file: "public/scss/test.scss",
+		includePaths: [
+			"public/scss/_partial",
+			"public/scss/_partial/compass",
+			"public/scss/theme"
+		],
+		linefeed: "lf",
+		omitSourceMapUrl: false,
+		outFile: "public/css/test.css",
+		outputStyle: "expanded",
+		sourceMap: true,
+	};
+
+};
+
+const getTestRender = function() {
+
+	return {
+		css: Buffer.from(`body #uwot {${sassCompiler.ENV_SPEC.EOL}  color: white;${sassCompiler.ENV_SPEC.EOL}  background-color: black;${sassCompiler.ENV_SPEC.EOL}}${sassCompiler.ENV_SPEC.EOL}${sassCompiler.ENV_SPEC.EOL}/*# sourceMappingURL=test.css.map */`),
+		map: Buffer.from('{"version":3,"sourceRoot":"","sources":["stdin"],"names":[],"mappings":"AAAM;EAAO;EAAa","file":"test.css"}'),
+		stats: {
+			"entry": "file",
+			"start": 1565190327053,
+			"end": 1565190327103,
+			"duration": 50,
+			"includedFiles": []
+		}
+	};
+
+};
+
 describe('sassCompiler.js', function() {
 
 	before(function() {
@@ -20,6 +54,11 @@ describe('sassCompiler.js', function() {
 	});
 	describe('getArgs(filePath)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.getArgs).to.be.a('function');
@@ -144,28 +183,208 @@ describe('sassCompiler.js', function() {
 	});
 	describe('renderFile(filePath)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.renderFile).to.be.a('function');
 		
 		});
-		it('should return an object with a string source property and an Array errors property');
-		it('should assign value of filePath arg to the source property, and an array with an error to the errors property, then immediately return if getArgs(filePath) throws an error');
-		it('should assign args.file value to the source property of the returned object if getArgs does not throw an error');
-		it('should assign true to the devMode property of the returned object if getArgs does not throw an error and args.outputStyle is "expanded"');
-		it('should assign false to the devMode property of the returned object if getArgs does not throw an error and args.outputStyle is "compressed"');
-		it('should assign the value of args.outFile to the cssFile property of the returned object if getArgs does not throw an error');
-		it('should assign the value of args.outFile + ".map" to the mapFile property of the returned object if getArgs does not throw an error');
-		it('should call sass.renderSync with the result of getArgs(filePath) to compile the SCSS to a CSS and source map');
-		it('should add an Error with a message containing "rendering {filePath} failed." to the errors property array of the returned object and immediately return if sass.renderSync returns an Error');
-		it('should call fs.outputFileSync with args.outFile and value of css property resulting from sass.renderSync as args');
-		it('should add an Error with message containing "writing css for [filePath] failed." to errors property array of returned object if fs.outputFileSync for the css file throws an error');
-		it('should call fs.outputFileSync with args.outFile + ".map" and value of map property resulting from sass.renderSync as args');
-		it('should add an Error with message containing "writing source map for [filePath] failed." to errors property array of returned object if fs.outputFileSync for the source map file throws an error');
+		it('should return an object with a string source property and an Array errors property', function() {
+		
+			var testPath = 'test';
+			var testResult = sassCompiler.renderFile();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult).to.be.an('object').with.property('source').that.is.a('string');
+		
+		});
+		it('should assign value of filePath arg to the source property, and an array with an error to the errors property, then immediately return if getArgs(filePath) throws an error', function() {
+		
+			var testPath = 'test';
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').throws(new Error('test getArgs error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test getArgs error');
+			expect(testResult.source).to.equal(testPath);
+			getArgsStub.restore();
+		
+		});
+		it('should assign args.file value to the source property of the returned object if getArgs does not throw an error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.source).to.equal(testArgs.file);
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should assign true to the devMode property of the returned object if getArgs does not throw an error and args.outputStyle is "expanded"', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			testArgs.outputStyle = 'expanded';
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.devMode).to.be.true;
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should assign false to the devMode property of the returned object if getArgs does not throw an error and args.outputStyle is "compressed"', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			testArgs.outputStyle = 'compressed';
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.devMode).to.be.false;
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should assign the value of args.outFile to the cssFile property of the returned object if getArgs does not throw an error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.cssFile).to.equal(testArgs.outFile);
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should assign the value of args.outFile + ".map" to the mapFile property of the returned object if getArgs does not throw an error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.mapFile).to.equal(`${testArgs.outFile}.map`);
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should call sass.renderSync with the result of getArgs(filePath) to compile the SCSS to a CSS and source map', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(sassRenderSyncStub.calledWith(testArgs)).to.be.true;
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should add an Error with a message containing "rendering {filePath} failed." to the errors property array of the returned object and immediately return if sass.renderSync throws an Error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').throws(new Error('thrown test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.contains('thrown test renderSync Error');
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should add an Error with a message containing "rendering {filePath} failed." to the errors property array of the returned object and immediately return if sass.renderSync returns an Error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(new Error('returned test renderSync Error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.contains('returned test renderSync Error');
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+		
+		});
+		it('should call fs.outputFileSync with args.outFile and value of css property resulting from sass.renderSync as args if sass.renderSync completes without error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var testRender = getTestRender();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(testRender);
+			var outputFileSyncStub = sinon.stub(fs, 'outputFileSync').returns(true);
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(outputFileSyncStub.getCall(0).args[0]).to.equal(testArgs.outFile);
+			expect(outputFileSyncStub.getCall(0).args[1]).to.equal(testRender.css);
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+			outputFileSyncStub.restore();
+		
+		});
+		it('should add an Error with message containing "writing css for [filePath] failed." to errors property array of returned object if fs.outputFileSync for the css file throws an error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var testRender = getTestRender();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(testRender);
+			var outputFileSyncStub = sinon.stub(fs, 'outputFileSync');
+			outputFileSyncStub.onCall(0).throws(new Error('test css write error'));
+			outputFileSyncStub.onCall(1).returns(true);
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.contains('test css write error');
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+			outputFileSyncStub.restore();
+		
+		});
+		it('should call fs.outputFileSync with args.outFile + ".map" and value of map property resulting from sass.renderSync as args', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var testRender = getTestRender();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(testRender);
+			var outputFileSyncStub = sinon.stub(fs, 'outputFileSync').returns(true);
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(outputFileSyncStub.getCall(1).args[0]).to.equal(`${testArgs.outFile}.map`);
+			expect(outputFileSyncStub.getCall(1).args[1]).to.equal(testRender.map);
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+			outputFileSyncStub.restore();
+		
+		});
+		it('should add an Error with message containing "writing source map for [filePath] failed." to errors property array of returned object if fs.outputFileSync for the source map file throws an error', function() {
+		
+			var testPath = 'test';
+			var testArgs = getTestArgs();
+			var testRender = getTestRender();
+			var getArgsStub = sinon.stub(sassCompiler, 'getArgs').returns(testArgs);
+			var sassRenderSyncStub = sinon.stub(sass, 'renderSync').returns(testRender);
+			var outputFileSyncStub = sinon.stub(fs, 'outputFileSync');
+			outputFileSyncStub.onCall(0).returns(true);
+			outputFileSyncStub.onCall(1).throws(new Error('test source map write error'));
+			var testResult = sassCompiler.renderFile(testPath);
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.contains('test source map write error');
+			getArgsStub.restore();
+			sassRenderSyncStub.restore();
+			outputFileSyncStub.restore();
+		
+		});
 	
 	});
 	describe('renderMainStyle()', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.renderMainStyle).to.be.a('function');
@@ -179,6 +398,11 @@ describe('sassCompiler.js', function() {
 	});
 	describe('renderLocalThemes()', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.renderLocalThemes).to.be.a('function');
@@ -203,6 +427,11 @@ describe('sassCompiler.js', function() {
 	});
 	describe('renderExternalThemes()', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(sassCompiler.renderExternalThemes).to.be.a('function');
