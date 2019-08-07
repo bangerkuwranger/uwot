@@ -277,6 +277,86 @@ function renderAll() {
 
 }
 
+function listStyles() {
+
+	var returnObj = {
+		main: [],
+		local: [],
+		external: []
+	};
+	var mainObj = {
+		name: 'style',
+		location: 'public/scss/style.scss'
+	};
+	try {
+	
+		mainObj.stats = fs.statSync(path.join(BASE_DIR, 'css', path.basename(mainObj.name, '.scss') + '.css'));
+		mainObj.status = 'compiled ' + mainObj.stats.mtime.toLocaleString();
+		
+	
+	}
+	catch(e) {
+	
+		mainObj.status = 'NOT COMPILED';
+	
+	}
+	returnObj.main.push(mainObj);
+	const THEME_DIR_SRC = path.join(BASE_DIR, 'scss/theme');
+	const THEME_DIR_TRG = path.join(BASE_DIR, 'css/theme');
+	var themes;
+	try {
+	
+		themes = fs.readdirSync(THEME_DIR_SRC);
+	
+	}
+	catch(e) {
+	
+		returnObj.errors.push(e);
+		return returnObj;
+	
+	}
+	if (themes.length > 0) {
+	
+		var i = 0;
+		themes.forEach((theme) => {
+		
+			var srcPath = path.join(THEME_DIR_SRC, themes[i], 'main.scss');
+			var filePath = path.join(THEME_DIR_TRG, themes[i], 'main.css');
+			var localObj = {
+				name: themes[i],
+				location: 'public/scss/' + themes[i] + '/main.scss'
+			};
+			try {
+			
+				fs.statSync(srcPath);
+				try {
+			
+					localObj.stats = fs.statSync(filePath);
+					localObj.status = 'compiled ' + localObj.stats.mtime.toLocaleString();
+			
+				}
+				catch(e) {
+			
+					localObj.status = "NOT COMPILED";
+			
+				}
+				i++;
+				returnObj.local.push(localObj);
+			
+			}
+			catch(e) {
+			
+				i++;
+			
+			}
+		
+		});
+	
+	}
+	return returnObj;
+
+}
+
 module.exports = {
 	renderAll,
 	renderMainStyle,
@@ -284,5 +364,6 @@ module.exports = {
 	renderExternalThemes,
 	renderFile,
 	getArgs,
-	ENV_SPEC
+	ENV_SPEC,
+	listStyles
 };
