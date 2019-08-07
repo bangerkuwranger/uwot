@@ -607,15 +607,419 @@ describe('sassCompiler.js', function() {
 			renderFileStub.restore();
 		
 		});
-		it('should not add values to errors or processed array properties of returned object for any value in themes dir that is not a dir');
-		it('should return without adding values to errors or processed array properties of returned object if last value in themes dir is not a dir');
-		it('should call fs.statSync for a file "main.scss" in each directory in themes dir');
-		it('should not add values to errors or processed array properties of returned object for any value in themes dir that is not a dir containing a "main.scss" file');
-		it('should return without adding values to errors or processed array properties of returned object if last value in themes dir is not a dir containing a "main.scss" file');
-		it('should call renderFile("theme/{themes[i]}/main") for each directory in themes dir that has a "main.scss" file');
-		it('should add any errors returned by any call to renderFile to the errors property array of returned object');
-		it('should add the result of each call to renderFile, with the errors property removed, to the processed property array of the returned object');
-		it('should immediately return after adding a value to the processed property array of return object if the current dir is the last item in the themes dir');
+		it('should not add values to errors or processed array properties of returned object for any value in themes dir that is not a dir', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else if ('cac' === fileName) {
+				
+					return {
+						isDirectory: function() { return false; }
+					};
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			var processedThemes = testResult.processed.map((pt) => {
+			
+				var sourceArr = pt.source.split('/');
+				return sourceArr[3];
+			
+			});
+			expect(processedThemes.indexOf('cac')).to.equal(-1);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should return without adding values to errors or processed array properties of returned object if last value in themes dir is not a dir', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else if ('default' === fileName) {
+				
+					return {
+						isDirectory: function() { return false; }
+					};
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			var processedThemes = testResult.processed.map((pt) => {
+			
+				var sourceArr = pt.source.split('/');
+				return sourceArr[3];
+			
+			});
+			expect(processedThemes.indexOf('default')).to.equal(-1);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should call fs.statSync for a file "main.scss" in each directory in themes dir', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			for (let i = 0; i < testDirs.length; i++) {
+			
+				var themeFilePath = path.join(themeDirPath, testDirs[i], 'main.scss');
+				expect(statSyncStub.calledWith(themeFilePath)).to.be.true;
+			
+			}
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should not add values to errors or processed array properties of returned object for any value in themes dir that is not a dir containing a "main.scss" file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if ('cac/main.scss' === fileName) {
+				
+					throw new Error('fnf');
+				
+				}
+				else if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			var processedThemes = testResult.processed.map((pt) => {
+			
+				var sourceArr = pt.source.split('/');
+				return sourceArr[3];
+			
+			});
+			expect(processedThemes.indexOf('cac')).to.equal(-1);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should return without adding values to errors or processed array properties of returned object if last value in themes dir is not a dir containing a "main.scss" file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if ('default/main.scss' === fileName) {
+				
+					throw new Error('fnf');
+				
+				}
+				else if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			var processedThemes = testResult.processed.map((pt) => {
+			
+				var sourceArr = pt.source.split('/');
+				return sourceArr[3];
+			
+			});
+			expect(processedThemes.indexOf('default')).to.equal(-1);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should call renderFile("theme/{themes[i]}/main") for each directory in themes dir that has a "main.scss" file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				return getTestRenderFile(pth);
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			for (let i = 0; i < testDirs.length; i++) {
+			
+				expect(renderFileStub.calledWith(`theme/${testDirs[i]}/main`)).to.be.true;
+			
+			}
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should add any errors returned by any call to renderFile to the errors property array of returned object', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				var testRenderFile = getTestRenderFile(pth);
+				if ('theme/cac/main' === pth) {
+				
+					testRenderFile.errors.push(new Error('test renderFile error'));
+				
+				}
+				return testRenderFile;
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.not.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderFile error');
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should add the result of each call to renderFile, with the errors property removed, to the processed property array of the returned object', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				var testRenderFile = getTestRenderFile(pth);
+				if ('theme/cac/main' === pth) {
+				
+					testRenderFile.errors.push(new Error('test renderFile error'));
+				
+				}
+				return testRenderFile;
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.not.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderFile error');
+			for (let i = 0; i < testDirs.length; i++) {
+			
+				var thisProcessed = testResult.processed[i];
+				var thisDir = testDirs[i];
+				expect(thisProcessed.source).to.equal(`public/scss/theme/${thisDir}/main.scss`);
+			
+			}
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
+		it('should immediately return after adding a value to the processed property array of return object if the current dir is the last item in the themes dir', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var themeDirPath = path.join(global.Uwot.Constants.appRoot, 'public/scss/theme');
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function returnIsDirIfDir(pth) {
+			
+				var fileName = path.relative(themeDirPath, pth);
+				if (testDirs.indexOf(fileName) === -1) {
+				
+					return true;
+				
+				}
+				else {
+				
+					return {
+						isDirectory: function() { return true; }
+					};
+				
+				}
+			
+			});
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').callsFake(function returnResult(pth) {
+			
+				var testRenderFile = getTestRenderFile(pth);
+				if ('theme/default/main' === pth) {
+				
+					testRenderFile.errors.push(new Error('test renderFile error'));
+				
+				}
+				return testRenderFile;
+			
+			});
+			var testResult = sassCompiler.renderLocalThemes();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array').that.is.not.empty;
+			expect(testResult.processed).to.be.an('array').that.is.not.empty;
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderFile error');
+			for (let i = 0; i < testDirs.length; i++) {
+			
+				var thisProcessed = testResult.processed[i];
+				var thisDir = testDirs[i];
+				expect(thisProcessed.source).to.equal(`public/scss/theme/${thisDir}/main.scss`);
+			
+			}
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+			renderFileStub.restore();
+		
+		});
 	
 	});
 	describe('renderExternalThemes()', function() {
