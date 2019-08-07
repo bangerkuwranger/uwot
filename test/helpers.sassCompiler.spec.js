@@ -1,7 +1,6 @@
 const globalSetupHelper = require('../helpers/globalSetup');
 var fs = require('fs-extra');
 var path = require('path');
-const EOL = require('os').EOL;
 var sass = require('sass');
 
 const sinon = require("sinon");
@@ -10,8 +9,6 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
 var sassCompiler;
-
-
 
 describe('sassCompiler.js', function() {
 
@@ -28,20 +25,121 @@ describe('sassCompiler.js', function() {
 			expect(sassCompiler.getArgs).to.be.a('function');
 		
 		});
-		it('should return an object');
-		it('should throw an Error if filePath is not a string');
-		it('should return an object with a file property that is a string describing a path from system root to public/scss/[filepath].scss');
-		it('should return an object with an outputStyle property that is "expanded" if global.process.env.NODE_ENV is "development"');
-		it('should return an object with an outputStyle property that is "compressed" if global.process.env.NODE_ENV is not "development"');
-		it('should return an object with an includePaths property that is an array containing strings with absolute paths to public/scss/_partial, public//scss/_partial/compass, and public/scss/theme');
-		it('should return an object with a linefeed property that equals "crlf" if os.EOL is a carriage return then a linefeed');
-		it('should return an object with a linefeed property that equals "cr" if os.EOL is a carriage return');
-		it('should return an object with a linefeed property that equals "lfcr" if os.EOL is a linefeed then a carriage return');
-		it('should return an object with a linefeed property that equals "lf" if os.EOL is a linefeed');
-		it('should return an object with an omitSourceMapUrl property that is false if global.process.env.NODE_ENV is "development"');
-		it('should return an object with an omitSourceMapUrl property that is true if global.process.env.NODE_ENV is not "development"');
-		it('should return an object with an outFile property that is a string describing a path from system root to public/css/[filepath].css');
-		it('should return an object with a sourceMap property that is true');
+		it('should return an object', function() {
+		
+			var testPath = 'test';
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object');
+		
+		});
+		it('should throw an Error if filePath is not a string', function() {
+		
+			expect(sassCompiler.getArgs).to.throw(Error, 'invalid filePath passed to getArgs');
+		
+		});
+		it('should return an object with a file property that is a string describing a path from system root to public/scss/[filepath].scss', function() {
+		
+			var testPath = 'test';
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('file').that.contains(`public/scss/${testPath}.scss`);
+		
+		});
+		it('should return an object with an outputStyle property that is "expanded" if global.process.env.NODE_ENV is "development"', function() {
+		
+			var testPath = 'test';
+			const currentIsDev = sassCompiler.ENV_SPEC.isDev;
+			sassCompiler.ENV_SPEC.isDev = true;
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('outputStyle').that.equals('expanded');
+			sassCompiler.ENV_SPEC.isDev = currentIsDev;
+		
+		});
+		it('should return an object with an outputStyle property that is "compressed" if global.process.env.NODE_ENV is not "development"', function() {
+		
+			var testPath = 'test';
+			const currentIsDev = sassCompiler.ENV_SPEC.isDev;
+			sassCompiler.ENV_SPEC.isDev = false;
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('outputStyle').that.equals('compressed');
+			sassCompiler.ENV_SPEC.isDev = currentIsDev;
+		
+		});
+		it('should return an object with an includePaths property that is an array containing strings with absolute paths to public/scss/_partial, public//scss/_partial/compass, and public/scss/theme', function() {
+		
+			var testPath = 'test';
+			var testResult = sassCompiler.getArgs(testPath);
+			expect(testResult).to.be.an('object').with.property('includePaths').that.is.an('array');
+			expect(testResult.includePaths).to.contain(`${global.Uwot.Constants.appRoot}/public/scss/_partial`);
+			expect(testResult.includePaths).to.contain(`${global.Uwot.Constants.appRoot}/public/scss/_partial/compass`);
+			expect(testResult.includePaths).to.contain(`${global.Uwot.Constants.appRoot}/public/scss/theme`);
+		
+		});
+		it('should return an object with a linefeed property that equals "crlf" if os.EOL is a carriage return then a linefeed', function() {
+		
+			var testPath = 'test';
+			const currentEOL = sassCompiler.ENV_SPEC.EOL;
+			sassCompiler.ENV_SPEC.EOL = "\r\n";
+			var testResult = sassCompiler.getArgs(testPath);
+			expect(testResult).to.be.an('object').with.property('linefeed').that.equals('crlf');
+			sassCompiler.ENV_SPEC.EOL = currentEOL;
+		
+		});
+		it('should return an object with a linefeed property that equals "cr" if os.EOL is a carriage return', function() {
+		
+			var testPath = 'test';
+			const currentEOL = sassCompiler.ENV_SPEC.EOL;
+			sassCompiler.ENV_SPEC.EOL = "\r";
+			var testResult = sassCompiler.getArgs(testPath);
+			expect(testResult).to.be.an('object').with.property('linefeed').that.equals('cr');
+			sassCompiler.ENV_SPEC.EOL = currentEOL;
+		
+		});
+		it('should return an object with a linefeed property that equals "lfcr" if os.EOL is a linefeed then a carriage return', function() {
+		
+			var testPath = 'test';
+			const currentEOL = sassCompiler.ENV_SPEC.EOL;
+			sassCompiler.ENV_SPEC.EOL = "\n\r";
+			var testResult = sassCompiler.getArgs(testPath);
+			expect(testResult).to.be.an('object').with.property('linefeed').that.equals('lfcr');
+			sassCompiler.ENV_SPEC.EOL = currentEOL;
+		
+		});
+		it('should return an object with a linefeed property that equals "lf" if os.EOL is a linefeed', function() {
+		
+			var testPath = 'test';
+			const currentEOL = sassCompiler.ENV_SPEC.EOL;
+			sassCompiler.ENV_SPEC.EOL = "\n";
+			var testResult = sassCompiler.getArgs(testPath);
+			expect(testResult).to.be.an('object').with.property('linefeed').that.equals('lf');
+			sassCompiler.ENV_SPEC.EOL = currentEOL;
+		
+		});
+		it('should return an object with an omitSourceMapUrl property that is false if global.process.env.NODE_ENV is "development"', function() {
+		
+			var testPath = 'test';
+			const currentIsDev = sassCompiler.ENV_SPEC.isDev;
+			sassCompiler.ENV_SPEC.isDev = true;
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('omitSourceMapUrl').that.is.false;
+			sassCompiler.ENV_SPEC.isDev = currentIsDev;
+		
+		});
+		it('should return an object with an omitSourceMapUrl property that is true if global.process.env.NODE_ENV is not "development"', function() {
+		
+			var testPath = 'test';
+			const currentIsDev = sassCompiler.ENV_SPEC.isDev;
+			sassCompiler.ENV_SPEC.isDev = false;
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('omitSourceMapUrl').that.is.true;
+			sassCompiler.ENV_SPEC.isDev = currentIsDev;
+		
+		});
+		it('should return an object with an outFile property that is a string describing a path from system root to public/css/[filepath].css', function() {
+		
+			var testPath = 'test';
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('outFile').that.equals(`/Users/ccarino/wot/public/css/${testPath}.css`);
+		
+		});
+		it('should return an object with a sourceMap property that is true', function() {
+		
+			var testPath = 'test';
+			expect(sassCompiler.getArgs(testPath)).to.be.an('object').with.property('sourceMap').that.is.true;
+		
+		});
 	
 	});
 	describe('renderFile(filePath)', function() {

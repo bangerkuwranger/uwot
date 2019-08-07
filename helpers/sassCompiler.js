@@ -1,16 +1,21 @@
 var path = require('path');
 var fs = require('fs-extra');
 var sass = require('sass');
-const EOL = require('os').EOL;
+const os = require('os');
 
 const PROD_STYLE = 'compressed';
 const DEV_STYLE = 'expanded';
 const BASE_DIR = global.Uwot.Constants.appRoot + '/public';
 const MAIN_STYLE = 'style';
 
+const ENV_SPEC = {
+	EOL: os.EOL,
+	isDev: "development" === global.process.env.NODE_ENV
+};
+
 function getOSLF() {
 
-	switch(EOL) {
+	switch(ENV_SPEC.EOL) {
 	
 		case "\r\n":
 			return "crlf";
@@ -27,17 +32,21 @@ function getOSLF() {
 
 function getArgs(filePath) {
 
-	var isDev = "development" === global.process.env.NODE_ENV;
+	if ('string' !== typeof filePath) {
+	
+		throw new TypeError('invalid filePath passed to getArgs');
+	
+	}
 	return {
 		file: path.join(BASE_DIR, 'scss', filePath + '.scss'),
-		outputStyle: isDev ? DEV_STYLE : PROD_STYLE,
+		outputStyle: ENV_SPEC.isDev ? DEV_STYLE : PROD_STYLE,
 		includePaths: [
 			BASE_DIR + '/scss/_partial',
 			BASE_DIR + '/scss/_partial/compass',
 			BASE_DIR + '/scss/theme'
 		],
 		linefeed: getOSLF(),
-		omitSourceMapUrl: isDev ? false : true,
+		omitSourceMapUrl: ENV_SPEC.isDev ? false : true,
 		outFile: path.join(BASE_DIR, 'css', filePath + '.css'),
 		sourceMap: true
 	};
@@ -262,5 +271,6 @@ module.exports = {
 	renderLocalThemes,
 	renderExternalThemes,
 	renderFile,
-	getArgs
+	getArgs,
+	ENV_SPEC
 };
