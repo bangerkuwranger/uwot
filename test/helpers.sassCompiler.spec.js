@@ -44,6 +44,19 @@ const getTestRender = function() {
 
 };
 
+const getTestRenderFile = function() {
+
+	var argsObj = getTestArgs();
+	return {
+		source: argsObj.file,
+		devMode: argsObj.outputStyle === 'expanded',
+		cssFile: argsObj.outFile,
+		mapFile: argsObj.outFile + '.map',
+		errors: []
+	};
+
+};
+
 describe('sassCompiler.js', function() {
 
 	before(function() {
@@ -390,10 +403,54 @@ describe('sassCompiler.js', function() {
 			expect(sassCompiler.renderMainStyle).to.be.a('function');
 		
 		});
-		it('should return an object with array properties "processed" and "errors"');
-		it('should call renderFile("style")');
-		it('should add any errors in errors property array of object returned from calling renderFile to the errors property of returned object');
-		it('should add the result of calling renderFile, with the errors property removed, to the processed property array of the returned object');
+		it('should return an object with array properties "processed" and "errors"', function() {
+		
+			var testRenderFile = getTestRenderFile();
+			testRenderFile.source = "public/scss/style.scss";
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').returns(testRenderFile);
+			var testResult = sassCompiler.renderMainStyle();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array');
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			renderFileStub.restore();
+		
+		});
+		it('should call renderFile("style")', function() {
+		
+			var testRenderFile = getTestRenderFile();
+			testRenderFile.source = "public/scss/style.scss";
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').returns(testRenderFile);
+			var testResult = sassCompiler.renderMainStyle();
+			expect(renderFileStub.calledWith('style')).to.be.true;
+			renderFileStub.restore();
+		
+		});
+		it('should add any errors in errors property array of object returned from calling renderFile to the errors property of returned object', function() {
+		
+			var testRenderFile = getTestRenderFile();
+			testRenderFile.source = "public/scss/style.scss";
+			testRenderFile.errors.push(new Error('test renderFile error'));
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').returns(testRenderFile);
+			var testResult = sassCompiler.renderMainStyle();
+			expect(testResult).to.be.an('object').with.property('errors').that.is.an('array');
+			expect(testResult.errors[0]).to.be.an.instanceof(Error).with.property('message').that.equals('test renderFile error');
+			renderFileStub.restore();
+		
+		});
+		it('should add the result of calling renderFile, with the errors property removed, to the processed property array of the returned object', function() {
+		
+			var testRenderFile = getTestRenderFile();
+			testRenderFile.source = "public/scss/style.scss";
+			var renderFileStub = sinon.stub(sassCompiler, 'renderFile').returns(testRenderFile);
+			var testResult = sassCompiler.renderMainStyle();
+			expect(testResult).to.be.an('object').with.property('processed').that.is.an('array');
+			expect(testResult.processed[0]).to.be.an('object').with.property('source').that.equals(testRenderFile.source);
+			expect(testResult.processed[0]).to.be.an('object').with.property('devMode').that.equals(sassCompiler.ENV_SPEC.isDev);
+			expect(testResult.processed[0]).to.be.an('object').with.property('cssFile').that.equals(testRenderFile.cssFile);
+			expect(testResult.processed[0]).to.be.an('object').with.property('mapFile').that.equals(testRenderFile.mapFile);
+			expect(testResult.processed[0].errors).to.be.undefined;
+			renderFileStub.restore();
+		
+		});
 	
 	});
 	describe('renderLocalThemes()', function() {
