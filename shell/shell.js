@@ -1010,10 +1010,10 @@ function listStyles(arg) {
 	titleBlock('Installed Stylesheets:');
 	console.log('        type                   name                 location                                 status');
 	console.log('        ------------------------------------------------------------------------------------------------------------------');
-
+	var logLine;
 	for (let i = 0; i < styleList.main.length; i++) {
 	
-		var logLine = '        main';
+		logLine = '        main';
 		for (let sp = 19; sp > 0; sp--) {
 		
 			logLine += ' ';
@@ -1037,7 +1037,7 @@ function listStyles(arg) {
 	}
 	for (let i = 0; i < styleList.local.length; i++) {
 	
-		var logLine = '        local';
+		logLine = '        local';
 		for (let sp = 18; sp > 0; sp--) {
 		
 			logLine += ' ';
@@ -1061,7 +1061,7 @@ function listStyles(arg) {
 	}
 	for (let i = 0; i < styleList.external.length; i++) {
 	
-		var logLine = '        ext';
+		logLine = '        ext';
 		for (let sp = 20; sp > 0; sp--) {
 		
 			logLine += ' ';
@@ -1182,7 +1182,7 @@ function compileStyles(arg) {
 			opResult = {
 				processed: [],
 				errors: []
-			}
+			};
 			var oneResult = sassCompiler.renderFile(arg);
 			if (oneResult.errors.length > 0) {
 	
