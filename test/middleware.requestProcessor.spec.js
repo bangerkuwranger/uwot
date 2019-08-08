@@ -271,6 +271,43 @@ describe('requestProcessor.js', function() {
 			requestProcessor()(req, res, function() {});
 			global.process.env.NODE_ENV = currentNodeEnv;
 			expect(getAnsiJson(res.uwotObj)).to.equal(getAnsiJson(cmdVerifiedAstExesObj));
+			executeRuntimeStub.restore();
+		
+		});
+		it('should call res.ansi with an error object if req.body.cmd is a string, req.uwot.cmdAst is a non-null object, req.uwot.runtime.exes is an object, and executeRuntime(req.uwot.runtime) throws an error', function() {
+		
+			var testCmdAst = getTestAst();
+			var testExes = new Map([[0, getTestExe()]]);
+			var testRuntime = getTestRuntime();
+			testRuntime.exes = testExes;
+			var testExecuteRuntimeError = new Error('test executeRuntime Error');
+			testRuntime.executeCommands = function(cb) {
+			
+				return cb(testExecuteRuntimeError);
+			
+			};
+			const currentNodeEnv = global.process.env.NODE_ENV;
+			global.process.env.NODE_ENV = 'production';
+			req.body = {
+				cmd: 'testCmd'
+			};
+			req.uwot = {
+				cmdAst: testCmdAst,
+				runtime: testRuntime
+			};
+			executeRuntimeStub = sinon.stub(requestProcessor, 'executeRuntime').callsFake(function returnRejectedPromise(runtime) {
+
+				return new Promise(function(resolve, reject) {
+	
+					return reject(testExecuteRuntimeError);
+	
+				});
+			
+			});
+			requestProcessor()(req, res, function() {});
+			global.process.env.NODE_ENV = currentNodeEnv;
+// 			expect(res.uwotObj.error).to.equal(getAnsiJson(testExecuteRuntimeError));
+			executeRuntimeStub.restore();
 		
 		});
 	

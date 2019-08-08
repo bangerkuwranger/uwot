@@ -7,6 +7,7 @@ const globalSetupHelper = require('../helpers/globalSetup');
 globalSetupHelper.initConstants();
 globalSetupHelper.initEnvironment();
 globalSetupHelper.initExports();
+const sassCompiler = require('../helpers/sassCompiler');
 
 const Setup = require('../setup');
 const tableNames = [
@@ -64,6 +65,10 @@ var commandSets = {
 		"initial",
 		"remove",
 		"add"
+	],
+	styles: [
+		"list",
+		"compile"
 	]
 };
 
@@ -978,6 +983,281 @@ function disallowAdminUserSudo(id) {
 
 }
 
+//list scss stylesheets
+//usage:
+//	shell.js styles list
+function listStyles(arg) {
+
+	if ('undefined' !== typeof arg && ('-h' === arg || '--help' === arg || 'help' === arg)) {
+	
+		actionHelp("styles list", 'View a list of all compilable scss stylesheets with type.', '');
+		return process.exit();
+	
+	}
+	else if ('undefined' !== typeof arg) {
+	
+		console.log('"styles list" does not accept any arguments.');
+		return process.exit();
+	
+	}
+	var styleList = sassCompiler.listStyles();
+	if (styleList instanceof Error) {
+	
+		console.log(styleList.message);
+		return process.exit();
+	
+	}
+	titleBlock('Installed Stylesheets:');
+	console.log('        type                   name                 location                                 status');
+	console.log('        ------------------------------------------------------------------------------------------------------------------');
+	var logLine;
+	for (let i = 0; i < styleList.main.length; i++) {
+	
+		logLine = '        main';
+		for (let sp = 19; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.main[i].name;
+		for (let sp = 21 - styleList.main[i].name.toString().length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.main[i].location;
+		for (let sp = 41 - styleList.main[i].location.length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.main[i].status;
+		console.log(logLine);
+	
+	}
+	for (let i = 0; i < styleList.local.length; i++) {
+	
+		logLine = '        local';
+		for (let sp = 18; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.local[i].name;
+		for (let sp = 21 - styleList.local[i].name.toString().length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.local[i].location;
+		for (let sp = 41 - styleList.local[i].location.length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.local[i].status;
+		console.log(logLine);
+	
+	}
+	for (let i = 0; i < styleList.external.length; i++) {
+	
+		logLine = '        ext';
+		for (let sp = 20; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.external[i].name;
+		for (let sp = 21 - styleList.external[i].name.toString().length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.external[i].location;
+		for (let sp = 41 - styleList.external[i].location.length; sp > 0; sp--) {
+		
+			logLine += ' ';
+		
+		}
+		logLine += styleList.external[i].status;
+		console.log(logLine);
+	
+	}
+	return process.exit();
+
+}
+
+//list scss stylesheets
+//usage:
+//	shell.js styles compile
+function compileStyles(arg) {
+
+	var opResult;
+	if ('string' !== typeof arg) {
+	
+		console.log('"styles compile" requires either a flag (--all, --main, --local, --ext) or filename as an argument.');
+		return process.exit();
+	
+	}
+	else if ('-h' === arg || '--help' === arg || 'help' === arg) {
+	
+		actionHelp("styles compile", 'Compile groups or individual stylesheets to CSS.', '[flag or filename]', 'flag or filename argument is either the name of the file as shown in "styles list" command or one of: "--all", compile all scss; "--main", compile main scss; "--local", compile local themes\' scss; "--ext", compile external themes\' scss');
+		return process.exit();
+	
+	}
+	else if ('--all' === arg) {
+	
+		try {
+		
+			opResult = sassCompiler.renderAll();
+		
+		}
+		catch(e) {
+		
+			opResult = {
+				processed: [],
+				errors: [e]
+			};
+		
+		}
+	
+	}
+	else if ('--main' === arg) {
+	
+		try {
+		
+			opResult = sassCompiler.renderMainStyle();
+		
+		}
+		catch(e) {
+		
+			opResult = {
+				processed: [],
+				errors: [e]
+			};
+		
+		}
+	
+	}
+	else if ('--local' === arg) {
+	
+		try {
+		
+			opResult = sassCompiler.renderLocalThemes();
+		
+		}
+		catch(e) {
+		
+			opResult = {
+				processed: [],
+				errors: [e]
+			};
+		
+		}
+	
+	}
+	else if ('--ext' === arg) {
+	
+		try {
+		
+			opResult = sassCompiler.renderExternalThemes();
+		
+		}
+		catch(e) {
+		
+			opResult = {
+				processed: [],
+				errors: [e]
+			};
+		
+		}
+	
+	}
+	else {
+	
+		try {
+		
+			opResult = {
+				processed: [],
+				errors: []
+			};
+			var stylePath;
+			if (arg === 'style') {
+			
+				stylePath = 'style';
+			
+			}
+			else {
+			
+				var styleList = sassCompiler.listStyles();
+				var localMap = new Map();
+				var extMap = new Map();
+				if (styleList.local.length > 0) {
+			
+					styleList.local.forEach((localStyle) => {
+					
+						localMap.set(localStyle.name, `theme/${localStyle.name}/main`);
+					
+					});
+			
+				}
+				// TBD
+				// Resolve arg to correct value to pass to renderFile for ext
+				
+				var localPath = localMap.get(arg);
+				var extPath = extMap.get(arg);
+				if ('string' === typeof localPath) {
+				
+					stylePath = localPath;
+				
+				}
+				else if ('string' === typeof extPath) {
+				
+					stylePath = extPath;
+				
+				}
+				else {
+				
+					console.log(new Error('invalid style name - use "styles list" to see valid style names').message);
+					return process.exit();
+				
+				}
+			
+			}
+			var oneResult = sassCompiler.renderFile(stylePath);
+			if (oneResult.errors.length > 0) {
+	
+				opResult.errors = opResult.errors.concat(oneResult.errors);
+	
+			}
+			delete oneResult.errors;
+			opResult.processed.push(oneResult);
+		
+		}
+		catch(e) {
+		
+			opResult = {
+				processed: [],
+				errors: [e]
+			};
+		
+		}
+	
+	}
+	console.log('Compilation Complete: ' + opResult.processed.length + ' files processed with ' + opResult.errors.length + ' errors');
+	if (opResult.errors.length > 0) {
+	
+		opResult.errors.forEach((err) => {
+		
+			console.log(err);
+		
+		});
+	
+	}
+	return process.exit();
+
+}
+
 // outputs array of objects as table with properly spaced headers for each obj property and index for each element
 function arrayWithIdx(ar) {
 
@@ -1210,6 +1490,25 @@ switch (args[0]) {
 			default:
 				unrecognizedAction(cs, an);
 		
+		}
+		break;
+	case 'styles':
+		switch(args[1]) {
+			
+			case 'list': 
+				listStyles(args[2]);
+				break;
+			case 'compile': 
+				compileStyles(args[2]);
+				break;
+			case undefined:
+			case '-h':
+			case '--help':
+			case 'help':
+				commandSetHelp(args[0]);
+				break;
+			default:
+				unrecognizedAction(args[0], args[1]);
 		}
 		break;
 	case undefined:

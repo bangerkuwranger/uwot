@@ -44,8 +44,6 @@ module.exports = function(args) {
 					res.uwotObj.output.content.push({content: 'CMD Verified. AST: ', color: 'cyan'}, {tag:'br'}, {tag:'br'}, JSON.stringify(req.uwot.cmdAst), {tag:'br'}, {tag:'br'});
 		
 				}
-				// TBD
-				// take req.body.cwd and apply it to user's filesystem if it is not a match to current vcwd.
 				// check that runtime and exes were generated from parsed AST, begin processing if so
 				if ('object' === typeof req.uwot.runtime && null !== req.uwot.runtime && 'object' === typeof req.uwot.runtime.exes) {
 			
@@ -70,6 +68,19 @@ module.exports = function(args) {
 						// empty output obj and its content since it wasn't done prior to runtime check
 						res.uwotObj.output = {content: []};
 					
+					}
+					// TBD
+					// take req.body.cwd and apply it to user's filesystem if it is not a match to current vcwd.
+					if ('string' === typeof req.body.cwd) {
+			
+						var userFs = req.user ? global.Uwot.FileSystems[req.user._id] : global.Uwot.FileSystems.GUEST;
+						var changeCwdError = userFs.changeCwd(req.body.cwd);
+						if (changeCwdError instanceof Error) {
+				
+							res.uwotObj.error = changeCwdError;
+				
+						}
+			
 					}
 					// execute the commands in the runtime exes; this is where deferred execution happens
 					// results must be an object
