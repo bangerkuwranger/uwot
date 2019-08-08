@@ -1218,7 +1218,7 @@ function compileStyles(arg) {
 				}
 				else {
 				
-					console.log(new Error('invalid style name'));
+					console.log(new Error('invalid style name - use "styles list" to see valid style names').message);
 					return process.exit();
 				
 				}
