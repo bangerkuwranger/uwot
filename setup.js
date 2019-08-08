@@ -178,7 +178,7 @@ class UwotSetup {
 			this.performConfigOperation('get', [cat, null, false], function(error, catVals) {
 				var catKeys = Object.keys(catVals);
 				let i = 0;
-				catKeys.forEach(function(key) {
+				catKeys.forEach((key) => {
 			
 					self.performConfigOperation('resetToDefault', [cat, key], function(error, isSaved) {
 			

@@ -6,7 +6,7 @@ Another unsupported, half-finished experiment made in a non-existent kind of tim
 
 ## What does it do?
 
-It creates a web interface that simulates the experience of a bash shell, which can be used for any number of applications, depending on configuration. When complete, at a minimum, it will allow an admin to set up an application that allows users to browse content in a public directory within a virtual file system. Future plans include reverse proxy support for additional content, 'console' or 'x-window' mode for graphical content, support for generating custom themes or 'bins', and some other miscellania.
+It creates a web interface that simulates the experience of a bash(ish) shell, which can be used for any number of applications, depending on configuration. When complete, at a minimum, it will allow an admin to set up an application that allows users to browse content in a public directory within a virtual file system. Future plans include reverse proxy support for additional content, 'console' or 'x-window' mode for graphical content, support for generating custom themes or 'bins', and some other miscellania.
 
 ## Why?
 
@@ -22,4 +22,28 @@ Sure, at some point, that is the plan. I'd like to get it, y'know, functional, b
 
 ## So, it doesn't work?
 
-Well, as of alpha 19, it has a functioning shell interface that allows an admin to configure it, can run in prod, dev, debug, test, etc., and will indeed create a functional CLI interface that provides a very limited instruction set. Commands like history, clear, login/logout, and some of the standard bash builtins are already implemented, and they do function as expected... which is nice. However, it's certainly not operating within the scope envisioned at this point... which is not so nice. It doesn't help that I got sidetracked by stabilizing what I'd already written by writing test scripts, automated quality checks, and so forth... but it'll get there. Eventually. The fact that I've even written this and made the repo public is a pretty good sign, right?
+Well, as of alpha 21, it has a functioning shell interface that allows an admin to configure it, can run in prod, dev, debug, test, etc., and will indeed create a functional CLI interface that provides a somewhat limited instruction set. Commands like history, clear, login/logout, and most of the standard bash builtins are already implemented, and they do function as expected... which is nice. It's mostly running stable at this point, and handles virtual filesystem operations, parallel commands, etc. much better. Redirects to/from files in VFS are now working, and it's on the verge of allowing cli-driven browsing of local and remote web content. :-D Modularization and discrete user environments are getting better now, with most scaffolding for listeners, instanceSessions, sessions, filesystems, permissions, and local VFS in place and stable. Oh! CSS compilation doesn't rely on having ruby locally on the server anymore, either... since it's... well... at least five years past Compass time. Everything API wise is still very much in flux, but we gotta nail down the basics before the fun stuff.
+
+## What, oh heavens, is missing?
+
+You're not regretting reading this far down, are you? What if I have coupons for free tacos or something in here? Anyhow... support for some common CLI stuff like pipelines, functions, root user, conditionals... yknow... stuff you use regularly, are on the way. Eventually, the ability to generate a new node project from the shell that can support additional themes, commands, and configs will be there too, along with logic and docs to support those things. The ability to use this as a web interface for content, a local text editor, some enduser community stuff, AI autocomplete, support for actual DBs... these are all _planned_, and in some cases __the entire point__, but we'll see just how much nonexistent time can be forced into existence by pure will. (or cash. cash works too.)
+
+## Let's say, __hypothetically__, I wanted to use this..?
+
+Right now, it works IN PLACE without installing via NPM. Toss it on a node-ready server from the zip file and mess around with the shell:
+
+`node shell/shell.js`
+
+You'll want to init the DB (file based, so don't multi-instance yet, killer), set up users and config files, and probably compile the css. Run from `bin/www`, or using the npm scripts. I think I threw nodemon in there, if you're not on windows. 
+
+As previously mentioned... somewhere... plan for actual NPM install is to allow integration into an existing project, OR to just make it generate its own projects, much like expressjs does for its projects. (or... both?) For now though, it is quite messaroundable, but not truly deployable imho.
+
+## bash? Really??
+
+Be thankful it's not just sh. Or Bell's sh. Or DOS. Y'all want DOS?
+
+Seriously, it's a hybrid of a few different shell ideas, but is most similar to bash 'cuz most anyone who would have any interest in this at all has likely used bash at some point.
+
+## About those free tacos...
+
+That is not a question.
