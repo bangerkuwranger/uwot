@@ -324,7 +324,7 @@ function listStyles() {
 			var filePath = path.join(THEME_DIR_TRG, themes[i], 'main.css');
 			var localObj = {
 				name: themes[i],
-				location: 'public/scss/' + themes[i] + '/main.scss'
+				location: 'public/scss/theme/' + themes[i] + '/main.scss'
 			};
 			try {
 			
@@ -353,6 +353,10 @@ function listStyles() {
 		});
 	
 	}
+	
+	// TBD
+	// process ext themes
+	
 	return returnObj;
 
 }

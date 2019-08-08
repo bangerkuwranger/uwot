@@ -1101,7 +1101,7 @@ function compileStyles(arg) {
 	}
 	else if ('-h' === arg || '--help' === arg || 'help' === arg) {
 	
-		actionHelp("styles compile", 'Compile groups or individual stylesheets to CSS.', '[flag or filename]', 'flag or filename argument is either the name of the file as shown in styles list command or one of: "--all", compile all scss; "--main", compile main scss; "--local", compile local themes\' scss; "--ext", compile external themes\' scss');
+		actionHelp("styles compile", 'Compile groups or individual stylesheets to CSS.', '[flag or filename]', 'flag or filename argument is either the name of the file as shown in "styles list" command or one of: "--all", compile all scss; "--main", compile main scss; "--local", compile local themes\' scss; "--ext", compile external themes\' scss');
 		return process.exit();
 	
 	}
@@ -1175,15 +1175,56 @@ function compileStyles(arg) {
 	}
 	else {
 	
-		// TBD
-		// Resolve arg to correct value to pass to renderFile
 		try {
 		
 			opResult = {
 				processed: [],
 				errors: []
 			};
-			var oneResult = sassCompiler.renderFile(arg);
+			var stylePath;
+			if (arg === 'style') {
+			
+				stylePath = 'style';
+			
+			}
+			else {
+			
+				var styleList = sassCompiler.listStyles();
+				var localMap = new Map();
+				var extMap = new Map();
+				if (styleList.local.length > 0) {
+			
+					styleList.local.forEach((localStyle) => {
+					
+						localMap.set(localStyle.name, `theme/${localStyle.name}/main`);
+					
+					});
+			
+				}
+				// TBD
+				// Resolve arg to correct value to pass to renderFile for ext
+				
+				var localPath = localMap.get(arg);
+				var extPath = extMap.get(arg);
+				if ('string' === typeof localPath) {
+				
+					stylePath = localPath;
+				
+				}
+				else if ('string' === typeof extPath) {
+				
+					stylePath = extPath;
+				
+				}
+				else {
+				
+					console.log(new Error('invalid style name'));
+					return process.exit();
+				
+				}
+			
+			}
+			var oneResult = sassCompiler.renderFile(stylePath);
 			if (oneResult.errors.length > 0) {
 	
 				opResult.errors = opResult.errors.concat(oneResult.errors);
