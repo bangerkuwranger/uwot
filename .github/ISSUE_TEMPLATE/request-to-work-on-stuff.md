@@ -7,20 +7,20 @@ assignees: bangerkuwranger
 
 ---
 
-**Describe what you'd like to do**
+### Describe what you'd like to do
 
 Give us an idea of the idea, as it were...
 
-**Describe why you can do it**
+### Describe why you can do it
 
 A brief description of what expertise you bring to working on this. Examples are helpful (and fun!)
 
-**Outline the plan**
+### Outline the plan
 
 Some
 
-*    bullet
-*    points
+*   bullet
+*   points
 
 outlining the tasks in the proposed scope.
 
