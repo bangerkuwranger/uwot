@@ -19,8 +19,8 @@ A brief description of what expertise you bring to working on this. Examples are
 
 Some
 
-*  bullet
-*  points
+*    bullet
+*    points
 
 outlining the tasks in the proposed scope.
 

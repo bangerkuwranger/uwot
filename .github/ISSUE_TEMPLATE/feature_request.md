@@ -29,4 +29,6 @@ Yep. Soooooo... the philosophy of this project is a little 'internal' at the mom
 
 Folks who suggest there is a problem and then propose a solution are invariably correct about the problem and incorrect about the solution. 
 
+It's generally more difficult to find a solution when... well, the PURPOSE of the thing that needs a solution is so unclear. We'll get right on that.
+
 That said, we're all devs here, so hopefully you go two for two. Any feedback is appreciated. Honestly.
