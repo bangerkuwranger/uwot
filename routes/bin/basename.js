@@ -3,7 +3,7 @@ const path = require('path');
 
 class UwotCmdBasename extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,
