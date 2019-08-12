@@ -1262,5 +1262,289 @@ describe('sassCompiler.js', function() {
 		});
 	
 	});
+	describe('listStyles()', function() {
+	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		it('should be a function', function() {
+		
+			expect(sassCompiler.listStyles).to.be.a('function');
+		
+		});
+		it('should return an object with three properties that are arrays (main, local, & external)', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.main).to.be.an('array');
+			expect(testResult.local).to.be.an('array');
+			expect(testResult.external).to.be.an('array');
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should return a single element in the main array with string properties "name" and "location"', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.main).to.be.an('array');
+			expect(testResult.main[0]).to.be.an('object').with.property('name').that.is.a('string');
+			expect(testResult.main[0]).to.be.an('object').with.property('location').that.is.a('string');
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should include a status property in the single main array element object that contains "compiled" if the css file exists', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMain(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.main).to.be.an('array');
+			expect(testResult.main[0]).to.be.an('object').with.property('status').that.contains('compiled ');
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should include a status property in the single main array element object that contains "NOT COMPILED" if the css file does not exist', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.main).to.be.an('array');
+			expect(testResult.main[0]).to.be.an('object').with.property('status').that.equals('NOT COMPILED');
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should return an empty array for local if there are no themes in the local theme directory', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.local).to.be.an('array').that.is.empty;
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should always return an empty array for external since the external theme function is not yet implemented', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns([]);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.external).to.be.an('array').that.is.empty;
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should add an errors property that is an array containing an error to the return object if readdir called with the local theme directory throws an error', function() {
+		
+			var testReaddirSyncError = new Error('test readdirSync error');
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').throws(testReaddirSyncError);
+			var statSyncStub = sinon.stub(fs, 'statSync').throws(new Error('test statSync error'));
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.errors).to.be.an('array').that.contains(testReaddirSyncError);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should loop through all of the themes in the local theme directory if it is not empty and there are valid theme directories within', function() {
+		
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(getTestDirs());
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMainorLocalScss(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				else if (pth.indexOf('main.scss') > -1) {
+				
+					return true;
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object');
+			expect(testResult.local.length).to.equal(getTestDirs().length);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should add an object as an element to the local array property of the returned object that contains a name property equal to the directory name and a location property with a relative path to the scss file from the application root for each directory in the local theme directory that contains a main.scss file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMainorLocalScss(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				else if (pth.indexOf('main.scss') > -1) {
+				
+					return true;
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object').with.property('local').that.is.an('array');
+			expect(testResult.local.length).to.equal(getTestDirs().length);
+			var i = 0;
+			testDirs.forEach((dirName) => {
+			
+				expect(testResult.local[i]).to.be.an('object').with.property('name').that.equals(dirName);
+				expect(testResult.local[i]).to.be.an('object').with.property('location').that.equals('public/scss/theme/' + dirName + '/main.scss');
+				i++;
+			
+			});
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should add an object as an element to the local array property of the returned object that contains a status property that contains "compile" for each directory in the local theme directory that contains a main.scss file that has an extant corresponding css file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMainorLocalScss(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				else if (pth.indexOf('main.scss') > -1) {
+				
+					return true;
+				
+				}
+				else if (pth.indexOf('main.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					};
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object').with.property('local').that.is.an('array');
+			expect(testResult.local.length).to.equal(getTestDirs().length);
+			var i = 0;
+			testDirs.forEach((dirName) => {
+			
+				expect(testResult.local[i]).to.be.an('object').with.property('status').that.contains('compiled ');
+				i++;
+			
+			});
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should add an object as an element to the local array property of the returned object that contains a status property that contains "NOT COMPILED" for each directory in the local theme directory that contains a main.scss file that does not have an extant corresponding css file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMainorLocalScss(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				else if (pth.indexOf('main.scss') > -1) {
+				
+					return true;
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object').with.property('local').that.is.an('array');
+			expect(testResult.local.length).to.equal(getTestDirs().length);
+			var i = 0;
+			testDirs.forEach((dirName) => {
+			
+				expect(testResult.local[i]).to.be.an('object').with.property('status').that.equals('NOT COMPILED');
+				i++;
+			
+			});
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+		it('should not add an element to the local array property of the returned object for any item in the local theme directory that is not a directory containing a main.scss file', function() {
+		
+			var testDirs = getTestDirs();
+			var readdirSyncStub = sinon.stub(fs, 'readdirSync').returns(testDirs);
+			var statSyncStub = sinon.stub(fs, 'statSync').callsFake(function errorUnlessMainorLocalScss(pth) {
+			
+				if(pth.indexOf('public/css/style.css') > -1) {
+				
+					return {
+						mtime: new Date()
+					}
+				
+				}
+				else if (pth.indexOf('default/main.scss') > -1) {
+				
+					return true;
+				
+				}
+				else if (pth.indexOf('default') > -1) {
+				
+					return {
+						mtime: new Date()
+					};
+				
+				}
+				throw new Error('test statSync error');
+				
+			});
+			var testResult = sassCompiler.listStyles();
+			expect(testResult).to.be.an('object').with.property('local').that.is.an('array');
+			expect(testResult.local.length).to.equal(1);
+			readdirSyncStub.restore();
+			statSyncStub.restore();
+		
+		});
+	
+	});
 
 });

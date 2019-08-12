@@ -311,6 +311,11 @@ function listStyles() {
 	}
 	catch(e) {
 	
+		if ('object' !== typeof returnObj.errors || !(Array.isArray(returnObj.errors))) {
+		
+			returnObj.errors = [];
+		
+		}
 		returnObj.errors.push(e);
 		return returnObj;
 	
