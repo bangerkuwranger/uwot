@@ -64,7 +64,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		
 			res.ansi = function outputAnsiOrConsole(obj) {
 			
-				return this.json(ansi(obj));
+				this.json(ansi(obj));
+				next();
 			
 			};
 		
