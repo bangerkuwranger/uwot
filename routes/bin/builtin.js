@@ -1,6 +1,7 @@
 'use strict';
 const path = require('path');
 const binLoader = require('../../helpers/binLoader');
+const sanitize = require('../../helpers/valueConversion');
 
 const validBuiltins = [
 	'cd',
@@ -517,13 +518,7 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 			cmdOpts,
 			cmdPath
 		);
-		
-		// Super don't do this; these are other commands that don't have an assoc. file
-		// add each builtin directly to global.Uwot.Bin 
-		global.Uwot.Bin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
-		global.Uwot.Bin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);
-		global.Uwot.Bin.help = new UwotCmdHelp(...builtinConstructorArgs.help);
-		global.Uwot.Bin.printf = new UwotCmdPrintf(...builtinConstructorArgs.printf);
+		loadBuiltins();
 		
 	}
 	
@@ -539,7 +534,12 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		var biOpts = [];
 		if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 		
-			biName = 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : biName;
+			if ('object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text) {
+			
+			 	var argName = args.shift();
+			 	biName = argName.text.trim();
+			
+			}
 			if (biName === '') {
 			
 				this.help(function(error, helpOutput) {
@@ -558,23 +558,20 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 				}.bind(this));
 			
 			}
-			else if(args.length > 1) {
+			else if (-1 !== validBuiltins.indexOf(biName)) {
 			
-				//loop through addtl args and set to biArgs for execution
+				if (args.length > 0) {
 			
-			}
-			if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
+					biArgs = sanitize.arrayOfObjectsOrEmpty(args);
+			
+				}
+				if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
 		
-				for (let i = 0; i < options.length; i++) {
-				
-					// parse options and assign to biOpts for execution of bi
+					biOpts = sanitize.arrayOfObjectsOrEmpty(options);
 			
 				}
 			
-			}
-			if (-1 !== validBuiltins.indexOf(biName)) {
-			
-				return global.Uwot.Bin[biName].execute(biArgs, biOpts, app, callback);
+				return global.Uwot.Bin[biName].execute(biArgs, biOpts, app, user, callback, isSudo, isid);
 			
 			}
 			else {
@@ -631,6 +628,18 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 	
 }
 
+function loadBuiltins() {
+
+	// Super don't do this; these are other commands that don't have an assoc. file
+	// add each builtin directly to global.Uwot.Bin 
+	global.Uwot.Bin.cd = new UwotCmdCd(...builtinConstructorArgs.cd);
+	global.Uwot.Bin.pwd = new UwotCmdPwd(...builtinConstructorArgs.pwd);
+	global.Uwot.Bin.help = new UwotCmdHelp(...builtinConstructorArgs.help);
+	global.Uwot.Bin.printf = new UwotCmdPrintf(...builtinConstructorArgs.printf);
+	return;
+
+}
+
 var builtin = new UwotCmdBuiltin(
 	{
 		name:				'builtin',
@@ -643,3 +652,9 @@ var builtin = new UwotCmdBuiltin(
 );
 
 module.exports = builtin;
+
+Object.defineProperty(module.exports, 'loadBuiltins', {
+	writable: true,
+	value: loadBuiltins
+});
+
