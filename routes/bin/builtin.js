@@ -536,8 +536,8 @@ class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 		
 			if ('object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text) {
 			
-			 	var argName = args.shift();
-			 	biName = argName.text.trim();
+				var argName = args.shift();
+				biName = argName.text.trim();
 			
 			}
 			if (biName === '') {
