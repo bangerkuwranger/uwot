@@ -67,6 +67,11 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 
 	execute(args, options, app, user, callback, isSudo, isid) {
 	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/builtin/cd/execute');
+		
+		}
 		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
 		global.Uwot.FileSystems[user._id].cmd('cd', argsArray, function(error) {
 		
@@ -113,6 +118,11 @@ class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 
 	execute(args, options, app, user, callback, isSudo, isid) {
 	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/builtin/pwd/execute');
+		
+		}
 		global.Uwot.FileSystems[user._id].cmd('pwd', [], function(error, pwdString) {
 		
 			if (error) {
@@ -157,12 +167,12 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to help');
 		
 		}
-		else if ('object' !== typeof args || !Array.isArray(args)) {
+		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'string' !== typeof args[0]) {
 		
 			return this.help(callback);
 		
 		}
-		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
+		var argsArray = this.argsObjToNameArray(args);
 		if (binLoader.isValidBin(argsArray[0])) {
 		
 			return global.Uwot.Bin[argsArray[0]].help(callback);

@@ -129,10 +129,7 @@ describe('builtin.js', function() {
 	// 		}
 		
 			);
-			it('should set global.Uwot.Bin.cd to an instance of UwotCmdCd');
-			it('should set global.Uwot.Bin.pwd to an instance of UwotCmdPwd');
-			it('should set global.Uwot.Bin.help to an instance of UwotCmdHelp');
-			it('should set global.Uwot.Bin.printf to an instance of UwotCmdPrintf');
+			it('should set call loadBuiltins to load cd, pwd, help, and printf to global.Uwot.Bin');
 	
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
@@ -238,17 +235,140 @@ describe('builtin.js', function() {
 				}, false, null);
 		
 			});
-			it('should return the value of the result of calling a valid builtin cmd if the first element in args contains an object with a text property matching a valid builtin name and the call completes without error');
-			it('should return an error if calling a valid builtin cmd returns an error and the first element in args contains an object with a text property matching a valid builtin name');
-			it('should return the value of the result of calling a valid builtin cmd with additional args if the first element in args contains an object with a text property matching a valid builtin name and args contains additional valid arg nodes beyond the builtin name');
-			it('should return the value of the result of calling a valid builtin cmd with additional args if the first element in args contains an object with a text property matching a valid builtin name and options contains valid option nodes');
+			it('should return the value of the result of calling a valid builtin cmd if the first element in args contains an object with a text property matching a valid builtin name and the call completes without error', function(done) {
+		
+				const currentGlobalPwd = global.Uwot.Bin.pwd;
+				global.Uwot.Bin.pwd = {
+					execute(args, options, app, user, callback, isSudo, isid) {
+					
+						return callback(false, 'test pwd result')
+					
+					}
+				}
+				binBuiltin.execute([{text: 'pwd'}], [], {}, {}, function(error, result) {
+			
+					if (error || 'string' !== typeof result) {
+					
+						global.Uwot.Bin.pwd = currentGlobalPwd;
+					
+					}
+					expect(error).to.be.false;
+					expect(result).to.equal('test pwd result');
+					global.Uwot.Bin.pwd = currentGlobalPwd;
+					done();
+			
+				}, false, null);
+		
+			});
+			it('should return an error if calling a valid builtin cmd returns an error and the first element in args contains an object with a text property matching a valid builtin name', function(done) {
+		
+				const currentGlobalPwd = global.Uwot.Bin.pwd;
+				global.Uwot.Bin.pwd = {
+					execute(args, options, app, user, callback, isSudo, isid) {
+					
+						return callback(new Error('test pwd error'))
+					
+					}
+				}
+				binBuiltin.execute([{text: 'pwd'}], [], {}, {}, function(error, result) {
+			
+					if (!error) {
+					
+						global.Uwot.Bin.pwd = currentGlobalPwd;
+					
+					}
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test pwd error');
+					global.Uwot.Bin.pwd = currentGlobalPwd;
+					done();
+			
+				}, false, null);
+		
+			});
+			it('should return the value of the result of calling a valid builtin cmd with additional args if the first element in args contains an object with a text property matching a valid builtin name and args contains additional valid arg nodes beyond the builtin name', function(done) {
+		
+				const currentGlobalPwd = global.Uwot.Bin.pwd;
+				global.Uwot.Bin.pwd = {
+					execute(args, options, app, user, callback, isSudo, isid) {
+					
+						var argStr = '';
+						for (let i = 0; i < args.length; i++) {
+						
+							if ('object' === typeof args[i] && null !== args[i] && 'string' === typeof args[i].text) {
+							
+								argStr += args[i].text;
+							
+							}
+							if ((i + 1) >= args.length) {
+							
+								return callback(false, argStr);
+							
+							}
+						
+						}
+					
+					}
+				}
+				binBuiltin.execute([{text: 'pwd'}, {text: 'ready'}, {text: 'set'}, {text: 'go'}], [], {}, {}, function(error, result) {
+			
+					if (error || 'string' !== typeof result) {
+					
+						global.Uwot.Bin.pwd = currentGlobalPwd;
+					
+					}
+					expect(error).to.be.false;
+					expect(result).to.equal('readysetgo');
+					global.Uwot.Bin.pwd = currentGlobalPwd;
+					done();
+			
+				}, false, null);
+		
+			});
+			it('should return the value of the result of calling a valid builtin cmd with options if the first element in args contains an object with a text property matching a valid builtin name and options contains valid option nodes', function(done) {
+		
+				const currentGlobalPwd = global.Uwot.Bin.pwd;
+				global.Uwot.Bin.pwd = {
+					execute(args, options, app, user, callback, isSudo, isid) {
+					
+						var optsStr = '';
+						for (let i = 0; i < options.length; i++) {
+						
+							if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].text) {
+							
+								optsStr += options[i].text;
+							
+							}
+							if ((i + 1) >= options.length) {
+							
+								return callback(false, optsStr);
+							
+							}
+						
+						}
+					
+					}
+				}
+				binBuiltin.execute([{text: 'pwd'}], [{text: 'ready'}, {text: 'set'}, {text: 'go'}], {}, {}, function(error, result) {
+			
+					if (error || 'string' !== typeof result) {
+					
+						global.Uwot.Bin.pwd = currentGlobalPwd;
+					
+					}
+					expect(error).to.be.false;
+					expect(result).to.equal('readysetgo');
+					global.Uwot.Bin.pwd = currentGlobalPwd;
+					done();
+			
+				}, false, null);
+		
+			});
 	
 		});
 		describe('help(callback)', function() {
 	
 			afterEach(function() {
 		
-				sinon.restore;
+				sinon.restore();
 		
 			});
 			it('should be a function', function() {
@@ -267,6 +387,42 @@ describe('builtin.js', function() {
 				binBuiltin.help(function(error, result) {
 			
 					expect(uwotCmdHelpStub.called).to.be.true;
+					expect(result).to.deep.equal(argArr);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
+			it('should return an error if calling the parent class method "help" with the passed value from callback arg returns an error', function(done) {
+		
+				var helpError = new Error('test help error');
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnErr(cb) {
+			
+					return cb(helpError);
+			
+				});
+				binBuiltin.help(function(error, result) {
+			
+					expect(error).to.deep.equal(helpError);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
+			it('should return an object with an output property containing a message indicating help isn\'t working if calling the parent class method "help" with the passed value from callback arg does not return an error or a non-null object to callback', function(done) {
+		
+				var testResult = 'there\'s no fixing stupid.';
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnStr(cb) {
+			
+					return cb(false, testResult);
+			
+				});
+				binBuiltin.help(function(error, result) {
+			
+					expect(result).to.be.an('object').with.property('output').that.equals('*** Help system currently unavailable. ***');
+					uwotCmdHelpStub.restore();
 					done();
 			
 				});
@@ -366,6 +522,13 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.cd.execute).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback arg is not a function');
+			it('should call its own/inherited method argsObjToNameArray with args if args is an object');
+			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and null if args is not an object');
+			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and the result of argsObjToNameArray if args is not an object');
+			it('should return an error to callback if the cmd call returns an error to callback');
+			it('should call the getVcwd method of the global filesystem for "user"');
+			it('should return an object with a cwd value matching the result of getVcwd, and an output property value containing both "changed directory to " and the result of getVcwd');
 		
 		});
 		describe('help(callback)', function() {
@@ -375,6 +538,7 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.cd.help).to.be.a('function');
 			
 			});
+			it('should call the parent class method help');
 		
 		});
 	
@@ -468,6 +632,10 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.pwd.execute).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should call the cmd method of the global filesystem for "user" with "pwd" as the first argument');
+			it('should return an error to callback if calling cmd("pwd", ...) returns an error to its callback');
+			it('should return a string to the second arg of callback if calling cmd("pwd", ...) returns without error');
 		
 		});
 		describe('help(callback)', function() {
@@ -477,6 +645,7 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.pwd.help).to.be.a('function');
 			
 			});
+			it('should call the parent class method help');
 		
 		});
 	
@@ -570,6 +739,11 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.help.execute).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function');
+			it('should call its help method and return the result to callback if args is not a non-empty array with a first member that is a string');
+			it('should call parent class method argsObjToNameArray with args if args is a non-empty array with a first member that is a string');
+			it('should call binLoader method isValidBin on the text value of the first member of args and return the result of calling the global bin with the text value of the first member of args to callback if isValidBin is true');
+			it('should call binLoader method isValidBin on the text value of the first member of args and return an error to callback if isValidBin is false');
 		
 		});
 		describe('help(callback)', function() {
@@ -579,6 +753,7 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.help.help).to.be.a('function');
 			
 			});
+			it('should call the parent class method help');
 		
 		});
 	
@@ -679,6 +854,97 @@ describe('builtin.js', function() {
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.help).to.be.a('function');
+			
+			});
+			it('should call the parent class method help');
+		
+		});
+		describe('stripQuotes(quotedStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.stripQuotes).to.be.a('function');
+			
+			});
+		
+		});
+		describe('unescapeString(escStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.unescapeString).to.be.a('function');
+			
+			});
+		
+		});
+		describe('unsDecNum(inputStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.unsDecNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('sigDecNum(inputStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.sigDecNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('unsOctNum(inputStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.unsOctNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('unsHexNum(inputStr, casing)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.unsHexNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('floatNum(inputStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.floatNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('doubleNum(inputStr, casing, sci)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.doubleNum).to.be.a('function');
+			
+			});
+		
+		});
+		describe('charStr(inputStr)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.charStr).to.be.a('function');
+			
+			});
+		
+		});
+		describe('replaceSub(subPattern, argsArray)', function() {
+		
+			it('should be a function', function() {
+			
+				expect(global.Uwot.Bin.printf.replaceSub).to.be.a('function');
 			
 			});
 		
