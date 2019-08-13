@@ -54,7 +54,7 @@ const builtinConstructorArgs = {
 
 class UwotCmdCd extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,
@@ -100,7 +100,7 @@ class UwotCmdCd extends global.Uwot.Exports.Cmd {
 
 class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,
@@ -139,7 +139,7 @@ class UwotCmdPwd extends global.Uwot.Exports.Cmd {
 
 class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,
@@ -185,7 +185,7 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 
 class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,
@@ -510,7 +510,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 
 class UwotCmdBuiltin extends global.Uwot.Exports.Cmd {
 
-	constructor( cmdObj, cmdOpts, cmdPath ) {
+	constructor(cmdObj, cmdOpts, cmdPath) {
 	
 		super(
 			cmdObj,

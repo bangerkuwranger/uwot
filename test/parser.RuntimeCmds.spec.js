@@ -11,7 +11,6 @@ const globalSetupHelper = require('../helpers/globalSetup');
 const AbstractRuntime = require('../parser/AbstractRuntime');
 const sanitize = require('../helpers/valueConversion');
 const systemError = require('../helpers/systemError');
-const ansiToText = require('../output/ansiToText');
 
 const uid = require('uid-safe');
 
