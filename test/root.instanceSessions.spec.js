@@ -492,8 +492,8 @@ describe('instanceSessions.js', function() {
 				instanceSessions.invalidate(testId, function(error, sessionId) {
 			
 					expect(sessionId).to.equal(testId);
-					expect(newExpires.getTime()).to.equal(now.getTime());
 					expect(error).to.be.false;
+					expect(Math.abs(newExpires.getTime() - now.getTime()) < 5).to.be.true;
 					dbUpdateStub.restore();
 					done();
 			
