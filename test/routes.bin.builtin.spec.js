@@ -903,15 +903,91 @@ describe('builtin.js', function() {
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 		
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
+			after(function() {
+			
+				removeTestUserFS();
+			
+			});
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.pwd.execute).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
-			it('should call the cmd method of the global filesystem for "user" with "pwd" as the first argument');
-			it('should return an error to callback if calling cmd("pwd", ...) returns an error to its callback');
-			it('should return a string to the second arg of callback if calling cmd("pwd", ...) returns without error');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				function throwError() {
+				
+					return global.Uwot.Bin.pwd.execute([], [], {}, {}, null, false, 'tanqueray');
+				
+				}
+				expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/builtin/pwd/execute');
+			
+			});
+			it('should call the cmd method of the global filesystem for "user" with "pwd" as the first argument', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/tonic/lime';
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(new Error('test cmd error'));
+				
+				});
+				global.Uwot.Bin.pwd.execute([], [], {}, testUser, function(error, result) {
+				
+					expect(fsCmdStub.called).to.be.true;
+					var cmdCall = fsCmdStub.getCall(0);
+					expect(cmdCall.args[0]).to.equal('pwd');
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should return an error to callback if calling cmd("pwd", ...) returns an error to its callback', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/tonic/lime';
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(new Error('test cmd error'));
+				
+				});
+				global.Uwot.Bin.pwd.execute([], [], {}, testUser, function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test cmd error');
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should return a string to the second arg of callback if calling cmd("pwd", ...) returns without error', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/tonic/lime';
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(false, testPath);
+				
+				});
+				global.Uwot.Bin.pwd.execute([], [], {}, testUser, function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal(testPath);
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
 		
 		});
 		describe('help(callback)', function() {
@@ -921,7 +997,24 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.pwd.help).to.be.a('function');
 			
 			});
-			it('should call the parent class method help');
+			it('should call the parent class method help', function(done) {
+		
+				var argArr = ['arg1', 'arg2', 'arg3'];
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnArgArr(cb) {
+			
+					return cb(false, argArr);
+			
+				});
+				global.Uwot.Bin.pwd.help(function(error, result) {
+			
+					expect(uwotCmdHelpStub.called).to.be.true;
+					expect(result).to.deep.equal(argArr);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
 		
 		});
 	
