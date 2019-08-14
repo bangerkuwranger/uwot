@@ -1332,9 +1332,9 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.command).to.have.property('name').that.equals('printf');
 	
 			});
-			it('should have a property "description" that has value "Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process."', function() {
+			it('should have a property "description" that has value "Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process. Some automatic formatting placeholders will use the more complex rather than "most appropriate" method to determine input/output settings for transforming value. Specifically, %i and %d both attempt to automatically select the radix on input, and both %e and %g only use exponential notation in output."', function() {
 	
-				expect(global.Uwot.Bin.printf.command).to.have.property('description').that.equals('Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process.');
+				expect(global.Uwot.Bin.printf.command).to.have.property('description').that.equals('Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process. Some automatic formatting placeholders will use the more complex rather than "most appropriate" method to determine input/output settings for transforming value. Specifically, %i and %d both attempt to automatically select the radix on input, and both %e and %g only use exponential notation in output.');
 	
 			});
 			it('should have a property "requiredArguments" that is an array with one element, "format"', function() {
@@ -1858,12 +1858,258 @@ describe('builtin.js', function() {
 		});
 		describe('replaceSub(subPattern, argsArray)', function() {
 		
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.replaceSub).to.be.a('function');
 			
 			});
-		
+			it('should return an Error if subPattern is not a valid replacement character', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = '8';
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.be.an.instanceof(Error).with.property('message').that.equals('unexpected format placeholder %8');
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then unescapeString on the first element of the argsArray argument if subPattern is "b"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'b';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('unescapeString(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				unescapeStringStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then sigDecNum on the first element of the argsArray argument if subPattern is "i" or "d"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'i';
+				var testArr2 = ['kablam'];
+				var testPattern2 = 'd';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var sigDecNumStub = sinon.stub(global.Uwot.Bin.printf, 'sigDecNum').callsFake(function addSDNName(sdnString) {
+				
+					return 'sigDecNum(' + sdnString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('sigDecNum(stripQuotes(kablooey))');
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern2, testArr2)).to.equal('sigDecNum(stripQuotes(kablam))');
+				stripQuotesStub.restore();
+				sigDecNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then unsOctNum on the first element of the argsArray argument if subPattern is "o"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'o';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unsOctNumStub = sinon.stub(global.Uwot.Bin.printf, 'unsOctNum').callsFake(function addUONName(uonString) {
+				
+					return 'unsOctNum(' + uonString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('unsOctNum(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				unsOctNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then unsDecNum on the first element of the argsArray argument if subPattern is "u"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'u';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unsDecNumStub = sinon.stub(global.Uwot.Bin.printf, 'unsDecNum').callsFake(function addUDNName(udnString) {
+				
+					return 'unsDecNum(' + udnString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('unsDecNum(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				unsDecNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then unsHexNum on the first element of the argsArray argument if subPattern is "x"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'x';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unsHexNumStub = sinon.stub(global.Uwot.Bin.printf, 'unsHexNum').callsFake(function addUHNName(uhnString, casing) {
+				
+					var result = 'unsHexNum(' + uhnString + ')';
+					return casing === "upper" ? result.toUpperCase() : result;
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('unsHexNum(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				unsHexNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling unsHexNum with the result of calling stripQuotes on the first element of the argsArray argument and "upper" if subPattern is "X"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'X';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unsHexNumStub = sinon.stub(global.Uwot.Bin.printf, 'unsHexNum').callsFake(function addUHNName(uhnString, casing) {
+				
+					var result = 'unsHexNum(' + uhnString + ')';
+					return casing === "upper" ? result.toUpperCase() : result;
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('UNSHEXNUM(STRIPQUOTES(KABLOOEY))');
+				stripQuotesStub.restore();
+				unsHexNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes and then floatNum on the first element of the argsArray argument if subPattern is "f"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'f';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var floatNumStub = sinon.stub(global.Uwot.Bin.printf, 'floatNum').callsFake(function addFNName(fnString) {
+				
+					return 'floatNum(' + fnString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('floatNum(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				floatNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling doubleNum with the result of calling stripQuotes on the first element of the argsArray argument and true if subPattern is "g" or "e"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'g';
+				var testArr2 = ['kablam'];
+				var testPattern2 = 'e';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var doubleNumStub = sinon.stub(global.Uwot.Bin.printf, 'doubleNum').callsFake(function addDNName(dnString, sci, casing) {
+				
+					if (sci) {
+					
+						dnString += 'e+0';
+					
+					}
+					var result = 'doubleNum(' + dnString + ')';
+					return casing === 'upper' ? result.toUpperCase() : result;
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('doubleNum(stripQuotes(kablooey)e+0)');
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern2, testArr2)).to.equal('doubleNum(stripQuotes(kablam)e+0)');
+				stripQuotesStub.restore();
+				doubleNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling doubleNum with the result of calling stripQuotes on the first element of the argsArray argument, true, and "upper" if subPattern is "G" or "E"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'G';
+				var testArr2 = ['kablam'];
+				var testPattern2 = 'E';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var doubleNumStub = sinon.stub(global.Uwot.Bin.printf, 'doubleNum').callsFake(function addDNName(dnString, sci, casing) {
+				
+					if (sci) {
+					
+						dnString += 'e+0';
+					
+					}
+					var result = 'doubleNum(' + dnString + ')';
+					return casing === 'upper' ? result.toUpperCase() : result;
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('DOUBLENUM(STRIPQUOTES(KABLOOEY)E+0)');
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern2, testArr2)).to.equal('DOUBLENUM(STRIPQUOTES(KABLAM)E+0)');
+				stripQuotesStub.restore();
+				doubleNumStub.restore();
+			
+			});
+			it('should return a string resulting from calling charStr with the result of calling stripQuotes on the first element of the argsArray argument if subPattern is "c"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 'c';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var charStrStub = sinon.stub(global.Uwot.Bin.printf, 'charStr').callsFake(function addCSName(csString) {
+				
+					return 'charStr(' + csString + ')';
+				
+				});
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('charStr(stripQuotes(kablooey))');
+				stripQuotesStub.restore();
+				charStrStub.restore();
+			
+			});
+			it('should return a string resulting from calling stripQuotes on the first element of the argsArray argument if subPattern is "s"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = 's';
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('stripQuotes(kablooey)');
+				stripQuotesStub.restore();
+			
+			});
+			it('should return a string that contains the html entity for "%" if subPattern is "%"', function() {
+			
+				var testArr = ['kablooey'];
+				var testPattern = '%';
+				expect(global.Uwot.Bin.printf.replaceSub(testPattern, testArr)).to.equal('&percnt;');
+			
+			});
+			
 		});
 	
 	});

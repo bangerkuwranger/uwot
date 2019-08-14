@@ -44,7 +44,7 @@ const builtinConstructorArgs = {
 	printf: [
 		{
 			name:				'printf',
-			description:		'Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process.',
+			description:		'Write the formatted arguments to the standard output under the control of the format. Does NOT support modifiers or the following string placeholders: %q, %n, %a, %A, %(FORMAT)T. Additionally, all numeric conversions are limited by ES6 spec, and as such, will be limited to double precision and may be converted to 32bit integers in the process. Some automatic formatting placeholders will use the more complex rather than "most appropriate" method to determine input/output settings for transforming value. Specifically, %i and %d both attempt to automatically select the radix on input, and both %e and %g only use exponential notation in output.',
 			requiredArguments:	['format'],
 			optionalArguments:	['arguments']
 		},
@@ -462,7 +462,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 				replaceWith = '&percnt;';
 				break;
 			default:
-				return new Error('unexpected format placeholder %' + subPattern);
+				return new Error('unexpected format placeholder %' + subPattern.toString());
 	
 		}
 		return replaceWith;
@@ -491,8 +491,8 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 			finalString = this.stripQuotes(format);
 			// replace escapes in format
 			finalString = this.unescapeString(finalString);
-			var hasSubs = -1 !== finalString.indexOf('%');
-			if (!hasSubs) {
+			var noSubs = -1 === finalString.indexOf('%');
+			if (noSubs) {
 			
 				return callback(false, finalString);
 			
