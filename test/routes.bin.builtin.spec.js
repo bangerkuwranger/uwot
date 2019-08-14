@@ -7,6 +7,69 @@ const expect = chai.expect;
 
 const path = require('path');
 
+const getTestUser = function() {
+
+	return {
+		"fName": "Found",
+		"lName": "User",
+		"uName": "fuser",
+		"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+		"sudoer": true,
+		"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+		"createdAt": new Date(1546450800498),
+		"updatedAt": new Date(1546450800498),
+		"_id": "CDeOOrH0gOg791cZ",
+		"maySudo": function() { return this.sudoer; }
+	};
+
+};
+
+const createTestUserFS = function(uid) {
+
+	if ('string' !== typeof uid) {
+	
+		uid = getTestUser()._id;
+	
+	}
+	if ('object' !== typeof global.Uwot.FileSystems || null === global.Uwot.FileSystems) {
+	
+		global.Uwot.FileSystems = {};
+	
+	}
+	if ('object' !== typeof global.Uwot.FileSystems[uid] || null === global.Uwot.FileSystems[uid]) {
+	
+		global.Uwot.FileSystems[uid] = {
+			cmd: function(op, args, cb) {
+	
+				return cb(false, op + '(' + args.join() + ')');
+	
+			},
+			getVcwd: function() {
+			
+				return "/home/" +getTestUser().uName;
+			
+			}
+		};
+	
+	}
+
+}
+
+const removeTestUserFS = function(uid) {
+
+	if ('string' !== typeof uid) {
+	
+		uid = getTestUser()._id;
+	
+	}
+	if ('object' === typeof global.Uwot.FileSystems && null !== global.Uwot.FileSystems && 'object' === typeof global.Uwot.FileSystems[uid] && null !== global.Uwot.FileSystems[uid]) {
+	
+		delete global.Uwot.FileSystems[uid];
+	
+	}
+
+};
+
 describe('builtin.js', function() {
 
 	var binBuiltin;
@@ -517,18 +580,214 @@ describe('builtin.js', function() {
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 		
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
+			after(function() {
+			
+				removeTestUserFS();
+			
+			});
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.cd.execute).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback arg is not a function');
-			it('should call its own/inherited method argsObjToNameArray with args if args is an object');
-			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and null if args is not an object');
-			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and the result of argsObjToNameArray if args is not an object');
-			it('should return an error to callback if the cmd call returns an error to callback');
-			it('should call the getVcwd method of the global filesystem for "user"');
-			it('should return an object with a cwd value matching the result of getVcwd, and an output property value containing both "changed directory to " and the result of getVcwd');
+			it('should throw a TypeError if callback arg is not a function', function() {
+			
+				function throwError() {
+				
+					return global.Uwot.Bin.cd.execute([{type: 'Word', text: '/salmonella'}], [], {}, {}, null, false, 'blueberries');
+				
+				}
+				expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/builtin/cd/execute');
+			
+			});
+			it('should call its own/inherited method argsObjToNameArray with args if args is an object', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(new Error('test cmd error'));
+				
+				});
+				global.Uwot.Bin.cd.execute([{type: 'Word', text: '/salmonella'}], [], {}, testUser, function(error, result) {
+				
+					expect(cmdArgsObjToNameArrayStub.called).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and null if args is not an object', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(new Error('test cmd error'));
+				
+				});
+				global.Uwot.Bin.cd.execute('/salmonella', [], {}, testUser, function(error, result) {
+				
+					expect(fsCmdStub.called).to.be.true;
+					var cmdCall = fsCmdStub.getCall(0);
+					expect(cmdCall.args[0]).to.equal('cd');
+					expect(cmdCall.args[1]).to.be.null;
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should call the cmd method of the global filesystem for the passed user\'s _id with args "cd" and the result of argsObjToNameArray if args is an object', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/salmonella';
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnSecondArg(op, args, cb) {
+				
+					return cb(false, args[1]);
+				
+				});
+				var fsGetVcwdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'getVcwd').returns(testPath);
+				global.Uwot.Bin.cd.execute([{type: 'Word', text: testPath}], [], {}, testUser, function(error, result) {
+				
+					expect(fsCmdStub.called).to.be.true;
+					var cmdCall = fsCmdStub.getCall(0);
+					expect(cmdCall.args[0]).to.equal('cd');
+					expect(cmdCall.args[1]).to.deep.equal([testPath]);
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					fsGetVcwdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should return an error to callback if the cmd call returns an error to callback', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb) {
+				
+					return cb(new Error('test cmd error'));
+				
+				});
+				global.Uwot.Bin.cd.execute('/salmonella', [], {}, testUser, function(error, result) {
+				
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test cmd error');
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should call the getVcwd method of the global filesystem for "user"', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/salmonella';
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnSecondArg(op, args, cb) {
+				
+					return cb(false, args[1]);
+				
+				});
+				var fsGetVcwdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'getVcwd').returns(testPath);
+				global.Uwot.Bin.cd.execute([{type: 'Word', text: testPath}], [], {}, testUser, function(error, result) {
+				
+					expect(fsGetVcwdStub.called).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					fsGetVcwdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
+			it('should return an object with a cwd value matching the result of getVcwd, and an output property value containing both "changed directory to " and the result of getVcwd', function(done) {
+			
+				var testUser = getTestUser();
+				createTestUserFS();
+				var testPath = '/salmonella';
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var fsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnSecondArg(op, args, cb) {
+				
+					return cb(false, args[1]);
+				
+				});
+				var fsGetVcwdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'getVcwd').returns(testPath);
+				global.Uwot.Bin.cd.execute([{type: 'Word', text: testPath}], [], {}, testUser, function(error, result) {
+				
+					expect(fsGetVcwdStub.called).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					fsCmdStub.restore();
+					fsGetVcwdStub.restore();
+					done();
+				
+				}, false, 'blueberries');
+			
+			});
 		
 		});
 		describe('help(callback)', function() {
@@ -538,7 +797,24 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.cd.help).to.be.a('function');
 			
 			});
-			it('should call the parent class method help');
+			it('should call the parent class method help', function(done) {
+		
+				var argArr = ['arg1', 'arg2', 'arg3'];
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnArgArr(cb) {
+			
+					return cb(false, argArr);
+			
+				});
+				global.Uwot.Bin.cd.help(function(error, result) {
+			
+					expect(uwotCmdHelpStub.called).to.be.true;
+					expect(result).to.deep.equal(argArr);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
 		
 		});
 	
