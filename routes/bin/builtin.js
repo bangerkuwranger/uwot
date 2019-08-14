@@ -240,29 +240,43 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	unescapeString(escStr) {
 	
 		var finalString = escStr;
-		const escChars = [
-			'\\\\',
-			'\\n',
-			'\\r',
-			'\\t',
-			'\\"',
-			"\\'",
-			"\\?"
-		];
-		const escCharMap = {
-			'\\\\': '&bsol;',
-			'\\n': '&NewLine;',
-			'\\r': '',
-			'\\t': '&Tab;',
-			'\\"': '&quot;',
-			"\\'": '&apos;',
-			"\\?": '&quest;'
-		};
-		escChars.forEach(function(escChar) {
+		if ('string' === typeof finalString) {
 		
-			finalString = finalString.split(escChar).join(escCharMap[escChar]);
+			const escChars = [
+				'\\\\',
+				'\\n',
+				'\\r',
+				'\\t',
+				'\\"',
+				"\\'",
+				"\\?",
+				"\\#",
+				"\\$",
+				"\\<",
+				"\\>",
+				"\\&"
+			];
+			const escCharMap = {
+				'\\\\': '&bsol;',
+				'\\n': '&NewLine;',
+				'\\r': '',
+				'\\t': '&Tab;',
+				'\\"': '&quot;',
+				"\\'": '&apos;',
+				"\\?": '&quest;',
+				"\\#": '&num;',
+				"\\$": '&dollar;',
+				"\\<": '&lt;',
+				"\\>": '&gt;',
+				"\\&": '&amp;'
+			};
+			escChars.forEach((escChar) => {
 		
-		});
+				finalString = finalString.split(escChar).join(escCharMap[escChar]);
+		
+			});
+		
+		}
 		return finalString;
 	
 	}

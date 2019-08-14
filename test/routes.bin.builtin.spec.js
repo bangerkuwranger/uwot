@@ -1401,7 +1401,24 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.help).to.be.a('function');
 			
 			});
-			it('should call the parent class method help');
+			it('should call the parent class method help', function(done) {
+		
+				var argArr = ['arg1', 'arg2', 'arg3'];
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnArgArr(cb) {
+			
+					return cb(false, argArr);
+			
+				});
+				global.Uwot.Bin.printf.help(function(error, result) {
+			
+					expect(uwotCmdHelpStub.called).to.be.true;
+					expect(result).to.deep.equal(argArr);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
 		
 		});
 		describe('stripQuotes(quotedStr)', function() {
@@ -1411,13 +1428,131 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.stripQuotes).to.be.a('function');
 			
 			});
+			it('should return value of quotedStr arg unchanged if it is not a string', function() {
+			
+				var testArg = ['"fanciful unicorns"'];
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg)).to.deep.equal(testArg);
+			
+			});
+			it('should return value of quotedStr arg with the first and last characters removed if they are both double-quote chars', function() {
+			
+				var testArg = '"fanciful unicorns"';
+				var testResult = 'fanciful unicorns';
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg)).to.equal(testResult);
+			
+			});
+			it('should return value of quotedStr arg with the first and last characters removed if they are both single-quote chars', function() {
+			
+				var testArg = "'fanciful unicorns'";
+				var testResult = 'fanciful unicorns';
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg)).to.equal(testResult);
+			
+			});
+			it('should return value of quotedStr arg unchanged if first and last chars are neither both double- or single-quotes', function() {
+			
+				var testArg1 = 'fanciful unicorns';
+				var testArg2 = '\'fanciful unicorns"';
+				var testArg3 = '"fanciful unicorns\'';
+				var testArg4 = '\'fanciful unicorns';
+				var testArg5 = 'fanciful unicorns\'';
+				var testArg6 = 'fanciful unicorns"';
+				var testArg7 = '"fanciful unicorns';
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg1)).to.equal(testArg1);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg2)).to.equal(testArg2);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg3)).to.equal(testArg3);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg4)).to.equal(testArg4);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg5)).to.equal(testArg5);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg6)).to.equal(testArg6);
+				expect(global.Uwot.Bin.printf.stripQuotes(testArg7)).to.equal(testArg7);
+			
+			});
 		
 		});
 		describe('unescapeString(escStr)', function() {
 		
+			var testArg = 'trailing the \\$, \\n\\r c:run\\\\bin\\\\ \\#bitcoin\\> still \\"trending\\",\\tdespite loss \\& currently \\\'\\<\\\'\\? ';
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.unescapeString).to.be.a('function');
+			
+			});
+			it('should return value of escStr arg unchanged if it is not a string', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString([testArg]);
+				expect(testResult).to.be.an('array');
+				expect(testResult[0]).to.equal(testArg);
+			
+			});
+			it('should return the value of escStr with all instances of "\\\\" replaced with "&bsol;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('c:run&bsol;bin&bsol;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\n" replaced with "&NewLine;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain(', &NewLine; ');
+			
+			});
+			it('should return the value of escStr with all instances of "\\r" replaced with ""', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain(', &NewLine; ');
+			
+			});
+			it('should return the value of escStr with all instances of "\\t" replaced with "&Tab;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain(',&Tab;despite');
+			
+			});
+			it('should return the value of escStr with all instances of "\\\"" replaced with "&quot;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('&quot;trending&quot;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\\'" replaced with "&apos;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('&apos;&lt;&apos;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\?" replaced with "&quest;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('&apos;&lt;&apos;&quest;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\#" replaced with "&num;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('&num;bitcoin');
+			
+			});
+			it('should return the value of escStr with all instances of "\\$" replaced with "&dollar"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('trailing the &dollar;,');
+			
+			});
+			it('should return the value of escStr with all instances of "\\<" replaced with "&lt;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('currently &apos;&lt;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\>" replaced with "&gt;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('bitcoin&gt;');
+			
+			});
+			it('should return the value of escStr with all instances of "\\&" replaced with "&amp;"', function() {
+			
+				var testResult = global.Uwot.Bin.printf.unescapeString(testArg);
+				expect(testResult).to.contain('loss &amp; currently');
 			
 			});
 		
