@@ -164,10 +164,10 @@ class UwotCmdHelp extends global.Uwot.Exports.Cmd {
 	
 		if ('function' !== typeof callback) {
 		
-			throw new TypeError('invalid callback passed to help');
+			throw new TypeError('invalid callback passed to bin/builtin/help/execute');
 		
 		}
-		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'string' !== typeof args[0]) {
+		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'object' !== typeof args[0] || null === args[0] || 'string' !== typeof args[0].text) {
 		
 			return this.help(callback);
 		

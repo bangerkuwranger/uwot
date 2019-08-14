@@ -6,6 +6,7 @@ const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
 const path = require('path');
+const binLoader = require('../helpers/binLoader');
 
 const getTestUser = function() {
 
@@ -1103,16 +1104,174 @@ describe('builtin.js', function() {
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 		
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
+			after(function() {
+			
+				removeTestUserFS();
+			
+			});
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.help.execute).to.be.a('function');
 			
 			});
-			it('should throw a TypeError if callback is not a function');
-			it('should call its help method and return the result to callback if args is not a non-empty array with a first member that is a string');
-			it('should call parent class method argsObjToNameArray with args if args is a non-empty array with a first member that is a string');
-			it('should call binLoader method isValidBin on the text value of the first member of args and return the result of calling the global bin with the text value of the first member of args to callback if isValidBin is true');
-			it('should call binLoader method isValidBin on the text value of the first member of args and return an error to callback if isValidBin is false');
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				function throwError() {
+				
+					return global.Uwot.Bin.help.execute([], [], {}, {}, null, false, 'tanqueray');
+				
+				}
+				expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/builtin/help/execute');
+			
+			});
+			it('should call its help method and return the result to callback if args is not a non-empty array with a first member that is an object with property "text" that is a string', function(done) {
+		
+				var testResult = 'test help result';
+				var helpStub = sinon.stub(global.Uwot.Bin.help, 'help').callsFake(function returnString(cb) {
+			
+					return cb(false, testResult);
+			
+				});
+				global.Uwot.Bin.help.execute('null', [], {}, {}, function(error, result) {
+			
+					expect(error).to.be.false;
+					expect(result).to.equal(testResult);
+					global.Uwot.Bin.help.execute(null, [], {}, {}, function(error, result) {
+			
+						expect(error).to.be.false;
+						expect(result).to.equal(testResult);
+						global.Uwot.Bin.help.execute([], [], {}, {}, function(error, result) {
+			
+							expect(error).to.be.false;
+							expect(result).to.equal(testResult);
+							global.Uwot.Bin.help.execute(['null'], [], {}, {}, function(error, result) {
+			
+								expect(error).to.be.false;
+								expect(result).to.equal(testResult);
+								global.Uwot.Bin.help.execute([null], [], {}, {}, function(error, result) {
+			
+									expect(error).to.be.false;
+									expect(result).to.equal(testResult);
+									global.Uwot.Bin.help.execute([{text: null}], [], {}, {}, function(error, result) {
+			
+										expect(error).to.be.false;
+										expect(result).to.equal(testResult);
+										helpStub.restore();
+										done();
+			
+									}, false, null);
+			
+								}, false, null);
+			
+							}, false, null);
+			
+						}, false, null);
+			
+					}, false, null);
+			
+				}, false, null);
+		
+			});
+			it('should call parent class method argsObjToNameArray with args if args is a non-empty array with a first member that is a string', function(done) {
+			
+				var testUser = getTestUser();
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var binLoaderIsValidBinStub = sinon.stub(binLoader, 'isValidBin').callsFake(function returnFalse(binName) {
+				
+					return false;
+				
+				});
+				global.Uwot.Bin.help.execute([{type: 'Word', text: 'pwd'}], [], {}, testUser, function(error, result) {
+				
+					expect(cmdArgsObjToNameArrayStub.called).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					binLoaderIsValidBinStub.restore();
+					done();
+				
+				}, false, 'glenlivet');
+			
+			});
+			it('should call binLoader method isValidBin on the text value of the first member of args and return the result of calling the global bin with the text value of the first member of args to callback if isValidBin is true', function(done) {
+			
+				var testUser = getTestUser();
+				var testResult = 'test pwd help';
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var binLoaderIsValidBinStub = sinon.stub(binLoader, 'isValidBin').callsFake(function returnTrue(binName) {
+				
+					return true;
+				
+				});
+				var globalBinPwdHelpStub = sinon.stub(global.Uwot.Bin.pwd, 'help').callsFake(function returnString(cb) {
+				
+					return cb(false, testResult);
+				
+				});
+				global.Uwot.Bin.help.execute([{type: 'Word', text: 'pwd'}], [], {}, testUser, function(error, result) {
+				
+					expect(binLoaderIsValidBinStub.called).to.be.true;
+					expect(binLoaderIsValidBinStub.calledWith('pwd')).to.be.true;
+					expect(globalBinPwdHelpStub.called).to.be.true;
+					expect(result).to.equal(testResult);
+					expect(error).to.be.false;
+					cmdArgsObjToNameArrayStub.restore();
+					binLoaderIsValidBinStub.restore();
+					globalBinPwdHelpStub.restore();
+					done();
+				
+				}, false, 'glenlivet');
+			
+			});
+			it('should call binLoader method isValidBin on the text value of the first member of args and return an error to callback if isValidBin is false', function(done) {
+			
+				var testUser = getTestUser();
+				var testResult = 'test pwd help';
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var binLoaderIsValidBinStub = sinon.stub(binLoader, 'isValidBin').callsFake(function returnFalse(binName) {
+				
+					return false;
+				
+				});
+				global.Uwot.Bin.help.execute([{type: 'Word', text: 'pwd'}], [], {}, testUser, function(error, result) {
+				
+					expect(binLoaderIsValidBinStub.called).to.be.true;
+					expect(binLoaderIsValidBinStub.calledWith('pwd')).to.be.true;
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid command: pwd');
+					cmdArgsObjToNameArrayStub.restore();
+					binLoaderIsValidBinStub.restore();
+					done();
+				
+				}, false, 'glenlivet');
+			
+			});
 		
 		});
 		describe('help(callback)', function() {
@@ -1122,7 +1281,24 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.help.help).to.be.a('function');
 			
 			});
-			it('should call the parent class method help');
+			it('should call the parent class method help', function(done) {
+		
+				var argArr = ['arg1', 'arg2', 'arg3'];
+				var uwotCmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnArgArr(cb) {
+			
+					return cb(false, argArr);
+			
+				});
+				global.Uwot.Bin.help.help(function(error, result) {
+			
+					expect(uwotCmdHelpStub.called).to.be.true;
+					expect(result).to.deep.equal(argArr);
+					uwotCmdHelpStub.restore();
+					done();
+			
+				});
+		
+			});
 		
 		});
 	
