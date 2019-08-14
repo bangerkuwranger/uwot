@@ -295,16 +295,24 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	unsOctNum(inputStr) {
 	
-		return Math.abs(parseFloat(inputStr)).toString(8);
+		return Math.abs(parseInt(inputStr)).toString(8);
 	
 	}
 	
 	unsHexNum(inputStr, casing) {
 	
-		var result = parseFloat(inputStr);
+		var intResult = parseInt(inputStr);
+		var floatResult = parseFloat(inputStr) * 10;
+		var result = intResult !== parseFloat(inputStr) && parseFloat(inputStr) === floatResult ? intResult : parseFloat(inputStr);
+		result = Math.abs(result);
 		if ('string' !== typeof casing || casing !== 'upper') {
 		
 			return result.toString(16);
+		
+		}
+		else if (result.toString() === 'NaN') {
+		
+			return 'NaN';
 		
 		}
 		else {
@@ -317,14 +325,19 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 	
 	floatNum(inputStr) {
 	
-		return parseFloat(inputStr).toString(10);
+		return Math.fround(parseFloat(inputStr)).toString(10);
 	
 	}
 	
-	doubleNum(inputStr, casing, sci) {
+	doubleNum(inputStr, sci, casing) {
 	
 		var result = parseFloat(inputStr);
-		if ('boolean' === typeof sci && sci) {
+		if (result.toString() === 'NaN') {
+		
+			return 'NaN';
+		
+		}
+		else if ('boolean' === typeof sci && sci) {
 		
 			return 'string' !== typeof casing || casing !== 'upper' ? result.toExponential() : result.toExponential().toUpperCase();
 		
@@ -339,7 +352,12 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 
 	charStr(inputStr) {
 	
-		return inputStr.charAt(0);
+		if ('string' !== typeof inputStr && 'number' !== typeof inputStr && 'boolean' !== typeof inputStr) {
+		
+			throw new TypeError('invalid inputStr passed to bin/builtin/printf/charStr');
+		
+		}
+		return inputStr.toString().trim().charAt(0);
 	
 	}
 	
@@ -411,7 +429,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 				sub = argsArray.shift();
 				if ('string' === typeof sub && '' !== sub) {
 			
-					replaceWith = this.doubleNum(this.stripQuotes(sub), 'lower', true);
+					replaceWith = this.doubleNum(this.stripQuotes(sub), true);
 			
 				}
 				break;
@@ -420,7 +438,7 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 				sub = argsArray.shift();
 				if ('string' === typeof sub && '' !== sub) {
 			
-					replaceWith = this.doubleNum(this.stripQuotes(sub), 'upper', true);
+					replaceWith = this.doubleNum(this.stripQuotes(sub), true, 'upper');
 			
 				}
 				break;

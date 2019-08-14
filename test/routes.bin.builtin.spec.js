@@ -1564,6 +1564,28 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.unsDecNum).to.be.a('function');
 			
 			});
+			it('should return an unsigned decimal representation of inputStr arg value', function() {
+			
+				testArgs = [
+					'-9000',
+					'9001',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.unsDecNum(ta); });
+				expect(testResults[0]).to.equal('9000');
+				expect(testResults[1]).to.equal('9001');
+				expect(testResults[2]).to.equal('0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('3.141592653589793');
+				expect(testResults[5]).to.equal('2.718281828459045');
+				expect(testResults[6]).to.equal('0');
+				
+			
+			});
 		
 		});
 		describe('sigDecNum(inputStr)', function() {
@@ -1571,6 +1593,28 @@ describe('builtin.js', function() {
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.sigDecNum).to.be.a('function');
+			
+			});
+			it('should return a signed decimal representation of inputStr arg value', function() {
+			
+				testArgs = [
+					'-9000',
+					'9001',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.sigDecNum(ta); });
+				expect(testResults[0]).to.equal('-9000');
+				expect(testResults[1]).to.equal('9001');
+				expect(testResults[2]).to.equal('0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('-3.141592653589793');
+				expect(testResults[5]).to.equal('2.718281828459045');
+				expect(testResults[6]).to.equal('0');
+				
 			
 			});
 		
@@ -1582,6 +1626,28 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.unsOctNum).to.be.a('function');
 			
 			});
+			it('should return an unsigned octal representation of inputStr arg value', function() {
+			
+				testArgs = [
+					'-9000',
+					'9001',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.unsOctNum(ta); });
+				expect(testResults[0]).to.equal('21450');
+				expect(testResults[1]).to.equal('21451');
+				expect(testResults[2]).to.equal('372');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('3');
+				expect(testResults[5]).to.equal('2');
+				expect(testResults[6]).to.equal('377');
+				
+			
+			});
 		
 		});
 		describe('unsHexNum(inputStr, casing)', function() {
@@ -1589,6 +1655,54 @@ describe('builtin.js', function() {
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.unsHexNum).to.be.a('function');
+			
+			});
+			it('should return an unsigned hexadecimal representation of inputStr arg value with lowercase alpha chars if casing arg is not a string that equals "upper"', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.unsHexNum(ta); });
+				expect(testResults[0]).to.equal('15f90');
+				expect(testResults[1]).to.equal('400');
+				expect(testResults[2]).to.equal('fa');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('3.243f6a8885a3');
+				expect(testResults[5]).to.equal('2.b7e151628aed2');
+				expect(testResults[6]).to.equal('ff');
+				
+			
+			});
+			it('should return an unsigned hexadecimal representation of inputStr arg value with uppercase alpha chars if casing arg equals "upper"', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.unsHexNum(ta, 'upper'); });
+				expect(testResults[0]).to.equal('15F90');
+				expect(testResults[1]).to.equal('400');
+				expect(testResults[2]).to.equal('FA');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('3.243F6A8885A3');
+				expect(testResults[5]).to.equal('2.B7E151628AED2');
+				expect(testResults[6]).to.equal('FF');
+				
+			});
+			it('should return "NaN" if inputStr value cannot be parsed to a number, even if casing is "upper"', function() {
+			
+				expect(global.Uwot.Bin.printf.unsHexNum('ta ta for now', 'upper')).to.equal('NaN');
 			
 			});
 		
@@ -1600,13 +1714,102 @@ describe('builtin.js', function() {
 				expect(global.Uwot.Bin.printf.floatNum).to.be.a('function');
 			
 			});
+			it('should return a signed 32-bit floating decimal representation of inputStr arg value', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.floatNum(ta); });
+				expect(testResults[0]).to.equal('-90000');
+				expect(testResults[1]).to.equal('1024');
+				expect(testResults[2]).to.equal('0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('-3.1415927410125732');
+				expect(testResults[5]).to.equal('2.7182817459106445');
+				expect(testResults[6]).to.equal('0');
+				
+			});
 		
 		});
-		describe('doubleNum(inputStr, casing, sci)', function() {
+		describe('doubleNum(inputStr, sci, casing)', function() {
 		
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.doubleNum).to.be.a('function');
+			
+			});
+			it('should return a signed 64-bit floating decimal representation of inputStr arg value if value of sci arg is not a boolean that is true', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.doubleNum(ta); });
+				expect(testResults[0]).to.equal('-90000');
+				expect(testResults[1]).to.equal('1024');
+				expect(testResults[2]).to.equal('0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('-3.141592653589793');
+				expect(testResults[5]).to.equal('2.718281828459045');
+				expect(testResults[6]).to.equal('0');
+				
+			});
+			it('should return a signed 64-bit floating decimal exponential representation with lowercase alpha chars of inputStr arg value if value of sci arg is a boolean that is true and casing arg value does not equal "upper"', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.doubleNum(ta, true); });
+				expect(testResults[0]).to.equal('-9e+4');
+				expect(testResults[1]).to.equal('1.024e+3');
+				expect(testResults[2]).to.equal('0e+0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('-3.141592653589793e+0');
+				expect(testResults[5]).to.equal('2.718281828459045e+0');
+				expect(testResults[6]).to.equal('0e+0');
+				
+			});
+			it('should return a signed 64-bit floating decimal exponential representation with uppercase alpha chars of inputStr arg value if value of sci arg is a boolean that is true and casing arg value does not equal "upper"', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.doubleNum(ta, true, 'upper'); });
+				expect(testResults[0]).to.equal('-9E+4');
+				expect(testResults[1]).to.equal('1.024E+3');
+				expect(testResults[2]).to.equal('0E+0');
+				expect(testResults[3]).to.equal('NaN');
+				expect(testResults[4]).to.equal('-3.141592653589793E+0');
+				expect(testResults[5]).to.equal('2.718281828459045E+0');
+				expect(testResults[6]).to.equal('0E+0');
+				
+			});
+			it('should return "NaN" if inputStr value cannot be parsed to a number, even if sci is true and casing is "upper"', function() {
+			
+				expect(global.Uwot.Bin.printf.unsHexNum('ta ta for now', 'upper')).to.equal('NaN');
 			
 			});
 		
@@ -1617,6 +1820,39 @@ describe('builtin.js', function() {
 			
 				expect(global.Uwot.Bin.printf.charStr).to.be.a('function');
 			
+			});
+			it('should throw a TypeError if value of inputStr is not a string, number, or boolean"', function() {
+			
+				function throwError() {
+				
+					return global.Uwot.Bin.printf.charStr(null);
+				
+				}
+				expect(throwError).to.throw(TypeError, 'invalid inputStr passed to bin/builtin/printf/charStr');
+			
+			});
+			it('should return the first character of inputStr arg value as a string, excluding whitespace, if value of inputStr is a string, number, or boolean"', function() {
+			
+				testArgs = [
+					'-90000',
+					'1024',
+					'0xfam',
+					'it is over',
+					'-3.14159265358979323846264338327950288419716939937510582097494459230781640629',
+					'2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516643',
+					'0xff',
+					'         seventy-thousand	'
+				]
+				testResults = testArgs.map((ta) => { return global.Uwot.Bin.printf.charStr(ta); });
+				expect(testResults[0]).to.equal('-');
+				expect(testResults[1]).to.equal('1');
+				expect(testResults[2]).to.equal('0');
+				expect(testResults[3]).to.equal('i');
+				expect(testResults[4]).to.equal('-');
+				expect(testResults[5]).to.equal('2');
+				expect(testResults[6]).to.equal('0');
+				expect(testResults[7]).to.equal('s');
+				
 			});
 		
 		});
