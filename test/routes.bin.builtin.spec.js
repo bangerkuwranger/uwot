@@ -1387,11 +1387,351 @@ describe('builtin.js', function() {
 		});
 		describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 		
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
 			it('should be a function', function() {
 			
 				expect(global.Uwot.Bin.printf.execute).to.be.a('function');
 			
 			});
+			it('should throw a TypeError if callback is not a function', function() {
+			
+				function throwError() {
+				
+					return global.Uwot.Bin.printf.execute([], [], {}, getTestUser(), null, false, 'triboro');
+				
+				}
+				expect(throwError).to.throw(TypeError, 'invalid callback passed to printf');
+			
+			});
+			it('should return the results of its instance help method to callback if args is not an array with an object that has a string value for its text property as its first member', function(done) {
+			
+				var helpStub = sinon.stub(global.Uwot.Bin.printf, 'help').callsFake(function returnString(cb) {
+				
+					return cb(false, 'test help output');
+				
+				});
+				global.Uwot.Bin.printf.execute('args', [], {}, getTestUser(), function(error, result) {
+				
+					expect(error).to.be.false;
+					expect(result).to.equal('test help output');
+					global.Uwot.Bin.printf.execute(null, [], {}, getTestUser(), function(error, result) {
+			
+						expect(error).to.be.false;
+						expect(result).to.equal('test help output');
+						global.Uwot.Bin.printf.execute(['args'], [], {}, getTestUser(), function(error, result) {
+				
+							expect(error).to.be.false;
+							expect(result).to.equal('test help output');
+							global.Uwot.Bin.printf.execute([{text: null}], [], {}, getTestUser(), function(error, result) {
+			
+								expect(error).to.be.false;
+								expect(result).to.equal('test help output');
+								helpStub.restore();
+								done();
+			
+							}, false, 'triboro');
+				
+						}, false, 'triboro');
+			
+					}, false, 'triboro');
+				
+				}, false, 'triboro');
+			
+			});
+			it('should return an Error to callback if the first member of args is not a valid argument node', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return [];
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.contains('invalid format: ');
+					cmdArgsObjToNameArrayStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should call the parent class method argsObjToNameArray with the value of args', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return [];
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(cmdArgsObjToNameArrayStub.called).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should call stripQuotes on the first element in argsArray if args is valid', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(stripQuotesStub.calledWith(testFormat)).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should call unescapeString on the result of calling stripQuotes on the text value of the first element in args if args is valid', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(unescapeStringStub.calledWith('stripQuotes(' + testFormat + ')')).to.be.true;
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should return the result of calling stripQuotes and unescapeString on the text value of the first member of args array if it is a string that does not contain the "%" character', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen hairs on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(result).to.equal("unescapeString(stripQuotes(Fifteen hairs on a dead man\\'s chest))");
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should loop through each character in the text value of the first member of args, calling replaceSub with the each character following a "%" character', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s chest";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(result).to.equal("unescapeString(stripQuotes(Fifteen rs(s, squirrels) on a dead man\\'s chest))");
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should return an Error to callback if the result of any call to replaceSub returns an Error', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					if (arr.length < 1 ) {
+					
+						return new Error('unexpected format placeholder %' + rsChar.toString());
+					
+					}
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s %s";
+				var testSub = 'squirrels';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}], [], {}, getTestUser(), function(error, result) {
+
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals("unexpected format placeholder %s");
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			it('should replace any valid placeholder with the string result of replaceSub in the final string and return the final string to callback if replaceSub calls do not return any errors', function(done) {
+			
+				var cmdArgsObjToNameArrayStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'argsObjToNameArray').callsFake(function returnTextArr(objArr) {
+				
+					return objArr.map((node) => {
+					
+						return node.text;
+					
+					});
+				
+				});
+				var stripQuotesStub = sinon.stub(global.Uwot.Bin.printf, 'stripQuotes').callsFake(function addSQName(sqStr) {
+				
+					return 'stripQuotes(' + sqStr + ')';
+				
+				});
+				var unescapeStringStub = sinon.stub(global.Uwot.Bin.printf, 'unescapeString').callsFake(function addUSName(usString) {
+				
+					return 'unescapeString(' + usString + ')';
+				
+				});
+				var replaceSubStub = sinon.stub(global.Uwot.Bin.printf, 'replaceSub').callsFake(function addRSName(rsChar, arr) {
+				
+					if (arr.length < 1 ) {
+					
+						return new Error('unexpected format placeholder %' + rsChar.toString());
+					
+					}
+					return 'rs(' + rsChar + ', ' +  arr.shift() + ')';
+				
+				});
+				var testFormat = "Fifteen %s on a dead man\\'s %s";
+				var testSub = 'squirrels';
+				var testSub2 = 'tree';
+				global.Uwot.Bin.printf.execute([{text: testFormat}, {text: testSub}, {text: testSub2}], [], {}, getTestUser(), function(error, result) {
+
+					expect(error).to.be.false;
+					expect(result).to.equal("unescapeString(stripQuotes(Fifteen rs(s, squirrels) on a dead man\\'s rs(s, tree)))")
+					cmdArgsObjToNameArrayStub.restore();
+					stripQuotesStub.restore();
+					unescapeStringStub.restore();
+					replaceSubStub.restore();
+					done();
+
+				}, false, 'triboro');
+			
+			});
+			
+			
 		
 		});
 		describe('help(callback)', function() {

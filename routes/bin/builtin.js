@@ -476,12 +476,12 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to printf');
 		
 		}
-		else if ('object' !== typeof args || !Array.isArray(args)) {
+		else if ('object' !== typeof args || !Array.isArray(args) || 'object' !== typeof args[0] || 'string' !== typeof args[0].text) {
 		
 			return this.help(callback);
 		
 		}
-		var argsArray = 'object' === typeof args ? this.argsObjToNameArray(args) : null;
+		var argsArray = this.argsObjToNameArray(args);
 		if ('string' === typeof argsArray[0]) {
 		
 			var format = argsArray.shift();
@@ -533,12 +533,16 @@ class UwotCmdPrintf extends global.Uwot.Exports.Cmd {
 					priorStr += ch;
 				
 				}
+				if ((i + 1) >= charArray.length) {
+				
+					phArray.push(priorStr);
+					// consolidate members to finalString
+					finalString = phArray.join('');
+					return callback(false, finalString);
+				
+				}
 			
 			}
-			phArray.push(priorStr);
-			// consolidate members to finalString
-			finalString = phArray.join('');
-			return callback(false, finalString);
 		
 		}
 		else {
