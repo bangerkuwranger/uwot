@@ -30,22 +30,14 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.Cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
 			if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 			
-				pathArr = args.map((arg) => {
-			
-					if ('object' === typeof arg && 'string' === typeof arg.text) {
-					
-						return arg.text.trim();
-					
-					}
-					else {
-					
-						return '';
-					
-					}
-			
-				});
+				pathArr = this.argsObjToNameArray(args);
 			
 			}
 		
