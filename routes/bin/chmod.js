@@ -26,6 +26,11 @@ class UwotCmdChmod extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
 			if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 			
 				pth = 'object' === typeof args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
