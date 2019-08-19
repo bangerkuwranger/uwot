@@ -30,7 +30,7 @@ class UwotCmdCat extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			if ('object' !== typeof userFs || 'function' !== typeof userFs.Cmd) {
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
 			
 				throw new TypeError('invalid user fileSystem');
 			
