@@ -298,24 +298,401 @@ describe('chmod.js', function() {
 			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/chmod/execute');
 		
 		});
-		it('should return a TypeError to callback if user fileSystem is invalid');
-		it('should return a SystemError to callback if args is not a non-empty array');
-		it('should call the cmd method of instance user fileSystem with arguments "chmod"; an array containing path, allowed, isRecursive, and userName; a callback function; and the value of the isSudo arg if args and filesystem are valid');
-		it('should pass the value of the second member of the args array argument\'s text property with trimmed whitespace as the first argument for cmd');
-		it('should pass null as the first argument for cmd if the second member of the args array argument\'s text property is not a string');
-		it('should pass an empty array as the second argument for cmd if the first member of the args array argument\'s text property is not a string, or does not contain any of the characters "r", "w", or "x"');
-		it('should pass an array containing an element with value "r" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "r"');
-		it('should pass an array containing an element with value "w" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "w"');
-		it('should pass an array containing an element with value "x" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "x"');
-		it('should pass false as the third argument for cmd if the options argument value is not a non-empty array');
-		it('should pass false as the third argument for cmd if the options argument value is a non-empty array and does not contain an object with a name property that equals "R" or "recursive"');
-		it('should pass undefined as the fourth argument for cmd if the options argument value is not a non-empty array');
-		it('should pass undefined as the fourth argument for cmd if the options argument value is a non-empty array and does not contain an object with a name property that equals "u" or "user"');
-		it('should pass null as the fourth argument for cmd if the options argument value is a non-empty array that contains an object with a name property that equals "u" or "user", but does not have a property "args" that is an array with a first element that is a string');
-		it('should pass the value of the first argument in an option\'s args property as the fourth argument for cmd if the options argument value is a non-empty array that contains an object with a name property that equals "u" or "user" that has a property "args" that is an array with a first element that is a string');
-		it('should return an error to callback if the cmd call returns an error to its callback');
-		it('should return an error to callback if the cmd call does not return a truthy result');
-		it('should return an object with property output that is an object with property content that is an array containing "permissions updated." to callback if cmd call returns a truthy result without error');
+		it('should return a TypeError to callback if user fileSystem is invalid', function(done) {
+		
+			binChmod.execute([], [], {}, {_id: 'marvin'}, function(error, wasChanged) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user fileSystem');
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should return a SystemError to callback if args is not a non-empty array', function(done) {
+		
+			binChmod.execute([], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should call the cmd method of instance user fileSystem with arguments "chmod"; an array containing path, allowed, isRecursive, and userName; a callback function; and the value of the isSudo arg if args and filesystem are valid', function(done) {
+		
+			var testPath = '/faeries/wear/boots';
+			var testAllowedStr = 'rwx';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][0]).to.equal(testPath);
+				expect(testArgs[1][1]).to.deep.equal(['r', 'w', 'x']);
+				expect(testArgs[1][2]).to.be.false;
+				expect(testArgs[1][4]).to.be.undefined;
+				expect(testArgs[2]).to.be.a('function');
+				expect(testArgs[3]).to.be.false;
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass the value of the second member of the args array argument\'s text property with trimmed whitespace as the first argument for cmd', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'rwx';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array').that.contains(testPath.trim());
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass null as the first argument for cmd if the second member of the args array argument\'s text property is not a string', function(done) {
+		
+			var testPath = {damage: 'dent'};
+			var testAllowedStr = 'rwx';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][0]).to.be.null;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass an empty array as the second argument for cmd if the first member of the args array argument\'s text property is not a string, or does not contain any of the characters "r", "w", or "x"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'evesedlettes';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][1]).to.be.an('array').that.is.empty;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass an array containing an array element with value "r" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "r"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebro';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][1]).to.deep.equal(['r']);
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass an array containing an array element with value "w" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "w"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][1]).to.deep.equal(['w']);
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass an array containing an array element with value "x" as the second argument for cmd if the first member of the args array argument\'s text property is a string containing "x"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebox';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][1]).to.deep.equal(['x']);
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass false as the third element in the second argument array to cmd if the options argument value is not a non-empty array', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.false;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass false as the third element in the second argument array to cmd if the options argument value is a non-empty array and does not contain an object with a name property that equals "R" or "recursive"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'challenger'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.false;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass true as the third element in the second argument array to cmd if the options argument value is a non-empty array and contains an object with a name property that equals "R" or "recursive"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'R'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.true;
+				binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'recursive'}], {}, testUser, function(error, wasChanged) {
+			
+					expect(userFsCmdStub.called).to.be.true;
+					var testArgs = userFsCmdStub.getCall(0).args;
+					expect(testArgs[0]).to.equal('chmod');
+					expect(testArgs[1]).to.be.an('array');
+					expect(testArgs[1][2]).to.be.true;
+					userFsCmdStub.restore();
+					done();
+			
+				}, false, 'paranoid');
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass undefined as the fourth element in the second argument array to cmd if the options argument value is not a non-empty array', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], null, {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.be.undefined;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass undefined as the fourth element in the second argument array to cmd if the options argument value is a non-empty array and does not contain an object with a name property that equals "u" or "user"', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'challenger'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.be.undefined;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass null as the fourth element in the second argument array to cmd if the options argument value is a non-empty array that contains an object with a name property that equals "u" or "user", but does not have a property "args" that is an array with a first element that is a string', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'u'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.be.null;
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should pass the value of the first argument in an option\'s args property as the fourth argument for cmd if the options argument value is a non-empty array that contains an object with a name property that equals "u" or "user" that has a property "args" that is an array with a first element that is a string', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'u', args: ['trillian']}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('chmod');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.equal('trillian');
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should return an error to callback if the cmd call returns an error to its callback', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('test cmd error'));
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'u', args: ['trillian']}], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.an.instanceof(Error).with.property('message').that.equals('test cmd error');
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should return an error to callback if the cmd call does not return a truthy result', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'u', args: ['trillian']}], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.an.instanceof(Error).with.property('message').that.equals('invalid path');
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
+		it('should return an object with property output that is an object with property content that is an array containing "permissions updated." to callback if cmd call returns a truthy result without error', function(done) {
+		
+			var testPath = '	/damaged/art   ';
+			var testAllowedStr = 'beeblebrox wylde';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnTrue(op, args, cb, isSudo) {
+			
+				return cb(false, true);
+			
+			});
+			binChmod.execute([{text: testAllowedStr}, {text: testPath}], [{name: 'u', args: ['trillian']}], {}, testUser, function(error, wasChanged) {
+			
+				
+			expect(error).to.be.false;	expect(wasChanged).to.an('object').with.property('output').that.is.an('object').with.property('content').that.is.an('array').that.contains('permissions updated.');
+				userFsCmdStub.restore();
+				done();
+			
+			}, false, 'paranoid');
+		
+		});
 	
 	});
 	describe('help(callback)', function() {
