@@ -26,6 +26,11 @@ class UwotCmdChown extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
 			if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 			
 				userName = 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
