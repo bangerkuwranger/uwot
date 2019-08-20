@@ -26,8 +26,13 @@ class UwotCmdCp extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			source = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
-			target = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
+			source = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+			target = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[1] && null !== args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
 			if (null === source || null === target) {
 			
 				throw new TypeError('invalid source/target for bin/cp/execute');
@@ -48,12 +53,12 @@ class UwotCmdCp extends global.Uwot.Exports.Cmd {
 		
 			for (let i = 0; i < options.length; i++) {
 			
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "n") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && (options[i].name === "n" || options[i].name === "noclobber")) {
 			
 					noOverwrite = true;
 			
 				}
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "R") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && (options[i].name === "R" || options[i].name === "recursive")) {
 			
 					isRecursive = true;
 			
@@ -79,8 +84,17 @@ class UwotCmdCp extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					executeResult.output.content.push('copied ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
-					return callback(false, executeResult);
+					try {
+					
+						executeResult.output.content.push('copied ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
+						return callback(false, executeResult);
+					
+					}
+					catch(e) {
+					
+						return callback(e);
+					
+					}
 				
 				}
 			
@@ -109,14 +123,14 @@ var cp = new UwotCmdCp(
 		{
 			description: 		'Do not overwrite an existing file.',
 			shortOpt: 			'n',
-			longOpt: 			null,
+			longOpt: 			'noclobber',
 			requiredArguments:	[],
 			optionalArguments:	[]
 		},
 		{
 			description: 		'Recursive copy. If source designates a directory, cp copies the directory and the entire subtree connected at that point.  If the source path ends in a "/", the contents of the directory are copied rather than the directory itself.',
 			shortOpt: 			'R',
-			longOpt: 			null,
+			longOpt: 			'recursive',
 			requiredArguments:	[],
 			optionalArguments:	[]
 		}
