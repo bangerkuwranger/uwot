@@ -26,7 +26,17 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? userFs.resolvePath(args[0].text.trim()) : userFs.getCwd();
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
+			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? userFs.resolvePath(args[0].text.trim()) : userFs.getCwd();
+			if (pathTo instanceof Error) {
+			
+				return callback(pathTo);
+			
+			}
 		
 		}
 		catch(e) {
@@ -41,12 +51,12 @@ class UwotCmdLs extends global.Uwot.Exports.Cmd {
 		
 			for (let i = 0; i < options.length; i++) {
 			
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "a") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && options[i].name === "a") {
 			
 					showInvisible = true;
 			
 				}
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "l") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && options[i].name === "l") {
 			
 					longForm = true;
 			
