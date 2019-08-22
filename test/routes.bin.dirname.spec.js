@@ -66,9 +66,9 @@ describe('dirname.js', function() {
 			expect(binDirname.command).to.have.property('name').that.equals('dirname');
 	
 		});
-		it('should have a property "description" that has value "Return filename portion of pathname."', function() {
+		it('should have a property "description" that has value "Return directory portion of pathname."', function() {
 	
-			expect(binDirname.command).to.have.property('description').that.equals('Return filename portion of pathname.');
+			expect(binDirname.command).to.have.property('description').that.equals('Return directory portion of pathname.');
 	
 		});
 		it('should have a property "requiredArguments" that is an array with one value, "path"', function() {
@@ -190,7 +190,7 @@ describe('dirname.js', function() {
 			var testArg = '/goto/' + testName;
 			binDirname.execute([{text: testArg}], [], {}, {}, function(error, result) {
 
-				expect(result).to.equal(testName);
+				expect(result).to.equal('/goto');
 				expect(error).to.be.false;
 				done();
 

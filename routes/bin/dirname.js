@@ -20,7 +20,7 @@ class UwotCmdDirname extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to bin/dirname/execute');
 		
 		}
-		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'object' !== typeof args[0] || 'string' !== typeof args[0].text) {
+		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'object' !== typeof args[0] || null === args[0] || 'string' !== typeof args[0].text) {
 		
 			return callback(new TypeError('invalid path passed to dirname'), '');
 		
