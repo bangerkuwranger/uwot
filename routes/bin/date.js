@@ -40,7 +40,7 @@ class UwotCmdDate extends global.Uwot.Exports.Cmd {
 var date = new UwotCmdDate(
 	{
 		name:				'date',
-		description:		'Return current date and time',
+		description:		'Return current date and time.',
 		requiredArguments:	[],
 		optionalArguments:	[]
 	},
