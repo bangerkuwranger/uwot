@@ -366,10 +366,6 @@ describe('cp.js', function() {
 				var testArgs = userFsCmdStub.getCall(0).args;
 				expect(testArgs[0]).to.equal('cp');
 				expect(testArgs[1]).to.be.an('array');
-				expect(testArgs[1][0]).to.equal(testSource);
-				expect(testArgs[1][1]).to.equal(testTarget);
-				expect(testArgs[1][2]).to.be.false;
-				expect(testArgs[1][3]).to.be.false;
 				expect(testArgs[2]).to.be.a('function');
 				expect(testArgs[3]).to.be.false;
 				userFsCmdStub.restore();
@@ -379,17 +375,282 @@ describe('cp.js', function() {
 			}, false, 'martian');
 		
 		});
-		it('should pass the string value of args[0].text as the first member of the second argument array to the cmd call if args is a non-empty array with a first member object with property text that is a string');
-		it('should pass the string value of args[1].text as the second member of the second argument array to the cmd call if args is a non-empty array with a second member object with property text that is a string');
-		it('should pass false as the third and fourth member of the second argument array to the cmd call if options arg is not a non-empty array');
-		it('should pass false as the third member of the second argument array to the cmd call if options arg is a non-empty array but does not contain a member object with name property that equals "n" or "noclobber"');
-		it('should pass false as the fourth member of the second argument array to the cmd call if options arg is a non-empty array but does not contain a member object with name property that equals "R" or "recursive"');
-		it('should pass true as the third member of the second argument array to the cmd call if options arg is a non-empty array and contains a member object with name property that equals "n" or "noclobber"');
-		it('should pass true as the fourth member of the second argument array to the cmd call if options arg is a non-empty array and contains a member object with name property that equals "R" or "recursive"');
-		it('should return an error to callback if cmd call returns an error to its callback');
-		it('should return an error and array containing source and target string values to callback if cmd call does not return true to its callback but completes without error');
-		it('should return an object with output property that is an object with content property that is an array containing the result of instance user fileSystem method dissolvePath being called with source and target values');
-		it('should return an error to callback if either call to dissolvePath throws an error');
+		it('should pass the string value of args[0].text as the first member of the second argument array (source) to the cmd call if args is a non-empty array with a first member object with property text that is a string', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][0]).to.equal(testSource);
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass the string value of args[1].text as the second member of the second argument array (target) to the cmd call if args is a non-empty array with a second member object with property text that is a string', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][1]).to.equal(testTarget);
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass false as the third and fourth members (noOverWrite and isRecursive, respectively) of the second argument array to the cmd call if options arg is not a non-empty array', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.false;
+				expect(testArgs[1][3]).to.be.false;
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass false as the third member of the second argument array to the cmd call if options arg is a non-empty array but does not contain a member object with name property that equals "n" or "noclobber"', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.false;
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass false as the fourth member of the second argument array to the cmd call if options arg is a non-empty array but does not contain a member object with name property that equals "R" or "recursive"', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.be.false;
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass true as the third member of the second argument array to the cmd call if options arg is a non-empty array and contains a member object with name property that equals "n" or "noclobber"', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'n'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][2]).to.be.true;
+				binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'noclobber'}], {}, testUser, function(error, wasChanged) {
+			
+					expect(userFsCmdStub.called).to.be.true;
+					var testArgs = userFsCmdStub.getCall(0).args;
+					expect(testArgs[0]).to.equal('cp');
+					expect(testArgs[1]).to.be.an('array');
+					expect(testArgs[1][2]).to.be.true;
+					userFsCmdStub.restore();
+					userFsDissolvePathStub.restore();
+					done();
+			
+				}, false, 'martian');
+			
+			}, false, 'martian');
+		
+		});
+		it('should pass true as the fourth member of the second argument array to the cmd call if options arg is a non-empty array and contains a member object with name property that equals "R" or "recursive"', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'R'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(userFsCmdStub.called).to.be.true;
+				var testArgs = userFsCmdStub.getCall(0).args;
+				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1][3]).to.be.true;
+				binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'recursive'}], {}, testUser, function(error, wasChanged) {
+			
+					expect(userFsCmdStub.called).to.be.true;
+					var testArgs = userFsCmdStub.getCall(0).args;
+					expect(testArgs[0]).to.equal('cp');
+					expect(testArgs[1]).to.be.an('array');
+					expect(testArgs[1][3]).to.be.true;
+					userFsCmdStub.restore();
+					userFsDissolvePathStub.restore();
+					done();
+			
+				}, false, 'martian');
+			
+			}, false, 'martian');
+		
+		});
+		it('should return an error to callback if cmd call returns an error to its callback', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnError(op, args, cb, isSudo) {
+			
+				return cb(new Error('matt damon'));
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('matt damon');
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should return an error and array containing source and target string values to callback if cmd call does not return true to its callback but completes without error', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
+			
+				return cb(false, false);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid copy');
+				expect(wasChanged).to.be.an('array').that.contains(testSource);
+				expect(wasChanged).to.be.an('array').that.contains(testTarget);
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should return an object with output property that is an object with content property that is an array containing the result of instance user fileSystem method dissolvePath being called with source and target values if cmd call returns true to its callback', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnTrue(op, args, cb, isSudo) {
+			
+				return cb(false, true);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.be.false;
+				expect(wasChanged).to.be.an('object').with.property('output').that.is.an('object').with.property('content').that.is.an('array').that.contains('copied ' + testSource + ' to ' + testTarget);
+				expect(userFsDissolvePathStub.calledWith(testSource)).to.be.true;
+				expect(userFsDissolvePathStub.calledWith(testTarget)).to.be.true;
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
+		it('should return an error to callback if either call to dissolvePath throws an error after cmd call returns true to its callback', function(done) {
+		
+			var testSource = '/screwy/aint/it';
+			var testTarget = '/what/a/stinker';
+			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnTrue(op, args, cb, isSudo) {
+			
+				return cb(false, true);
+			
+			});
+			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath');
+			userFsDissolvePathStub.onCall(0).returnsArg(0);
+			userFsDissolvePathStub.onCall(1).throws(new Error('test dissolvePath error'));
+			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test dissolvePath error');
+				expect(userFsDissolvePathStub.calledWith(testSource)).to.be.true;
+				expect(userFsDissolvePathStub.calledWith(testTarget)).to.be.true;
+				userFsCmdStub.restore();
+				userFsDissolvePathStub.restore();
+				done();
+			
+			}, false, 'martian');
+		
+		});
 	
 	});
 	describe('help(callback)', function() {
