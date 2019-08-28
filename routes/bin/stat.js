@@ -26,7 +26,17 @@ class UwotCmdStat extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
+			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+			if (null === pathTo) {
+			
+				throw new TypeError('invalid path passed to bin/stat/execute');
+			
+			}
 		
 		}
 		catch(e) {
@@ -38,17 +48,17 @@ class UwotCmdStat extends global.Uwot.Exports.Cmd {
 		
 			for (let i = 0; i < options.length; i++) {
 			
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && (options[i].name === "v" || options[i].name === "verbose")) {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && (options[i].name === "v" || options[i].name === "verbose")) {
 			
 					isVerbose = true;
 			
 				}
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "F") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && options[i].name === "F") {
 			
 					appendFtc = true;
 			
 				}
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && (options[i].name === "f" || options[i].name === "format")) {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && (options[i].name === "f" || options[i].name === "format")) {
 			
 					format = 'object' === typeof options[i].args && Array.isArray(options[i].args) && 'string' === typeof options[i].args[0] ? options[i].args[0] : null;
 			
@@ -70,7 +80,7 @@ class UwotCmdStat extends global.Uwot.Exports.Cmd {
 					return callback(error, null);
 				
 				}
-				else if ('string' !== typeof stats) {
+				else if ('string' !== typeof stats || '' === stats) {
 				
 					return callback(new Error('invalid path'), pathTo);
 				
