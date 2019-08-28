@@ -20,12 +20,21 @@ class UwotCmdMkdir extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to bin/mkdir/execute');
 		
 		}
-		var userFs, pathTo, newDir, createIntermediate = false;
+		var userFs, argPath, createIntermediate = false;
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			newDir = path.basename(args[0].text.trim());
-			pathTo = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? path.dirname(args[0].text.trim()) : userFs.root.path;
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
+			argPath = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+			if (argPath === null) {
+			
+				throw new TypeError('invalid path passed to bin/mkdir/execute');
+			
+			}
 		
 		}
 		catch(e) {
@@ -41,7 +50,7 @@ class UwotCmdMkdir extends global.Uwot.Exports.Cmd {
 		
 			for (let i = 0; i < options.length; i++) {
 			
-				if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "p") {
+				if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && options[i].name === "p") {
 			
 					createIntermediate = true;
 			
@@ -52,7 +61,7 @@ class UwotCmdMkdir extends global.Uwot.Exports.Cmd {
 		}
 		userFs.cmd(
 			'mkdir',
-			[path.join(pathTo, newDir), createIntermediate],
+			[argPath, createIntermediate],
 			(error, finalPath) => {
 			
 				if (error) {
@@ -62,7 +71,7 @@ class UwotCmdMkdir extends global.Uwot.Exports.Cmd {
 				}
 				else if ('string' !== typeof finalPath || '' === finalPath) {
 				
-					return callback(new Error('invalid path'), path.join(pathTo, newDir));
+					return callback(new Error('invalid path'), argPath);
 				
 				}
 				else {
