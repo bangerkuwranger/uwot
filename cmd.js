@@ -33,7 +33,7 @@ class UwotCmdOption {
 		optionalArguments
 	) {
 	
-		this.description = sanitize.cleanString(description, 255);
+		this.description = sanitize.cleanString(description, 1024);
 		this.shortOpt = sanitize.cleanString(shortOpt, 1);
 		this.longOpt = sanitize.stringNoSpaces(sanitize.cleanString(longOpt), 'cc');
 		this.requiredArguments = sanitize.arrayOfStringsOrEmpty(requiredArguments, true);
