@@ -24,8 +24,13 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 		try {
 		
 			userFs = global.Uwot.FileSystems[user._id];
-			source = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
-			target = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
+			if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+				throw new TypeError('invalid user fileSystem');
+			
+			}
+			source = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : null;
+			target = 'object' === typeof args && Array.isArray(args) && args.length > 0 && 'object' === typeof args[1] && null !== args[1] && 'string' === typeof args[1].text ? args[1].text.trim() : null;
 			if (null === source || null === target) {
 			
 				throw new TypeError('invalid source/target for bin/mv/execute');
@@ -72,8 +77,17 @@ class UwotCmdMv extends global.Uwot.Exports.Cmd {
 				}
 				else {
 				
-					executeResult.output.content.push('moved ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
-					return callback(false, executeResult);
+					try {
+					
+						executeResult.output.content.push('moved ' + userFs.dissolvePath(source) + ' to ' + userFs.dissolvePath(target));
+						return callback(false, executeResult);
+					
+					}
+					catch(e) {
+					
+						return callback(e);
+					
+					}
 				
 				}
 			
@@ -102,7 +116,7 @@ var mv = new UwotCmdMv(
 		{
 			description: 		'Do not overwrite an existing file.',
 			shortOpt: 			'n',
-			longOpt: 			null,
+			longOpt: 			'noclobber',
 			requiredArguments:	[],
 			optionalArguments:	[]
 		},

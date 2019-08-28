@@ -5,7 +5,7 @@ const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
 
-var binCp;
+var binMv;
 const path = require('path');
 
 const getTestUser = function() {
@@ -71,7 +71,7 @@ const removeTestUserFS = function(uid) {
 
 };
 
-describe('cp.js', function() {
+describe('mv.js', function() {
 
 	var req, res;
 	before(function() {
@@ -91,7 +91,7 @@ describe('cp.js', function() {
 			globalSetupHelper.initExports();
 		
 		}
-		binCp = require('../routes/bin/cp');
+		binMv = require('../routes/bin/mv');
 	
 	});
 	beforeEach(function() {
@@ -107,42 +107,42 @@ describe('cp.js', function() {
 		};
 	
 	});
-	it('should be an object that is an instance of UwotCmdCp', function() {
+	it('should be an object that is an instance of UwotCmdMv', function() {
 	
-		expect(binCp).to.be.an('object').that.has.property('constructor').that.has.property('name').that.equals('UwotCmdCp');
+		expect(binMv).to.be.an('object').that.has.property('constructor').that.has.property('name').that.equals('UwotCmdMv');
 	
 	});
 	it('should be an object that inherits from UwotCmd', function() {
 	
-		expect(binCp).to.be.an.instanceof(global.Uwot.Exports.Cmd);
+		expect(binMv).to.be.an.instanceof(global.Uwot.Exports.Cmd);
 	
 	});
 	describe('command', function() {
 	
 		it('should be an object that is an instance of UwotCmdCommand', function() {
 	
-			expect(binCp).to.have.property('command').that.is.an('object').that.has.property('constructor').that.has.property('name').that.equals('UwotCmdCommand');
+			expect(binMv).to.have.property('command').that.is.an('object').that.has.property('constructor').that.has.property('name').that.equals('UwotCmdCommand');
 	
 		});
-		it('should have a property "name" that has value "cp"', function() {
+		it('should have a property "name" that has value "mv"', function() {
 	
-			expect(binCp.command).to.have.property('name').that.equals('cp');
+			expect(binMv.command).to.have.property('name').that.equals('mv');
 	
 		});
-		it('should have a property "description" that has value "Copy files. The cp utility copies the contents of the source to the target."', function() {
+		it('should have a property "description" that has value "Move files. The mv utility renames the file named by the source operand to the destination path named by the target operand."', function() {
 	
-			expect(binCp.command).to.have.property('description').that.equals('Copy files. The cp utility copies the contents of the source to the target.');
+			expect(binMv.command).to.have.property('description').that.equals('Move files. The mv utility renames the file named by the source operand to the destination path named by the target operand.');
 	
 		});
 		it('should have a property "requiredArguments" that is an array with two values, "source" and "target"', function() {
 	
-			expect(binCp.command).to.have.property('requiredArguments').that.is.an('array').that.contains('source');
-			expect(binCp.command).to.have.property('requiredArguments').that.is.an('array').that.contains('target');
+			expect(binMv.command).to.have.property('requiredArguments').that.is.an('array').that.contains('source');
+			expect(binMv.command).to.have.property('requiredArguments').that.is.an('array').that.contains('target');
 	
 		});
 		it('should have a property "optionalArguments" that is an empty array', function() {
 	
-			expect(binCp.command).to.have.property('optionalArguments').that.is.an('array').that.is.empty;
+			expect(binMv.command).to.have.property('optionalArguments').that.is.an('array').that.is.empty;
 	
 		});
 	
@@ -151,73 +151,39 @@ describe('cp.js', function() {
 	
 		it('should have a value that is an array', function() {
 	
-			expect(binCp).to.have.property('options').that.is.an('array');
+			expect(binMv).to.have.property('options').that.is.an('array');
 	
 		});
 		describe('options[0]', function() {
 		
 			it('should be an object', function() {
 			
-				expect(binCp.options[0]).to.be.an('object');
+				expect(binMv.options[0]).to.be.an('object');
 			
 			});
 			it('should have property "description" that equals "Do not overwrite an existing file."', function() {
 			
-				expect(binCp.options[0]).to.be.an('object').with.property('description').that.equals('Do not overwrite an existing file.');
+				expect(binMv.options[0]).to.be.an('object').with.property('description').that.equals('Do not overwrite an existing file.');
 			
 			});
 			it('should have property "shortOpt" that has value "n"', function() {
 			
-				expect(binCp.options[0]).to.be.an('object').with.property('shortOpt').that.equals('n');
+				expect(binMv.options[0]).to.be.an('object').with.property('shortOpt').that.equals('n');
 			
 			});
 			it('should have property "longOpt" that has value "noclobber"', function() {
 			
-				expect(binCp.options[0]).to.be.an('object').with.property('longOpt').that.equals('noclobber');
+				expect(binMv.options[0]).to.be.an('object').with.property('longOpt').that.equals('noclobber');
 			
 			});
 			it('should have property "requiredArguments" that is an empty array', function() {
 			
-				expect(binCp.options[0]).to.be.an('object').with.property('requiredArguments').that.is.an('array').that.is.empty;
+				expect(binMv.options[0]).to.be.an('object').with.property('requiredArguments').that.is.an('array').that.is.empty;
 			
 			});
 			it('should have property "optionalArguments" that is an empty array', function() {
 			
-				expect(binCp.options[0]).to.be.an('object').with.property('optionalArguments').that.is.an('array').that.is.empty;
-			
-			});
-		
-		});
-		describe('options[1]', function() {
-		
-			it('should be an object', function() {
-			
-				expect(binCp.options[1]).to.be.an('object');
-			
-			});
-			it('should have property "description" that equals "Recursive copy. If source designates a directory, cp copies the directory and the entire subtree connected at that point.  If the source path ends in a "/", the contents of the directory are copied rather than the directory itself."', function() {
-			
-				expect(binCp.options[1]).to.be.an('object').with.property('description').that.equals('Recursive copy. If source designates a directory, cp copies the directory and the entire subtree connected at that point.  If the source path ends in a "/", the contents of the directory are copied rather than the directory itself.');
-			
-			});
-			it('should have property "shortOpt" that has value "R"', function() {
-			
-				expect(binCp.options[1]).to.be.an('object').with.property('shortOpt').that.equals('R');
-			
-			});
-			it('should have property "longOpt" that has value "recursive"', function() {
-			
-				expect(binCp.options[1]).to.be.an('object').with.property('longOpt').that.equals('recursive');
-			
-			});
-			it('should have property "requiredArguments" that is an empty array', function() {
-			
-				expect(binCp.options[1]).to.be.an('object').with.property('requiredArguments').that.is.an('array').that.is.empty;
-			
-			});
-			it('should have property "optionalArguments" that is an empty array', function() {
-			
-				expect(binCp.options[1]).to.be.an('object').with.property('optionalArguments').that.is.an('array').that.is.empty;
+				expect(binMv.options[0]).to.be.an('object').with.property('optionalArguments').that.is.an('array').that.is.empty;
 			
 			});
 		
@@ -226,9 +192,9 @@ describe('cp.js', function() {
 	});
 	describe('path', function() {
 	
-		it('should have a string value that is an absolute path to the application root and "routes/bin/cp"', function() {
+		it('should have a string value that is an absolute path to the application root and "routes/bin/mv"', function() {
 	
-			expect(binCp).to.have.property('path').that.equals(global.Uwot.Constants.appRoot + '/routes/bin/cp');
+			expect(binMv).to.have.property('path').that.equals(global.Uwot.Constants.appRoot + '/routes/bin/mv');
 	
 		});
 	
@@ -237,7 +203,7 @@ describe('cp.js', function() {
 	
 		it('should have a value that is false', function() {
 	
-			expect(binCp).to.have.property('listenerSettings').that.is.false;
+			expect(binMv).to.have.property('listenerSettings').that.is.false;
 	
 		});
 	
@@ -246,7 +212,7 @@ describe('cp.js', function() {
 	
 		it('should be a function', function() {
 		
-			expect(binCp.constructor).to.be.a('function');
+			expect(binMv.constructor).to.be.a('function');
 		
 		});
 		it('should accept three arguments and pass them to the parent class constructor'
@@ -255,7 +221,7 @@ describe('cp.js', function() {
 // 		
 // 			var argArr = ['arg1', 'arg2', 'arg3'];
 // 			var uwotCmdStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'constructor').returns(argArr);
-// 			var bb2 = new binCp.constructor(...argArr);
+// 			var bb2 = new binMv.constructor(...argArr);
 // 			console.log(bb2)
 // 			expect(uwotCmdStub.called).to.be.true;
 // 		
@@ -285,42 +251,42 @@ describe('cp.js', function() {
 		});
 		it('should be a function', function() {
 		
-			expect(binCp.execute).to.be.a('function');
+			expect(binMv.execute).to.be.a('function');
 		
 		});
 		it('should throw a TypeError if callback arg is not a function', function() {
 		
 			function throwError() {
 			
-				return binCp.execute();
+				return binMv.execute();
 			
 			};
-			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/cp/execute');
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/mv/execute');
 		
 		});
 		it('should return a TypeError to callback function if args in not an array with two member objects that each have a text property with a string value', function(done) {
 		
-			binCp.execute('args', [], {}, testUser, function(error, result) {
+			binMv.execute('args', [], {}, testUser, function(error, result) {
 			
-				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-				binCp.execute(null, [], {}, testUser, function(error, result) {
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+				binMv.execute(null, [], {}, testUser, function(error, result) {
 			
-					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-					binCp.execute([], [], {}, testUser, function(error, result) {
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+					binMv.execute([], [], {}, testUser, function(error, result) {
 			
-						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-						binCp.execute(['args'], [], {}, testUser, function(error, result) {
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+						binMv.execute(['args'], [], {}, testUser, function(error, result) {
 			
-							expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-							binCp.execute([null], [], {}, testUser, function(error, result) {
+							expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+							binMv.execute([null], [], {}, testUser, function(error, result) {
 			
-								expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-								binCp.execute([{text: null}], [], {}, testUser, function(error, result) {
+								expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+								binMv.execute([{text: null}], [], {}, testUser, function(error, result) {
 		
-									expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
-									binCp.execute([{text: 'anywhere/but/here'}, {text: null}], [], {}, testUser, function(error, result) {
+									expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
+									binMv.execute([{text: 'anywhere/but/here'}, {text: null}], [], {}, testUser, function(error, result) {
 		
-										expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/cp/execute');
+										expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid source/target for bin/mv/execute');
 										done();
 		
 									}, false, null);
@@ -342,7 +308,7 @@ describe('cp.js', function() {
 		
 			var testSource = '/screwy/aint/it';
 			var testTarget = '/what/a/stinker';
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, {_id: 'marvin'}, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, {_id: 'marvin'}, function(error, wasChanged) {
 			
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user fileSystem');
 				done();
@@ -350,7 +316,7 @@ describe('cp.js', function() {
 			}, false, 'martian');
 		
 		});
-		it('should call instance user fileSystem cmd method with args: "cp"; array with source, target, noOverwrite, isRecursive values; callback function; and value of isSudo arg', function(done) {
+		it('should call instance user fileSystem cmd method with args: "mv"; array with source, target, & noOverwrite values; callback function; and value of isSudo arg', function(done) {
 		
 			var testSource = '/screwy/aint/it';
 			var testTarget = '/what/a/stinker';
@@ -360,12 +326,13 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
+				expect(testArgs[1].length).to.equal(3);
 				expect(testArgs[2]).to.be.a('function');
 				expect(testArgs[3]).to.be.false;
 				userFsCmdStub.restore();
@@ -385,11 +352,11 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
 				expect(testArgs[1][0]).to.equal(testSource);
 				userFsCmdStub.restore();
@@ -409,11 +376,11 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
 				expect(testArgs[1][1]).to.equal(testTarget);
 				userFsCmdStub.restore();
@@ -423,7 +390,7 @@ describe('cp.js', function() {
 			}, false, 'martian');
 		
 		});
-		it('should pass false as the third and fourth members (noOverWrite and isRecursive, respectively) of the second argument array to the cmd call if options arg is not a non-empty array', function(done) {
+		it('should pass false as the third member (noOverWrite) of the second argument array to the cmd call if options arg is not a non-empty array', function(done) {
 		
 			var testSource = '/screwy/aint/it';
 			var testTarget = '/what/a/stinker';
@@ -433,14 +400,13 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
 				expect(testArgs[1][2]).to.be.false;
-				expect(testArgs[1][3]).to.be.false;
 				userFsCmdStub.restore();
 				userFsDissolvePathStub.restore();
 				done();
@@ -458,37 +424,13 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
 				expect(testArgs[1][2]).to.be.false;
-				userFsCmdStub.restore();
-				userFsDissolvePathStub.restore();
-				done();
-			
-			}, false, 'martian');
-		
-		});
-		it('should pass false as the fourth member of the second argument array to the cmd call if options arg is a non-empty array but does not contain a member object with name property that equals "R" or "recursive"', function(done) {
-		
-			var testSource = '/screwy/aint/it';
-			var testTarget = '/what/a/stinker';
-			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
-			
-				return cb(false, false);
-			
-			});
-			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
-			
-				expect(userFsCmdStub.called).to.be.true;
-				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
-				expect(testArgs[1]).to.be.an('array');
-				expect(testArgs[1][3]).to.be.false;
 				userFsCmdStub.restore();
 				userFsDissolvePathStub.restore();
 				done();
@@ -506,53 +448,20 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'n'}], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'n'}], {}, testUser, function(error, wasChanged) {
 			
 				expect(userFsCmdStub.called).to.be.true;
 				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
+				expect(testArgs[0]).to.equal('mv');
 				expect(testArgs[1]).to.be.an('array');
 				expect(testArgs[1][2]).to.be.true;
-				binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'noclobber'}], {}, testUser, function(error, wasChanged) {
+				binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'noclobber'}], {}, testUser, function(error, wasChanged) {
 			
 					expect(userFsCmdStub.called).to.be.true;
 					var testArgs = userFsCmdStub.getCall(0).args;
-					expect(testArgs[0]).to.equal('cp');
+					expect(testArgs[0]).to.equal('mv');
 					expect(testArgs[1]).to.be.an('array');
 					expect(testArgs[1][2]).to.be.true;
-					userFsCmdStub.restore();
-					userFsDissolvePathStub.restore();
-					done();
-			
-				}, false, 'martian');
-			
-			}, false, 'martian');
-		
-		});
-		it('should pass true as the fourth member of the second argument array to the cmd call if options arg is a non-empty array and contains a member object with name property that equals "R" or "recursive"', function(done) {
-		
-			var testSource = '/screwy/aint/it';
-			var testTarget = '/what/a/stinker';
-			var userFsCmdStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'cmd').callsFake(function returnFalse(op, args, cb, isSudo) {
-			
-				return cb(false, false);
-			
-			});
-			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'R'}], {}, testUser, function(error, wasChanged) {
-			
-				expect(userFsCmdStub.called).to.be.true;
-				var testArgs = userFsCmdStub.getCall(0).args;
-				expect(testArgs[0]).to.equal('cp');
-				expect(testArgs[1]).to.be.an('array');
-				expect(testArgs[1][3]).to.be.true;
-				binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'recursive'}], {}, testUser, function(error, wasChanged) {
-			
-					expect(userFsCmdStub.called).to.be.true;
-					var testArgs = userFsCmdStub.getCall(0).args;
-					expect(testArgs[0]).to.equal('cp');
-					expect(testArgs[1]).to.be.an('array');
-					expect(testArgs[1][3]).to.be.true;
 					userFsCmdStub.restore();
 					userFsDissolvePathStub.restore();
 					done();
@@ -572,7 +481,7 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [], {}, testUser, function(error, wasChanged) {
 			
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('matt damon');
 				userFsCmdStub.restore();
@@ -592,9 +501,9 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
 			
-				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid copy');
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid move');
 				expect(wasChanged).to.be.an('array').that.contains(testSource);
 				expect(wasChanged).to.be.an('array').that.contains(testTarget);
 				userFsCmdStub.restore();
@@ -614,10 +523,10 @@ describe('cp.js', function() {
 			
 			});
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath').returnsArg(0);
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
 			
 				expect(error).to.be.false;
-				expect(wasChanged).to.be.an('object').with.property('output').that.is.an('object').with.property('content').that.is.an('array').that.contains('copied ' + testSource + ' to ' + testTarget);
+				expect(wasChanged).to.be.an('object').with.property('output').that.is.an('object').with.property('content').that.is.an('array').that.contains('moved ' + testSource + ' to ' + testTarget);
 				expect(userFsDissolvePathStub.calledWith(testSource)).to.be.true;
 				expect(userFsDissolvePathStub.calledWith(testTarget)).to.be.true;
 				userFsCmdStub.restore();
@@ -639,7 +548,7 @@ describe('cp.js', function() {
 			var userFsDissolvePathStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'dissolvePath');
 			userFsDissolvePathStub.onCall(0).returnsArg(0);
 			userFsDissolvePathStub.onCall(1).throws(new Error('test dissolvePath error'));
-			binCp.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
+			binMv.execute([{text: testSource}, {text: testTarget}], [{name: 'q'}], {}, testUser, function(error, wasChanged) {
 			
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test dissolvePath error');
 				expect(userFsDissolvePathStub.calledWith(testSource)).to.be.true;
@@ -657,7 +566,7 @@ describe('cp.js', function() {
 	
 		it('should be a function', function() {
 		
-			expect(binCp.help).to.be.a('function');
+			expect(binMv.help).to.be.a('function');
 		
 		});
 		it('should return the result of calling the parent class method "help" with the passed value from callback arg', function(done) {
@@ -668,7 +577,7 @@ describe('cp.js', function() {
 				return cb(false, argArr);
 			
 			});
-			binCp.help(function(error, result) {
+			binMv.help(function(error, result) {
 			
 				expect(uwotCmdHelpStub.called).to.be.true;
 				done();
