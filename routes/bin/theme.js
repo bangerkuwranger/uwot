@@ -1,6 +1,6 @@
 'use strict';
 const path = require('path');
-const validateTheme = require('../../helpers/themeLoader').isValidTheme;
+var themeLoaderHelper = require('../../helpers/themeLoader');
 
 class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 
@@ -21,7 +21,11 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to bin/theme/execute');
 		
 		}
-
+		if ('function' !== typeof app || 'function' !== typeof app.get) {
+		
+			return callback(new TypeError('invalid app instance passed to bin/theme/execute'));
+		
+		}
 		var saveTheme = false;
 		var themeName = '';
 		var executeResult = {
@@ -29,7 +33,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 		};
 		if ('object' === typeof args && Array.isArray(args) && args.length > 0) {
 		
-			themeName = 'object' === typeof args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : themeName;
+			themeName = 'object' === typeof args[0] && null !== args[0] && 'string' === typeof args[0].text ? args[0].text.trim() : themeName;
 			if (themeName === '') {
 			
 				this.help(function(error, helpOutput) {
@@ -49,42 +53,46 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 				}.bind(this));
 			
 			}
-			if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
+			else {
+			
+				if ('object' === typeof options && Array.isArray(options) && options.length > 0) {
 		
-				for (let i = 0; i < options.length; i++) {
+					for (let i = 0; i < options.length; i++) {
 				
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
+						if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name && (options[i].name === "s" || options[i].name === "save")) {
 				
-						saveTheme = true;
-						i = options.length;
+							saveTheme = true;
+							i = options.length;
 				
+						}
+			
+					}
+					if (saveTheme) {
+			
+						var now = new Date();
+						var oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+						executeResult.cookies = {
+							uwotSavedTheme: {
+								value: themeName,
+								expiry: oneYearLater
+							}
+						};
+			
 					}
 			
 				}
-				if (saveTheme) {
+				if (themeLoaderHelper.isValidTheme(themeName)) {
 			
-					var now = new Date();
-					var oneYearLater = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
-					executeResult.cookies = {
-						uwotSavedTheme: {
-							value: themeName,
-							expiry: oneYearLater
-						}
-					};
+					executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
+					executeResult.outputType = 'object';
+					return callback(false, executeResult);
 			
 				}
+				else {
 			
-			}
-			if (validateTheme(themeName)) {
+					return callback(new Error('invalid theme'), null);
 			
-				executeResult.redirect = '/?theme=' + encodeURIComponent(themeName);
-				executeResult.outputType = 'object';
-				return callback(false, executeResult);
-			
-			}
-			else {
-			
-				return callback(new Error('invalid theme'), null);
+				}
 			
 			}
 		
@@ -93,19 +101,19 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 		
 			this.help(function(error, helpOutput) {
 				
-					if (error) {
-					
-						return callback(error, null);
-					
-					}
-					else {
-					
-						helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
-						return callback(false, helpOutput);
-					
-					}
+				if (error) {
 				
-				}.bind(this));
+					return callback(error, null);
+				
+				}
+				else {
+				
+					helpOutput.content.unshift({content:[{content:'Current Theme: '}, {content: app.get('uwot_theme'), isBold: true}, {tag: 'br'}, {tag: 'br'}]});
+					return callback(false, helpOutput);
+				
+				}
+			
+			}.bind(this));
 		
 		}
 	
@@ -129,7 +137,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 			}
 			else {
 			
-				themeList.content.unshift({output: '*** Help system currently unavailable. ***', isBold: true});
+				themeList.content.unshift({content: '*** Help system currently unavailable. ***', isBold: true});
 				return callback(false, themeList);
 			
 			}
@@ -140,7 +148,7 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 	
 	outputValidThemes() {
 	
-		var themeArray = validateTheme();
+		var themeArray = themeLoaderHelper.isValidTheme();
 		var validThemeOutput = {content:[{tag: 'div', content: 'List of valid themeNames:', isBold: true}, {content:[], tag: 'ul'}]};
 		for (let i = 0; i < themeArray.length; i++) {
 		
@@ -167,7 +175,7 @@ var theme = new UwotCmdTheme(
 	},
 	[
 		{
-			description: 		'save theme selection for future sessions for this user',
+			description: 		'Save theme selection for future sessions for this user.',
 			shortOpt: 			's',
 			longOpt: 			'save',
 			requiredArguments:	[],
