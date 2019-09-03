@@ -121,9 +121,14 @@ class UwotCmdTheme extends global.Uwot.Exports.Cmd {
 	
 	help(callback) {
 	
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/theme/help');
+		
+		}
+		var themeList = this.outputValidThemes();
 		super.help(function(error, helpOutput) {
 		
-			var themeList = this.outputValidThemes();
 			if (error) {
 			
 				return callback(error, null);

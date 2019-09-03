@@ -518,23 +518,347 @@ describe('theme.js', function() {
 	});
 	describe('help(callback)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binTheme.help).to.be.a('function');
 		
 		});
-		it('should call the class method outputValidThemes');
-		it('should call the parent class help method');
-		it('should return an error to callback if the parent help call returns an error to its callback');
-		it('should return the result of the parent class help call, with a the result of outputValidThemes appended to the content property array, if the parent help call returns a non-null object');
-		it('should return the result of the outputValidThemes call, with an ansi object with "*** Help system currently unavailable. ***" content prepended to its content array property if the parent help call completes without error but does not return a non-null object to its callback');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binTheme.help();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/theme/help');
+		
+		});
+		it('should call the class method outputValidThemes', function(done) {
+		
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var outputValidThemesStub = sinon.stub(binTheme, 'outputValidThemes').returns(testValidThemes);
+			var cmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnError(cb) {
+			
+				return cb(new Error('test cmd help error'));
+			
+			});
+			binTheme.help(function(error, result) {
+			
+				expect(outputValidThemesStub.called).to.be.true;
+				outputValidThemesStub.restore();
+				cmdHelpStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should call the parent class help method', function(done) {
+		
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var outputValidThemesStub = sinon.stub(binTheme, 'outputValidThemes').returns(testValidThemes);
+			var cmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnError(cb) {
+			
+				return cb(new Error('test cmd help error'));
+			
+			});
+			binTheme.help(function(error, result) {
+			
+				expect(cmdHelpStub.called).to.be.true;
+				outputValidThemesStub.restore();
+				cmdHelpStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return an error to callback if the parent help call returns an error to its callback', function(done) {
+		
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var outputValidThemesStub = sinon.stub(binTheme, 'outputValidThemes').returns(testValidThemes);
+			var cmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnError(cb) {
+			
+				return cb(new Error('test cmd help error'));
+			
+			});
+			binTheme.help(function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test cmd help error');
+				outputValidThemesStub.restore();
+				cmdHelpStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the result of the parent class help call, with a the result of outputValidThemes appended to the content property array, if the parent help call returns a non-null object', function(done) {
+		
+			var testHelpContent = 'test help content';
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var outputValidThemesStub = sinon.stub(binTheme, 'outputValidThemes').returns(testValidThemes);
+			var cmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnObject(cb) {
+			
+				return cb(false, {
+					content: [testHelpContent]
+				});
+			
+			});
+			binTheme.help(function(error, result) {
+			
+				expect(error).to.be.false;
+				expect(result).to.be.an('object').with.property('content').that.is.an('array');
+				expect(result.content[0]).to.equal(testHelpContent);
+				expect(result.content[1]).to.deep.equal(testValidThemes);
+				outputValidThemesStub.restore();
+				cmdHelpStub.restore();
+				done();
+			
+			});
+		
+		});
+		it('should return the result of the outputValidThemes call, with an ansi object with "*** Help system currently unavailable. ***" content prepended to its content array property if the parent help call completes without error but does not return a non-null object to its callback', function(done) {
+		
+			var testHelpContent = {content: '*** Help system currently unavailable. ***', isBold: true};
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var outputValidThemesStub = sinon.stub(binTheme, 'outputValidThemes').returns(testValidThemes);
+			var cmdHelpStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'help').callsFake(function returnNull(cb) {
+			
+				return cb(false, null);
+			
+			});
+			binTheme.help(function(error, result) {
+			
+				expect(error).to.be.false;
+				expect(result).to.be.an('object').with.property('content').that.is.an('array');
+				expect(result.content[0]).to.deep.equal(testHelpContent);
+				expect(result.content[1]).to.deep.equal(testValidThemes.content[1]);
+				expect(result.content[2]).to.deep.equal(testValidThemes.content[2]);
+				outputValidThemesStub.restore();
+				cmdHelpStub.restore();
+				done();
+			
+			});
+		
+		});
 	
 	});
 	describe('outputValidThemes()', function() {
 	
-		it('should be a function');
-		it('should call themeLoader helper function isValidTheme');
-		it('should return an ansi object with a a content array that has a second member that is an ansi object containing a ul with li objects that match the elements of the result of isValidTheme call');
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		it('should be a function', function() {
+		
+			expect(binTheme.outputValidThemes).to.be.a('function');
+		
+		});
+		it('should call themeLoader helper function isValidTheme', function() {
+		
+			var validateThemeStub = sinon.stub(themeLoader, 'isValidTheme').returns([
+				'borg',
+				'bot',
+				'clone',
+				'default'
+			]);
+			var testResult = binTheme.outputValidThemes();
+			expect(validateThemeStub.called).to.be.true;
+			validateThemeStub.restore();
+		
+		});
+		it('should return an ansi object with a a content array that has a second member that is an ansi object containing a ul with li objects that match the elements of the result of isValidTheme call', function() {
+		
+			var validateThemeStub = sinon.stub(themeLoader, 'isValidTheme').returns([
+				'borg',
+				'bot',
+				'clone',
+				'default'
+			]);
+			var testValidThemes = {
+				content:[
+					{
+						tag: 'div',
+						content: 'List of valid themeNames:',
+						isBold: true
+					},
+					{
+						content: [
+							{
+								content: 'borg',
+								tag: 'li'
+							},
+							{
+								content: 'bot',
+								tag: 'li'
+							},
+							{
+								content: 'clone',
+								tag: 'li'
+							},
+							{
+								content: 'default',
+								tag: 'li'
+							}
+						],
+						tag: 'ul'
+					}
+				]
+			};
+			var testResult = binTheme.outputValidThemes();
+			expect(testResult).to.deep.equal(testValidThemes);
+			validateThemeStub.restore();
+		
+		});
 	
 	});
 
