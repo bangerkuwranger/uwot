@@ -35,53 +35,49 @@ class UwotCmdUname extends global.Uwot.Exports.Cmd {
 	
 				for (let i = 0; i < options.length; i++) {
 		
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "a") {
-		
-						i = options.length;
-						return callback(false, envVars.s + ' ' + envVars.v + ' ' + envVars.n + ' ' + envVars.p + ' ' + envVars.r + ' ' + envVars.m);
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "m") {
-		
-						returnString += envVars.m;
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "n") {
-		
-						returnString += envVars.n;
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "p") {
-		
-						returnString += envVars.p;
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "r") {
-		
-						returnString += envVars.r;
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "s") {
-		
-						returnString += envVars.s;
-		
-					}
-					if ('object' === typeof options[i] && 'string' === typeof options[i].name && options[i].name === "v") {
-		
-						returnString += "v" + envVars.v;
-		
-					}
-					if ((i + 1) < options.length) {
+					if ('object' === typeof options[i] && null !== options[i] && 'string' === typeof options[i].name) {
 					
-						returnString += ' ';
+						var postSpace = (i + 1) < options.length ? ' ' : '';
+						switch (options[i].name) {
+					
+							case "a":
+								i = options.length;
+								return callback(false, envVars.s + ' ' + envVars.v + ' ' + envVars.n + ' ' + envVars.p + ' ' + envVars.r + ' ' + envVars.m);
+								break;	//unreachable break
+							
+							case "m":
+								returnString += envVars.m + postSpace;
+								break;
+						
+							case "n":
+								returnString += envVars.n + postSpace;
+								break;
+						
+							case "p":
+								returnString += envVars.p + postSpace;
+								break;
+						
+							case "r":
+								returnString += envVars.r + postSpace;
+								break;
+						
+							case "s":
+								returnString += envVars.s + postSpace;
+								break;
+		
+							case "v":
+								returnString += "v" + envVars.v + postSpace;
+								break;
+		
+						}
 					
 					}
-					else {
+					if ((i + 1) >= options.length) {
 					
 						return callback(false, returnString);
 					
 					}
-	
+				
 				}
 	
 			}
@@ -112,7 +108,7 @@ var uname = new UwotCmdUname(
 	},
 	[
 		{
-			description: 		'Output all strings from flags s, v, n, p, r, & m',
+			description: 		'Output all strings from flags s, v, n, p, r, & m.',
 			shortOpt: 			'a',
 			longOpt: 			null,
 			requiredArguments:	[],
