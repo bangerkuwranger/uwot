@@ -59,13 +59,14 @@ router.post(
 		};
 		var nv;
 		// verify form nonce
-		if ('string' !== typeof req.body.nonce) {
+		if ('object' !== typeof req.body || null === req.body || 'string' !== typeof req.body.nonce) {
 		
-			// if nonce not present in req, assing invalid nonce response to resObj
+			// if nonce not present in req, pass invalid nonce response to resObj
 			resObj.output = {
 				color: 'yellow',
 				content: 'Invalid Request - Reload'
 			};
+			return sendAsAnsi(resObj, res);
 		
 		}
 		else {
@@ -78,7 +79,7 @@ router.post(
 			// return nonce error if not verified
 			resObj.output = {
 				color: 'yellow',
-				content: 'Invalid Request -' + nv.message
+				content: 'Invalid Request - ' + nv.message
 			};
 			if ('function' !== typeof res.ansi) {
 			
@@ -223,6 +224,11 @@ router.post(
 				}
 			
 			}
+		
+		}
+		else {
+		
+			return sendAsAnsi(resObj, res);
 		
 		}
 
