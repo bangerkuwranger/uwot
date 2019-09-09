@@ -1,5 +1,6 @@
 const INSTANCE_SESSION_COOKIE_NAME = 'instanceSessionId';
 const isidListenerHelper = require('../helpers/isidListener');
+const nonceHandler = require('node-timednonce');
 
 module.exports = function(args) {
 
@@ -35,6 +36,10 @@ module.exports = function(args) {
 							else {
 							
 								res.cookie(INSTANCE_SESSION_COOKIE_NAME, isid, {maxAge: 303000});
+								res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(isid);
+								// TBD
+								// Generate a new one in the helper for each new listener load...
+								res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
 							
 							}
 							next();
@@ -56,6 +61,10 @@ module.exports = function(args) {
 							
 								res.cookie(INSTANCE_SESSION_COOKIE_NAME, savedSession._id, {expires: new Date(savedSession.expiresAt + 3000)});
 								isidListenerHelper.moveListeners(isidCookie, savedSession._id);
+								res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(savedSession._id);
+								// TBD
+								// Generate a new one in the helper for each new listener load...
+								res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
 							
 							}
 							next();
@@ -67,7 +76,10 @@ module.exports = function(args) {
 				}
 				else {
 				
-					
+					res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(savedSession._id);
+					// TBD
+					// Generate a new one in the helper for each new listener load...
+					res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
 					next();
 				
 				}
@@ -89,6 +101,10 @@ module.exports = function(args) {
 				
 					res.cookie(INSTANCE_SESSION_COOKIE_NAME, savedSession._id, {expires: new Date(savedSession.expiresAt + 3000)});
 					isidListenerHelper.newIsidDefaultListener(savedSession._id);
+					res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(savedSession._id);
+					// TBD
+					// Generate a new one in the helper for each new listener load...
+					res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
 				
 				}
 				next();

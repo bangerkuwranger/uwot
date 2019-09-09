@@ -121,6 +121,7 @@ router.get('/', inSession(), function(req, res, next) {
 	};
 	
 	res.locals.nonce = nonceHandler.create( 'index-get', 300000 );
+	res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
 	res.locals.validOps = global.Uwot.Constants.cliOps ? JSON.stringify(global.Uwot.Constants.cliOps) : '[]';
 	if (global.Uwot.Config.getVal('server', 'showVersion')) {
 	

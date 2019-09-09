@@ -9,6 +9,10 @@ block content
 		-var nval = nonce
 	-else
 		-var nval = ''
+	-if (listenerNonce)
+		-var lnval = listenerNonce
+	-else
+		-var lnval = ''
 	div(class=themeClass class=["uwot"] id='uwot')
 		div(id='uwotterminal' class='terminal')
 			div(id='uwotheader' class='header')
@@ -46,6 +50,7 @@ block content
 							input(id='uwotcli-nonce' name='nonce' type='hidden' value=nval)
 							input(id='uwotcli-login' name='username' type='hidden')
 							input(id='uwotcli-doLogin' name='doLogin' type='hidden' value='false')
+							input(id='uwotcli-listenerNonce' name='listenerNonce' type='hidden' value=lnval)
 
 			div(id='uwotoutput' class='output')
 				div(class='output-container')

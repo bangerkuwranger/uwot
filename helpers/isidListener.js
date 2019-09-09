@@ -140,6 +140,35 @@ module.exports = {
 	
 		}
 
+	},
+	
+	getServerListeners(isid) {
+	
+		var globalListeners = this.ensureGlobalListener(isid);
+		var allListenerNames = Object.keys(globalListeners);
+		var serverListeners = [];
+		for (let i = 0; i < allListenerNames.length; i++) {
+		
+			let thisListener = globalListeners[allListenerNames[i]];
+			let thatListener = {
+				name:		thisListener.name,
+				options:	{
+					type:	thisListener.options.type,
+					path:	thisListener.options.routeUriPath,
+					cmdSet:	thisListener.options.cmdSet,
+					isid:	thisListener.isid
+				},
+				status:		thisListener.status
+			}
+			serverListeners.push(thatListener);
+			if ((i + 1) >= allListenerNames.length) {
+		
+				return serverListeners;
+		
+			}
+	
+		}
+	
 	}
 
 };
