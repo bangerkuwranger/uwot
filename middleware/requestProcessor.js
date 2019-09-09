@@ -31,6 +31,11 @@ module.exports = function(args) {
 				content: 'Invalid Request'
 			}
 		};
+		if ('object' === typeof res.locals.uwotServerListeners && Array.isArray(res.locals.uwotServerListeners)) {
+		
+			res.uwotObj.serverListeners = res.locals.uwotServerListeners;
+		
+		}
 		if ('object' === typeof req.body && 'string' === typeof req.body.cmd) {
 
 			// check that cmd was parsed to AST

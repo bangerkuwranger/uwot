@@ -1,8 +1,8 @@
 'use strict';
 
 const defaultUwotListenerOptions = {
-	type:		'additional',
-	path:		'/listeners',
+	type:		'default',
+	path:		'/bin',
 	cmdSet:		[]
 };
 
@@ -19,15 +19,20 @@ class UwotCliListener {
 		}
 		else {
 		
-			if ('object' === typeof options && null !== options) {
+			if ('object' !== typeof options && null !== options) {
 			
-				this.type = 'string' === typeof options.type && -1 !== validUwotListenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
-				this.path = 'string' === typeof options.path ? '/listeners/' + options.path : defaultUwotListenerOptions.path;
-				this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) && options.cmdSet.length > 0 ? options.cmdSet : defaultUwotListenerOptions.cmdSet;
-				this.isid = 'string' === typeof options.isid && '' !== options.isid ? options.isid : '';
+				options = Object.assign({}, defaultUwotListenerOptions);
 			
 			}
+			this.name = name.trim();
 			this.status = 'string' === typeof status && 'enabled' === status ? 'enabled' : 'disabled';
+			this.type = 'string' === typeof options.type && -1 !== validUwotListenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
+			this.path = 'string' === typeof options.path ? '/listeners/' + options.path : defaultUwotListenerOptions.path;
+			this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) && options.cmdSet.length > 0 ? options.cmdSet : defaultUwotListenerOptions.cmdSet;
+			this.isid = 'string' === typeof options.isid && '' !== options.isid ? options.isid : '';
+			// TBD
+			// add individual listener nonce from server
+			this.history = new CliHistory(this.name);
 		
 		}
 	
@@ -40,25 +45,52 @@ class UwotCliListener {
 			return outputToMain('', {addPrompt:true});
 		
 		}
-		var doLogin = false;
-		var hasLoginUser = false;
-		if (this.type === 'default') {
-		
-			doLogin = 'string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
-			hasLoginUser = 'string' === typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
-			if (doLogin) {
-				if (hasLoginUser) {
-					op = 'login ' + $("#uwotcli-login").val() + ' ' + data.op;
-				}
-				else {
-					op = 'login ' + data.op;
-				}
-			}
-		
-		}
 		else {
 		
+			var doLogin = false;
+			var hasLoginUser = false;
+			if (this.type === 'default') {
 		
+				doLogin = 'string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
+				hasLoginUser = 'string' === typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
+				if (doLogin) {
+					if (hasLoginUser) {
+						data.op = 'login ' + $("#uwotcli-login").val() + ' ' + data.op;
+					}
+					else {
+						data.op = 'login ' + data.op;
+					}
+				}
+				else {
+			
+					this.history.addItem(data.op);
+			
+				}
+		
+			}
+			else {
+		
+				this.history.addItem(data.op);
+		
+			}
+			jQuery.post(
+				this.path,
+				data
+			)
+			.done(function(result) {
+				outputToMain(result);
+			})
+			.fail(function(obj, status, error) {
+				if ('' === error) {
+					error = 'Command failed - Server temporarily unavailable';
+				}
+				outputToMain(error);
+			})
+			.always(function() {
+				if (!hasLoginUser) {
+					uwotInterface.enableInput();
+				}
+			});
 		
 		}
 	
