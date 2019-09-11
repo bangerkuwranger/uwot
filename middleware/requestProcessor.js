@@ -31,7 +31,7 @@ module.exports = function(args) {
 				content: 'Invalid Request'
 			}
 		};
-		if ('object' === typeof res.locals.uwotServerListeners && Array.isArray(res.locals.uwotServerListeners)) {
+		if ('object' === typeof res.locals && null !== res.locals && 'object' === typeof res.locals.uwotServerListeners && Array.isArray(res.locals.uwotServerListeners)) {
 		
 			res.uwotObj.serverListeners = res.locals.uwotServerListeners;
 		
