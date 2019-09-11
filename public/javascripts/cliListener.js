@@ -26,7 +26,7 @@ class UwotCliListener {
 			}
 			this.name = name.trim();
 			this.status = 'string' === typeof status && 'enabled' === status ? 'enabled' : 'disabled';
-			this.type = 'string' === typeof options.type && -1 !== validUwotListenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
+			this.type = 'string' === typeof options.type && -1 !== uwotListenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
 			this.path = 'string' === typeof options.path ? '/listeners/' + options.path : defaultUwotListenerOptions.path;
 			this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) && options.cmdSet.length > 0 ? options.cmdSet : defaultUwotListenerOptions.cmdSet;
 			this.isid = 'string' === typeof options.isid && '' !== options.isid ? options.isid : '';
@@ -40,8 +40,9 @@ class UwotCliListener {
 	
 	post(data) {
 	
-		if ('object' !== typeof data || 'string' !== typeof data.op || '' === data.op) {
+		if ('object' !== typeof data || 'string' !== typeof data.cmd || '' === data.cmd) {
 		
+			uwotInterface.enableInput();
 			return outputToMain('', {addPrompt:true});
 		
 		}
@@ -55,22 +56,22 @@ class UwotCliListener {
 				hasLoginUser = 'string' === typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
 				if (doLogin) {
 					if (hasLoginUser) {
-						data.op = 'login ' + $("#uwotcli-login").val() + ' ' + data.op;
+						data.cmd = 'login ' + $("#uwotcli-login").val() + ' ' + data.cmd;
 					}
 					else {
-						data.op = 'login ' + data.op;
+						data.cmd = 'login ' + data.cmd;
 					}
 				}
 				else {
 			
-					this.history.addItem(data.op);
+					this.history.addItem(data.cmd);
 			
 				}
 		
 			}
 			else {
 		
-				this.history.addItem(data.op);
+				this.history.addItem(data.cmd);
 		
 			}
 			jQuery.post(

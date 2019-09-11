@@ -153,13 +153,13 @@ module.exports = {
 			let thatListener = {
 				name:		thisListener.name,
 				options:	{
-					type:	thisListener.options.type,
-					path:	thisListener.options.routeUriPath,
-					cmdSet:	thisListener.options.cmdSet,
+					type:	thisListener.type,
+					path:	thisListener.routeUriPath,
+					cmdSet:	thisListener.cmdSet,
 					isid:	thisListener.isid
 				},
 				status:		thisListener.status
-			}
+			};
 			serverListeners.push(thatListener);
 			if ((i + 1) >= allListenerNames.length) {
 		

@@ -26,7 +26,7 @@ module.exports = function(args) {
 					// if invalid and user is authenticated, renew with additional 5 min
 					if (isAuthenticated) {
 					
-						global.Uwot.InstanceSessions.renew(isidCookie, 300000, function(error, isid) {
+						global.Uwot.InstanceSessions.renew(isidCookie, 300000, function(error, isidCookie) {
 						
 							if (error) {
 							
@@ -35,8 +35,8 @@ module.exports = function(args) {
 							}
 							else {
 							
-								res.cookie(INSTANCE_SESSION_COOKIE_NAME, isid, {maxAge: 303000});
-								res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(isid);
+								res.cookie(INSTANCE_SESSION_COOKIE_NAME, isidCookie, {maxAge: 303000});
+								res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(isidCookie);
 								// TBD
 								// Generate a new one in the helper for each new listener load...
 								res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);
@@ -76,7 +76,7 @@ module.exports = function(args) {
 				}
 				else {
 				
-					res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(savedSession._id);
+					res.locals.uwotServerListeners = isidListenerHelper.getServerListeners(isidCookie);
 					// TBD
 					// Generate a new one in the helper for each new listener load...
 					res.locals.listenerNonce = nonceHandler.create('listener-get', 300000);

@@ -1,7 +1,7 @@
 'use strict';
 const path = require('path');
 const ansi = require('../../output/ansi');
-const remoteHtml = require('../../helpers/consoleHtml')
+const remoteHtml = require('../../helpers/consoleHtml');
 
 var listenerSettings = {
 	name: 'browse',

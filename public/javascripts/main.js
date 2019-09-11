@@ -162,7 +162,7 @@ function updateListeners(serverListeners) {
 				serverListeners[i].name,
 				serverListeners[i].options,
 				serverListeners[i].status
-			)
+			);
 		
 		}
 		// otherwise, validate client values match server
@@ -400,7 +400,7 @@ jQuery(document).ready(function($) {
 				cmd: op,
 				nonce,
 				cwd: localStorage.getItem('UwotCwd')
-			}
+			};
 			var whereToPool = getEnabledListeners();
 			if (whereToPool.length === 1) {
 			
