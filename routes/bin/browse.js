@@ -44,23 +44,65 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		// return TypeError if required arg is not passed
 		else if ('object' !== typeof args || !Array.isArray(args) || args.length < 1 || 'object' !== typeof args[0] || null === args[0] || 'string' !== typeof args[0].text) {
 		
-			return callback(new TypeError('invalid path passed to browse'), '');
+			return callback(new TypeError('invalid path passed to bin/browse/execute'), '');
 		
 		}
 		// return Error if isid is invalid
+		else if ('string' !== typeof isid) {
 		
+			return callback(new TypeError('invalid isid passed to bin/browse/execute'));
+		
+		}
+		// return Error if user is invalid
+		else if ('object' !== typeof user || null === user || 'string' !== typeof user._id) {
+		
+			return callback(new TypeError('invalid user passed to bin/browse/execute'));
+		
+		}
+		// return error if user fileSystem is invalid
+		else if ('object' !== typeof global.Uwot.FileSystems[user._id] || null == global.Uwot.FileSystems[user._id]) {
+		
+			return callback(new Error('invalid user fileSystem'));
+		
+		}
 		// enter logic to start console with req arg andset up exclusive listener
 		else {
-		
 			
+			// TBD
+			// get data for display
+			var outputData = 'test output data';
+			// try to register/enable Listener for isid
+			try {
 			
-			// try to enable Listener for isid
+				var lEnabled = super.enableListener(isid);
+				// return error to cb if enableListener returns an Error
+				if (lEnabled instanceof Error) {
+				
+					return callback(lEnabled);
+				
+				}
+				// return error to cb if registerListener returns false
+				else if (!lEnabled || 'enabled' !== lEnabled) {
+				
+					return callback(new Error('could not enable listener for bin/browse'));
+				
+				}
+				// return output to cb if enableListener completes without error
+				else {
+				
+					return callback(false, outputData);
+				
+				}
 			
-			// return error to cb if enableListener returns an Error
-			
-			// return output to cb if enableListener completes without error
-			
+			}
 			// return error to cb if enableListener throws an Error
+			catch(e) {
+			
+				return callback(e);
+			
+			}
+			
+			
 			return callback(false, false);
 		
 		}
@@ -91,6 +133,12 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	exit() {
 	
 		return;
+	
+	}
+	
+	quit() {
+	
+		return this.exit();
 	
 	}
 	

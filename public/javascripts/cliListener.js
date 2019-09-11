@@ -27,11 +27,10 @@ class UwotCliListener {
 			this.name = name.trim();
 			this.status = 'string' === typeof status && 'enabled' === status ? 'enabled' : 'disabled';
 			this.type = 'string' === typeof options.type && -1 !== uwotListenerTypes.indexOf(options.type) ? options.type : defaultUwotListenerOptions.type;
-			this.path = 'string' === typeof options.path ? '/listeners/' + options.path : defaultUwotListenerOptions.path;
 			this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) && options.cmdSet.length > 0 ? options.cmdSet : defaultUwotListenerOptions.cmdSet;
 			this.isid = 'string' === typeof options.isid && '' !== options.isid ? options.isid : '';
-			// TBD
-			// add individual listener nonce from server
+			this.nonce = 'string' === typeof options.nonce && '' !== options.nonce ? options.nonce : null;
+			this.path = 'string' === typeof options.path ? options.path + '/' + this.isid + '/' + this.name : defaultUwotListenerOptions.path;
 			this.history = new CliHistory(this.name);
 		
 		}
@@ -99,13 +98,13 @@ class UwotCliListener {
 	
 	enable() {
 	
-		
+		this.status = 'enabled';
 	
 	}
 	
 	disable() {
 	
-		
+		this.status = 'disabled';
 	
 	}
 

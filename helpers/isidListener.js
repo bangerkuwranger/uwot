@@ -1,4 +1,5 @@
 var Listener = require('../listener');
+const nonceHandler = require('node-timednonce');
 
 module.exports = {
 
@@ -149,18 +150,24 @@ module.exports = {
 		var serverListeners = [];
 		for (let i = 0; i < allListenerNames.length; i++) {
 		
-			let thisListener = globalListeners[allListenerNames[i]];
-			let thatListener = {
-				name:		thisListener.name,
-				options:	{
-					type:	thisListener.type,
-					path:	thisListener.routeUriPath,
-					cmdSet:	thisListener.cmdSet,
-					isid:	thisListener.isid
-				},
-				status:		thisListener.status
-			};
-			serverListeners.push(thatListener);
+			if (allListenerNames[i] !== 'disabledForExclusive') {
+			
+				let thisListener = globalListeners[allListenerNames[i]];
+				let thatListener = {
+					name:		thisListener.name,
+					options:	{
+						type:	thisListener.type,
+						path:	thisListener.routeUriPath,
+						cmdSet:	thisListener.cmdSet,
+						isid:	thisListener.isid,
+						nonce:	nonceHandler.create(isid + '-listener-' + thisListener.name, 300000)
+					},
+					status:		thisListener.status,
+				
+				};
+				serverListeners.push(thatListener);
+			
+			}
 			if ((i + 1) >= allListenerNames.length) {
 		
 				return serverListeners;

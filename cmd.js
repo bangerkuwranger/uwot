@@ -593,7 +593,7 @@ class UwotCmd {
 			return new Error('could not register listener ' + this.listenerSettings.name + ' for id ' + isid);
 		
 		}
-		else if (isRegistered instanceof Error) {
+		else if (isRegistered instanceof Error && isRegistered.message !== 'listener name "' + this.listenerSettings.name + '" not unique for isid "' + isid + '"') {
 		
 			isRegistered.message = 'could not register listener ' + this.listenerSettings.name + ' for id ' + isid + ': ' + isRegistered.message;
 			return isRegistered;
@@ -601,13 +601,22 @@ class UwotCmd {
 		}
 		else {
 		
-			globalListeners[this.listenerSettings.name].enable();
-			if (this.listenerSettings.options.type === 'exclusive') {
+			try {
 			
-				isidListenerHelper.enableExclusiveState(isid);
+				globalListeners[this.listenerSettings.name].enable();
+				if (this.listenerSettings.options.type === 'exclusive') {
+			
+					isidListenerHelper.enableExclusiveState(isid);
+			
+				}
+				return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
 			
 			}
-			return global.Uwot.Listeners[isid][this.listenerSettings.name].status;
+			catch(e) {
+			
+				return e;
+			
+			}
 		
 		}
 	
