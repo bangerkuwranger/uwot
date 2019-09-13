@@ -21,7 +21,7 @@ const getTestListenerOpts = function() {
 		parserPath:		path.join(global.Uwot.Constants.appRoot, 'parser/defaultCmdParser.js'),
 		output:			'ansi',
 		outputPath:		path.join(global.Uwot.Constants.appRoot, 'output/ansi.js'),
-		routerPath:		path.join(global.Uwot.Constants.appRoot, 'routes/path.js'),
+		cmdPath:		path.join(global.Uwot.Constants.appRoot, 'routes/path.js'),
 		routeUriPath:	'/testListener',
 		cmdSet: 		['fwd', 'cc', 'bcc']
 	};
@@ -166,7 +166,7 @@ describe('instanceSessions.js', function() {
 				expect(testListener.parserPath).to.equal(defaultOpts.parserPath);
 				expect(testListener.output).to.equal(defaultOpts.output);
 				expect(testListener.outputPath).to.equal(defaultOpts.outputPath);
-				expect(testListener.routerPath).to.equal(defaultOpts.routerPath);
+				expect(testListener.cmdPath).to.equal(defaultOpts.cmdPath);
 				expect(testListener.routeUriPath).to.equal(defaultOpts.routeUriPath);
 				expect(testListener.cmdSet).to.equal(defaultOpts.cmdSet);
 				testListener = new Listener(
@@ -338,13 +338,13 @@ describe('instanceSessions.js', function() {
 				);
 			
 			});
-			it('should set its routerPath property to options.routerPath if it is a string', function() {
+			it('should set its cmdPath property to options.cmdPath if it is a string', function() {
 			
 				delete global.Uwot.Listeners[testIsid];
 				var testOpts = getTestListenerOpts();
 				var defaultOpts = Listener.DEFAULT_UWOT_LISTENER_OPTIONS;
 				testListener = new Listener('default', testIsid, testOpts);
-				expect(testListener).to.be.an('object').with.property('routerPath').that.equals(testOpts.routerPath);
+				expect(testListener).to.be.an('object').with.property('cmdPath').that.equals(testOpts.cmdPath);
 				testListener = new Listener(
 					testListenerName,
 					testIsid,
@@ -352,14 +352,14 @@ describe('instanceSessions.js', function() {
 				);
 			
 			});
-			it('should set its routerPath property to default routerPath value if options.routerPath is not a string', function() {
+			it('should set its cmdPath property to default cmdPath value if options.cmdPath is not a string', function() {
 			
 				delete global.Uwot.Listeners[testIsid];
 				var testOpts = getTestListenerOpts();
 				var defaultOpts = Listener.DEFAULT_UWOT_LISTENER_OPTIONS;
-				testOpts.routerPath = null;
+				testOpts.cmdPath = null;
 				testListener = new Listener('default', testIsid, testOpts);
-				expect(testListener).to.be.an('object').with.property('routerPath').that.equals(defaultOpts.routerPath);
+				expect(testListener).to.be.an('object').with.property('cmdPath').that.equals(defaultOpts.cmdPath);
 				testListener = new Listener(
 					testListenerName,
 					testIsid,
@@ -425,12 +425,12 @@ describe('instanceSessions.js', function() {
 				);
 			
 			});
-			it('should throw an Error if require(this.routerPath) throws an Error', function() {
+			it('should throw an Error if require(this.cmdPath) throws an Error', function() {
 			
 				delete global.Uwot.Listeners[testIsid];
 				var testOpts = getTestListenerOpts();
 				var defaultOpts = Listener.DEFAULT_UWOT_LISTENER_OPTIONS;
-				testOpts.routerPath = 'file/not/found.js';
+				testOpts.cmdPath = 'file/not/found.js';
 				function throwSysError() {
 				
 					testListener = new Listener('default', testIsid, testOpts);
@@ -444,13 +444,13 @@ describe('instanceSessions.js', function() {
 				);
 			
 			});
-			it('should set this.parserFunction to require(this.routerPath)[this.parserPath] if this.parser is "internal"', function() {
+			it('should set this.parserFunction to require(this.cmdPath)[this.parserPath] if this.parser is "internal"', function() {
 			
 				delete global.Uwot.Listeners[testIsid];
 				var testOpts = getTestListenerOpts();
 				var defaultOpts = Listener.DEFAULT_UWOT_LISTENER_OPTIONS;
 				testOpts.parser = 'internal';
-				var testParserFunction = require(testOpts.routerPath)[testOpts.parserPath];
+				var testParserFunction = require(testOpts.cmdPath)[testOpts.parserPath];
 				testListener = new Listener('default', testIsid, testOpts);
 				expect(testListener.parserFunction).to.deep.equal(testParserFunction);
 				testListener = new Listener(
@@ -476,13 +476,13 @@ describe('instanceSessions.js', function() {
 				);
 			
 			});
-			it('should set this.outputFunction to require(this.routerPath)[this.outputPath] if this.output is "internal"', function() {
+			it('should set this.outputFunction to require(this.cmdPath)[this.outputPath] if this.output is "internal"', function() {
 			
 				delete global.Uwot.Listeners[testIsid];
 				var testOpts = getTestListenerOpts();
 				var defaultOpts = Listener.DEFAULT_UWOT_LISTENER_OPTIONS;
 				testOpts.output = 'internal';
-				var testOutputFunction = require(testOpts.routerPath)[testOpts.outputPath];
+				var testOutputFunction = require(testOpts.cmdPath)[testOpts.outputPath];
 				testListener = new Listener('default', testIsid, testOpts);
 				expect(testListener.outputFunction).to.deep.equal(testOutputFunction);
 				testListener = new Listener(

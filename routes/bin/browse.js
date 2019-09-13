@@ -8,7 +8,7 @@ var listenerSettings = {
 	type: 'exclusive',
 	output: 'internal',
 	outputPath: 'outputBrowse',
-	routerPath: path.join(global.Uwot.Constants.appRoot, 'routes/listeners.js'),
+	cmdPath: path.join(global.Uwot.Constants.appRoot, 'routes/bin/browse.js'),
 	routeUriPath: '/listeners',
 	cmdSet: [
 		'exit',
@@ -115,18 +115,9 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	outputBrowse(args) {
+	outputBrowse(obj) {
 	
-		return function(res, req, next) {
-		
-			res.ansi = function outputAnsiOrConsole(obj) {
-			
-				this.json(ansi(obj));
-			
-			};
-			next();
-		
-		};
+		return JSON.stringify(ansi(obj));
 	
 	}
 	

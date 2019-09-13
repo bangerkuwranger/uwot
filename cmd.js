@@ -89,9 +89,9 @@ class UwotListenerSettings {
 			this.options.outputPath = sanitize.cleanString(settingsObj.outputPath, 1024);
 		
 		}
-		if ('string' === typeof settingsObj.routerPath) {
+		if ('string' === typeof settingsObj.cmdPath) {
 		
-			this.options.routerPath = sanitize.cleanString(settingsObj.routerPath, 1024);
+			this.options.cmdPath = sanitize.cleanString(settingsObj.cmdPath, 1024);
 		
 		}
 		if ('string' === typeof settingsObj.routeUriPath) {

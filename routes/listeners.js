@@ -129,6 +129,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 					});
 				
 				};
+				next();
 			
 			}).catch((parserError) => {
 			

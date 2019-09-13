@@ -16,7 +16,7 @@ class UwotListener {
 			parserPath:		path.join(global.Uwot.Constants.appRoot, 'parser/defaultCmdParser.js'),
 			output:			'ansi',
 			outputPath:		path.join(global.Uwot.Constants.appRoot, 'output/ansi.js'),
-			routerPath:		path.join(global.Uwot.Constants.appRoot, 'routes/path.js'),
+			cmdPath:		path.join(global.Uwot.Constants.appRoot, 'cmd.js'),
 			routeUriPath:	'/bin',		//path relative to /listeners or /path.........
 			cmdSet: 		global.Uwot.Constants.reserved
 		};
@@ -71,7 +71,7 @@ class UwotListener {
 				this.parserPath = 'string' === typeof options.parserPath ? sanitize.cleanString(options.parserPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.parserPath;
 				this.output = 'string' === typeof options.output  && -1 !== global.Uwot.Constants.listenerOutputTypes.indexOf(options.output) ? options.output : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.output;
 				this.outputPath = 'string' === typeof options.outputPath ? sanitize.cleanString(options.outputPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.outputPath;
-				this.routerPath = 'string' === typeof options.routerPath ? sanitize.cleanString(options.routerPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routerPath;
+				this.cmdPath = 'string' === typeof options.cmdPath ? sanitize.cleanString(options.cmdPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.cmdPath;
 				this.routeUriPath = 'string' === typeof options.routeUriPath ? sanitize.cleanString(options.routeUriPath) : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.routeUriPath;
 				this.cmdSet = 'object' === typeof options.cmdSet && Array.isArray(options.cmdSet) ? options.cmdSet : UwotListener.DEFAULT_UWOT_LISTENER_OPTIONS.cmdSet;
 				if ('additional' === this.type) {
@@ -81,7 +81,7 @@ class UwotListener {
 					// set parser, output, and router to defaults, as additional listeners can only perform custom logic for commands, not custom parsing or output
 
 				}
-				var cmdFile = require(this.routerPath);
+				var cmdFile = require(this.cmdPath);
 				switch(this.parser) {
 				
 					case 'internal':
@@ -169,14 +169,14 @@ class UwotListener {
 							
 								if ('object' !== typeof outputObj || null === outputObj) {
 								
-									return resolve(outputFunction(''));
+									return resolve(self.outputFunction(''));
 								
 								}
 								else {
 								
 									try {
 									
-										return resolve(outputFunction(outputObj));
+										return resolve(self.outputFunction(outputObj));
 										
 									}
 									catch(e) {

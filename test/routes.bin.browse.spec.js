@@ -153,11 +153,11 @@ describe('browse.js', function() {
 				});
 		
 			});
-			describe('routerPath', function() {
+			describe('cmdPath', function() {
 		
-				it('should have a value that is an absolute path to listener router', function() {
+				it('should have a value that is an absolute path to listener bin cmd router', function() {
 			
-					expect(binBrowse.listenerSettings.options).to.have.property('routerPath').that.equals(global.Uwot.Constants.appRoot + '/routes/listeners.js');
+					expect(binBrowse.listenerSettings.options).to.have.property('cmdPath').that.equals(global.Uwot.Constants.appRoot + '/routes/bin/browse.js');
 			
 				});
 		
