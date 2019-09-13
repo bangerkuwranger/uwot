@@ -117,7 +117,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	outputBrowse(obj) {
 	
-		return JSON.stringify(ansi(obj));
+		return ansi(obj);
 	
 	}
 	
