@@ -11,7 +11,7 @@ var listenerSettings = {
 	cmdPath: path.join(global.Uwot.Constants.appRoot, 'routes/bin/browse.js'),
 	routeUriPath: '/listeners',
 	cmdSet: [
-		'exit',
+		'quit',
 		'reload',
 		'go',
 		'fwd',
@@ -109,6 +109,23 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
+	handler(bin, args, options, app, user, callback, isSudo, isid) {
+	
+		// throw TypeError if callback is invalid
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/browse/handler');
+		
+		}
+		else if ('string' !== typeof bin || -1 === this.listenerSettings.cmdSet) {
+		
+			return callback(new TypeError(invalid))
+		
+		}
+		return callback(false, 'browse handled "' + bin + '"');
+	
+	}
+	
 	help(callback) {
 	
 		super.help(callback);
@@ -118,12 +135,6 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	outputBrowse(obj) {
 	
 		return ansi(obj);
-	
-	}
-	
-	exit() {
-	
-		return;
 	
 	}
 	

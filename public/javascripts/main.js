@@ -173,7 +173,16 @@ function updateListeners(serverListeners) {
 			var serverOpts = Object.keys(serverListeners[i].options);
 			serverOpts.forEach((optName) => {
 			
-				thisOldListener[optName] = serverListeners[i].options[optName];
+				if ('path' === optName && 'exclusive' === serverListeners[i].options.type) {
+				
+					thisOldListener.path = serverListeners[i].options.path + '/' + serverListeners[i].options.isid + '/' + serverListeners[i].name;
+				
+				}
+				else {
+				
+					thisOldListener[optName] = serverListeners[i].options[optName];
+				
+				}
 			
 			});
 			if (thisOldListener.status !== serverListeners[i].status && 'enabled' === serverListeners[i].status) {

@@ -81,11 +81,11 @@ class UwotListener {
 					// set parser, output, and router to defaults, as additional listeners can only perform custom logic for commands, not custom parsing or output
 
 				}
-				var cmdFile = require(this.cmdPath);
+				this.cmdFile = require(this.cmdPath);
 				switch(this.parser) {
 				
 					case 'internal':
-						this.parserFunction = cmdFile[this.parserPath];
+						this.parserFunction = this.cmdFile[this.parserPath];
 						break;
 					case 'external':
 					default:
@@ -95,7 +95,7 @@ class UwotListener {
 				switch(this.output) {
 				
 					case 'internal':
-						this.outputFunction = cmdFile[this.outputPath];
+						this.outputFunction = this.cmdFile[this.outputPath];
 						break;
 					case 'external':
 					default:
@@ -153,6 +153,7 @@ class UwotListener {
 				}
 				args.userId = sanitize.cleanString(args.userId, 255);
 				args.isid = 'string' === typeof args.isid && '' !== args.isid ? sanitize.cleanString(args.isid) : this.isid;
+				args.cmdSet = self.cmdSet;
 				self.parserFunction(args, function(error, parsedObj) {
 				
 					if (error) {
@@ -204,22 +205,56 @@ class UwotListener {
 	
 	enable() {
 
-// 		if ('default' !== this.type) {
-		
-			this.status = STATUS_ENABLED;
-		
-// 		}
+		if ('default' !== this.type && 'cmdParser' === this.parser) {
+	
+			this.cmdSet.forEach((cmd) => {
+			
+				if ('string' === typeof cmd && -1 === global.Uwot.Constants.reserved.indexOf(cmd)) {
+				
+					global.Uwot.Bin[cmd] = {
+						name: cmd,
+						execute: (args, opts, app, user, callback, isSudo, isid) => {
+						
+							if ('function' !== typeof callback) {
+							
+								throw new TypeError('invalid callback passed to listener for ' + cmd);
+							
+							}
+							else {
+							
+								return this.cmdFile.handler(cmd, args, opts, app, user, callback, isSudo, isid);
+							
+							}
+ 						
+						}
+					}
+				
+				}
+			
+			});
+	
+		}
+		this.status = STATUS_ENABLED;
 		return this.status;
 
 	}
 	
 	disable() {
 	
-// 		if ('default' !== this.type) {
-		
-			this.status = STATUS_DISABLED;
-		
-// 		}
+		if ('default' !== this.type && 'cmdParser' === this.parser) {
+	
+			this.cmdSet.forEach((cmd) => {
+			
+				if ('string' === typeof cmd && -1 === global.Uwot.Constants.reserved.indexOf(cmd)) {
+				
+					delete global.Uwot.Bin[cmd];
+				
+				}
+			
+			});
+	
+		}
+		this.status = STATUS_DISABLED;
 		return this.status;
 	
 	}

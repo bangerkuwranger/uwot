@@ -65,8 +65,20 @@ router.post('/:isid/:lname', function(req, res, next) {
 			req.uwot.listeners = {};
 		
 		}
+		// error if listener does not exist
+		if ('object' !== typeof global.Uwot.Listeners[reqIsid] || null === global.Uwot.Listeners[reqIsid] || 'object' !== typeof global.Uwot.Listeners[reqIsid][reqLname] || null === global.Uwot.Listeners[reqIsid][reqLname]) {
+		
+			var errorObj = {
+				output: {
+					color: 'red',
+					content: 'Invalid state - please reload page'
+				}
+			};
+			return sendAsAnsi(errorObj, res);
+		
+		}
 		// deny if not an exclusive listener
-		if ('string' !== typeof global.Uwot.Listeners[reqIsid][reqLname].type || 'exclusive' !== global.Uwot.Listeners[reqIsid][reqLname].type) {
+		else if ('string' !== typeof global.Uwot.Listeners[reqIsid][reqLname].type || 'exclusive' !== global.Uwot.Listeners[reqIsid][reqLname].type) {
 		
 			denied = new ListenerError('', {type: 'NOTEXCL', isid: reqIsid, lname: reqLname});
 			return res.json(denied);
