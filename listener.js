@@ -163,7 +163,6 @@ class UwotListener {
 					}
 					else {
 					
-						var outputFunction = self.outputFunction;
 						parsedObj.outputHandler = (outputObj) => {
 						
 							return new Promise((resolve, reject) => {
@@ -227,7 +226,7 @@ class UwotListener {
 							}
  						
 						}
-					}
+					};
 				
 				}
 			

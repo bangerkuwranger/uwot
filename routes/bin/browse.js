@@ -16,7 +16,8 @@ var listenerSettings = {
 		'go',
 		'fwd',
 		'back',
-		''
+		'select',
+		'submit'
 	]
 };
 
@@ -119,7 +120,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		}
 		else if ('string' !== typeof bin || -1 === this.listenerSettings.cmdSet) {
 		
-			return callback(new TypeError(invalid))
+			return callback(new TypeError('invalid cmd passed to bin/browse/handler'));
 		
 		}
 		else {
@@ -133,7 +134,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				case 'go':
 				case 'fwd':
 				case 'back':
-				case '':
+				case 'select':
+				case 'submit':
 					return callback(false, 'browse handled "' + bin + '": ');
 			
 			}
