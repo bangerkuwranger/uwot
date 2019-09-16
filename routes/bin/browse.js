@@ -122,7 +122,24 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			return callback(new TypeError(invalid))
 		
 		}
-		return callback(false, 'browse handled "' + bin + '"');
+		else {
+		
+			switch(bin) {
+			
+				case 'quit':
+					return this.quit(isid, callback);
+					break;
+				case 'reload':
+				case 'go':
+				case 'fwd':
+				case 'back':
+				case '':
+					return callback(false, 'browse handled "' + bin + '": ');
+			
+			}
+		
+		}
+		
 	
 	}
 	
@@ -132,37 +149,76 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	outputBrowse(obj) {
+	outputBrowse(obj, callback) {
 	
 		return ansi(obj);
 	
 	}
 	
-	quit() {
+	quit(isid, callback) {
 	
-		return this.exit();
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/browse/handler/quit');
+		
+		}
+		else if ('string' !== typeof isid || '' === isid) {
+		
+			return callback(new TypeError('invalid isid passed to bin/browse/handler/quit'));
+		
+		}
+		// try to disable Listener for isid
+		try {
+		
+			var lDisabled = super.disableListener(isid);
+			// return error to cb if enableListener returns an Error
+			if (lDisabled instanceof Error) {
+			
+				return callback(lDisabled);
+			
+			}
+			// return error to cb if registerListener returns false
+			else if (!lDisabled || 'disabled' !== lDisabled) {
+			
+				return callback(new Error('could not disable listener for bin/browse'));
+			
+			}
+			// return output to cb if enableListener completes without error
+			else {
+			
+				return callback(false, 'thanks for browsing!');
+			
+			}
+		
+		}
+		// return error to cb if disableListener throws an Error
+		catch(e) {
+		
+			return callback(e);
+		
+		}
 	
 	}
 	
-	reload() {
+	reload(callback) {
 	
 		return;
 	
 	}
 	
-	go(uri) {
+	go(uri, callback) {
 	
 		return;
 	
 	}
 	
-	fwd() {
+	fwd(callback) {
 	
 		return;
 	
 	}
 	
-	back() {
+	back(callback) {
 	
 		return;
 	
