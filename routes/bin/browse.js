@@ -69,9 +69,18 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		// enter logic to start console with req arg andset up exclusive listener
 		else {
 			
+			var executeResult = {
+				output: 'test output data',
+				outputType: 'object'
+			}
+			executeResult.cookies = {
+				uwotBrowseCurrentPath: {
+					value: args[0].text
+				}
+			};
 			// TBD
-			// get data for display
-			var outputData = 'test output data';
+			// get data for display and set to output
+			
 			// try to register/enable Listener for isid
 			try {
 			
@@ -91,7 +100,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				// return output to cb if enableListener completes without error
 				else {
 				
-					return callback(false, outputData);
+					return callback(false, executeResult);
 				
 				}
 			
