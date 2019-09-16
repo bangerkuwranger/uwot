@@ -1,216 +1,8 @@
 'use strict';
-var uwotHistory, uwotInteractive = false;
+var uwotHistory, uwotIsid, uwotInteractive = false;
 var initTouchSupport = false;
-jQuery(document).ready(function($) {
-
-	uwotHistory = new CliHistory();
-	
-	if ('string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
-		changePrompt('login');
-	}
-	else {
-		changePrompt(user);
-	}
-	var initialCwd = '/';
-	var storedCwd = localStorage.getItem('UwotCwd');
-	if ('string' === typeof storedCwd) {
-		initialCwd = storedCwd;
-	}
-	changeCwd(initialCwd);
-	window.addEventListener('touchstart', function() {
-		if (!initTouchSupport) {
-			$.ajaxSetup({cache: true});
-			$.getScript('/javascripts/jquery.touchSwipe.min.js')
-			.done(function(script, status) {
-				$('#uwotcli').swipe({
-					swipeLeft(event, direction, distance, duration, fingerCount) {
-						var prevCmd = uwotHistory.getPrevItem();
-						$("#uwotcli-input").val(prevCmd).focus();	
-					},
-					swipeRight(event, direction, distance, duration, fingerCount) {
-						var nextCmd = uwotHistory.getNextItem();
-						$("#uwotcli-input").val(nextCmd).focus();
-					},
-				});
-				initTouchSupport = true;
-				return initTouchSupport;
-			})
-			.always(function() {
-				$("#uwotcli-input").focus();
-				return $.ajaxSetup({cache: false});
-			});
-		}
-	});
-	
-	$("#uwotcli-input").focus();
-	
-	// TBD
-	// refactor to use UwotCliListener class
-	
-	$("#uwotcli").submit(function(e) {
-		e.preventDefault();
-		var op;
-		var doLogin = 'string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val();
-		var hasLoginUser = 'string' === typeof $("#uwotcli-login").val() && '' !== $("#uwotcli-login").val();
-		if (doLogin) {
-			if (hasLoginUser) {
-				op = 'login ' + $("#uwotcli-login").val() + ' ' + $('#uwotcli-input').val();
-			}
-			else {
-				op = 'login ' + $('#uwotcli-input').val();
-			}
-		}
-		else {
-			op = $('#uwotcli-input').val();
-			uwotHistory.addItem(op);
-			outputToMain(op, {addPrompt:true});
-		}
-		if (op.trim() === '') {
-			$('#uwotheader-indicator').removeClass('loading');
-			$('#cliform > .field').removeClass('disabled');
-			$('#uwotcli-input').prop('disabled', false);
-			$("#uwotcli-input").val('').focus();
-		}
-		else {
-			$("#uwotcli-input").val('').focus();
-			var nonce = $('#uwotcli-nonce').val();
-			$('#uwotheader-indicator').addClass('loading');
-			$('#cliform > .field').addClass('disabled');
-			$('#uwotcli-input').prop('disabled', true);
-			$.post(
-				'/bin',
-				{
-					cmd: op,
-					nonce,
-					cwd: localStorage.getItem('UwotCwd')
-				}
-			)
-			.done(function(data) {
-				outputToMain(data);
-			})
-			.fail(function(obj, status, error) {
-				if ('' === error) {
-					error = 'Command failed - Server temporarily unavailable';
-				}
-				outputToMain(error);
-			})
-			.always(function() {
-				if (!hasLoginUser) {
-					$('#uwotheader-indicator').removeClass('loading');
-					$('#cliform > .field').removeClass('disabled');
-					$('#uwotcli-input').prop('disabled', false);
-					$("#uwotcli-input").focus();
-				}
-			});
-		}
-	});
-
-	$("#uwotcli-input").keydown(function(e) {
-		switch(e.which) {
-			case 9: // tab
-				e.preventDefault();
-				outputToMain('You probably wish autocomplete was implemented, don\'t you?');
-				return false;
-				break;
-			case 38: // up
-				e.preventDefault();
-				var prevCmd = uwotHistory.getPrevItem();
-				$("#uwotcli-input").val(prevCmd).focus();
-				break;
-
-			case 40: // down
-				e.preventDefault();
-				var nextCmd = uwotHistory.getNextItem();
-				$("#uwotcli-input").val(nextCmd).focus();
-				break;
-
-			default: return; // exit this handler for other keys
-		}
-	});
-	
-	$('#uwotterminal').click(function() {
-	
-		if (!uwotInteractive) {
-		
-			$("#uwotcli-input").focus();
-		
-		}
-	
-	});
-	
-	$(window).resize(function() {
-        window.setTimeout(onWidth(), 1000);
-    });
-    
-    onWidth();
-
-});
-
-function outputToMain(data, args) {
-	var lineClasses = "outputline";
-	if ('object' === typeof args) {
-		if ('boolean' === typeof args.addPrompt && args.addPrompt) {
-			lineClasses += " add-prompt";
-		}
-	}
-	if ('string' === typeof data) {
-		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
-	}
-	else if ('object' === typeof data && null !== data) {
-		if ('string' === typeof data.output && '' !== data.output) {
-			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
-		}
-		if ('undefined' !== typeof data.operations && 'object' === typeof uwotOperations && Array.isArray(uwotOperations)) {
-			performOperations(data.operations);
-		}
-		if ('object' === typeof data.cookies && null !== data.cookies) {
-		
-			var cNames = Object.keys(data.cookies);
-			for (let i =0; i < cNames.length; i++) {
-				var thisCName = cNames[i];
-				var thisCookie = data.cookies[thisCName];
-				var curVal = uwotGetCookieValue(thisCName);
-				if ('object' === typeof thisCookie && null !== thisCookie && 'string' === typeof thisCookie.value) {
-					var thisValue = thisCookie.value;
-					var expiry = null;
-					if ('string' === typeof thisCookie.expiry) {
-						expiry = new Date(thisCookie.expiry);
-					}
-					else if ('object' === typeof thisCookie.expiry && thisCookie.expiry instanceof Date) {
-						expiry = thisCookie.expiry;
-					}
-					if (thisValue === '' && null !== expiry) {
-						uwotSetCookie(thisCName, curVal, expiry);
-					}
-					else if (thisValue !== '' && null !== expiry) {
-						uwotSetCookie(thisCName, thisValue, expiry);
-					}
-					else if (thisValue !== '') {
-						uwotSetCookie(thisCName, thisValue);
-					}
-				}
-			}
-		}
-		if ('object' === typeof data.redirect && data.redirect !== null) {
-			jQuery('#uwotheader-indicator').addClass('loading');
-			window.setTimeout(uwotClientRedirect(data.redirect), 250);
-		}
-		if ('string' === typeof data.cwd) {
-		
-			changeCwd(data.cwd);
-		
-		}
-	}
-// 	return;
-	//yucky bugs make yuckier things yucky
-	if (window.screen.width > 648) {
-		return jQuery('#uwotoutput .output-container').scrollTop(1E10);
-	}
-	else {
-		return jQuery('#uwotoutput .output-container').scrollTop(-1E10);
-	}
-	
-}
+var uwotInterface = {};
+var uwotListeners = {};
 
 function countIntDigits(num) {
 	return num.toString().length;
@@ -343,3 +135,380 @@ function onWidth() {
 	jQuery('.header-cwd').css('width', 'calc(' + (jQuery('#uwotheader > h1').width() - (jQuery('.header-title').width() + jQuery('.header-version').width() + jQuery('.header-theme').width()) + 'px - 7ch)'));
 }
 
+function updateListeners(serverListeners) {
+
+	var oldListenerNames = Object.keys(uwotListeners);
+	var newListenerNames = serverListeners.map((listenerObj) => {
+	
+		return listenerObj.name;
+	
+	});
+	// remove outdated listeners for instance session
+	oldListenerNames.forEach((oldName) => {
+	
+		if (-1 === newListenerNames.indexOf(oldName)) {
+		
+			delete uwotListeners[oldName];
+		
+		}
+	
+	});
+	for (let i = 0; i < serverListeners.length; i++) {
+	
+		// create a new client listener if it hasn't been created yet
+		if (-1 === oldListenerNames.indexOf(serverListeners[i].name)) {
+		
+			uwotListeners[serverListeners[i].name] = new UwotCliListener(
+				serverListeners[i].name,
+				serverListeners[i].options,
+				serverListeners[i].status,
+				serverListeners[i].nonce
+			);
+		
+		}
+		// otherwise, validate client values match server
+		else {
+		
+			var thisOldListener = uwotListeners[serverListeners[i].name];
+			var serverOpts = Object.keys(serverListeners[i].options);
+			serverOpts.forEach((optName) => {
+			
+				if ('path' === optName && 'exclusive' === serverListeners[i].options.type) {
+				
+					thisOldListener.path = serverListeners[i].options.path + '/' + serverListeners[i].options.isid + '/' + serverListeners[i].name;
+				
+				}
+				else {
+				
+					thisOldListener[optName] = serverListeners[i].options[optName];
+				
+				}
+			
+			});
+			if (thisOldListener.status !== serverListeners[i].status && 'enabled' === serverListeners[i].status) {
+			
+				thisOldListener.enable();
+			
+			}
+			if (thisOldListener.status !== serverListeners[i].status && 'enabled' !== serverListeners[i].status) {
+			
+				thisOldListener.disable();
+			
+			}
+		
+		}
+		if ((i +1) >= serverListeners.length) {
+					
+			return uwotListeners;
+		
+		}
+	
+	}
+
+}
+
+function getEnabledListeners() {
+
+	var enabledListeners = [];
+	var uwotListenerNames = Object.keys(uwotListeners);
+	uwotListenerNames.forEach((lname) => {
+	
+		if (uwotListeners[lname].status === 'enabled') {
+		
+			enabledListeners.push(uwotListeners[lname]);
+		
+		}
+	
+	});
+	return enabledListeners;
+
+}
+
+function getCurrentHistory() {
+
+	var currentHistory;
+	// get enabled listeners
+	var enabledListeners = getEnabledListeners();
+	// if one, return that listener's history (exclusive or default only)
+	if (enabledListeners.length === 1) {
+	
+		currentHistory =  enabledListeners[0].history;
+	
+	}
+	// otherwise, return the default listener's history
+	else {
+	
+		enabledListeners.forEach((elistener) => {
+		
+			if (elistener.type === 'default') {
+			
+				currentHistory = elistener.history;
+			
+			}
+		
+		});
+	
+	}
+	return currentHistory;
+
+}
+
+function initListeners(isid) {
+
+	uwotListeners = {
+		'default': new UwotCliListener(
+			'default',
+			{
+				isid,
+				type:	'default',
+				cmdSet: uwotOperations	// TBD // should actually have all reserved bins + ops here, but cmdSet is not used client side, for now, so nbd
+			},
+			'enabled'
+		)
+	};
+	return uwotListeners;
+
+}
+
+
+function outputToMain(data, args) {
+	var lineClasses = "outputline";
+	if ('object' === typeof args) {
+		if ('boolean' === typeof args.addPrompt && args.addPrompt) {
+			lineClasses += " add-prompt";
+		}
+	}
+	if ('string' === typeof data) {
+		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
+	}
+	else if ('object' === typeof data && null !== data) {
+		if ('string' === typeof data.output && '' !== data.output) {
+			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
+		}
+		if ('undefined' !== typeof data.operations && 'object' === typeof uwotOperations && Array.isArray(uwotOperations)) {
+			performOperations(data.operations);
+		}
+		if ('object' === typeof data.cookies && null !== data.cookies) {
+		
+			var cNames = Object.keys(data.cookies);
+			for (let i =0; i < cNames.length; i++) {
+				var thisCName = cNames[i];
+				var thisCookie = data.cookies[thisCName];
+				var curVal = uwotGetCookieValue(thisCName);
+				if ('object' === typeof thisCookie && null !== thisCookie && 'string' === typeof thisCookie.value) {
+					var thisValue = thisCookie.value;
+					var expiry = null;
+					if ('string' === typeof thisCookie.expiry) {
+						expiry = new Date(thisCookie.expiry);
+					}
+					else if ('object' === typeof thisCookie.expiry && thisCookie.expiry instanceof Date) {
+						expiry = thisCookie.expiry;
+					}
+					if (thisValue === '' && null !== expiry) {
+						uwotSetCookie(thisCName, curVal, expiry);
+					}
+					else if (thisValue !== '' && null !== expiry) {
+						uwotSetCookie(thisCName, thisValue, expiry);
+					}
+					else if (thisValue !== '') {
+						uwotSetCookie(thisCName, thisValue);
+					}
+				}
+			}
+		}
+		if ('object' === typeof data.serverListeners && Array.isArray(data.serverListeners)) {
+			updateListeners(data.serverListeners);
+		}
+		if ('string' === typeof data.cwd) {
+		
+			changeCwd(data.cwd);
+		
+		}
+		if ('object' === typeof data.redirect && data.redirect !== null) {
+			uwotInterface.disableInput();
+			window.setTimeout(uwotClientRedirect(data.redirect), 250);
+		}
+	}
+// 	return;
+	//yucky bugs make yuckier things yucky
+	if (window.screen.width > 648) {
+		return jQuery('#uwotoutput .output-container').scrollTop(1E10);
+	}
+	else {
+		return jQuery('#uwotoutput .output-container').scrollTop(-1E10);
+	}
+
+}
+
+jQuery(document).ready(function($) {
+
+	// TBD
+	// replace with listener history
+// 	uwotHistory = new CliHistory('default');
+	
+	// set up global interface jQuery selectors
+	// TBD
+	// consider whether to pull all interface stuff into separate class/file
+	uwotInterface.indicator = $('#uwotheader-indicator');
+	uwotInterface.cliFields = $('#cliform > .field');
+	uwotInterface.cliInput = $('#uwotcli-input');
+	uwotInterface.enableInput = function() {
+	
+		uwotInterface.indicator.removeClass('loading');
+		uwotInterface.cliFields.removeClass('disabled');
+		uwotInterface.cliInput.prop('disabled', false).val('').focus();
+	
+	};
+	uwotInterface.disableInput = function() {
+	
+		uwotInterface.indicator.addClass('loading');
+		uwotInterface.cliFields.addClass('disabled');
+		uwotInterface.cliInput.prop('disabled', true);
+	
+	};
+	uwotInterface.getInputValue = function() {
+	
+		var inputValue = uwotInterface.cliInput.val();
+		return inputValue.trim();
+	
+	};
+	
+	// change prompt to login if in login operation
+	if ('string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
+		changePrompt('login');
+	}
+	// otherwise change prompt to user value
+	else {
+		changePrompt(user);
+	}
+	// display cwd in vfs to user
+	var initialCwd = '/';
+	var storedCwd = localStorage.getItem('UwotCwd');
+	if ('string' === typeof storedCwd) {
+		initialCwd = storedCwd;
+	}
+	changeCwd(initialCwd);
+	
+	// set global isid
+	uwotIsid = uwotGetCookieValue('instanceSessionId');
+	
+	// set up instance session listeners prior to getting server values
+	initListeners(uwotIsid);
+	
+	// set up touch swipe controls for history
+	window.addEventListener('touchstart', function() {
+		if (!initTouchSupport) {
+			$.ajaxSetup({cache: true});
+			$.getScript('/javascripts/jquery.touchSwipe.min.js')
+			.done(function(script, status) {
+				$('#uwotcli').swipe({
+					swipeLeft(event, direction, distance, duration, fingerCount) {
+						var prevCmd = getCurrentHistory().getPrevItem();
+						$("#uwotcli-input").val(prevCmd).focus();	
+					},
+					swipeRight(event, direction, distance, duration, fingerCount) {
+						var nextCmd = getCurrentHistory().getNextItem();
+						$("#uwotcli-input").val(nextCmd).focus();
+					},
+				});
+				initTouchSupport = true;
+				return initTouchSupport;
+			})
+			.always(function() {
+				$("#uwotcli-input").focus();
+				return $.ajaxSetup({cache: false});
+			});
+		}
+	});
+	
+	// set up keyboard controls for history & autcomplete
+	// TBD
+	// Actually implement autocomplete
+	$("#uwotcli-input").keydown(function(e) {
+		switch(e.which) {
+			case 9: // tab
+				e.preventDefault();
+				outputToMain('You probably wish autocomplete was implemented, don\'t you?');
+				return false;
+				break;
+			case 38: // up
+				e.preventDefault();
+				var prevCmd = getCurrentHistory().getPrevItem();
+				$("#uwotcli-input").val(prevCmd).focus();
+				break;
+
+			case 40: // down
+				e.preventDefault();
+				var nextCmd = getCurrentHistory().getNextItem();
+				$("#uwotcli-input").val(nextCmd).focus();
+				break;
+
+			default: return; // exit this handler for other keys
+		}
+	});
+	
+	// clicks/taps on non-interactive terminal refocus to cli input field
+	$('#uwotterminal').click(function() {
+	
+		if (!uwotInteractive) {
+		
+			$("#uwotcli-input").focus();
+		
+		}
+	
+	});
+	
+	// start out with focus on cli input
+	$("#uwotcli-input").focus();
+	
+	// submit CLI input to server for processing from form
+	// TBD
+	// refactor to use UwotCliListener class ... in progress
+	$("#uwotcli").submit(function(e) {
+		e.preventDefault();
+		var op = uwotInterface.getInputValue();
+		if (op === '') {
+			outputToMain(op, {addPrompt:true});
+			uwotInterface.enableInput();
+		}
+		else {
+			uwotInterface.cliInput.val('').focus();
+			var pathNonce = $('#uwotcli-nonce').val();
+			var listenerNonce = $('#uwotcli-listenerNonce').val(); // will be in the listener, eventually.
+			uwotInterface.disableInput();
+			var data = {
+				cmd: op,
+				nonce: pathNonce,
+				cwd: localStorage.getItem('UwotCwd')
+			};
+			var whereToPool = getEnabledListeners();
+			if (whereToPool.length === 1) {
+			
+				if (whereToPool[0].type !== 'default' && 'string' === typeof whereToPool[0].nonce) {
+				
+					data.nonce = whereToPool[0].nonce;
+				
+				}
+				whereToPool[0].post(data);
+			
+			}
+			else {
+			
+			// TBD
+			// Handle cmdSet matching for additional listeners here? 
+			// can also send everything to default and have server parse it out. (makes more sense, but slower)
+			// decisions...
+			
+			}
+		}
+	});
+	
+	// set up to resize and reorder elements responsively to window width change
+	$(window).resize(function() {
+        window.setTimeout(onWidth(), 1000);
+    });
+    
+    // resize and reorder elements after page is ready at initial load
+    onWidth();
+
+});

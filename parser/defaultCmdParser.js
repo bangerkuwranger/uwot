@@ -66,7 +66,7 @@ module.exports = function defaultCmdParser(args, callback) {
 					// probably needless, but ensure guest cannot sudo
 					user.maySudo = function() { return false; };
 					// assign new runtime to response.runtime using parsed AST, args.app, and guest user
-					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
+					response.runtime = new Runtime(response.cmdAst, user, args.cmdSet).addAppInstance(args.app).addInstanceSessionId(args.isid);
 					return callback(false, response);
 			
 				}
@@ -99,7 +99,7 @@ module.exports = function defaultCmdParser(args, callback) {
 							// probably needless, but ensure guest cannot sudo
 							user.maySudo = function() { return false; };
 							// assign new runtime to response.runtime using parsed AST, args.app, and guest user
-							response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
+							response.runtime = new Runtime(response.cmdAst, user, args.cmdSet).addAppInstance(args.app).addInstanceSessionId(args.isid);
 							return callback(false, response);
 			
 						}
@@ -111,7 +111,7 @@ module.exports = function defaultCmdParser(args, callback) {
 				else {
 			
 					// assign new runtime to response.runtime using parsed AST, args.app, and found user
-					response.runtime = new Runtime(response.cmdAst, user).addAppInstance(args.app).addInstanceSessionId(args.isid);
+					response.runtime = new Runtime(response.cmdAst, user, args.cmdSet).addAppInstance(args.app).addInstanceSessionId(args.isid);
 					return callback(false, response);
 			
 				}

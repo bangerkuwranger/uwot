@@ -153,11 +153,11 @@ describe('browse.js', function() {
 				});
 		
 			});
-			describe('routerPath', function() {
+			describe('cmdPath', function() {
 		
-				it('should have a value that is an absolute path to listener router', function() {
+				it('should have a value that is an absolute path to listener bin cmd router', function() {
 			
-					expect(binBrowse.listenerSettings.options).to.have.property('routerPath').that.equals(global.Uwot.Constants.appRoot + '/routes/listeners.js');
+					expect(binBrowse.listenerSettings.options).to.have.property('cmdPath').that.equals(global.Uwot.Constants.appRoot + '/routes/bin/browse.js');
 			
 				});
 		
@@ -227,22 +227,22 @@ describe('browse.js', function() {
 		
 			binBrowse.execute('args', [], {}, {}, function(error, result) {
 			
-				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 				binBrowse.execute(null, [], {}, {}, function(error, result) {
 			
-					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 					binBrowse.execute([], [], {}, {}, function(error, result) {
 			
-						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+						expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 						binBrowse.execute(['args'], [], {}, {}, function(error, result) {
 			
-							expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+							expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 							binBrowse.execute([null], [], {}, {}, function(error, result) {
 			
-								expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+								expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 								binBrowse.execute([{text: null}], [], {}, {}, function(error, result) {
 		
-									expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to browse');
+									expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/execute');
 									done();
 		
 								}, false, null);
@@ -258,19 +258,19 @@ describe('browse.js', function() {
 			}, false, null);
 		
 		});
-		it('should return false to the callback function if args[0].text is a string', function(done) {
-		
-			var testName = 'ten';
-			var testArg = '/goto/' + testName;
-			binBrowse.execute([{text: testArg}], [], {}, {}, function(error, result) {
-
-				expect(result).to.be.false;
-				expect(error).to.be.false;
-				done();
-
-			}, false, null);
-		
-		});
+		// it('should return false to the callback function if args[0].text is a string', function(done) {
+// 		
+// 			var testName = 'ten';
+// 			var testArg = '/goto/' + testName;
+// 			binBrowse.execute([{text: testArg}], [], {}, {}, function(error, result) {
+// 
+// 				expect(result).to.be.false;
+// 				expect(error).to.be.false;
+// 				done();
+// 
+// 			}, false, null);
+// 		
+// 		});
 	
 	});
 	describe('help(callback)', function() {

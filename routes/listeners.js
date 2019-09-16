@@ -16,7 +16,7 @@ const sendAsAnsi = function(body, res) {
 
 router.post('/:isid/:lname', function(req, res, next) {
 
-	var denied = false;
+	var reqIsid, reqLname, denied = false;
 	// if isid is invalid, reject request
 	if ('string' !== typeof req.params.isid) {
 	
@@ -38,11 +38,17 @@ router.post('/:isid/:lname', function(req, res, next) {
 		return res.json(denied);
 	
 	}
+	else {
+	
+		reqIsid = req.params.isid;
+		reqLname = req.params.lname;
+	
+	}
 	// if nonce is invalid, reject request
-	var nv = nonceHandler.verify('get-listener-' + req.params.lname, req.body.nonce);
+	var nv = nonceHandler.verify(reqIsid + '-listener-' + reqLname, req.body.nonce);
 	if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 	
-		denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: req.params.isid, lname: req.params.lname, reason: nv.message});
+		denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: reqIsid, lname: reqLname, reason: nv.message});
 		return res.json(denied);
 	
 	}
@@ -59,25 +65,37 @@ router.post('/:isid/:lname', function(req, res, next) {
 			req.uwot.listeners = {};
 		
 		}
-		// deny if not an exclusive listener
-		if ('string' !== typeof global.Uwot.Listeners[req.params.isid][req.params.lname].type || 'exclusive' !== global.Uwot.Listeners[req.params.isid][req.params.lname].type) {
+		// error if listener does not exist
+		if ('object' !== typeof global.Uwot.Listeners[reqIsid] || null === global.Uwot.Listeners[reqIsid] || 'object' !== typeof global.Uwot.Listeners[reqIsid][reqLname] || null === global.Uwot.Listeners[reqIsid][reqLname]) {
 		
-			denied = new ListenerError('', {type: 'NOTEXCL', isid: req.params.isid, lname: req.params.lname});
+			var errorObj = {
+				output: {
+					color: 'red',
+					content: 'Invalid state - please reload page'
+				}
+			};
+			return sendAsAnsi(errorObj, res);
+		
+		}
+		// deny if not an exclusive listener
+		else if ('string' !== typeof global.Uwot.Listeners[reqIsid][reqLname].type || 'exclusive' !== global.Uwot.Listeners[reqIsid][reqLname].type) {
+		
+			denied = new ListenerError('', {type: 'NOTEXCL', isid: reqIsid, lname: reqLname});
 			return res.json(denied);
 		
 		}
 		else {
 		
-			res.locals.instanceSessionId = req.params.isid;
-			req.uwot.listeners[req.params.lname] = (global.Uwot.Listeners[req.params.isid][req.params.lname]);
+			res.locals.instanceSessionId = reqIsid;
+			req.uwot.listeners[reqLname] = (global.Uwot.Listeners[reqIsid][reqLname]);
 			var args = {
 				cmd: req.body.cmd,
 				isAuthenticated: req.isAuthenticated(),
 				userId: 'object' === typeof res.locals && 'string' === typeof res.locals.userId && '' !== res.locals.userId ? res.locals.userId : null,
 				app: 'function' === typeof req.app ? req.app : null,
-				isid: req.params.isid
+				isid: reqIsid
 			};
-			global.Uwot.Listeners[req.params.isid][req.params.lname].handler(args).then((resultObj) => {
+			global.Uwot.Listeners[reqIsid][reqLname].handler(args).then((resultObj) => {
 			
 				if (resultObj instanceof Error) {
 				
@@ -123,6 +141,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 					});
 				
 				};
+				next();
 			
 			}).catch((parserError) => {
 			

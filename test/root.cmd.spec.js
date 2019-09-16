@@ -78,7 +78,7 @@ describe('cmd.js', function() {
 				output: 'external',
 				parserPath: path.join(global.Uwot.Constants.appRoot, 'test/cmd.zsh.js'),
 				outputPath: path.join(global.Uwot.Constants.appRoot, 'test/cmd.tty.js'),
-				routerPath: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js'),
+				cmdPath: path.resolve(global.Uwot.Constants.appRoot, 'test/cmd.spec.js'),
 				routeUriPath: 'testCmd',
 				cmdSet: [
 					'fwd',
@@ -1519,7 +1519,7 @@ describe('cmd.js', function() {
 				expect(testListenerSettings.name).to.equal('MaecenasSedDiamEgetRisusVariusBlanditSitAmetNonMagnaNullamIdDolorIdNibhUltriciesVehiculaUtIdElitNullamIdDolorIdNibhUltriciesVehiculaUtIdElitDuisMollisEstNonCommodoLuctusNisiEratPorttitorliaTestCommandInstance');
 			
 			});
-			it('should set the options property to an object a single property "cmdSet" set to an empty array if settingsObj does not have strings for type, parser, output, parserPath, outputPath, routerPath, or routeUriPath property values, and its cmdSet property is not an Array', function() {
+			it('should set the options property to an object a single property "cmdSet" set to an empty array if settingsObj does not have strings for type, parser, output, parserPath, outputPath, cmdPath, or routeUriPath property values, and its cmdSet property is not an Array', function() {
 			
 				cmd = new Cmd(
 					testCmdArgs.command,
@@ -1642,11 +1642,11 @@ describe('cmd.js', function() {
 				expect(testListenerSettings.options.outputPath).to.equal(sanitize.cleanString(testOutputPath, 1024));
 			
 			});
-			it('should set the value of options.routerPath property to the value of settingsObj.routerPath, with trimmed whitespace and truncated to 1024 characters not counting trimeed whitespace, if the value is a string', function() {
+			it('should set the value of options.cmdPath property to the value of settingsObj.cmdPath, with trimmed whitespace and truncated to 1024 characters not counting trimeed whitespace, if the value is a string', function() {
 			
-				var testRouterPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
+				var testCmdPath = '     Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Nullam id dolor id nibh ultricies vehicula ut id elit. Duis mollis, est non commodo luctus, nisi erat porttitorlia test command instance, eget lacinia odio sem nec elit. Donec ullamcorper nulla non metus auctor fringilla. Donec ullamcorper nulla non metus auctor fringilla. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam quis risus eget urna mollis ornare vel eu leo. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum. Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Maecenas sed diam eget risus varius blandit sit amet non magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Curabitur blandit tempus porttitor. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Curabitur blandit tempus porttitor.     ';
 				testListenerSettings = Object.assign({}, testCmdArgs.listenerSettings);
-				testListenerSettings.routerPath = testRouterPath;
+				testListenerSettings.cmdPath = testCmdPath;
 				cmd = new Cmd(
 					testCmdArgs.command,
 					testCmdArgs.options,
@@ -1654,7 +1654,7 @@ describe('cmd.js', function() {
 					testListenerSettings
 				);
 				testListenerSettings = cmd.listenerSettings;
-				expect(testListenerSettings.options.routerPath).to.equal(sanitize.cleanString(testRouterPath, 1024));
+				expect(testListenerSettings.options.cmdPath).to.equal(sanitize.cleanString(testCmdPath, 1024));
 			
 			});
 			it('should set the value of options.routeUriPath property to the value of settingsObj.routeUriPath, with trimmed whitespace and truncated to 255 characters not counting trimeed whitespace, if the value is a string', function() {

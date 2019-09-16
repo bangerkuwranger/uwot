@@ -8,7 +8,7 @@ const ansiToText = require('../output/ansiToText');
 
 class UwotRuntimeCmds extends AbstractRuntime {
 
-	constructor(ast, user) {
+	constructor(ast, user, cmdSet) {
 	
 		// perform checks against AbstractRuntime spec
 		super(ast, user);
@@ -45,6 +45,16 @@ class UwotRuntimeCmds extends AbstractRuntime {
 					this.fx = false;
 				
 				}
+			
+			}
+			if ('object' === typeof cmdSet && Array.isArray(cmdSet) && cmdSet.length > 0) {
+			
+				this.cmdSet = sanitize.arrayOfStringsOrEmpty(cmdSet, false);
+			
+			}
+			else {
+			
+				this.cmdSet = global.Uwot.Constants.reserved;
 			
 			}
 			// begin tree traversal
@@ -230,7 +240,7 @@ class UwotRuntimeCmds extends AbstractRuntime {
 				}
 		
 			}
-			else if (-1 !== global.Uwot.Constants.reserved.indexOf(exe.name)) {
+			else if (-1 !== this.cmdSet.indexOf(exe.name)) {
 		
 				exe.input = 'undefined' !== typeof input ? input : null;
 				exe.output = 'undefined' !== typeof output ? output : null;

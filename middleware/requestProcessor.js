@@ -1,4 +1,5 @@
 const Url = require('url');
+const isidListenerHelper = require('../helpers/isidListener');
 
 function executeRuntime(runtime) {
 
@@ -86,6 +87,9 @@ module.exports = function(args) {
 					// results must be an object
 					executeRuntime(req.uwot.runtime).then((results) => {
 					
+						// get updated listeners to return to client
+						res.uwotObj.serverListeners = isidListenerHelper.getServerListeners(res.locals.instanceSessionId);
+
 						if ('object' === typeof results) {
 				
 							// results.output must be a non-empty array

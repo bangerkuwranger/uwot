@@ -25,7 +25,7 @@ module.exports = function(args) {
 					// if invalid and user is authenticated, renew with additional 5 min
 					if (isAuthenticated) {
 					
-						global.Uwot.InstanceSessions.renew(isidCookie, 300000, function(error, isid) {
+						global.Uwot.InstanceSessions.renew(isidCookie, 300000, function(error, isidCookie) {
 						
 							if (error) {
 							
@@ -34,7 +34,7 @@ module.exports = function(args) {
 							}
 							else {
 							
-								res.cookie(INSTANCE_SESSION_COOKIE_NAME, isid, {maxAge: 303000});
+								res.cookie(INSTANCE_SESSION_COOKIE_NAME, isidCookie, {maxAge: 303000});
 							
 							}
 							next();
@@ -67,7 +67,6 @@ module.exports = function(args) {
 				}
 				else {
 				
-					
 					next();
 				
 				}
