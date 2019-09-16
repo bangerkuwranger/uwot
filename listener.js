@@ -224,7 +224,7 @@ class UwotListener {
 								return this.cmdFile.handler(cmd, args, opts, app, user, callback, isSudo, isid);
 							
 							}
- 						
+						
 						}
 					};
 				
