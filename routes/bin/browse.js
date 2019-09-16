@@ -72,7 +72,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			var executeResult = {
 				output: 'test output data',
 				outputType: 'object'
-			}
+			};
 			executeResult.cookies = {
 				uwotBrowseCurrentPath: {
 					value: args[0].text
