@@ -150,6 +150,23 @@ describe('path.js', function() {
 				});
 			
 			});
+			it('should return an invalid request response if req.cookies.instanceSessionId is not a string or if there is not a valid global listeners object fo the instanceSession');
+			it('should call the instanceSession default listener handler method with req.body.cmd, req.isAuthenticated, res.locals.userId, req.app, and req.cookies.instanceSessionId as properties of args object');
+			it('should respond with error JSON if the handler method call returns a Promis resolved with an error message');
+			it('should respond with parser error JSON if the handler method call returns a Promise that is rejected');
+			it('should set req.uwot properties cmdAst, runtime, and outputHandler to matching properties in object returned with a resolved Promise from the handler call if handler returns a Promise resolved with a non-error object');
+			it('should set reset res.ansi to a function that returns a Promise');
+			describe('res.ansi(outputObj, resp)', function() {
+			
+				it('should be a function');
+				it('should be reassigned after a successful call to default listener handler method');
+				it('should return a Promise');
+				it('should call outputHandler method of returned object from listener handler with outputObj as an argument');
+				it('should respond with parser error JSON if the outputHandler call returns a Promise that is rejected');
+				it('should respond with error JSON if outputHandler call returns a Promise resolved with an Error');
+				it('should respond with resulting JSON string from outputHandler call if it returns a Promise that is resolved without Error');
+			
+			});
 		
 		});
 	
