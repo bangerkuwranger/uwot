@@ -191,24 +191,30 @@ class ReverseProxyBin{
 		localFileLocation,
 		url,
 		isLocal,
-		isConsole
+		isGui
 	) {
 	
-		if ('object' === typeof name && null !== name && 'undefined' === typeof localFileLocation && 'undefined' === typeof url && 'undefined' === typeof isLocal && 'undefined' === typeof isConsole) {
+		var thisName = null;
+		if ('object' === typeof name && null !== name && 'undefined' === typeof localFileLocation && 'undefined' === typeof url && 'undefined' === typeof isLocal && 'undefined' === typeof isGui) {
 		
 			var argsObj = Object.assign(name);
-			name = argsObj.hasOwnProperty('name') ? argsObj.name : null;
-			localFileLocation= argsObj.hasOwnProperty('localFileLocation') ? argsObj.localFileLocation : null;
-			url = argsObj.hasOwnProperty('url') ? argsObj.url : null;
+			thisName = argsObj.hasOwnProperty('name') && 'string' === typeof argsObj.name ? argsObj.name : null;
+			localFileLocation = argsObj.hasOwnProperty('localFileLocation') && 'string' === typeof argsObj.localFileLocation ? argsObj.localFileLocation : null;
+			url = argsObj.hasOwnProperty('url') && 'string' === typeof argsObj.url ? argsObj.url : null;
 			isLocal = argsObj.hasOwnProperty('isLocal') ? argsObj.isLocal : false;
-			isConsole = argsObj.hasOwnProperty('isConsole') ? argsObj.isConsole : false;
+			isGui = argsObj.hasOwnProperty('isGui') ? argsObj.isGui : false;
 		
 		}
-		this.name = sanitize.cleanString(name, 255);
+		else {
+		
+			thisName = name;
+		
+		}
+		this.name = sanitize.cleanString(thisName, 255);
 		this.localFileLocation = sanitize.cleanString(localFileLocation, 1024);
 		this.url = sanitize.cleanString(url, 1024);
 		this.isLocal = 'undefined' === typeof isLocal ? false : sanitize.cleanBool(isLocal);
-		this.isConsole = 'undefined' === typeof isConsole ? false : sanitize.cleanBool(isConsole);
+		this.isGui = 'undefined' === typeof isGui ? false : sanitize.cleanBool(isGui);
 	
 	}
 	
@@ -219,7 +225,7 @@ class ReverseProxyBin{
 			localFileLocation: this.localFileLocation,
 			url: this.url,
 			isLocal: this.isLocal,
-			isConsole: this.isConsole
+			isGui: this.isGui
 		};
 	
 	}
