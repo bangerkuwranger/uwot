@@ -70,7 +70,9 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		else {
 			
 			var executeResult = {
-				output: 'test output data',
+				output: {
+					content: [{content: 'test output data', classes: ['browseOutput']}]
+				},
 				outputType: 'object'
 			};
 			// TBD
@@ -170,7 +172,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	outputBrowse(obj, callback) {
 	
-		return ansi(obj);
+		var outputResult = 'string' === typeof obj ? obj : ansi(obj);
+		return outputResult;
 	
 	}
 	
