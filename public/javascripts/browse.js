@@ -32,6 +32,7 @@ class UwotBrowse {
 			this.history.addItem(this.currentPath);
 		}
 		this.isGui = opts.isGui;
+		this.gui = null;
 	}
 	destroy() {
 		delete this.history;

@@ -6,7 +6,6 @@ class UwotCliOperations {
 	constructor() {}
 	
 	performOperation(operationName, operationArgs) {
-	
 		if (-1 !== uwotOperations.indexOf(operationName.trim())) {
 			if('object' !== typeof operationArgs || !Array.isArray(operationArgs)) {
 				this[operationName.trim()]();
@@ -15,7 +14,6 @@ class UwotCliOperations {
 				this[operationName.trim()](operationArgs);
 			}
 		}
-	
 	}
 	
 	clear() {

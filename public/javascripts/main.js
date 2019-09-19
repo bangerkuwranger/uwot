@@ -273,7 +273,6 @@ function initListeners(isid) {
 
 }
 
-
 function outputToMain(data, args) {
 	var lineClasses = "outputline";
 	if ('object' === typeof args) {
@@ -319,9 +318,9 @@ function outputToMain(data, args) {
 		if ('string' === typeof data.cwd) {
 			changeCwd(data.cwd);
 		}
-		var browsePath = uwotGetCookieValue(uwotBrowseCurrentPath);
-		var browseType = uwotGetCookieValue(uwotBrowseCurrentType);
-		var browseStatus = uwotGetCookieValue(uwotBrowseCurrentStatus);
+		var browsePath = uwotGetCookieValue('uwotBrowseCurrentPath');
+		var browseType = uwotGetCookieValue('uwotBrowseCurrentType');
+		var browseStatus = uwotGetCookieValue('uwotBrowseCurrentStatus');
 		if ('' !== browsePath && '' !== browseType && 'active' === browseStatus && 'object' === typeof uwotListeners.browse && uwotListeners.browse.status === 'enabled') {
 			var browseRenderOpts = {
 				isGui: browseType === 'gui',
