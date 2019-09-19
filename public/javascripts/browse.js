@@ -1,10 +1,11 @@
 'use strict';
+/* global jQuery, UwotCliListener, CliHistory, UwotGui */
 
 const getDefaultUwotBrowseOpts = function() {
 	return {
 		isGui: false
 	};
-}
+};
 
 class UwotBrowse {
 	constructor(listener, initialPath, opts) {
@@ -32,11 +33,32 @@ class UwotBrowse {
 		}
 		this.isGui = opts.isGui;
 	}
+	destroy() {
+		delete this.history;
+		if (null !== this.gui) {
+			this.gui.destroy();
+			this.gui = null;
+		}
+	}
 	render(content, path, opts) {
-		this.history.addItem(path);
-		if ((this.isGui || opts.isGui) && null === this.gui) {
-			this.gui = new UwotGui();
-			this.gui.update(content)
+		if ('string' !== typeof content) {
+			throw new TypeError('invalid content passed to UwotBrowse.render');
+		}
+		if ('string' !== typeof path) {
+			throw new TypeError('invalid path passed to UwotBrowse.render');
+		}
+		if ('object' === typeof opts && null !== opts) {
+			this.isGui = 'boolean' === typeof opts.isGui && true === opts.isGui;
+			var isInitial = 'boolean' === typeof opts.isInitial && true === opts.isInitial;
+		}
+		if (!isInitial) {
+			this.history.addItem(path);
+		}
+		if (this.isGui) {
+			if (null === this.gui) {
+				this.gui = new UwotGui();
+			}
+			this.gui.update(content);
 		}
 		else {
 			if (null !== this.gui) {
@@ -50,5 +72,4 @@ class UwotBrowse {
 		}
 	}
 }
-
 // class contains instance methods for opening, closing, and maintaining browse instance in the user interface

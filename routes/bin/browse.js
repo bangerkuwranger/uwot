@@ -73,13 +73,21 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				output: 'test output data',
 				outputType: 'object'
 			};
+			// TBD
+			// get data for display and set to output
+			var isGui = false;
+			
 			executeResult.cookies = {
 				uwotBrowseCurrentPath: {
 					value: args[0].text
+				},
+				uwotBrowseCurrentType: {
+					value: isGui ? 'gui' : 'cli'
+				},
+				uwotBrowseCurrentStatus: {
+					value: 'active'
 				}
 			};
-			// TBD
-			// get data for display and set to output
 			
 			// try to register/enable Listener for isid
 			try {

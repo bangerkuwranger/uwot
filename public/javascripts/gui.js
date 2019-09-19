@@ -1,4 +1,5 @@
 'use strict';
+/* global jQuery, uwotInteractive */
 
 class UwotGui {
 	constructor() {

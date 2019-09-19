@@ -1,4 +1,5 @@
 'use strict';
+/* global CliHistory, jQuery, uwotOperations */
 
 class UwotCliOperations {
 

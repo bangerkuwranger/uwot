@@ -1,8 +1,11 @@
 'use strict';
+/* global jQuery, UwotCliListener, UwotCliOperations, UwotBrowse */
+
 var uwotHistory, uwotIsid, uwotInteractive = false;
 var initTouchSupport = false;
 var uwotInterface = {};
 var uwotListeners = {};
+var uwotBrowseInstance = null;
 
 function countIntDigits(num) {
 	return num.toString().length;
@@ -282,12 +285,6 @@ function outputToMain(data, args) {
 		jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data +'</div>');
 	}
 	else if ('object' === typeof data && null !== data) {
-		if ('string' === typeof data.output && '' !== data.output) {
-			jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
-		}
-		if ('undefined' !== typeof data.operations && 'object' === typeof uwotOperations && Array.isArray(uwotOperations)) {
-			performOperations(data.operations);
-		}
 		if ('object' === typeof data.cookies && null !== data.cookies) {
 		
 			var cNames = Object.keys(data.cookies);
@@ -320,13 +317,40 @@ function outputToMain(data, args) {
 			updateListeners(data.serverListeners);
 		}
 		if ('string' === typeof data.cwd) {
-		
 			changeCwd(data.cwd);
-		
 		}
-		if ('object' === typeof data.redirect && data.redirect !== null) {
-			uwotInterface.disableInput();
-			window.setTimeout(uwotClientRedirect(data.redirect), 250);
+		var browsePath = uwotGetCookieValue(uwotBrowseCurrentPath);
+		var browseType = uwotGetCookieValue(uwotBrowseCurrentType);
+		var browseStatus = uwotGetCookieValue(uwotBrowseCurrentStatus);
+		if ('' !== browsePath && '' !== browseType && 'active' === browseStatus && 'object' === typeof uwotListeners.browse && uwotListeners.browse.status === 'enabled') {
+			var browseRenderOpts = {
+				isGui: browseType === 'gui',
+				isInitial: false
+			}
+			if (uwotBrowseInstance === null) {
+				var browseInstanceOpts = {
+					isGui: browseRenderOpts.isGui
+				}
+				browseRenderOpts.isInitial = true;
+				uwotBrowseInstance = new UwotBrowse(uwotListeners.browse, browsePath, browseInstanceOpts);
+			}
+			uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
+		}
+		else {
+			if (uwotBrowseInstance !== null) {
+				uwotBrowseInstance.destroy();
+				uwotBrowseInstance = null;
+			}
+			if ('string' === typeof data.output && '' !== data.output) {
+				jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
+			}
+			if ('undefined' !== typeof data.operations && 'object' === typeof uwotOperations && Array.isArray(uwotOperations)) {
+				performOperations(data.operations);
+			}
+			if ('object' === typeof data.redirect && data.redirect !== null) {
+				uwotInterface.disableInput();
+				window.setTimeout(uwotClientRedirect(data.redirect), 250);
+			}
 		}
 	}
 // 	return;

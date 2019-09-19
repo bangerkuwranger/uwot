@@ -1,4 +1,5 @@
 'use strict';
+/* global jQuery, uwotInterface, uwotListenerTypes, CliHistory */
 
 const defaultUwotListenerOptions = {
 	type:		'default',

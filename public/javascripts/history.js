@@ -1,4 +1,5 @@
 'use strict';
+
 const INDEX_FIELD = 'UwotHistoryIndex';
 const INTVL_FIELD = 'UwotHistoryInterval';
 const INDEX_PREFIX = 'uwotclih';
