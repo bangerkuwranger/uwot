@@ -21,21 +21,39 @@ router.post('/:isid/:lname', function(req, res, next) {
 	if ('string' !== typeof req.params.isid) {
 	
 		denied = new ListenerError('', {type: 'NOISID', reason: 'ISID not in request path'});
-		return res.json(denied);
+		var errorObj = {
+			output: {
+				color: 'red',
+				content: denied.message
+			}
+		};
+		return sendAsAnsi(errorObj, res);
 	
 	}
 	// if listener name is invalid, reject request
 	else if ('string' !== typeof req.params.lname) {
 	
 		denied = new ListenerError('', {type: 'NOLNAME', reason: 'Listener Name not in request path'});
-		return res.json(denied);
+		var errorObj = {
+			output: {
+				color: 'red',
+				content: denied.message
+			}
+		};
+		return sendAsAnsi(errorObj, res);
 	
 	}
 	// if no nonce, reject request
 	else if ('object' !== typeof req.body || 'string' !== typeof req.body.nonce) {
 	
 		denied = new ListenerError('', {type: 'NONONCE', reason: 'Nonce not in request body', isid: req.params.isid, lname: req.params.lname});
-		return res.json(denied);
+		var errorObj = {
+			output: {
+				color: 'red',
+				content: denied.message
+			}
+		};
+		return sendAsAnsi(errorObj, res);
 	
 	}
 	else {
@@ -49,7 +67,13 @@ router.post('/:isid/:lname', function(req, res, next) {
 	if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 	
 		denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: reqIsid, lname: reqLname, reason: nv.message});
-		return res.json(denied);
+		var errorObj = {
+			output: {
+				color: 'red',
+				content: denied.message
+			}
+		};
+		return sendAsAnsi(errorObj, res);
 	
 	}
 	// otherwise, get listener and continue processing request
@@ -81,7 +105,13 @@ router.post('/:isid/:lname', function(req, res, next) {
 		else if ('string' !== typeof global.Uwot.Listeners[reqIsid][reqLname].type || 'exclusive' !== global.Uwot.Listeners[reqIsid][reqLname].type) {
 		
 			denied = new ListenerError('', {type: 'NOTEXCL', isid: reqIsid, lname: reqLname});
-			return res.json(denied);
+			var errorObj = {
+				output: {
+					color: 'red',
+					content: denied.message
+				}
+			};
+			return sendAsAnsi(errorObj, res);
 		
 		}
 		else {

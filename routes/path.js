@@ -7,6 +7,7 @@ const ansiParser = require('../middleware/ansi');
 var ansiOutput = require('../output/ansi');
 const requestProcessor = require('../middleware/requestProcessor');
 const denyAllOthers = require('../middleware/denyAllOthers');
+const isidListenerHelper = require('../helpers/isidListener');
 
 const sendAsAnsi = function(body, res) {
 
@@ -123,7 +124,21 @@ router.post(
 					case 'exclusive':
 						if (thisListener.status === 'enabled') {
 						
-							// reject request if an exclusive listener is active
+							// reject request if an exclusive listener is active, but request ended up here anyhow
+							var resObj = {
+								output: {
+									content: [
+										{
+											color: 'red',
+											content: 'Server state mismatch - please try again'
+										}
+									]
+								},
+								outputType: 'object'
+							};
+							// get updated listeners to return to client
+							resObj.serverListeners = isidListenerHelper.getServerListeners(res.locals.instanceSessionId);
+							return sendAsAnsi(resObj, res)
 						
 						}
 						break;
