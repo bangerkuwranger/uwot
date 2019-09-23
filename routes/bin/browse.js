@@ -284,7 +284,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			},
 			outputType: 'object'
 		};
-		return calback(false, executeResult);
+		return callback(false, executeResult);
 	
 	}
 	

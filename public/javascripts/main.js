@@ -321,11 +321,13 @@ function outputToMain(data, args) {
 		var browsePath = uwotGetCookieValue('uwotBrowseCurrentPath');
 		var browseType = uwotGetCookieValue('uwotBrowseCurrentType');
 		var browseStatus = uwotGetCookieValue('uwotBrowseCurrentStatus');
+		var browseLastOperation = uwotGetCookieValue('uwotBrowseLastOperation');
 		if ('' !== browsePath && '' !== browseType && 'active' === browseStatus && 'object' === typeof uwotListeners.browse && uwotListeners.browse.status === 'enabled') {
 			var browseRenderOpts = {
 				isGui: browseType === 'gui',
-				isInitial: false
-			}
+				isInitial: false,
+				addToHistory: 'string' === typeof browseLastOperation && ('fwd' === browseLastOperation || 'back' === browseLastOperation || 'reload' === browseLastOperation);
+			};
 			if (uwotBrowseInstance === null) {
 				var browseInstanceOpts = {
 					isGui: browseRenderOpts.isGui
