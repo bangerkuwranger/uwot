@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const sanitize = require('../../helpers/valueConversion');
 const ansi = require('../../output/ansi');
 const remoteHtml = require('../../helpers/consoleHtml');
 
@@ -150,6 +151,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					return this.quit(isid, callback);
 					break;
 				case 'reload':
+					return this.reload(args, callback);
+					break;
 				case 'go':
 				case 'fwd':
 				case 'back':
@@ -172,8 +175,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	outputBrowse(obj, callback) {
 	
-		var outputResult = 'string' === typeof obj ? obj : ansi(obj);
-		return outputResult;
+		return ansi(obj);
 	
 	}
 	
@@ -222,27 +224,91 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	reload(callback) {
+	reload(args, callback) {
 	
-		return;
+		if ('object' !== typeof args || !(Array.isArray(args)) || args.length < 1) {
+		
+			return callback(new TypeError('invalid args passed to bin/browse/reload'));
+		
+		}
+		else {
+		
+			var argsObj = {
+				isGui: false
+			};
+			var executeResult = {
+				output: {
+					content: [{content: 'test reload output data', classes: ['browseOutput']}]
+				},
+				outputType: 'object'
+			};
+			args.forEach((thisArg) => {
+			
+				if ('object' === typeof thisArg && null !== thisArg && 'string' === typeof thisArg.name) {
+				
+					switch (thisArg.name) {
+					
+						case 'path':
+							argsObj.path = thisArg.text;
+							break;
+						case 'isGui':
+							argsObj.isGui = sanitize.cleanBool(thisArg.text);
+					
+					}
+				
+				}
+			
+			});
+			executeResult.cookies = {
+				uwotBrowseCurrentPath: {
+					value: argsObj.path
+				},
+				uwotBrowseCurrentType: {
+					value: argsObj.isGui ? 'gui' : 'cli'
+				},
+				uwotBrowseCurrentStatus: {
+					value: 'active'
+				}
+			};
+			return callback(false, executeResult);
+		
+		}
 	
 	}
 	
 	go(uri, callback) {
 	
-		return;
+		var executeResult = {
+			output: {
+				content: [{content: 'test go output data', classes: ['browseOutput']}]
+			},
+			outputType: 'object'
+		};
+		return calback(false, executeResult);
 	
 	}
 	
 	fwd(callback) {
 	
-		return;
+		var executeResult = {
+			output: {
+				content: [{content: 'test fwd output data', classes: ['browseOutput']}]
+			},
+			outputType: 'object'
+		};
+		return callback(false, executeResult);
 	
 	}
 	
 	back(callback) {
 	
-		return;
+		var executeResult = {
+			output: {
+				content: [{content: 'test back output data', classes: ['browseOutput']}]
+			},
+			outputType: 'object'
+		};
+		return callback(false, executeResult);
 	
 	}
 

@@ -14,16 +14,28 @@ const getTestHtmlString = function() {
 
 };
 
+const getTestCliHtmlString = function() {
 
-var testString;
-var testObj;
+	return '<html><head><title>the pull of the past is the pall over us</title><meta name="description" content="art. software. music. a general sense of unease."><meta name="application-name" content="uwotCli"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="194x194" href="/favicon-194x194.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png?v=BG76j6NvbJ"><link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=BG76j6NvbJ"><link rel="manifest" href="/site.webmanifest?v=BG76j6NvbJ"><link rel="mask-icon" href="/safari-pinned-tab.svg?v=BG76j6NvbJ" color="#ff0000"><link rel="shortcut icon" href="/favicon.ico?v=BG76j6NvbJ"><meta name="msapplication-TileColor" content="#979797"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" href="https://www.chadacarino.com/css/singlepage.css?v=2"><link rel="stylesheet" href="https://www.chadacarino.com/css/font-cacscribbles.css"><style type="text/css">body {font-family: cAcScribbles, "Lucida Console", "Lucida Sans Typewriter", monaco, "Bitstream Vera Sans Mono", monospace;}h6 { text-transform: uppercase;}</style><script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script></head><body><div class="page page-comingsoon"><h1>i\'m working on it; leave me be.</h1><img src="https://www.chadacarino.com/images/caclogov2.png" alt="C. A. C." style="max-width: 320px; height: auto;"><h6><a id="normalLink" href="https://github.com/bangerkuwranger">visit me on github</a></h6></div><ul id="fruits"><li class="apple">Apple</li><li class="orange">Orange</li><li class="pear">Pear</li></ul><p><a id="spawnLink" href="https://www.chadacarino.com/" target="_blank">spawn</a></p><p><a id="nothingLink" href="#!" target="_self" onClick="console.log(\'nothing done.\')">do nothing</a></p><p><a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent">take over</a></p></body></html>';
+
+};
+
+
+var testInString, testObj, testOutString;
+var testCliInString, testCliObj, testCliOutString;
+var testCliOpenTag = '<div id="uwotBrowseHtml" class="uwotCli-html">';
+var testOpenTag = '<div id="uwotBrowseHtml" class="uwotGui-html">';
 
 describe('consoleHtml.js', function() {
 
 	beforeEach(function() {
 	
-		testString = getTestHtmlString();
-		testObj = cheerio.load(testString);
+		testInString = getTestHtmlString();
+		testObj = cheerio.load(testInString);
+		testOutString = testObj('body').html();
+		testCliInString = getTestCliHtmlString();
+		testCliObj = cheerio.load(testCliInString);
+		testCliOutString = testObj('body').html();
 	
 	});
 	describe('getAsJQuery(htmlString)', function() {
@@ -40,7 +52,7 @@ describe('consoleHtml.js', function() {
 		});
 		it('should return a cheerio object if htmlString arg value is a string', function() {
 		
-			var $ = consoleHtml.getAsJQuery(testString);
+			var $ = consoleHtml.getAsJQuery(testInString);
 			expect($).to.be.a('function');
 			expect($('title').text()).to.equal('the pull of the past is the pall over us');
 			console.log($.html());
@@ -438,7 +450,7 @@ describe('consoleHtml.js', function() {
 		it('should return an error to callback if getAsJQuery throws an error', function(done) {
 		
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').throws(new Error('test getAsJQuery error'));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
 				expect(result).to.be.null;
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test getAsJQuery error');
@@ -450,9 +462,9 @@ describe('consoleHtml.js', function() {
 		});
 		it('should return an error to callback if makeConsoleHtml throws an error', function(done) {
 		
-			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
+			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testCliObj);
 			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').throws(new Error('test makeConsoleHtml error'));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testCliInString, function(error, result) {
 			
 				expect(result).to.be.null;
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test makeConsoleHtml error');
@@ -466,13 +478,13 @@ describe('consoleHtml.js', function() {
 		it('should return an error as first callback arg and parsed body html as second html arg if pullHeadElements for styles returns a rejected Promise', function(done) {
 		
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.reject(new Error('test styles pullHeadElements rejection')));
 			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
-				expect(result).to.equal(testString);
+				expect(result).to.equal(testOutString);
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test styles pullHeadElements rejection');
 				getAsJQueryStub.restore();
 				makeConsoleHtmlStub.restore();
@@ -485,13 +497,13 @@ describe('consoleHtml.js', function() {
 		it('should return an error as first callback arg and parsed body html as second html arg if pullHeadElements for scripts returns a rejected Promise', function(done) {
 		
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
 			pullHeadElementsStub.onCall(1).returns(Promise.reject(new Error('test styles pullHeadElements rejection')));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
-				expect(result).to.equal(testString);
+				expect(result).to.equal(testOutString);
 				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test styles pullHeadElements rejection');
 				getAsJQueryStub.restore();
 				makeConsoleHtmlStub.restore();
@@ -503,13 +515,13 @@ describe('consoleHtml.js', function() {
 		});
 		it('should return the final html string with the style tag prepended if pullHeadElements for styles returns a Promise resolved with a non-empty string', function(done) {
 		
-			var finalHtml = '<style type="text/css">.styled {width: auto;}</style>' + testString;
+			var finalHtml = testOpenTag + '<style type="text/css">.styled {width: auto;}</style>' + testOutString + '</div>';
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
 			pullHeadElementsStub.onCall(1).returns(Promise.resolve(''));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
 				expect(result).to.equal(finalHtml);
 				expect(error).to.be.false;
@@ -523,13 +535,13 @@ describe('consoleHtml.js', function() {
 		});
 		it('should return the final html string with the script tag prepended if pullHeadElements for scripts returns a Promise resolved with a non-empty string', function(done) {
 		
-			var finalHtml = '<script type="text/javascript">console.log("it is a script");</script>' + testString;
+			var finalHtml = testOpenTag + '<script type="text/javascript">console.log("it is a script");</script>' + testOutString + '</div>';
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.resolve(''));
 			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
 				expect(result).to.equal(finalHtml);
 				expect(error).to.be.false;
@@ -543,13 +555,13 @@ describe('consoleHtml.js', function() {
 		});
 		it('should return the final html string with the style and script tags prepended if pullHeadElements for styles and scripts return Promises resolved with non-empty strings', function(done) {
 		
-			var finalHtml = '<style type="text/css">.styled {width: auto;}</style>' + '<script type="text/javascript">console.log("it is a script");</script>' + testString;
+			var finalHtml = testOpenTag + '<style type="text/css">.styled {width: auto;}</style>' + '<script type="text/javascript">console.log("it is a script");</script>' + testOutString + '</div>';
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.resolve('<style type="text/css">.styled {width: auto;}</style>'));
 			pullHeadElementsStub.onCall(1).returns(Promise.resolve('<script type="text/javascript">console.log("it is a script");</script>'));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
 				expect(result).to.equal(finalHtml);
 				expect(error).to.be.false;
@@ -564,13 +576,13 @@ describe('consoleHtml.js', function() {
 		it('should return the final html string with no tag prepended if pullHeadElements for styles and scripts return Promises resolved with empty strings', function(done) {
 		
 			var getAsJQueryStub = sinon.stub(consoleHtml, 'getAsJQuery').returns(testObj);
-			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testString);
+			var makeConsoleHtmlStub = sinon.stub(consoleHtml, 'makeConsoleHtml').returns(testOutString);
 			var pullHeadElementsStub = sinon.stub(consoleHtml, 'pullHeadElements');
 			pullHeadElementsStub.onCall(0).returns(Promise.resolve(''));
 			pullHeadElementsStub.onCall(1).returns(Promise.resolve(''));
-			consoleHtml.loadForConsole(testString, function(error, result) {
+			consoleHtml.loadForConsole(testInString, function(error, result) {
 			
-				expect(result).to.equal(testString);
+				expect(result).to.equal(testOpenTag + testOutString + '</div>');
 				expect(error).to.be.false;
 				getAsJQueryStub.restore();
 				makeConsoleHtmlStub.restore();

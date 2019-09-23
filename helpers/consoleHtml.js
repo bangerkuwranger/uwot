@@ -283,8 +283,10 @@ module.exports = {
 			try {
 
 				var $ = self.getAsJQuery(htmlString);
+				var applicationName = $('head meta[name=application-name]').attr('content');
+				applicationName = 'string' === typeof applicationName ? applicationName : 'uwotGui';
 				var bodyHtml = self.makeConsoleHtml($('body'));
-				var finalHtml = '';
+				var finalHtml = '<div id="uwotBrowseHtml" class="' + applicationName + '-html">';
 				Promise.all([
 					self.pullHeadElements($, 'style'),
 					self.pullHeadElements($, 'script')
@@ -300,7 +302,7 @@ module.exports = {
 						finalHtml += contentArray[1];
 					
 					}
-					finalHtml += bodyHtml;
+					finalHtml += bodyHtml + '</div>';
 					return callback(false, finalHtml);
 					
 				}).catch((error) => {

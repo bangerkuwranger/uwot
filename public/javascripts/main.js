@@ -329,7 +329,7 @@ function outputToMain(data, args) {
 			if (uwotBrowseInstance === null) {
 				var browseInstanceOpts = {
 					isGui: browseRenderOpts.isGui
-				}
+				};
 				browseRenderOpts.isInitial = true;
 				uwotBrowseInstance = new UwotBrowse(uwotListeners.browse, browsePath, browseInstanceOpts);
 			}
