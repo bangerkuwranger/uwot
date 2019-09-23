@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, uwotInterface, uwotListenerTypes, CliHistory */
+/* global jQuery, uwotInterface, uwotListenerTypes, CliHistory, outputToMain */
 
 const defaultUwotListenerOptions = {
 	type:		'default',
@@ -34,10 +34,10 @@ class UwotCliListener {
 			this.path = 'string' === typeof options.path ? options.path + '/' + this.isid + '/' + this.name : defaultUwotListenerOptions.path;
 			this.history = new CliHistory(this.name);
 			this.hooks = {
-				before_post: [],
-				after_post_fail: [],
-				after_post_success: [],
-				after_post_always: []
+				beforePost: [],
+				afterPostFail: [],
+				afterPostSuccess: [],
+				afterPostAlways: []
 			};
 		
 		}
@@ -80,14 +80,14 @@ class UwotCliListener {
 				this.history.addItem(data.cmd);
 		
 			}
-			data = this.callHook('before_post', data);
+			data = this.callHook('beforePost', data);
 			var self = this;
 			jQuery.post(
 				this.path,
 				data
 			)
 			.done(function(result) {
-				result = self.callHook('after_post_success', result);
+				result = self.callHook('afterPostSuccess', result);
 				outputToMain(result);
 			})
 			.fail(function(obj, status, error) {
@@ -96,7 +96,7 @@ class UwotCliListener {
 					status,
 					error
 				};
-				result = self.callHook('after_post_fail', result);
+				result = self.callHook('afterPostFail', result);
 				if ('' === result.error) {
 					result.error = 'Command failed - Server temporarily unavailable';
 				}
@@ -108,7 +108,7 @@ class UwotCliListener {
 					status,
 					xhrObjOrError
 				};
-				result = self.callHook('after_post_always', result);
+				result = self.callHook('afterPostAlways', result);
 				if (!hasLoginUser) {
 					uwotInterface.enableInput();
 				}

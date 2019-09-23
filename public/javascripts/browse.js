@@ -52,10 +52,10 @@ class UwotBrowse {
 			return reqData;
 		};
 		this.changeLoadPath = changeLoadPath;
-		this.listener.addHook('before_post', this.changeLoadPath);
+		this.listener.addHook('beforePost', this.changeLoadPath);
 	}
 	destroy() {
-		this.listener.removeHook('before_post', this.changeLoadPath);
+		this.listener.removeHook('beforePost', this.changeLoadPath);
 		this.listener = null;
 		delete this.history;
 		if (null !== this.gui) {
@@ -70,10 +70,12 @@ class UwotBrowse {
 		if ('string' !== typeof path) {
 			throw new TypeError('invalid path passed to UwotBrowse.render');
 		}
+		var isInitial = false;
+		var addToHistory = true;
 		if ('object' === typeof opts && null !== opts) {
 			this.isGui = 'boolean' === typeof opts.isGui && true === opts.isGui;
-			var isInitial = 'boolean' === typeof opts.isInitial && true === opts.isInitial;
-			var addToHistory = 'boolean' === typeof opts.addToHistory && true === opts.addToHistory;
+			isInitial = 'boolean' === typeof opts.isInitial && true === opts.isInitial;
+			addToHistory = 'boolean' === typeof opts.addToHistory && true === opts.addToHistory;
 		}
 		if (!isInitial && addToHistory) {
 			this.history.addItem(path);

@@ -326,7 +326,7 @@ function outputToMain(data, args) {
 			var browseRenderOpts = {
 				isGui: browseType === 'gui',
 				isInitial: false,
-				addToHistory: 'string' === typeof browseLastOperation && ('fwd' === browseLastOperation || 'back' === browseLastOperation || 'reload' === browseLastOperation);
+				addToHistory: 'string' === typeof browseLastOperation && ('fwd' === browseLastOperation || 'back' === browseLastOperation || 'reload' === browseLastOperation)
 			};
 			if (uwotBrowseInstance === null) {
 				var browseInstanceOpts = {
