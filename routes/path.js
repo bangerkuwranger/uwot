@@ -125,7 +125,7 @@ router.post(
 						if (thisListener.status === 'enabled') {
 						
 							// reject request if an exclusive listener is active, but request ended up here anyhow
-							var resObj = {
+							resObj = {
 								output: {
 									content: [
 										{
@@ -138,7 +138,7 @@ router.post(
 							};
 							// get updated listeners to return to client
 							resObj.serverListeners = isidListenerHelper.getServerListeners(res.locals.instanceSessionId);
-							return sendAsAnsi(resObj, res)
+							return sendAsAnsi(resObj, res);
 						
 						}
 						break;

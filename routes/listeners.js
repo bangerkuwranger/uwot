@@ -17,16 +17,17 @@ const sendAsAnsi = function(body, res) {
 router.post('/:isid/:lname', function(req, res, next) {
 
 	var reqIsid, reqLname, denied = false;
+	var errorObj = {
+		output: {
+			color: 'red',
+			content: 'Error'
+		}
+	};
 	// if isid is invalid, reject request
 	if ('string' !== typeof req.params.isid) {
 	
 		denied = new ListenerError('', {type: 'NOISID', reason: 'ISID not in request path'});
-		var errorObj = {
-			output: {
-				color: 'red',
-				content: denied.message
-			}
-		};
+		errorObj.output.content = denied.message;
 		return sendAsAnsi(errorObj, res);
 	
 	}
@@ -34,12 +35,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 	else if ('string' !== typeof req.params.lname) {
 	
 		denied = new ListenerError('', {type: 'NOLNAME', reason: 'Listener Name not in request path'});
-		var errorObj = {
-			output: {
-				color: 'red',
-				content: denied.message
-			}
-		};
+		errorObj.output.content = denied.message;
 		return sendAsAnsi(errorObj, res);
 	
 	}
@@ -47,12 +43,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 	else if ('object' !== typeof req.body || 'string' !== typeof req.body.nonce) {
 	
 		denied = new ListenerError('', {type: 'NONONCE', reason: 'Nonce not in request body', isid: req.params.isid, lname: req.params.lname});
-		var errorObj = {
-			output: {
-				color: 'red',
-				content: denied.message
-			}
-		};
+		errorObj.output.content = denied.message;
 		return sendAsAnsi(errorObj, res);
 	
 	}
@@ -67,12 +58,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 	if ('object' === typeof nv && false === nv.status && 'string' === typeof nv.message) {
 	
 		denied = new ListenerError('Invalid Nonce', {type: 'NONCEINV', isid: reqIsid, lname: reqLname, reason: nv.message});
-		var errorObj = {
-			output: {
-				color: 'red',
-				content: denied.message
-			}
-		};
+		errorObj.output.content = denied.message;
 		return sendAsAnsi(errorObj, res);
 	
 	}
@@ -92,12 +78,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 		// error if listener does not exist
 		if ('object' !== typeof global.Uwot.Listeners[reqIsid] || null === global.Uwot.Listeners[reqIsid] || 'object' !== typeof global.Uwot.Listeners[reqIsid][reqLname] || null === global.Uwot.Listeners[reqIsid][reqLname]) {
 		
-			var errorObj = {
-				output: {
-					color: 'red',
-					content: 'Invalid state - please reload page'
-				}
-			};
+			errorObj.output.content = 'Invalid state - please reload page';
 			return sendAsAnsi(errorObj, res);
 		
 		}
@@ -105,12 +86,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 		else if ('string' !== typeof global.Uwot.Listeners[reqIsid][reqLname].type || 'exclusive' !== global.Uwot.Listeners[reqIsid][reqLname].type) {
 		
 			denied = new ListenerError('', {type: 'NOTEXCL', isid: reqIsid, lname: reqLname});
-			var errorObj = {
-				output: {
-					color: 'red',
-					content: denied.message
-				}
-			};
+			errorObj.output.content = denied.message;
 			return sendAsAnsi(errorObj, res);
 		
 		}
@@ -129,12 +105,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 			
 				if (resultObj instanceof Error) {
 				
-					var errorObj = {
-						output: {
-							color: 'red',
-							content: resultObj.message
-						}
-					};
+					errorObj.output.content = resultObj.message;
 					return sendAsAnsi(errorObj, res);
 				
 				}
@@ -147,12 +118,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 					
 						if (jsonOutput instanceof Error) {
 				
-							var errorObj = {
-								output: {
-									color: 'red',
-									content: jsonOutput.message
-								}
-							};
+							errorObj.output.content = jsonOutput.message;
 							return sendAsAnsi(errorObj, resp);
 				
 						}
@@ -160,12 +126,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 					
 					}).catch((outputError) => {
 					
-						var errorObj = {
-							output: {
-								color: 'red',
-								content: 'Output Error: ' + outputError.message
-							}
-						};
+						errorObj.output.content = 'Output Error: ' + outputError.message;
 						return sendAsAnsi(errorObj, resp);
 					
 					});
@@ -175,12 +136,7 @@ router.post('/:isid/:lname', function(req, res, next) {
 			
 			}).catch((parserError) => {
 			
-				var errorObj = {
-					output: {
-						color: 'red',
-						content: 'Parser Error: ' + parserError.message
-					}
-				};
+				errorObj.output.content = 'Parser Error: ' + parserError.message;
 				return sendAsAnsi(errorObj, res);
 			
 			});
