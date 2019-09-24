@@ -80,38 +80,71 @@ class UwotCliListener {
 				this.history.addItem(data.cmd);
 		
 			}
-			data = this.callHook('beforePost', data);
 			var self = this;
-			jQuery.post(
-				this.path,
-				data
-			)
-			.done(function(result) {
-				result = self.callHook('afterPostSuccess', result);
-				outputToMain(result);
+			self.callHook('beforePost', data)
+			.then((bphData) => {
+				jQuery.post(
+					self.path,
+					bphData
+				)
+				.done((result) => {
+					self.callHook('afterPostSuccess', result)
+					.then((apshResult) => {
+						outputToMain(apshResult);
+					})
+					.catch((e) => {
+						console.error(e);
+						outputToMain(result);
+					});
+				})
+				.fail((obj, status, error) => {
+					var result = {
+						obj,
+						status,
+						error
+					};
+					self.callHook('afterPostFail', result)
+					.then((apfhResult) => {
+						if ('' === apfhResult.error) {
+							apfhResult.error = 'Command failed - Server temporarily unavailable';
+						}
+						outputToMain(apfhResult.error);
+					})
+					.catch((e) => {
+						console.error(e);
+						if ('' === result.error) {
+							result.error = 'Command failed - Server temporarily unavailable';
+						}
+						outputToMain(result.error);
+					});
+				})
+				.always(function(dataOrXhrObj, status, xhrObjOrError) {
+					var result = {
+						dataOrXhrObj,
+						status,
+						xhrObjOrError
+					};
+					self.callHook('afterPostAlways', result)
+					.then((apahResult) => {
+						if (!hasLoginUser) {
+							uwotInterface.enableInput();
+						}
+					})
+					.catch((e) => {
+						console.error(e);
+						if (!hasLoginUser) {
+							uwotInterface.enableInput();
+						}
+			
+					});
+				});
+			
 			})
-			.fail(function(obj, status, error) {
-				var result = {
-					obj,
-					status,
-					error
-				};
-				result = self.callHook('afterPostFail', result);
-				if ('' === result.error) {
-					result.error = 'Command failed - Server temporarily unavailable';
-				}
-				outputToMain(result.error);
-			})
-			.always(function(dataOrXhrObj, status, xhrObjOrError) {
-				var result = {
-					dataOrXhrObj,
-					status,
-					xhrObjOrError
-				};
-				result = self.callHook('afterPostAlways', result);
-				if (!hasLoginUser) {
-					uwotInterface.enableInput();
-				}
+			.catch((e) => {
+			
+				console.error(e);
+				bphData = data;
+			
 			});
 		
 		}
@@ -188,53 +221,56 @@ class UwotCliListener {
 	
 	callHook(hookName, data) {
 	
-		var hookNames = Object.keys(this.hooks);
-		if ('string' !== typeof hookName || -1 === hookNames.indexOf(hookName)) {
+		return new Promise((resolve, reject) => {
 		
-			console.error(new Error('invalid hook name passed to UwotCliListener.callHook'));
-			return data;
+			var hookNames = Object.keys(this.hooks);
+			if ('string' !== typeof hookName || -1 === hookNames.indexOf(hookName)) {
 		
-		}
-		else if (this.hooks[hookName].length < 1) {
+				console.error(new Error('invalid hook name passed to UwotCliListener.callHook'));
+				return resolve(data);
 		
-			return data;
+			}
+			else if (this.hooks[hookName].length < 1) {
 		
-		}
-		else {
+				return resolve(data);
 		
-			var i = 0;
-			this.hooks[hookName].forEach((thisHookFn) => {
+			}
+			else {
+		
+				var i = 0;
+				this.hooks[hookName].forEach((thisHookFn) => {
 			
-				try {
+					try {
 				
-					var hookResult = thisHookFn(data);
-					if (hookResult instanceof Error) {
+						var hookResult = thisHookFn(data);
+						if (hookResult instanceof Error) {
 					
-						console.error(hookResult);
+							console.error(hookResult);
 					
+						}
+						else {
+					
+							data = hookResult;
+					
+						}
+				
 					}
-					else {
-					
-						data = hookResult;
-					
+					catch(e) {
+			
+						console.error(e);
+			
 					}
+					if (++i >= this.hooks[hookName].length) {
 				
-				}
-				catch(e) {
-			
-					console.error(e);
-			
-				}
-				if (++i >= this.hooks[hookName].length) {
+						return resolve(data);
 				
-					return data;
-				
-				}
+					}
 			
-			});
-			
+				});
 		
-		}
+			}
+		
+		});
 	
 	}
 

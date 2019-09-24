@@ -225,6 +225,22 @@ class UwotListener {
 							
 							}
 						
+						},
+						// TBD
+						// Support option flagss for exclusive listeners?
+						matchOpt: function(optString) {
+						
+							return {
+								name: '',
+								isOpt: false,
+								isLong: false,
+								isDefined: false,
+								hasArgs: false,
+								reqArgs: [],
+								optArgs: [],
+								assignedArg: ''
+							};
+						
 						}
 					};
 				

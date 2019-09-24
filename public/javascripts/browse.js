@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations, uwotGetCookieValue, uwotSetCookieValue */
+/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie */
 
 const getDefaultUwotBrowseOpts = function() {
 	return {
@@ -47,7 +47,7 @@ class UwotBrowse {
 					reqData.cmd = 'go ' + self.getReloadPath();
 					break;
 				default:
-					uwotSetCookieValue('uwotBrowseLastOperation', oldCmd);
+					uwotSetCookie('uwotBrowseLastOperation', oldCmd);
 			}
 			return reqData;
 		};
@@ -99,17 +99,17 @@ class UwotBrowse {
 	}
 	getFwdPath() {
 		var pathVal = this.history.getNextItem();
-		uwotSetCookieValue('uwotBrowseLastOperation', 'fwd');
+		uwotSetCookie('uwotBrowseLastOperation', 'fwd');
 		return pathVal;
 	}
 	getBackPath() {
 		var pathVal = this.history.getPrevItem();
-		uwotSetCookieValue('uwotBrowseLastOperation', 'back');
+		uwotSetCookie('uwotBrowseLastOperation', 'back');
 		return pathVal;
 	}
 	getReloadPath() {
 		var pathVal = this.currentPath;
-		uwotSetCookieValue('uwotBrowseLastOperation', 'reload');
+		uwotSetCookie('uwotBrowseLastOperation', 'reload');
 		return pathVal;
 	}
 }

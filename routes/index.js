@@ -172,6 +172,11 @@ router.get('/', inSession(), function(req, res, next) {
 		res.locals.validUwotListenerTypes = JSON.stringify(global.Uwot.Constants.listenerTypes);
 	
 	}
+	// remove any browse artifacts, since reload removes all active listeners
+	res.clearCookie('uwotBrowseCurrentPath', { path: '/' });
+	res.clearCookie('uwotBrowseCurrentStatus', { path: '/' });
+	res.clearCookie('uwotBrowseCurrentType', { path: '/' });
+	res.clearCookie('uwotBrowseLastOperation', { path: '/' });
 	res.render('index', respValues);
 });
 
