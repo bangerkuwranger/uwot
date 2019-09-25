@@ -228,7 +228,7 @@ class UwotListener {
 						},
 						// TBD
 						// Support option flagss for exclusive listeners?
-						matchOpt: function(optString) {
+						matchOpt(optString) {
 						
 							return {
 								name: '',

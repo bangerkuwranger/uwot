@@ -13,14 +13,103 @@ var listenerSettings = {
 	routeUriPath: '/listeners',
 	cmdSet: [
 		'quit',
-		'reload',
 		'go',
-		'fwd',
-		'back',
 		'select',
 		'submit'
 	]
 };
+
+const getArgsMapArr = function(cmdName) {
+
+	if ('string' !== typeof cmdName || -1 === listenerSettings.cmdSet.indexOf(cmdName)) {
+	
+		return new Error('invalid cmd name');
+	
+	}
+	else if ('go' === cmdName) {
+	
+		return [
+			{
+				name: 'path',
+				cleanFn(str) {
+				
+					return sanitize.getCleanString(str, 1024,  null);
+				
+				}
+			},
+			{
+				name: 'isGui',
+				cleanFn(bool) {
+					
+					return sanitize.getCleanBool(bool, false);
+				
+				}
+			}
+		];
+	
+	}
+	else if ('select' === cmdName) {
+	
+		return [
+			{
+				name: 'idx',
+				cleanFn(intgr) {
+				
+					return sanitize.cleanInt(intgr, 0);
+				
+				}
+			},
+			{
+				name: 'attr',
+				cleanFn: function(attrObj) {
+				
+					return 'object' === typeof attrObj && null !== attrObj && 'string' === typeof attrObj.href ? attrObj : {href: ''};
+				
+				}
+			},
+			{
+				name: 'isGui',
+				cleanFn(bool) {
+				
+					return sanitize.cleanBool(false);
+				
+				}
+			}
+		];
+	
+	}
+	else if ('submit' === cmdName) {
+	
+		return [
+			{
+				name: 'ctrl',
+				cleanFn(intgr) {
+				
+					return sanitize.cleanInt(intgr, 0);
+				
+				}
+			},
+			{
+				name: 'attr',
+				cleanFn: function(attrObj) {
+				
+					return 'object' === typeof attrObj && null !== attrObj && ('string' === typeof attrObj.action) ? attrObj : {href: ''};
+				
+				}
+			},
+			{
+				name: 'isGui',
+				cleanFn(bool) {
+				
+					return sanitize.cleanBool(false);
+				
+				}
+			}
+		];
+	
+	}
+
+}
 
 class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 
@@ -143,28 +232,46 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			return callback(new TypeError('invalid cmd passed to bin/browse/handler'));
 		
 		}
+		else if ('object' !== typeof args || !(Array.isArray(args)) || args.length < 1) {
+		
+			return callback(new TypeError('invalid args passed to bin/browse/handler'));
+		
+		}
 		else {
 		
-			switch(bin) {
+			var argsObj = {
+				isGui: false
+			};
+			var argsMapArr = getArgsMapArr(bin);
+			for(let i = 0; i < argsMapArr.length; i++) {
 			
-				case 'quit':
-					return this.quit(isid, callback);
-					break;
-				case 'reload':
-					return this.reload(args, callback);
-					break;
-				case 'go':
-				case 'fwd':
-				case 'back':
-				case 'select':
-				case 'submit':
-					return callback(false, 'browse handled "' + bin + '": ');
+				let argMap = argsMapArr[i];
+				let thisArg = args[i];
+				if ('object' === typeof argMap && null !== argMap && 'object' === typeof thisArg && null !== thisArg && 'string' === typeof thisArg.text) {
+					
+					argsObj[argMap.name] = argMap.cleanFn(thisArg);
+				
+				}
+				if ((i + 1) >= args.length) {
+				
+					switch(bin) {
+			
+						case 'quit':
+							return this.quit(isid, callback);
+						case 'go':
+							return this.go(argsObj, callback);
+						case 'select':
+							return this.select(argsObj, callback);
+						case 'submit':
+							return this.submit(argsObj, callback);
+			
+					}
+				
+				}
 			
 			}
 		
 		}
-		
-	
 	}
 	
 	help(callback) {
@@ -173,7 +280,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	outputBrowse(obj, callback) {
+	outputBrowse(obj) {
 	
 		return ansi(obj);
 	
@@ -224,94 +331,75 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	reload(args, callback) {
+	go(args, callback) {
 	
-		if ('object' !== typeof args || !(Array.isArray(args)) || args.length < 1) {
-		
-			return callback(new TypeError('invalid args passed to bin/browse/reload'));
-		
-		}
-		else {
-		
-			var argsObj = {
-				isGui: false
-			};
-			var executeResult = {
-				output: {
-					content: [{content: 'test reload output data', classes: ['browseOutput']}]
-				},
-				outputType: 'object'
-			};
-			args.forEach((thisArg) => {
-			
-				if ('object' === typeof thisArg && null !== thisArg && 'string' === typeof thisArg.name) {
-				
-					switch (thisArg.name) {
-					
-						case 'path':
-							argsObj.path = thisArg.text;
-							break;
-						case 'isGui':
-							argsObj.isGui = sanitize.cleanBool(thisArg.text);
-					
-					}
-				
-				}
-			
-			});
-			executeResult.cookies = {
+		var goResult = {
+			output: {
+				content: [{content: 'test go output data', classes: ['browseOutput']}]
+			},
+			outputType: 'object',
+			cookies: {
 				uwotBrowseCurrentPath: {
-					value: argsObj.path
+					value: args.path
 				},
 				uwotBrowseCurrentType: {
-					value: argsObj.isGui ? 'gui' : 'cli'
+					value: args.isGui ? 'gui' : 'cli'
 				},
 				uwotBrowseCurrentStatus: {
 					value: 'active'
 				}
-			};
-			return callback(false, executeResult);
-		
-		}
+			}
+		};
+		return callback(false, goResult);
 	
 	}
 	
-	go(uri, callback) {
+	select(args, callback) {
 	
-		var executeResult = {
+		var selectResult = {
 			output: {
-				content: [{content: 'test go output data', classes: ['browseOutput']}]
+				content: [{content: 'test select output data', classes: ['browseOutput']}]
 			},
 			outputType: 'object'
 		};
-		return callback(false, executeResult);
+		selectResult.cookies = {
+			uwotBrowseCurrentPath: {
+				value: argsObj.path
+			},
+			uwotBrowseCurrentType: {
+				value: argsObj.isGui ? 'gui' : 'cli'
+			},
+			uwotBrowseCurrentStatus: {
+				value: 'active'
+			}
+		};
+		return callback(false, selectResult);
 	
 	}
 	
-	fwd(callback) {
+	submit(args, callback) {
 	
-		var executeResult = {
+		var submitResult = {
 			output: {
-				content: [{content: 'test fwd output data', classes: ['browseOutput']}]
+				content: [{content: 'test select output data', classes: ['browseOutput']}]
 			},
 			outputType: 'object'
 		};
-		return callback(false, executeResult);
-	
-	}
-	
-	back(callback) {
-	
-		var executeResult = {
-			output: {
-				content: [{content: 'test back output data', classes: ['browseOutput']}]
+		submitResult.cookies = {
+			uwotBrowseCurrentPath: {
+				value: argsObj.path
 			},
-			outputType: 'object'
+			uwotBrowseCurrentType: {
+				value: argsObj.isGui ? 'gui' : 'cli'
+			},
+			uwotBrowseCurrentStatus: {
+				value: 'active'
+			}
 		};
-		return callback(false, executeResult);
+		return callback(false, selectResult);
 	
 	}
-
+	
 }
 
 var browse = new UwotCmdBrowse(
