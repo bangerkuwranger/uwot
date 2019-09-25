@@ -61,7 +61,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'attr',
-				cleanFn: function(attrObj) {
+				cleanFn(attrObj) {
 				
 					return 'object' === typeof attrObj && null !== attrObj && 'string' === typeof attrObj.href ? attrObj : {href: ''};
 				
@@ -91,7 +91,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'attr',
-				cleanFn: function(attrObj) {
+				cleanFn(attrObj) {
 				
 					return 'object' === typeof attrObj && null !== attrObj && ('string' === typeof attrObj.action) ? attrObj : {href: ''};
 				
@@ -109,7 +109,7 @@ const getArgsMapArr = function(cmdName) {
 	
 	}
 
-}
+};
 
 class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 
@@ -364,10 +364,10 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		};
 		selectResult.cookies = {
 			uwotBrowseCurrentPath: {
-				value: argsObj.path
+				value: args.path
 			},
 			uwotBrowseCurrentType: {
-				value: argsObj.isGui ? 'gui' : 'cli'
+				value: args.isGui ? 'gui' : 'cli'
 			},
 			uwotBrowseCurrentStatus: {
 				value: 'active'
@@ -387,16 +387,16 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		};
 		submitResult.cookies = {
 			uwotBrowseCurrentPath: {
-				value: argsObj.path
+				value: args.path
 			},
 			uwotBrowseCurrentType: {
-				value: argsObj.isGui ? 'gui' : 'cli'
+				value: args.isGui ? 'gui' : 'cli'
 			},
 			uwotBrowseCurrentStatus: {
 				value: 'active'
 			}
 		};
-		return callback(false, selectResult);
+		return callback(false, submitResult);
 	
 	}
 	
