@@ -400,6 +400,13 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
+	getPathContent(pth, callback) {
+	
+		var pthContent;
+		return callback(false, pthContent);
+	
+	}
+	
 }
 
 var browse = new UwotCmdBrowse(
