@@ -431,7 +431,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			
 			}
 			// make sure user object is valid
-			if ('object' !== typeof args.user || null === args.user || 'string' !== typeof user._id) {
+			if ('object' !== typeof args.user || null === args.user || 'string' !== typeof args.user._id) {
 				
 				return callback(TypeError('invalid user'));
 				
