@@ -1,5 +1,6 @@
 'use strict';
 const path = require('path');
+const validUrl = require('valid-url');
 const sanitize = require('../../helpers/valueConversion');
 const ansi = require('../../output/ansi');
 const remoteHtml = require('../../helpers/consoleHtml');
@@ -400,10 +401,91 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	getPathContent(pth, callback) {
+	getPathContent(pth, args, callback) {
 	
 		var pthContent;
-		return callback(false, pthContent);
+		// cb must be a function
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/browse/getPathContent');
+		
+		}
+		// pth must be a non-empty string
+		else if ('string' !== typeof pth || '' === pth) {
+		
+			return callback(new TypeError('invalid pth passed to bin/browse/getPathContent'));
+		
+		}
+		// args must be a non-null object
+		else if ('object' !== typeof args || null === args) {
+		
+			return callback(new TypeError('invalid args passed to bin/browse/getPathContent'));
+		
+		}
+		else {
+		
+			// if isLocal arg not set, check if pth is valid uri and set true if not
+			if ('boolean' !== typeof args.isLocal) {
+			
+				args.isLocal = validUrl.isUri(pth) ? false : true;
+			
+			}
+			// make sure user object is valid
+			if ('object' !== typeof args.user || null === args.user || 'string' !== typeof user._id) {
+				
+				return callback(TypeError('invalid user'));
+				
+			}
+			// if isLocal, load local data from VFS and process with remoteHtml
+			if (args.isLocal) {
+			
+				var userFs;
+				try {
+			
+				
+					userFs = global.Uwot.FileSystems[args.user._id];
+					if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+			
+						throw new TypeError('invalid user fileSystem');
+			
+					}
+			
+				}
+				catch(e) {
+			
+					return callback(e);
+			
+				}
+				// read file at pth with userFs
+				
+				// return error to cb if read returns an error
+				
+				// otherwise, return result of remoteHtml.locadForConsole on read data to cb
+			
+			}
+			// otherwise, use remoteHtml to retrieve data and process
+			else {
+			
+				// get main html
+				remoteHtml.getRemoteResources(pth)
+				.then((resultHtml) => {
+				
+					// add head element content and return result to cb
+					return remoteHtml.loadForConsole(resultHtml, callback);
+				
+				})
+				// catch error retrieving data from remote resource and return to cb
+				.catch((e) => {
+				
+					return callback(e);
+				
+				});
+			
+			}
+			
+			return callback(false, pthContent);
+			
+		}
 	
 	}
 	
