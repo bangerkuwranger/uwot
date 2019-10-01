@@ -430,6 +430,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				args.isLocal = validUrl.isUri(pth) ? false : true;
 			
 			}
+			// if isSudo arg not set, default to false
+			args.isSudo = 'boolean' === typeof args.isSudo && true === args.isSudo;
 			// make sure user object is valid
 			if ('object' !== typeof args.user || null === args.user || 'string' !== typeof args.user._id) {
 				
@@ -457,10 +459,18 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			
 				}
 				// read file at pth with userFs
+				return userFs.pFile('read', [pth], args.isSudo).then((fileData) => {
 				
+					// return result of remoteHtml.locadForConsole on read data to cb
+					return remoteHtml.loadForConsole(fileData, callback);
+				
+				})
 				// return error to cb if read returns an error
+				.catch((e) => {
 				
-				// otherwise, return result of remoteHtml.locadForConsole on read data to cb
+					return callback(e);
+				
+				});
 			
 			}
 			// otherwise, use remoteHtml to retrieve data and process
