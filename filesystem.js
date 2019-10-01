@@ -682,7 +682,6 @@ class UwotFs {
 					this.sudo = false;
 			
 				}
-				var result;
 				if ('string' !== typeof argArr[0] || '' === argArr[0]) {
 				
 					return process.nextTick(reject,  systemError.EINVAL({'syscall': 'signal'}), null);
@@ -698,7 +697,7 @@ class UwotFs {
 					switch(op) {
 				
 						case 'append':
-							return this.appendPromise(...args).then((appended) => {
+							return this.appendPromise(...argArr).then((appended) => {
 							
 								if (appended) {
 								
@@ -707,7 +706,7 @@ class UwotFs {
 								}
 								else {
 								
-									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'write', path: args[0]})));
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'write', path: argArr[0]})));
 								
 								}
 							
@@ -719,7 +718,7 @@ class UwotFs {
 							});
 							break;
 						case 'delete':
-							return this.removeFilePromise(...args).then((deleted) => {
+							return this.removeFilePromise(...argArr).then((deleted) => {
 							
 								if (deleted) {
 								
@@ -728,7 +727,7 @@ class UwotFs {
 								}
 								else {
 								
-									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: args[0]})));
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: argArr[0]})));
 								
 								}
 							
@@ -740,7 +739,7 @@ class UwotFs {
 							});
 							break;
 						case 'read':
-							return this.readFilePromise(...args).then((fileData) => {
+							return this.readFilePromise(...argArr).then((fileData) => {
 							
 								if ('string' !== typeof fileData && fileData.hasOwnProperty('toString')) {
 								
@@ -754,7 +753,7 @@ class UwotFs {
 								}
 								else {
 								
-									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'read', path: args[0]})));
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'read', path: argArr[0]})));
 								
 								}
 							
@@ -766,7 +765,7 @@ class UwotFs {
 							});
 							break;
 						case 'write':
-							return this.writeFilePromise(...args).then((written) => {
+							return this.writeFilePromise(...argArr).then((written) => {
 							
 								if (written) {
 								
@@ -775,7 +774,7 @@ class UwotFs {
 								}
 								else {
 								
-									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: args[0]})));
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: argArr[0]})));
 								
 								}
 							
