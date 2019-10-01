@@ -711,7 +711,8 @@ class UwotFs {
 								
 								}
 							
-							}).catch((e) => {
+							})
+							.catch((e) => {
 							
 								return reject(this.dissolveErrorPaths(e));
 							
@@ -731,7 +732,8 @@ class UwotFs {
 								
 								}
 							
-							}).catch((e) => {
+							})
+							.catch((e) => {
 							
 								return reject(this.dissolveErrorPaths(e));
 							
@@ -756,7 +758,8 @@ class UwotFs {
 								
 								}
 							
-							}).catch((e) => {
+							})
+							.catch((e) => {
 							
 								return reject(this.dissolveErrorPaths(e));
 							
@@ -776,15 +779,13 @@ class UwotFs {
 								
 								}
 							
-							}).catch((e) => {
+							})
+							.catch((e) => {
 							
 								return reject(this.dissolveErrorPaths(e));
 							
 							});
 							break;
-				
-					}
-					
 				
 					}
 				
@@ -1429,6 +1430,8 @@ class UwotFs {
 				return process.nextTick(reject(e));
 			
 			}
+		
+		});
 	
 	}
 	
@@ -1944,7 +1947,8 @@ class UwotFs {
 			
 						return resolve(true);
 			
-					}).catch((e) {
+					})
+					.catch((e) => {
 			
 						return reject(e);
 			
