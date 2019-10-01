@@ -37,6 +37,13 @@ const VALID_CMDS = [
 	'chown'
 ];
 
+const VALID_FILE_OPS = [
+	'read',
+	'write',
+	'append',
+	'delete'
+];
+
 const VALID_STAT_FORMAT_PLACEHOLDERS = [
 	'A',
 	'b',
@@ -502,7 +509,7 @@ class UwotFs {
 	
 	}
 
-	//async wrapper for fs commands.
+	// async wrapper for fs commands.
 	// argArr accepts array of argument objects, empty array, or null
 	// isSudo accepts boolean or undefined
 	cmd(cmdName, argArr, callback, isSudo) {
@@ -516,7 +523,7 @@ class UwotFs {
 		//check against valid
 		if ('string' !== typeof cmdName || 'object' !== typeof argArr || -1 === VALID_CMDS.indexOf(cmdName)) {
 		
-			return callback(systemError.EINVAL({'syscall': 'signal'}), null);
+			return process.nextTick(callback, systemError.EINVAL({'syscall': 'signal'}), null);
 		
 		}
 		else {
@@ -620,7 +627,7 @@ class UwotFs {
 			
 				//set this.sudo = false
 				this.sudo = false;
-				return callback(e, null);
+				return process.nextTick(callback, this.dissolveErrorPaths(e), null);
 			
 			}
 			//set this.sudo = false
@@ -630,41 +637,162 @@ class UwotFs {
 			//return result or error
 			if (result instanceof Error) {
 			
-				if (result.hasOwnProperty('code')) {
-				
-					var seCode = result.code;
-					var sePath, seTarget;
-					if ('string' === typeof result.path && 'string' === typeof result.dest) {
-					
-						sePath = 'string' === typeof result.path && this.isInRoot(result.path) ? this.dissolvePath(result.path) : result.path;
-						seTarget = 'string' === typeof result.dest && this.isInRoot(result.dest) ? this.dissolvePath(result.dest) : result.dest;
-						result = systemError[seCode]({syscall: result.syscall, path: sePath, dest: seTarget});
-					
-					}
-					else if ('string' === typeof result.dest) {
-					
-						seTarget = 'string' === typeof result.dest && this.isInRoot(result.dest) ? this.dissolvePath(result.dest) : result.dest;
-						result = systemError[seCode]({syscall: result.syscall, dest: seTarget});
-					
-					}
-					else if ('string' === typeof result.path) {
-					
-						sePath = 'string' === typeof result.path && this.isInRoot(result.path) ? this.dissolvePath(result.path) : result.path;
-						result = systemError[seCode]({syscall: result.syscall, path: sePath});
-					
-					}
-				
-				}
-				return callback(result, null);
+				return process.nextTick(callback, this.dissolveErrorPaths(result), null);
 			
 			}
 			else {
 			
-				return callback(false, result);
+				return setImmediate(callback, false, result);
 			
 			}
 		
 		}
+	
+	}
+	
+	// Promise based file operations
+	// argArr accepts array of argument objects, empty array, or null
+	// isSudo accepts boolean or undefined
+	pFile(op, argArr, isSudo) {
+	
+		return new Promise((resolve, reject) => {
+		
+			//check against valid
+			if ('string' !== typeof op || 'object' !== typeof argArr || -1 === VALID_FILE_OPS.indexOf(op)) {
+		
+				return process.nextTick(reject, systemError.EINVAL({'syscall': 'signal'}), null);
+		
+			}
+			else {
+		
+				// set null args to empty array
+				if (!Array.isArray(argArr)) {
+			
+					argArr = [];
+			
+				}
+				//set this.sudo (checking if user is allowed)
+				if ('boolean' === typeof isSudo && isSudo && this.user.maySudo()) {
+			
+					this.sudo = true;
+			
+				}
+				else {
+			
+					this.sudo = false;
+			
+				}
+				var result;
+				if ('string' !== typeof argArr[0] || '' === argArr[0]) {
+				
+					return process.nextTick(reject,  systemError.EINVAL({'syscall': 'signal'}), null);
+				
+				}
+				else if ((op === 'append' || op === 'write') && ('string' !== typeof argArr[1] || '' === argArr[1])) {
+				
+					return process.nextTick(reject,  systemError.EINVAL({'syscall': 'signal'}), null);
+				
+				}
+				else {
+				
+					switch(op) {
+				
+						case 'append':
+							return this.appendPromise(...args).then((appended) => {
+							
+								if (appended) {
+								
+									return resolve(true);
+								
+								}
+								else {
+								
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'write', path: args[0]})));
+								
+								}
+							
+							}).catch((e) => {
+							
+								return reject(this.dissolveErrorPaths(e));
+							
+							});
+							break;
+						case 'delete':
+							return this.removeFilePromise(...args).then((deleted) => {
+							
+								if (deleted) {
+								
+									return resolve(true);
+								
+								}
+								else {
+								
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: args[0]})));
+								
+								}
+							
+							}).catch((e) => {
+							
+								return reject(this.dissolveErrorPaths(e));
+							
+							});
+							break;
+						case 'read':
+							return this.readFilePromise(...args).then((fileData) => {
+							
+								if ('string' !== typeof fileData && fileData.hasOwnProperty('toString')) {
+								
+									return resolve(fileData.toString());
+								
+								}
+								else if ('string' === typeof fileData) {
+								
+									return resolve(fileData);
+								
+								}
+								else {
+								
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'read', path: args[0]})));
+								
+								}
+							
+							}).catch((e) => {
+							
+								return reject(this.dissolveErrorPaths(e));
+							
+							});
+							break;
+						case 'write':
+							return this.writeFilePromise(...args).then((written) => {
+							
+								if (written) {
+								
+									return resolve(true);
+								
+								}
+								else {
+								
+									return reject(this.dissolveErrorPaths(systemError.EIO({syscall: 'unlink', path: args[0]})));
+								
+								}
+							
+							}).catch((e) => {
+							
+								return reject(this.dissolveErrorPaths(e));
+							
+							});
+							break;
+				
+					}
+					
+				
+					}
+				
+				}
+		
+			}
+		
+		});
 	
 	}
 	
@@ -799,6 +927,66 @@ class UwotFs {
 			return systemError.EACCES({'path': pth, 'syscall': 'write'});
 		
 		}
+	
+	}
+	
+	appendPromise(pth, data) {
+	
+		return new Promise((resolve, reject) => {
+		
+			try {
+			
+				var fullPath;
+				var fileName = path.basename(pth);
+				if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
+		
+					fullPath = pth;
+		
+				}
+				else {
+		
+					fullPath = this.resolvePath(pth, false);
+					if ('string' !== typeof fullPath) {
+			
+						return process.nextTick(reject, fullPath);
+			
+					}
+		
+				}
+				fullPath = path.dirname(fullPath);
+				var canWrite = this.isWritable(fullPath);
+				if (canWrite instanceof Error) {
+		
+					return process.nextTick(reject, canWrite);
+		
+				}
+				else if (canWrite) {
+		
+					return fs.appendFile(path.join(fullPath, fileName), data).then(() => {
+					
+						return resolve(true);
+			
+					}).catch((e) => {
+			
+						return reject(e);
+			
+					});
+		
+				}
+				else {
+		
+					return process.nextTick(reject, systemError.EACCES({'path': pth, 'syscall': 'write'}));
+		
+				}
+			
+			}
+			catch(e) {
+			
+				return process.nextTick(reject, e);
+			
+			}
+
+		});
 	
 	}
 	
@@ -1182,6 +1370,68 @@ class UwotFs {
 	
 	}
 	
+	readFilePromise(pth) {
+	
+		return new Promise((resolve, reject) => {
+		
+			try {
+			
+				var fullPath;
+				var fileName = path.basename(pth);
+				if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
+		
+					fullPath = pth;
+		
+				}
+				else {
+		
+					try {
+			
+						fullPath = this.resolvePath(pth, false);
+			
+					}
+					catch(err) {
+			
+						return process.nextTick(reject, err);
+			
+					}
+		
+				}
+				fullPath = path.dirname(fullPath);
+				var canRead = this.isReadable(fullPath);
+				if (canRead instanceof Error) {
+		
+					return process.nextTick(reject, canRead);
+		
+				}
+				else if (canRead) {
+		
+					return fs.readFile(path.join(fullPath, fileName), 'utf8').then((fileData) => {
+					
+						return resolve(fileData);
+					
+					}).catch((e) => {
+					
+						return reject(e);
+					
+					});
+		
+				}
+				else {
+		
+					return process.nextTick(reject, systemError.EACCES({'path': pth, 'syscall': 'read'}));
+		
+				}
+			
+			}
+			catch(e) {
+			
+				return process.nextTick(reject(e));
+			
+			}
+	
+	}
+	
 	moveFile(source, target, noOverwrite) {
 	
 		noOverwrite = 'boolean' === typeof noOverwrite ? noOverwrite : false;
@@ -1386,6 +1636,66 @@ class UwotFs {
 			return systemError.EACCES({'path': pth, 'syscall': 'unlink'});
 		
 		}
+	
+	}
+	
+	removeFilePromise(pth) {
+	
+		return new Promise((resolve, reject) => {
+		
+			try {
+		
+				var fullPath;
+				var fileName = path.basename(pth);
+				if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
+		
+					fullPath = pth;
+		
+				}
+				else {
+		
+					fullPath = this.resolvePath(pth, false);
+					if ('string' !== typeof fullPath) {
+			
+						return process.nextTick(reject, fullPath);
+			
+					}
+		
+				}
+				fullPath = path.dirname(fullPath);
+				var canWrite = this.isWritable(fullPath);
+				if (canWrite instanceof Error) {
+		
+					return process.nextTick(reject, canWrite);
+		
+				}
+				else if (canWrite) {
+		
+					return fs.unlink(path.join(fullPath, fileName)).then(() => {
+
+						return resolve(true);
+			
+					}).catch((e) => {
+			
+						return reject(e);
+			
+					});
+		
+				}
+				else {
+		
+					return process.nextTick(reject, systemError.EACCES({'path': pth, 'syscall': 'unlink'}));
+		
+				}
+			
+			}
+			catch(e) {
+			
+				return process.nextTick(reject(e));
+			
+			}
+		
+		});
 	
 	}
 	
@@ -1595,6 +1905,66 @@ class UwotFs {
 			return systemError.EACCES({'path': pth, 'syscall': 'write'});
 		
 		}
+	
+	}
+	
+	writePromise(pth, data) {
+	
+		return new Promise((resolve, reject) => {
+		
+			try {
+			
+				var fullPath;
+				var fileName = path.basename(pth);
+				if (path.isAbsolute(pth) && -1 !== pth.indexOf(this.root.path)) {
+		
+					fullPath = pth;
+		
+				}
+				else {
+		
+					fullPath = this.resolvePath(pth, false);
+					if ('string' !== typeof fullPath) {
+			
+						return process.nextTick(reject, fullPath);
+			
+					}
+		
+				}
+				fullPath = path.dirname(fullPath);
+				var canWrite = this.isWritable(fullPath);
+				if (canWrite instanceof Error) {
+		
+					return process.nextTick(reject, canWrite);
+		
+				}
+				else if (canWrite) {
+		
+					return fs.writeFile(path.join(fullPath, fileName), data).then(() => {
+			
+						return resolve(true);
+			
+					}).catch((e) {
+			
+						return reject(e);
+			
+					});
+		
+				}
+				else {
+		
+					return process.nextTick(reject, systemError.EACCES({'path': pth, 'syscall': 'write'}));
+		
+				}
+			
+			}
+			catch(e) {
+			
+				return process.nextTick(reject, e);
+			
+			}
+		
+		});
 	
 	}
 	
@@ -1873,6 +2243,46 @@ class UwotFs {
 		else {
 		
 			return pth;
+		
+		}
+	
+	}
+	
+	dissolveErrorPaths(err) {
+
+		if (err.hasOwnProperty('code')) {
+
+			var seCode = err.code;
+			var sePath, seTarget;
+			if ('string' === typeof err.path && 'string' === typeof err.dest) {
+
+				sePath = 'string' === typeof err.path && this.isInRoot(err.path) ? this.dissolvePath(err.path) : err.path;
+				seTarget = 'string' === typeof err.dest && this.isInRoot(err.dest) ? this.dissolvePath(err.dest) : err.dest;
+				return systemError[seCode]({syscall: err.syscall, path: sePath, dest: seTarget});
+
+			}
+			else if ('string' === typeof err.dest) {
+
+				seTarget = 'string' === typeof err.dest && this.isInRoot(err.dest) ? this.dissolvePath(err.dest) : err.dest;
+				return systemError[seCode]({syscall: err.syscall, dest: seTarget});
+
+			}
+			else if ('string' === typeof err.path) {
+
+				sePath = 'string' === typeof err.path && this.isInRoot(err.path) ? this.dissolvePath(err.path) : err.path;
+				return systemError[seCode]({syscall: err.syscall, path: sePath});
+
+			}
+			else {
+			
+				return err;
+			
+			}
+
+		}
+		else {
+		
+			return err;
 		
 		}
 	

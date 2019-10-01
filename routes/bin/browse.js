@@ -102,7 +102,7 @@ const getArgsMapArr = function(cmdName) {
 				name: 'isGui',
 				cleanFn(bool) {
 				
-					return sanitize.cleanBool(false);
+					return sanitize.cleanBool(bool, false);
 				
 				}
 			}
