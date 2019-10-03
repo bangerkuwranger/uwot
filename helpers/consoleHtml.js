@@ -1,4 +1,5 @@
 'use strict';
+const url = require('url');
 const request = require('request-promise-native');
 const cheerio = require('cheerio');
 const nodeCache = require('node-cache');
@@ -37,10 +38,10 @@ module.exports = {
 		}
 		else {
 		
-			var linkCount = jqObj('a').length;
+			var linkCount = jqObj('body a').length;
 			if (linkCount > 0) {
 			
-				jqObj('a').each(function(i, thisLink) {
+				jqObj('body a').each(function(i, thisLink) {
 			
 					var thisLinkTarget = jqObj(thisLink).attr('target');
 					var thisLinkOnclick = jqObj(thisLink).attr('onclick');
@@ -52,12 +53,12 @@ module.exports = {
 					}
 			
 				});
-				return jqObj.html();
+				return jqObj('body').html();
 			
 			}
 			else {
 			
-				return jqObj.html();
+				return jqObj('body').html();
 			
 			}
 		
@@ -224,14 +225,29 @@ module.exports = {
 			
 					headElements.each(function(i, thisEl) {
 		
+						var thisUri, parsedUri;
 						if (type === 'style' && jqObj(thisEl).attr('rel') === 'stylesheet' && 'string' === typeof jqObj(thisEl).attr('href') && '' !== jqObj(thisEl).attr('href')) {
 			
-							urlArray.push(jqObj(thisEl).attr('href'));
+							thisUri = jqObj(thisEl).attr('href');
+							parsedUri =  url.parse(thisUri, false, true);
+							if ('string' !== typeof parsedUri.protocol) {
+							
+								thisUri = global.Uwot.Config.getVal('server', 'transport') + ':' + thisUri;
+							
+							}
+							urlArray.push(thisUri);
 			
 						}
 						else if (type === 'script' && jqObj(thisEl).attr('type') === 'text/javascript' && 'string' === typeof jqObj(thisEl).attr('src') && '' !== jqObj(thisEl).attr('src') && -1 === jqObj(thisEl).attr('src').indexOf('jquery.min.js')) {
 					
-							urlArray.push(jqObj(thisEl).attr('src'));
+							thisUri = jqObj(thisEl).attr('src');
+							parsedUri =  url.parse(thisUri, false, true);
+							if ('string' !== typeof parsedUri.protocol) {
+							
+								thisUri = global.Uwot.Config.getVal('server', 'transport') + ':' + thisUri;
+							
+							}
+							urlArray.push(thisUri);
 					
 						}
 						if ((i + 1) >= elementCount) {
@@ -285,7 +301,7 @@ module.exports = {
 				var $ = self.getAsJQuery(htmlString);
 				var applicationName = $('head meta[name=application-name]').attr('content');
 				applicationName = 'string' === typeof applicationName && 'uwotcli' === applicationName.toLowerCase() ? 'uwotCli' : 'uwotGui';
-				var bodyHtml = self.makeConsoleHtml($('body'));
+				var bodyHtml = self.makeConsoleHtml($);
 				var finalHtml = '<div id="uwotBrowseHtml" class="' + applicationName + '-html">';
 				Promise.all([
 					self.pullHeadElements($, 'style'),

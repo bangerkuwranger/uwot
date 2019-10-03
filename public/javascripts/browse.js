@@ -55,13 +55,16 @@ class UwotBrowse {
 		this.listener.addHook('beforePost', this.changeLoadPath);
 	}
 	destroy() {
-		this.listener.removeHook('beforePost', this.changeLoadPath);
-		this.listener = null;
 		delete this.history;
 		if (null !== this.gui) {
 			this.gui.destroy();
 			this.gui = null;
 		}
+		else {
+			performOperations('clear');	
+		}
+		this.listener.removeHook('beforePost', this.changeLoadPath.name);
+		this.listener = null;
 	}
 	render(content, path, opts) {
 		if ('string' !== typeof content) {

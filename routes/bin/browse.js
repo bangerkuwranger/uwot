@@ -34,17 +34,17 @@ const getArgsMapArr = function(cmdName) {
 		return [
 			{
 				name: 'path',
-				cleanFn(str) {
+				cleanFn: (str) => {
 				
-					return sanitize.getCleanString(str, 1024,  null);
+					return sanitize.cleanString(str, 1024,  null);
 				
 				}
 			},
 			{
 				name: 'isGui',
-				cleanFn(bool) {
+				cleanFn: (bool) => {
 					
-					return sanitize.getCleanBool(bool, false);
+					return sanitize.cleanBool(bool, false);
 				
 				}
 			}
@@ -56,7 +56,7 @@ const getArgsMapArr = function(cmdName) {
 		return [
 			{
 				name: 'idx',
-				cleanFn(intgr) {
+				cleanFn: (intgr) => {
 				
 					return sanitize.cleanInt(intgr, 0);
 				
@@ -64,7 +64,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'attr',
-				cleanFn(attrObj) {
+				cleanFn: (attrObj) => {
 				
 					return 'object' === typeof attrObj && null !== attrObj && 'string' === typeof attrObj.href ? attrObj : {href: ''};
 				
@@ -72,7 +72,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'isGui',
-				cleanFn(bool) {
+				cleanFn: (bool) => {
 				
 					return sanitize.cleanBool(bool, false);
 				
@@ -86,7 +86,7 @@ const getArgsMapArr = function(cmdName) {
 		return [
 			{
 				name: 'ctrl',
-				cleanFn(intgr) {
+				cleanFn: (intgr) => {
 				
 					return sanitize.cleanInt(intgr, 0);
 				
@@ -94,7 +94,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'attr',
-				cleanFn(attrObj) {
+				cleanFn: (attrObj) => {
 				
 					return 'object' === typeof attrObj && null !== attrObj && ('string' === typeof attrObj.action) ? attrObj : {href: ''};
 				
@@ -102,7 +102,7 @@ const getArgsMapArr = function(cmdName) {
 			},
 			{
 				name: 'isGui',
-				cleanFn(bool) {
+				cleanFn: (bool) => {
 				
 					return sanitize.cleanBool(bool, false);
 				
@@ -270,6 +270,20 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			return callback(new TypeError('invalid cmd passed to bin/browse/handler'));
 		
 		}
+		else if ('quit' === bin) {
+		
+			if ('string' !== typeof isid || '' === isid) {
+			
+				return callback(new TypeError('invalid isid passed to bin/browse/handler'));
+			
+			}
+			else {
+			
+				return this.quit(isid, callback);
+			
+			}
+		
+		}
 		else if ('object' !== typeof args || !(Array.isArray(args)) || args.length < 1) {
 		
 			return callback(new TypeError('invalid args passed to bin/browse/handler'));
@@ -289,15 +303,13 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				let thisArg = args[i];
 				if ('object' === typeof argMap && null !== argMap && 'object' === typeof thisArg && null !== thisArg && 'string' === typeof thisArg.text) {
 					
-					argsObj[argMap.name] = argMap.cleanFn(thisArg);
+					argsObj[argMap.name] = argMap.cleanFn(thisArg.text);
 				
 				}
 				if ((i + 1) >= args.length) {
 				
 					switch(bin) {
-			
-						case 'quit':
-							return this.quit(isid, callback);
+					
 						case 'go':
 							return this.go(argsObj, callback);
 						case 'select':
@@ -422,6 +434,14 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					else {
 					
 						goResult.output.content[0].content = pathContent;
+						// TBD
+						// should be pulling this value from the user cookie after initial execute callback
+						// currently just do the same isGui check on content
+						if (-1 !== pathContent.indexOf(GUI_CLASS_STRING)) {
+						
+							goResult.cookies.uwotBrowseCurrentType.value = 'gui';
+						
+						}
 						return callback(false, goResult);
 						
 					
@@ -488,7 +508,6 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	getPathContent(pth, args, callback) {
 	
-		var pthContent;
 		// cb must be a function
 		if ('function' !== typeof callback) {
 		
