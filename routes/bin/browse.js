@@ -20,6 +20,8 @@ var listenerSettings = {
 	]
 };
 
+const GUI_CLASS_STRING = 'class="uwotGui-html"';
+
 const getArgsMapArr = function(cmdName) {
 
 	if ('string' !== typeof cmdName || -1 === listenerSettings.cmdSet.indexOf(cmdName)) {
@@ -162,59 +164,94 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			
 			var executeResult = {
 				output: {
-					content: [{content: 'test output data', classes: ['browseOutput']}]
+					content: [{content: 'no content found', classes: ['browseOutput']}]
 				},
 				outputType: 'object'
 			};
-			// TBD
-			// get data for display and set to output
 			var isGui = false;
-			
-			executeResult.cookies = {
-				uwotBrowseCurrentPath: {
-					value: args[0].text
-				},
-				uwotBrowseCurrentType: {
-					value: isGui ? 'gui' : 'cli'
-				},
-				uwotBrowseCurrentStatus: {
-					value: 'active'
-				}
+			var pathArgs = {
+				isGui,
+				isSudo,
+				user
 			};
-			
-			// try to register/enable Listener for isid
+			// attempt to load data
 			try {
 			
-				var lEnabled = super.enableListener(isid);
-				// return error to cb if enableListener returns an Error
-				if (lEnabled instanceof Error) {
+				this.getPathContent(sanitize.cleanString(args[0].text, 1024, null), pathArgs, (error, pathData) => {
+			
+					if (error) {
+					
+						return callback(error);
+					
+					}
+					else if ('string' !== typeof pathData || '' === pathData) {
+					
+						return callback(false, executeResult);
+					
+					}
+					else {
+					
+						executeResult.output.content[0].content = pathData;
+						if (-1 !== pathData.indexOf(GUI_CLASS_STRING)) {
+						
+							isGui = true;
+						
+						}
+						executeResult.cookies = {
+							uwotBrowseCurrentPath: {
+								value: args[0].text
+							},
+							uwotBrowseCurrentType: {
+								value: isGui ? 'gui' : 'cli'
+							},
+							uwotBrowseCurrentStatus: {
+								value: 'active'
+							}
+						};
+						// try to register/enable Listener for isid
+						try {
+			
+							var lEnabled = super.enableListener(isid);
+							// return error to cb if enableListener returns an Error
+							if (lEnabled instanceof Error) {
 				
-					return callback(lEnabled);
+								return callback(lEnabled);
 				
-				}
-				// return error to cb if registerListener returns false
-				else if (!lEnabled || 'enabled' !== lEnabled) {
+							}
+							// return error to cb if registerListener returns false
+							else if (!lEnabled || 'enabled' !== lEnabled) {
 				
-					return callback(new Error('could not enable listener for bin/browse'));
+								return callback(new Error('could not enable listener for bin/browse'));
 				
-				}
-				// return output to cb if enableListener completes without error
-				else {
+							}
+							// return output to cb if enableListener completes without error
+							else {
 				
-					return callback(false, executeResult);
+								return callback(false, executeResult);
 				
-				}
+							}
+			
+						}
+						// return error to cb if enableListener throws an Error
+						catch(e) {
+			
+							return callback(e);
+			
+						}
+			
+			
+						return callback(false, false);
+					
+					}
+				
+				});
 			
 			}
-			// return error to cb if enableListener throws an Error
 			catch(e) {
 			
 				return callback(e);
 			
 			}
-			
-			
-			return callback(false, false);
 		
 		}
 	
@@ -241,7 +278,9 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		else {
 		
 			var argsObj = {
-				isGui: false
+				isGui: false,
+				isSudo,
+				user
 			};
 			var argsMapArr = getArgsMapArr(bin);
 			for(let i = 0; i < argsMapArr.length; i++) {
@@ -334,24 +373,70 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	go(args, callback) {
 	
-		var goResult = {
-			output: {
-				content: [{content: 'test go output data', classes: ['browseOutput']}]
-			},
-			outputType: 'object',
-			cookies: {
-				uwotBrowseCurrentPath: {
-					value: args.path
+		var argPath;
+		if ('object' !== typeof args || args === null) {
+		
+			return callback(new TypeError('invalid args passed to bin/browse/go'));
+		
+		}
+		else if ('string' !== typeof args.path || '' === args.path) {
+		
+			return callback(new TypeError('invalid path passed to bin/browse/go'));
+		
+		}
+		else {
+		
+			argPath = args.path;
+			delete args.path;
+			var goResult = {
+				output: {
+					content: [{content: 'no content found', classes: ['browseOutput']}]
 				},
-				uwotBrowseCurrentType: {
-					value: args.isGui ? 'gui' : 'cli'
-				},
-				uwotBrowseCurrentStatus: {
-					value: 'active'
+				outputType: 'object',
+				cookies: {
+					uwotBrowseCurrentPath: {
+						value: args.path
+					},
+					uwotBrowseCurrentType: {
+						value: args.isGui ? 'gui' : 'cli'
+					},
+					uwotBrowseCurrentStatus: {
+						value: 'active'
+					}
 				}
+			};
+			try {
+			
+				this.getPathContent(argPath, args, function(error, pathContent) {
+				
+					if (error) {
+					
+						return callback(error);
+					
+					}
+					else if ('string' !== typeof pathContent || '' === pathContent) {
+					
+						return callback(false, goResult);
+					
+					}
+					else {
+					
+						goResult.output.content[0].content = pathContent;
+						return callback(false, goResult);
+						
+					
+					}
+				
+				});
+			
 			}
-		};
-		return callback(false, goResult);
+			catch(e) {
+			
+				return callback(e);
+			
+			}
+		
+		}
 	
 	}
 	
@@ -492,8 +577,6 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				});
 			
 			}
-			
-			return callback(false, pthContent);
 			
 		}
 	

@@ -284,7 +284,7 @@ module.exports = {
 
 				var $ = self.getAsJQuery(htmlString);
 				var applicationName = $('head meta[name=application-name]').attr('content');
-				applicationName = 'string' === typeof applicationName ? applicationName : 'uwotGui';
+				applicationName = 'string' === typeof applicationName && 'uwotcli' === applicationName.toLowerCase() ? 'uwotCli' : 'uwotGui';
 				var bodyHtml = self.makeConsoleHtml($('body'));
 				var finalHtml = '<div id="uwotBrowseHtml" class="' + applicationName + '-html">';
 				Promise.all([
