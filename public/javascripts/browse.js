@@ -36,18 +36,23 @@ class UwotBrowse {
 		var self = this;
 		var changeLoadPath = function(reqData) {
 			var oldCmd = reqData.cmd;
-			switch (oldCmd) {
-				case 'fwd':
-					reqData.cmd = 'go ' + self.getFwdPath();
-					break;
-				case 'back':
-					reqData.cmd = 'go ' + self.getBackPath();
-					break;
-				case 'reload':
-					reqData.cmd = 'go ' + self.getReloadPath();
-					break;
-				default:
-					uwotSetCookie('uwotBrowseLastOperation', oldCmd);
+			if (oldCmd.indexOf('go') === 0) {
+				reqData.cmd = oldCmd + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+			}
+			else {
+				switch (oldCmd) {
+					case 'fwd':
+						reqData.cmd = 'go ' + self.getFwdPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						break;
+					case 'back':
+						reqData.cmd = 'go ' + self.getBackPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						break;
+					case 'reload':
+						reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						break;
+					default:
+						uwotSetCookie('uwotBrowseLastOperation', oldCmd);
+				}
 			}
 			return reqData;
 		};
