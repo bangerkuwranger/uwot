@@ -55,7 +55,7 @@ describe('defaultCmdParser.js', function() {
 	
 		if ('object' !== typeof global.Uwot) {
 	
-			globalSetupHelper.initGlobalObjects;
+			globalSetupHelper.initGlobalObjects();
 	
 		}
 		if ('string' !== typeof global.Uwot.Constants.appRoot) {
@@ -63,7 +63,7 @@ describe('defaultCmdParser.js', function() {
 			globalSetupHelper.initConstants();
 
 		}
-		if ('object' !== typeof global.Uwot.Config || 'UwotConfigBase' !== global.Uwot.Config.constructor.name) {
+		if ('object' !== typeof global.Uwot.Config || 'UwotConfigBase' !== global.Uwot.Config.constructor.name || 'object' !== typeof global.Uwot.Users || 'UwotUsers' !== global.Uwot.Users.constructor.name) {
 	
 			globalSetupHelper.initEnvironment();
 	

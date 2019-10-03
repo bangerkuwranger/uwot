@@ -6,6 +6,8 @@ const chaiAsPromised = require("chai-as-promised");
 chai.use(chaiAsPromised);
 const cheerio = require('cheerio');
 const request = require('request-promise-native');
+const path = require('path');
+const globalSetupHelper = require('../helpers/globalSetup');
 
 var consoleHtml = require('../helpers/consoleHtml');
 const getTestHtmlString = function() {
@@ -28,6 +30,38 @@ var testOpenTag = '<div id="uwotBrowseHtml" class="uwotGui-html">';
 
 describe('consoleHtml.js', function() {
 
+	before(function() {
+	
+		if ('object' !== typeof global.Uwot || null === global.Uwot) {
+		
+			globalSetupHelper.initGlobalObjects();
+		
+		}
+		if ('object' !== global.Uwot.Constants || null === global.Uwot.Constants || 'string' !== typeof global.Uwot.Constants.appRoot) {
+		
+			globalSetupHelper.initConstants();
+		
+		}
+		if ('object' !== global.Uwot.Config || null === global.Uwot.Config) {
+		
+			var Config = require('../config');
+			if ("development" !== global.process.env.NODE_ENV) {
+
+				configPath = path.resolve(global.Uwot.Constants.etcProd, 'config.json');
+
+			}
+			else {
+
+				configPath = path.resolve(global.Uwot.Constants.etcDev, 'config.json');
+
+			}
+
+			// init global objects with instances of app classes
+			global.Uwot.Config = new Config(configPath);
+		
+		}
+	
+	});
 	beforeEach(function() {
 	
 		testInString = getTestHtmlString();
@@ -72,11 +106,11 @@ describe('consoleHtml.js', function() {
 			expect(consoleHtml.makeConsoleHtml).to.throw(TypeError, 'invalid jqObj passed to makeConsoleHtml');
 		
 		});
-		it('should return the html of the unchanged jqObj if there are no "a" tags in the markup', function() {
+		it('should return the html of the unchanged jqObj body if there are no "a" tags in the markup', function() {
 		
 			testObj('a').replaceWith('');
 			var testResults = consoleHtml.makeConsoleHtml(testObj);
-			expect(testResults).to.equal(testObj.html());
+			expect(testResults).to.equal(testObj('body').html());
 		
 		});
 		it('should not change the onclick or class attributes of any links that have an onclick attribute', function() {
