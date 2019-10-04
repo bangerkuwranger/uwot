@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie */
+/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie, uwotGetCookieValue */
 
 const getDefaultUwotBrowseOpts = function() {
 	return {
