@@ -1,7 +1,10 @@
 'use strict';
 const url = require('url');
+const path = require('path');
+const EOL = require('os').EOL;
 const request = require('request-promise-native');
 const cheerio = require('cheerio');
+const css = require('css');
 const nodeCache = require('node-cache');
 var cache = new nodeCache({ stdTTL: 3600 });
 
@@ -67,9 +70,14 @@ module.exports = {
 	},
 	
 	// retrieves external resources and concatenates into a string; returns a Promise
-	getRemoteResources(urlOrUrlArray, contentString) {
+	getRemoteResources(urlOrUrlArray, contentString, type) {
 	
 		var self = this;
+		if ('string' !== typeof type || ('style' !== type && 'script' !== type)) {
+		
+			type = 'file';
+		
+		}
 		if ('string' === typeof urlOrUrlArray) {
 	
 			return new Promise(function(resolve, reject) {
@@ -79,33 +87,62 @@ module.exports = {
 	
 					return request.get(urlOrUrlArray).then((body) => {
 				
-						cache.set(urlOrUrlArray, body);
-						if (!contentString) {
+						if (type === 'style') {
+						
+							self.localizeCss(body, urlOrUrlArray).then((localizedCss) =>{
+							
+								localizedCss = "/***  " + urlOrUrlArray + "  ***/" + EOL + localizedCss;
+								cache.set(urlOrUrlArray, localizedCss);
+								if ('string' !== typeof contentString || '' === contentString) {
 		
-							resolve(body);
+									return resolve(localizedCss);
 		
+								}
+								else {
+			
+									return resolve(contentString + localizedCss);
+			
+								}
+							
+							});
+						
 						}
 						else {
+						
+							if ('script' === type) {
+							
+								body = "/***  " + urlOrUrlArray + "  ***/" + EOL + body;
+							
+							}
+							cache.set(urlOrUrlArray, body);
+							if ('string' !== typeof contentString || '' === contentString) {
+		
+								return resolve(body);
+		
+							}
+							else {
 			
-							resolve(contentString + body);
+								return resolve(contentString + body);
 			
+							}
+						
 						}
 				
 					}).catch((error) => {
-				
-						reject(error);
+					
+						return process.nextTick(reject, error);
 				
 					});
 			
 				}
-				else if (!contentString) {
+				else if ('string' !== typeof contentString || '' === contentString) {
 
-					resolve(cached);
+					return process.nextTick(resolve, cached);
 
 				}
 				else {
 	
-					resolve(contentString + cached);
+					return process.nextTick(resolve, contentString + cached);
 	
 				}
 	
@@ -117,7 +154,7 @@ module.exports = {
 			var currentUrl = urlOrUrlArray.shift();
 			if (!currentUrl && 'string' !== typeof contentString) {
 		
-				return Promise.reject(new Error('no content received'));
+				return process.nextTick(Promise.reject, new Error('no content received'));
 		
 			}
 			else if (!currentUrl) {
@@ -134,44 +171,78 @@ module.exports = {
 				
 						return request.get(currentUrl).then((body) => {
 				
-							cache.set(currentUrl, body);
-							if (!contentString) {
+							if (type === 'style') {
+						
+								self.localizeCss(body, currentUrl).then((localizedCss) => {
+								
+									localizedCss = "/***  " + currentUrl + "  ***/" + EOL + localizedCss;
+									cache.set(currentUrl, localizedCss);
+									if ('string' !== typeof contentString) {
 		
-								contentString = body;
+										contentString = localizedCss;
 		
+									}
+									else {
+			
+										contentString += localizedCss;
+			
+									}
+									return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+						
+										return resolve(content);
+						
+									}).catch((error) => {
+						
+										return process.nextTick(reject, error);
+						
+									});
+								
+								});
+					
 							}
 							else {
+							
+								body = "/***  " + currentUrl + "  ***/" + EOL + body;
+								cache.set(currentUrl, body);
+								if ('string' !== typeof contentString) {
+		
+									contentString = body;
+		
+								}
+								else {
 			
-								contentString += body;
+									contentString += body;
 			
+								}
+								return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+						
+									resolve(content);
+						
+								}).catch((error) => {
+						
+									return process.nextTick(reject, error);
+						
+								});
+							
 							}
-							return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
-						
-								resolve(content);
-						
-							}).catch((error) => {
-						
-								reject(error);
-						
-							});
 					
 						}).catch((error) => {
 					
-							reject(error);
+							return process.nextTick(reject, error);
 					
 						});
 				
 					}
 					else {
 				
-						contentString = contentString ? contentString + cached : cached;
+						contentString = 'string' !== typeof contentString || '' === contentString ? contentString + cached : cached;
 						return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
 					
-							resolve(content);
+							return resolve(content);
 					
 						}).catch((error) => {
 					
-							reject(error);
+							return process.nextTick(reject, error);
 					
 						});
 				
@@ -184,7 +255,7 @@ module.exports = {
 		}
 		else {
 	
-			return Promise.reject(new TypeError('urlOrUrlArray must be a string or an Array of strings'));
+			return process.nextTick(Promise.reject, new TypeError('urlOrUrlArray must be a string or an Array of strings'));
 	
 		}
 	
@@ -196,7 +267,7 @@ module.exports = {
 		var self = this;
 		if ('function' !== typeof jqObj) {
 		
-			return Promise.reject(TypeError('invalid jqObj passed to pullHeadElements'));
+			return process.nextTick(Promise.reject, new TypeError('invalid jqObj passed to pullHeadElements'));
 		
 		}
 		else {
@@ -252,14 +323,14 @@ module.exports = {
 						}
 						if ((i + 1) >= elementCount) {
 				
-							self.getRemoteResources(urlArray).then((cnt) => {
+							self.getRemoteResources(urlArray, '', type).then((cnt) => {
 						
 								headContent += cnt + closeTag;
-								resolve(headContent);
+								return resolve(headContent);
 						
 							}).catch((err) => {
 						
-								reject(err);
+								return process.nextTick(reject, err);
 						
 							});
 				
@@ -271,7 +342,7 @@ module.exports = {
 				else {
 			
 					headContent = '';
-					resolve(headContent);
+					return process.nextTick(resolve, headContent);
 			
 				}
 			
@@ -290,7 +361,7 @@ module.exports = {
 		}
 		else if ('string' !== typeof htmlString) {
 		
-			return callback(TypeError('invalid htmlString passed to loadForConsole'), null);
+			return process.nextTick(callback, new TypeError('invalid htmlString passed to loadForConsole'), null);
 		
 		}
 		else {
@@ -323,18 +394,134 @@ module.exports = {
 					
 				}).catch((error) => {
 				
-					return callback(error, bodyHtml);
+					return process.nextTick(callback, error, bodyHtml);
 				
 				});
 
 			}
 			catch(e) {
 			
-				return callback(e, null);
+				return process.nextTick(callback, e, null);
 			
 			}		
 
 		}
+	
+	},
+	
+	localizeCss(cssString, cssUri) {
+	
+		return new Promise((resolve, reject) => {
+		
+			if ('string' !== typeof cssString || '' === cssString) {
+		
+				return process.nextTick(resolve, cssString);
+		
+			}
+			else {
+		
+				var cssObj, cssUrl, cssPath, baseUrl = null;
+				try {
+			
+					cssObj = css.parse(cssString);
+			
+				}
+				catch(e) {
+			
+					return process.nextTick(resolve, cssString);
+			
+				}
+				if ('string' === typeof cssUri && '' !== cssUri) {
+			
+					try {
+				
+						cssUrl =  url.parse(cssUri, false, true);
+				
+					}
+					catch(e) {
+				
+						return process.nextTick(resolve, cssString);
+				
+					}
+			
+				}
+				else {
+			
+					cssUrl = null;
+			
+				}
+				if ('object' === typeof cssUrl && null !== cssUrl) {
+			
+					baseUrl = cssUrl.protocol + '//' + cssUrl.hostname;
+					cssPath = '/' !== cssUrl.pathname && '' !== cssUrl.pathname ? path.dirname(cssUrl.pathname) + '/' : '/';
+			
+				}
+				for (let i = 0; i < cssObj.stylesheet.rules.length; i++) {
+			
+					if ('object' === typeof cssObj.stylesheet.rules[i].selectors && Array.isArray(cssObj.stylesheet.rules[i].selectors)) {
+				
+						cssObj.stylesheet.rules[i].selectors.forEach((selectStr, idx) => {
+				
+							if (selectStr.indexOf('body') !== -1) {
+					
+								cssObj.stylesheet.rules[i].selectors[idx] = selectStr.replace('body', '#uwotBrowseHtml');
+					
+							}
+							else {
+					
+								cssObj.stylesheet.rules[i].selectors[idx] = '#uwotBrowseHtml ' + selectStr;
+					
+							}
+				
+						});
+				
+					}
+					if ('object' === typeof cssObj.stylesheet.rules[i].declarations && Array.isArray(cssObj.stylesheet.rules[i].declarations)) {
+				
+						cssObj.stylesheet.rules[i].declarations.forEach((declaration, idx) => {
+				
+							if (declaration.value.indexOf('url(') !== -1) {
+					
+								var thisUrl;
+								if (declaration.value.indexOf('url(\'') !== -1 || declaration.value.indexOf('url("') !== -1) {
+								
+									thisUrl = declaration.value.replace(/(url\W*\(\W*['"])(.*?)(\W*['"]?\W*\))/g, '$2');
+								
+								}
+								else {
+								
+									thisUrl = declaration.value.replace(/url\(([^)'"]+)\)/g, '$1');
+								
+								}
+								var thisParsedUrl = url.parse(thisUrl);
+								if (thisParsedUrl.protocol === null && thisParsedUrl.host === null && baseUrl !== null) {
+						
+									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + url.resolve(baseUrl + cssPath, thisUrl) + "')";
+						
+								}
+								else if (this.parsedUrl.protocol === null & thisParsedUrl.host !== null) {
+						
+									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + global.Uwot.Config.getVal('server', 'transport') + ':' + thisParsedUrl.href + "')";
+						
+								}
+					
+							}
+				
+						});
+				
+					}
+					if ((i + 1) >= cssObj.stylesheet.rules.length) {
+				
+						return process.nextTick(resolve, css.stringify(cssObj));
+				
+					}
+			
+				}
+			
+		
+			}
+		
+		});
 	
 	}
 
