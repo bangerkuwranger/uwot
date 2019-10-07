@@ -78,62 +78,62 @@ module.exports = {
 			type = 'file';
 		
 		}
-		if ('string' === typeof urlOrUrlArray) {
-	
-			return new Promise(function(resolve, reject) {
+		return new Promise((resolve, reject) => {
 		
+			if ('string' === typeof urlOrUrlArray) {
+			
 				var cached = cache.get(urlOrUrlArray);
 				if (!cached) {
-	
+
 					return request.get(urlOrUrlArray).then((body) => {
-				
+			
 						if (type === 'style') {
-						
+					
 							self.localizeCss(body, urlOrUrlArray).then((localizedCss) =>{
-							
+						
 								localizedCss = "/***  " + urlOrUrlArray + "  ***/" + EOL + localizedCss;
 								cache.set(urlOrUrlArray, localizedCss);
 								if ('string' !== typeof contentString || '' === contentString) {
-		
+	
 									return resolve(localizedCss);
-		
+	
 								}
 								else {
-			
+		
 									return resolve(contentString + localizedCss);
-			
+		
 								}
-							
-							});
 						
+							});
+					
 						}
 						else {
-						
+					
 							if ('script' === type) {
-							
+						
 								body = "/***  " + urlOrUrlArray + "  ***/" + EOL + body;
-							
+						
 							}
 							cache.set(urlOrUrlArray, body);
 							if ('string' !== typeof contentString || '' === contentString) {
-		
+	
 								return resolve(body);
-		
+	
 							}
 							else {
-			
+		
 								return resolve(contentString + body);
-			
+		
 							}
-						
-						}
-				
-					}).catch((error) => {
 					
-						return process.nextTick(reject, error);
-				
-					});
+						}
 			
+					}).catch((error) => {
+				
+						return process.nextTick(reject, error);
+			
+					});
+		
 				}
 				else if ('string' !== typeof contentString || '' === contentString) {
 
@@ -141,123 +141,123 @@ module.exports = {
 
 				}
 				else {
-	
+
 					return process.nextTick(resolve, contentString + cached);
-	
+
 				}
 	
-			});
-	
-		}
-		else if ('object' === typeof urlOrUrlArray && Array.isArray(urlOrUrlArray)) {
-	
-			var currentUrl = urlOrUrlArray.shift();
-			if (!currentUrl && 'string' !== typeof contentString) {
-		
-				return process.nextTick(Promise.reject, new Error('no content received'));
-		
 			}
-			else if (!currentUrl) {
-		
-				return Promise.resolve(contentString);
-		
-			}
-			else {
-		
-				return new Promise(function(resolve, reject) {
+			else if ('object' === typeof urlOrUrlArray && Array.isArray(urlOrUrlArray)) {
 	
+				var currentUrl = urlOrUrlArray.shift();
+				if (!currentUrl && 'string' !== typeof contentString) {
+		
+					return process.nextTick(reject, new Error('no content received'));
+		
+				}
+				else if (!currentUrl) {
+		
+					return resolve(contentString);
+		
+				}
+				else {
+		
 					var cached = cache.get(currentUrl);
 					if (!cached) {
-				
+			
 						return request.get(currentUrl).then((body) => {
-				
+			
 							if (type === 'style') {
-						
+					
 								self.localizeCss(body, currentUrl).then((localizedCss) => {
-								
+							
 									localizedCss = "/***  " + currentUrl + "  ***/" + EOL + localizedCss;
 									cache.set(currentUrl, localizedCss);
 									if ('string' !== typeof contentString) {
-		
+	
 										contentString = localizedCss;
-		
+	
 									}
 									else {
-			
+		
 										contentString += localizedCss;
-			
+		
 									}
 									return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
-						
-										return resolve(content);
-						
-									}).catch((error) => {
-						
-										return process.nextTick(reject, error);
-						
-									});
-								
-								});
 					
+										return resolve(content);
+					
+									}).catch((error) => {
+					
+										return process.nextTick(reject, error);
+					
+									});
+							
+								});
+				
 							}
 							else {
-							
-								body = "/***  " + currentUrl + "  ***/" + EOL + body;
+						
+								if ('script' === type) {
+						
+									body = "/***  " + currentUrl + "  ***/" + EOL + body;
+						
+								}
 								cache.set(currentUrl, body);
 								if ('string' !== typeof contentString) {
-		
+	
 									contentString = body;
-		
+	
 								}
 								else {
-			
+		
 									contentString += body;
-			
+		
 								}
 								return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
-						
+					
 									resolve(content);
-						
+					
 								}).catch((error) => {
-						
+					
 									return process.nextTick(reject, error);
-						
+					
 								});
-							
+						
 							}
-					
-						}).catch((error) => {
-					
-							return process.nextTick(reject, error);
-					
-						});
 				
+						}).catch((error) => {
+				
+							return process.nextTick(reject, error);
+				
+						});
+			
 					}
 					else {
-				
-						contentString = 'string' !== typeof contentString || '' === contentString ? contentString + cached : cached;
+			
+						contentString = 'string' !== typeof contentString || '' === contentString ? cached : contentString + cached;
 						return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
-					
-							return resolve(content);
-					
-						}).catch((error) => {
-					
-							return process.nextTick(reject, error);
-					
-						});
 				
+							return resolve(content);
+				
+						}).catch((error) => {
+				
+							return process.nextTick(reject, error);
+				
+						});
+			
 					}
-	
-				});
 		
+				}
+	
 			}
+			else {
 	
-		}
-		else {
+				return process.nextTick(reject, new TypeError('urlOrUrlArray must be a string or an Array of strings'));
 	
-			return process.nextTick(Promise.reject, new TypeError('urlOrUrlArray must be a string or an Array of strings'));
-	
-		}
+			}
+		
+		});
 	
 	},
 	
@@ -265,15 +265,14 @@ module.exports = {
 	pullHeadElements(jqObj, type) {
 	
 		var self = this;
-		if ('function' !== typeof jqObj) {
+		return new Promise((resolve, reject) => {
+			if ('function' !== typeof jqObj) {
 		
-			return process.nextTick(Promise.reject, new TypeError('invalid jqObj passed to pullHeadElements'));
+				return process.nextTick(reject, new TypeError('invalid jqObj passed to pullHeadElements'));
 		
-		}
-		else {
+			}
+			else {
 		
-			return new Promise((resolve, reject) => {
-			
 				var headElements, closeTag, headContent = '';
 				if ('string' !== typeof type || 'script' !== type) {
 			
@@ -346,9 +345,9 @@ module.exports = {
 			
 				}
 			
-			});
+			}
 		
-		}
+		});
 	
 	},
 	
