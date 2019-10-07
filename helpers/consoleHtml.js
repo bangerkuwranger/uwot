@@ -89,7 +89,7 @@ module.exports = {
 			
 						if (type === 'style') {
 					
-							self.localizeCss(body, urlOrUrlArray).then((localizedCss) =>{
+							self.localizeCss(body, urlOrUrlArray).then((localizedCss) => {
 						
 								localizedCss = "/***  " + urlOrUrlArray + "  ***/" + EOL + localizedCss;
 								cache.set(urlOrUrlArray, localizedCss);
@@ -410,7 +410,7 @@ module.exports = {
 	
 	localizeCss(cssString, cssUri) {
 	
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 		
 			if ('string' !== typeof cssString || '' === cssString) {
 		
