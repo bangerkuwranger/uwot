@@ -131,14 +131,14 @@ describe('consoleHtml.js', function() {
 			expect(resultLinkHtml).to.equal(spawnLinkHtml);
 		
 		});
-		it('should add the class "uwot-console-link" and add an onclick attribute calling "uwotConsoleGoto" to any links that do not have an onclick attribute and do not have a target attribute of "_blank"', function() {
+		it('should add the class "uwot-console-link", an attribute "data-link-num" that is an integer, and add an onclick attribute calling "uwotConsoleGoto" to any links that do not have an onclick attribute and do not have a target attribute of "_blank"', function() {
 		
 			var testResults = consoleHtml.makeConsoleHtml(testObj);
 			var resultObj = cheerio.load(testResults);
 			var normalLinkHtml = resultObj.html('#normalLink');
 			var takeoverLinkHtml = resultObj.html('#takeoverLink');
-			expect(normalLinkHtml).to.equal('<a id="normalLink" href="https://github.com/bangerkuwranger" onclick="uwotConsoleGoto(&quot;https://github.com/bangerkuwranger&quot;)" class="uwot-console-link">visit me on github</a>');
-			expect(takeoverLinkHtml).to.equal('<a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent" onclick="uwotConsoleGoto(&quot;https://www.chadacarino.com/&quot;)" class="uwot-console-link">take over</a>');
+			expect(normalLinkHtml).to.equal('<a id="normalLink" href="https://github.com/bangerkuwranger" onclick="uwotConsoleGoto(&quot;https://github.com/bangerkuwranger&quot;)" class="uwot-console-link" data-link-num="0">visit me on github</a>');
+			expect(takeoverLinkHtml).to.equal('<a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent" onclick="uwotConsoleGoto(&quot;https://www.chadacarino.com/&quot;)" class="uwot-console-link" data-link-num="3">take over</a>');
 		
 		});
 	
