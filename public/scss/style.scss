@@ -188,7 +188,7 @@ body {
 
 					#uwotBrowseHtml {
 
-						&.uwotCli-html{
+						&.uwotCli-html {
 
 							.uwot-console-link-wrap {
 								position: relative;
@@ -199,11 +199,9 @@ body {
 									padding: 0.25ch 0.25em 0.25ch 2em;
 
 									&::before {
-
 										position: absolute;
 										left: 1em;
 										content: attr(data-link-num);
-
 									}
 
 								}
