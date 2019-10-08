@@ -52,6 +52,8 @@ module.exports = {
 					
 						jqObj(thisLink).attr('onclick', 'uwotConsoleGoto("' + jqObj(thisLink).attr('href') + '")');
 						jqObj(thisLink).addClass('uwot-console-link');
+						jqObj(thisLink).wrap('<span class="uwot-console-link-wrap"</div>');
+						jqObj(thisLink).attr('data-link-num', i);
 					
 					}
 			

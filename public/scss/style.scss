@@ -186,6 +186,33 @@ body {
 
 					}
 
+					#uwotBrowseHtml {
+
+						&.uwotCli-html{
+
+							.uwot-console-link-wrap {
+								position: relative;
+
+								a.uwot-console-link {
+									position: relative;
+									border: 1px solid;
+									padding: 0.25ch 0.25em 0.25ch 2em;
+
+									&::before {
+
+										position: absolute;
+										left: 1em;
+										content: attr(data-link-num);
+
+									}
+
+								}
+
+							}
+
+						}
+
+					}
 
 				}
 
