@@ -7,6 +7,10 @@ const getDefaultUwotBrowseOpts = function() {
 	};
 };
 
+const getCliLinksHtml = function() {
+	return '<div id="uwotBrowseLinks" class="uwot-browse-modal"><h3 class="uwot-browse-modal-title">Select from these links:</h3><div class="uwot-browse-modal-content"></div></div>';
+};
+
 class UwotBrowse {
 	constructor(listener, initialPath, opts) {
 		if ('object' !== typeof listener || !(listener instanceof UwotCliListener)) {
@@ -38,6 +42,35 @@ class UwotBrowse {
 			var oldCmd = reqData.cmd;
 			if (oldCmd.indexOf('go') === 0) {
 				reqData.cmd = oldCmd + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+			}
+			else if (oldCmd.indexOf('select') === 0) {
+			
+				var linkIdx = parseInt(oldCmd.replace('select', '').trim());
+				var linkHref = self.getAttrForLink(linkIdx, 'href');
+				var linkTarget = self.getAttrForLink(linkIdx, 'target');
+				if (Number.isNaN(linkIdx)) {
+				
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType') + 'invalid link index selected';
+				
+				}
+				else if ('string' !== typeof linkHref || '' === linkHref) {
+				
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType') + 'link index selected has invalid target URI';
+				
+				}
+				else if ('_blank' === linkTarget) {
+				
+					self.goToExternalLink(linkIdx);
+					reqData.cmd = '';
+					return reqData;
+				
+				}
+				else {
+					
+					reqData.cmd = 'select ' + linkIdx + ' ' + linkHref + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+				
+				}
+			
 			}
 			else {
 				switch (oldCmd) {
@@ -103,6 +136,16 @@ class UwotBrowse {
 				performOperations('clear');	
 			}
 			jQuery('#uwotoutput .output-container').html(content);
+			var cliLinks = jQuery('#uwotoutput .output-container a');
+			jQuery('#uwotoutput .output-container').append(getCliLinksHtml());
+			cliLinks.each((idx, el) => {
+				let linkNo = jQuery(el).attr('data-link-num');
+				let linkHref = jQuery(el).attr('href');
+				let linkTarget = jQuery(el).attr('target');
+				linkTarget = 'string' === typeof linkTarget && '_blank' === linkTarget ? linkTarget : '_self';
+				let linkTxt = jQuery(el).text();
+				jQuery('#uwotBrowseLinks .uwot-browse-modal-content').append('<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>');
+			});
 		}
 	}
 	getFwdPath() {
@@ -119,6 +162,23 @@ class UwotBrowse {
 		var pathVal = this.currentPath;
 		uwotSetCookie('uwotBrowseLastOperation', 'reload');
 		return pathVal;
+	}
+	getAttrForLink(idx, attrName) {
+		var attrVal;
+		if ('string' === typeof attrName) {
+			switch(attrName) {
+				case 'href':
+					attrVal = jQuery('#uwotBrowseLinks .uwot-browse-modal-content .uwot-browse-modal-content-line[data-link-num="' + idx + '"]').attr('data-link-href');
+					break;
+				case 'target':
+					attrVal = jQuery('#uwotBrowseLinks .uwot-browse-modal-content .uwot-browse-modal-content-line[data-link-num="' + idx + '"]').attr('data-link-target');
+			}
+		}
+		return attrVal;
+	}
+	goToExternalLink(idx) {
+		var idxLink = jQuery('#uwotoutput .output-container .browseOutput a[data-link-num="' + idx + '"]');
+		idxLink[0].click();
 	}
 }
 // class contains instance methods for opening, closing, and maintaining browse instance in the user interface

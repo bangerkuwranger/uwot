@@ -40,6 +40,15 @@ body {
 			.output {
 				width: 100%;
 				min-height: 300px;
+
+				.output-container {
+
+					> .uwot-browse-modal {
+						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+					}
+
+				}
+
 			}
 
 			.cli {
@@ -97,6 +106,18 @@ body {
 				.header {
 					border-color: #DDDDDD;
 					background-color: #00002A;
+				}
+
+				.output {
+
+					.output-container {
+
+						> .uwot-browse-modal {
+							background: rgba(#111111, 0.8);
+						}
+
+					}
+
 				}
 
 				.cli {

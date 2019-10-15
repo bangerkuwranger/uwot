@@ -35,6 +35,15 @@ body {
 
 			.output {
 				background-image: url(/scss/theme/bind/img/wotbindbg.png);
+
+				.output-container {
+
+					> .uwot-browse-modal {
+						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+					}
+
+				}
+
 			}
 
 			.cli {
@@ -93,6 +102,18 @@ body {
 				.header {
 					border-color: #DDDD00;
 					background-color: #111111;
+				}
+
+				.output {
+
+					.output-container {
+
+						> .uwot-browse-modal {
+							background: rgba(#111111, 0.8);
+						}
+
+					}
+
 				}
 
 				.cli {

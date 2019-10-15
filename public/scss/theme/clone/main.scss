@@ -40,6 +40,15 @@ body {
 			.output {
 				width: 100%;
 				min-height: 300px;
+
+				.output-container {
+
+					> .uwot-browse-modal {
+						background: rgba( mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+					}
+
+				}
+
 			}
 
 			.cli {
@@ -92,6 +101,18 @@ body {
 				.header {
 					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
+				}
+
+				.output {
+
+					.output-container {
+
+						> .uwot-browse-modal {
+							background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'fg'), 0.8);
+						}
+
+					}
+
 				}
 
 				.cli {

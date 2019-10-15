@@ -45,6 +45,15 @@ body {
 				background-repeat: no-repeat;
 				background-position: center;
 				margin: 8em 0 0;
+
+				.output-container {
+
+					> .uwot-browse-modal {
+						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+					}
+
+				}
+
 			}
 
 			.cli {
@@ -107,6 +116,18 @@ body {
 				.header {
 					border-color: #9D0D00;
 					background-color: #1C1C1C;
+				}
+
+				.output {
+
+					.output-container {
+
+						> .uwot-browse-modal {
+							background: rgba(#1C1C1C, 0.8);
+						}
+
+					}
+
 				}
 
 				.cli {

@@ -63,10 +63,10 @@ const getArgsMapArr = function(cmdName) {
 				}
 			},
 			{
-				name: 'attr',
-				cleanFn: (attrObj) => {
+				name: 'href',
+				cleanFn: (str) => {
 				
-					return 'object' === typeof attrObj && null !== attrObj && 'string' === typeof attrObj.href ? attrObj : {href: ''};
+					return sanitize.cleanString(str, 1024,  null);
 				
 				}
 			},
@@ -470,7 +470,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 		};
 		selectResult.cookies = {
 			uwotBrowseCurrentPath: {
-				value: args.path
+				value: args.href
 			},
 			uwotBrowseCurrentType: {
 				value: args.isGui ? 'gui' : 'cli'
@@ -479,7 +479,46 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				value: 'active'
 			}
 		};
-		return callback(false, selectResult);
+		var argPath = args.href;
+		delete args.href;
+		try {
+		
+			this.getPathContent(argPath, args, function(error, pathContent) {
+			
+				if (error) {
+				
+					return callback(error);
+				
+				}
+				else if ('string' !== typeof pathContent || '' === pathContent) {
+				
+					return callback(false, selectResult);
+				
+				}
+				else {
+				
+					selectResult.output.content[0].content = pathContent;
+					// TBD
+					// should be pulling this value from the user cookie after initial execute callback
+					// currently just do the same isGui check on content
+					if (-1 !== pathContent.indexOf(GUI_CLASS_STRING)) {
+					
+						selectResult.cookies.uwotBrowseCurrentType.value = 'gui';
+					
+					}
+					return callback(false, selectResult);
+					
+				
+				}
+			
+			});
+		
+		}
+		catch(e) {
+		
+			return callback(e);
+		
+		}
 	
 	}
 	
