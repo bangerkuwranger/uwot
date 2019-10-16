@@ -4,6 +4,7 @@ const validUrl = require('valid-url');
 const sanitize = require('../../helpers/valueConversion');
 const ansi = require('../../output/ansi');
 const remoteHtml = require('../../helpers/consoleHtml');
+const browseErrorHelper = require('../../helpers/htmlBrowseErrors');
 
 var listenerSettings = {
 	name: 'browse',
@@ -611,6 +612,22 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				// return error to cb if read returns an error
 				.catch((e) => {
 				
+					if ('string' === typeof e.code) {
+					
+						var respCode = browseErrorHelper.getErrIntFromSysCode(e.code);
+						var htmlError = browseErrorHelper.getHtmlForError(respCode);
+						if (htmlError instanceof Error && error.message === 'invalid browser Error') {
+						
+							return callback(e);
+						
+						}
+						else {
+						
+							return callback(false, htmlError);
+						
+						}
+					
+					}
 					return callback(e);
 				
 				});
@@ -630,6 +647,22 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				// catch error retrieving data from remote resource and return to cb
 				.catch((e) => {
 				
+					if ('string' === typeof e.code) {
+					
+						var respCode = browseErrorHelper.getErrIntFromSysCode(e.code);
+						var htmlError = browseErrorHelper.getHtmlForError(respCode);
+						if (htmlError instanceof Error && error.message === 'invalid browser Error') {
+						
+							return callback(e);
+						
+						}
+						else {
+						
+							return callback(false, htmlError);
+						
+						}
+					
+					}
 					return callback(e);
 				
 				});

@@ -41,7 +41,7 @@ class UwotBrowse {
 		var changeLoadPath = function(reqData) {
 			var oldCmd = reqData.cmd;
 			if (oldCmd.indexOf('go') === 0) {
-				reqData.cmd = oldCmd + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+				reqData.cmd = oldCmd + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 			}
 			else if (oldCmd.indexOf('select') === 0) {
 			
@@ -50,12 +50,12 @@ class UwotBrowse {
 				var linkTarget = self.getAttrForLink(linkIdx, 'target');
 				if (Number.isNaN(linkIdx)) {
 				
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType') + 'invalid link index selected';
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + 'invalid link index selected';
 				
 				}
 				else if ('string' !== typeof linkHref || '' === linkHref) {
 				
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType') + 'link index selected has invalid target URI';
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + 'link index selected has invalid target URI';
 				
 				}
 				else if ('_blank' === linkTarget) {
@@ -67,7 +67,7 @@ class UwotBrowse {
 				}
 				else {
 					
-					reqData.cmd = 'select ' + linkIdx + ' ' + linkHref + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+					reqData.cmd = 'select ' + linkIdx + ' ' + linkHref + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 				
 				}
 			
@@ -75,13 +75,13 @@ class UwotBrowse {
 			else {
 				switch (oldCmd) {
 					case 'fwd':
-						reqData.cmd = 'go ' + self.getFwdPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						reqData.cmd = 'go ' + self.getFwdPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 						break;
 					case 'back':
-						reqData.cmd = 'go ' + self.getBackPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						reqData.cmd = 'go ' + self.getBackPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 						break;
 					case 'reload':
-						reqData.cmd = 'go ' + self.getReloadPath() + ' ' + uwotGetCookieValue('uwotBrowseCurrentType');
+						reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 						break;
 					default:
 						uwotSetCookie('uwotBrowseLastOperation', oldCmd);

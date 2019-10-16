@@ -500,7 +500,7 @@ module.exports = {
 									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + url.resolve(baseUrl + cssPath, thisUrl) + "')";
 						
 								}
-								else if (this.parsedUrl.protocol === null & thisParsedUrl.host !== null) {
+								else if (thisParsedUrl.protocol === null & thisParsedUrl.host !== null) {
 						
 									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + global.Uwot.Config.getVal('server', 'transport') + ':' + thisParsedUrl.href + "')";
 						
