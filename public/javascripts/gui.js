@@ -13,7 +13,11 @@ class UwotGui {
 	}
 	update(content) {
 		this.frame.html(content);
-			var cliLinks = this.frame.find('a');
+		var cliLinks = this.frame.find('a');
+		if (cliLinks.length > 0) {
+			jQuery('a.uwot-console-link').click(function(e) {
+				uwotConsoleOnClick(this, e);
+			});
 			this.frame.append(getCliLinksHtml());
 			cliLinks.each((idx, el) => {
 				let linkNo = jQuery(el).attr('data-link-num');
@@ -23,6 +27,7 @@ class UwotGui {
 				let linkTxt = jQuery(el).text();
 				jQuery('#uwotBrowseLinks .uwot-browse-modal-content').append('<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>');
 			});
+		}
 	}
 }
 

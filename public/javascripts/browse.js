@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie, uwotGetCookieValue */
+/* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie, uwotGetCookieValue, uwotConsoleOnClick */
 
 const getDefaultUwotBrowseOpts = function() {
 	return {
@@ -50,18 +50,18 @@ class UwotBrowse {
 				var linkTarget = self.getAttrForLink(linkIdx, 'target');
 				if (Number.isNaN(linkIdx)) {
 				
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + 'invalid link index selected';
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid link index selected"';
 				
 				}
 				else if ('string' !== typeof linkHref || '' === linkHref) {
 				
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + 'link index selected has invalid target URI';
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "link index selected has invalid target URI"';
 				
 				}
 				else if ('_blank' === linkTarget) {
 				
 					self.goToExternalLink(linkIdx);
-					reqData.cmd = '';
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "external link opened in new tab or window"';
 					return reqData;
 				
 				}
@@ -137,23 +137,30 @@ class UwotBrowse {
 			}
 			jQuery('#uwotoutput .output-container').html(content);
 			var cliLinks = jQuery('#uwotoutput .output-container a');
-			jQuery('#uwotoutput .output-container').append(getCliLinksHtml());
-			cliLinks.each((idx, el) => {
-				let linkNo = jQuery(el).attr('data-link-num');
-				let linkHref = jQuery(el).attr('href');
-				let linkTarget = jQuery(el).attr('target');
-				linkTarget = 'string' === typeof linkTarget && '_blank' === linkTarget ? linkTarget : '_self';
-				let linkTxt = jQuery(el).text();
-				jQuery('#uwotBrowseLinks .uwot-browse-modal-content').append('<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>');
-			});
+			if (cliLinks.length > 0) {
+				jQuery('a.uwot-console-link').click(function(e) {
+					uwotConsoleOnClick(this, e);
+				});
+				jQuery('#uwotoutput .output-container').append(getCliLinksHtml());
+				cliLinks.each((idx, el) => {
+					let linkNo = jQuery(el).attr('data-link-num');
+					let linkHref = jQuery(el).attr('href');
+					let linkTarget = jQuery(el).attr('target');
+					linkTarget = 'string' === typeof linkTarget && '_blank' === linkTarget ? linkTarget : '_self';
+					let linkTxt = jQuery(el).text();
+					jQuery('#uwotBrowseLinks .uwot-browse-modal-content').append('<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>');
+				});
+			}
 		}
 	}
 	getFwdPath() {
+		this.history.incrementInterval();
 		var pathVal = this.history.getNextItem();
 		uwotSetCookie('uwotBrowseLastOperation', 'fwd');
 		return pathVal;
 	}
 	getBackPath() {
+		this.history.decrementInterval();
 		var pathVal = this.history.getPrevItem();
 		uwotSetCookie('uwotBrowseLastOperation', 'back');
 		return pathVal;

@@ -17,15 +17,16 @@ block content
 		div(id='uwotterminal' class='terminal')
 			div(id='uwotheader' class='header')
 				h1
-					-if (title)
-						span(class="header-title") #{title}
-					-else
-						span(class="header-title") UWOT
-					-if (uwotVersion)
-						span(class="header-version") #{uwotVersion}
-					-if (theme && showTheme)
-						-var ThemeName = '- ' + theme + ' theme'
-						span(class="header-theme") #{ThemeName}
+					span(class="header-application")
+						-if (title)
+							span(class="header-title") #{title}
+						-else
+							span(class="header-title") UWOT
+						-if (uwotVersion)
+							span(class="header-version") #{uwotVersion}
+						-if (theme && showTheme)
+							-var ThemeName = '- ' + theme + ' theme'
+							span(class="header-theme") #{ThemeName}
 					-if (vfsCwd)
 						span(class="header-cwd") 
 							span(class="ellipsis")="…"

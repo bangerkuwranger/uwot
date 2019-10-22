@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, uwotInterface, uwotListenerTypes, CliHistory, outputToMain */
+/* global jQuery, uwotInterface, uwotListenerTypes, CliHistory, outputToMain, changeApplication */
 
 const defaultUwotListenerOptions = {
 	type:		'default',
@@ -184,10 +184,16 @@ class UwotCliListener {
 	
 	enable() {
 		this.status = 'enabled';
+		if (this.type === 'exclusive') {
+			changeApplication({name: this.name});
+		}
 	}
 	
 	disable() {
 		this.status = 'disabled';
+		if (this.type === 'exclusive') {
+			changeApplication();
+		}
 	}
 	
 	// cbFn must not be anonymous

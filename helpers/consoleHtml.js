@@ -48,12 +48,12 @@ module.exports = {
 			
 					var thisLinkTarget = jqObj(thisLink).attr('target');
 					var thisLinkOnclick = jqObj(thisLink).attr('onclick');
+					jqObj(thisLink).addClass('uwot-console-link');
+					jqObj(thisLink).wrap('<span class="uwot-console-link-wrap"</div>');
+					jqObj(thisLink).attr('data-link-num', i);
 					if ('string' !== typeof thisLinkOnclick && ('string' !== typeof thisLinkTarget || '_blank' !== thisLinkTarget)) {
 					
 						jqObj(thisLink).attr('onclick', 'uwotConsoleGoto("' + jqObj(thisLink).attr('href') + '")');
-						jqObj(thisLink).addClass('uwot-console-link');
-						jqObj(thisLink).wrap('<span class="uwot-console-link-wrap"</div>');
-						jqObj(thisLink).attr('data-link-num', i);
 					
 					}
 			
@@ -481,7 +481,7 @@ module.exports = {
 				
 						cssObj.stylesheet.rules[i].declarations.forEach((declaration, idx) => {
 				
-							if (declaration.value.indexOf('url(') !== -1) {
+							if ('string' === typeof declaration.value && '' !== declaration.value && declaration.value.indexOf('url(') !== -1) {
 					
 								var thisUrl;
 								if (declaration.value.indexOf('url(\'') !== -1 || declaration.value.indexOf('url("') !== -1) {

@@ -6,6 +6,7 @@ var initTouchSupport = false;
 var uwotInterface = {};
 var uwotListeners = {};
 var uwotBrowseInstance = null;
+var uwotApplicationHtml;
 
 function countIntDigits(num) {
 	return num.toString().length;
@@ -25,6 +26,27 @@ function revertPrompt() {
 	jQuery('#cliform .field').attr('data-prompt', promptString + ' ');
 	jQuery('#cliform .field').attr('data-prev-prompt', prevPrompt);
 	jQuery('#uwotcli-input').css('margin-left', (parseInt(jQuery('#cliform .field').attr('data-prompt').length) + parseInt(jQuery('#cliform .field').attr('data-cwd').length) + 3) + 'ch');
+	return;
+}
+
+function changeApplication(appArgs) {
+	var appHtml;
+	if ('object' !== typeof appArgs || null === appArgs || 'string' !== typeof appArgs.name) {
+	
+		appHtml = uwotApplicationHtml;
+	
+	}
+	else {
+		appHtml = '<span class="header-title">' + appArgs.name + '</span>';
+		delete appArgs.name;
+		var argProps = Object.keys(appArgs);
+		if (argProps.length > 0) {
+			argProps.forEach((propName) => {
+				appHtml += '<span class="header-' + propName + '">&nbsp;' + appArgs[propName] + '</span>';
+			});
+		}
+	}
+	jQuery('#uwotheader .header-application').html(appHtml);
 	return;
 }
 
@@ -167,6 +189,9 @@ function updateListeners(serverListeners) {
 				serverListeners[i].status,
 				serverListeners[i].nonce
 			);
+			if ('enabled' === uwotListeners[serverListeners[i].name].status) {
+				uwotListeners[serverListeners[i].name].enable();
+			}
 		
 		}
 		// otherwise, validate client values match server
@@ -225,6 +250,46 @@ function getEnabledListeners() {
 	});
 	return enabledListeners;
 
+}
+
+function uwotConsoleOnClick(element, event) {
+	if (!uwotInteractive) {
+		return event.preventDefault();
+	}
+	else if (jQuery(element).attr('target') !== '_blank') {
+		event.preventDefault();
+		var linkNum = jQuery(element).attr('data-link-num');
+		var pathNonce = $('#uwotcli-nonce').val();
+		var listenerNonce = $('#uwotcli-listenerNonce').val(); // will be in the listener, eventually.
+		uwotInterface.disableInput();
+		var data = {
+			cmd: 'select ' + linkNum,
+			nonce: pathNonce,
+			cwd: localStorage.getItem('UwotCwd')
+		};
+		var whereToPool = getEnabledListeners();
+		if (whereToPool.length === 1) {
+		
+			if (whereToPool[0].type !== 'default' && 'string' === typeof whereToPool[0].nonce) {
+			
+				data.nonce = whereToPool[0].nonce;
+			
+			}
+			whereToPool[0].post(data);
+		
+		}
+		else {
+		
+		// TBD
+		// Handle cmdSet matching for additional listeners here? 
+		// can also send everything to default and have server parse it out. (makes more sense, but slower)
+		// decisions...
+		
+		}
+	}
+	else {
+		return;
+	}
 }
 
 function getCurrentHistory() {
@@ -326,7 +391,7 @@ function outputToMain(data, args) {
 			var browseRenderOpts = {
 				isGui: browseType === 'gui',
 				isInitial: false,
-				addToHistory: 'string' === typeof browseLastOperation && ('fwd' === browseLastOperation || 'back' === browseLastOperation || 'reload' === browseLastOperation)
+				addToHistory: 'string' === typeof browseLastOperation && ('fwd' === browseLastOperation || 'back' === browseLastOperation || 'reload' === browseLastOperation) ? false : true
 			};
 			if (uwotBrowseInstance === null) {
 				var browseInstanceOpts = {
@@ -397,6 +462,8 @@ jQuery(document).ready(function($) {
 		return inputValue.trim();
 	
 	};
+	
+	uwotApplicationHtml = $('#uwotheader .header-application').html();
 	
 	// change prompt to login if in login operation
 	if ('string' === typeof $("#uwotcli-doLogin").val() && 'true' === $("#uwotcli-doLogin").val()) {
