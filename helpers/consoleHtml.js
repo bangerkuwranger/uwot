@@ -75,6 +75,7 @@ module.exports = {
 	getRemoteResources(urlOrUrlArray, contentString, type) {
 	
 		var self = this;
+		var cached = false;
 		if ('string' !== typeof type || ('style' !== type && 'script' !== type)) {
 		
 			type = 'file';
@@ -84,7 +85,7 @@ module.exports = {
 		
 			if ('string' === typeof urlOrUrlArray) {
 			
-				var cached = cache.get(urlOrUrlArray);
+				cached = cache.get(urlOrUrlArray);
 				if (!cached) {
 
 					return request.get(urlOrUrlArray).then((body) => {
@@ -164,7 +165,7 @@ module.exports = {
 				}
 				else {
 		
-					var cached = cache.get(currentUrl);
+					cached = cache.get(currentUrl);
 					if (!cached) {
 			
 						return request.get(currentUrl).then((body) => {
