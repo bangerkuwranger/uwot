@@ -10,25 +10,25 @@ const getErrorContentObj = function(errInt) {
 				errInt: '401',
 				name: 'Unauthorized',
 				rawDesc: 'This server could not verify that you are authorized to access the document requested. Either you supplied the wrong credentials (e.g., bad password), or your browser doesn\'t understand how to supply the credentials required.'
-			}
+			};
 		case 403:
 			return {
 				errInt: '403',
 				name: 'Forbidden',
 				rawDesc: 'You don\'t have permission to access the requested object. It is either read-protected or not readable by the server.'
-			}
+			};
 		case 404:
 			return {
 				errInt: '404',
 				name: 'Not Found',
 				rawDesc: "The requested URL was not found on this server. If you entered the URL manually please check your spelling and try again."
-			}
+			};
 		case 500:
 			return {
 				errInt: '500',
 				name: 'Internal Server Error',
 				rawDesc: "The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there was an error in a script."
-			}
+			};
 		default:
 			return null;
 	
