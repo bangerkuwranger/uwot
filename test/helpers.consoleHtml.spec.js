@@ -137,8 +137,8 @@ describe('consoleHtml.js', function() {
 			var resultObj = cheerio.load(testResults);
 			var normalLinkHtml = resultObj.html('#normalLink');
 			var takeoverLinkHtml = resultObj.html('#takeoverLink');
-			expect(normalLinkHtml).to.equal('<a id="normalLink" href="https://github.com/bangerkuwranger" onclick="uwotConsoleGoto(&quot;https://github.com/bangerkuwranger&quot;)" class="uwot-console-link" data-link-num="0">visit me on github</a>');
-			expect(takeoverLinkHtml).to.equal('<a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent" onclick="uwotConsoleGoto(&quot;https://www.chadacarino.com/&quot;)" class="uwot-console-link" data-link-num="3">take over</a>');
+			expect(normalLinkHtml).to.equal('<a id="normalLink" href="https://github.com/bangerkuwranger" class="uwot-console-link" data-link-num="0" onclick="uwotConsoleGoto(&quot;https://github.com/bangerkuwranger&quot;)">visit me on github</a>');
+			expect(takeoverLinkHtml).to.equal('<a id="takeoverLink" href="https://www.chadacarino.com/" target="_parent" class="uwot-console-link" data-link-num="3" onclick="uwotConsoleGoto(&quot;https://www.chadacarino.com/&quot;)">take over</a>');
 		
 		});
 	
