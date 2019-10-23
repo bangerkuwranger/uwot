@@ -1,11 +1,79 @@
 'use strict';
 /* global jQuery, UwotCliListener, CliHistory, UwotGui, performOperations,  uwotSetCookie, uwotGetCookieValue, uwotConsoleOnClick, uwotBrowseInstance */
 
+const UWOT_BROWSE_SETTINGS_COOKIE_NAME = 'uwotBrowseSettings';
+
 const getDefaultUwotBrowseOpts = function() {
 	return {
 		isGui: false
 	};
 };
+
+const getDefaultUwotBrowseSettings = function() {
+	return {
+		showPanel: 'default',	//can be true, false, or default
+		closeMsg: true,			//can be true, false, or unsigned number
+		noHistory: false,		//can be true or false
+		noCliHistory: false		//can be true or false 
+	};
+}
+
+const UwotBrowseSettingsValidator = function(key, value) {
+	var validKeys = Objecy.keys(getDefaultUwotBrowseSettings());
+	if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
+		return false;
+	}
+	const validators = {
+		showPanel(val) {
+			var vv = [
+				'default',
+				'true',
+				'false'
+			];
+			if ('string' !== typeof val) {
+				return vv;
+			}
+			return -1 !== vv.indexOf(val);
+		},
+		closeMsg(val) {
+			if ('string' !== typeof val) {
+				return [
+					'true',
+					'false',
+					'number >= 0'
+				];
+			}
+			else if ('true' === val || 'false' === val) {
+				return true;
+			}
+			else if ('number' === typeof parseInt(val) && parseInt(val) >= 0) {
+				return true;
+			}
+			else {
+				return false;
+			}
+		},
+		noHistory(val) {
+			if ('string' !== typeofVal) {
+				return [
+					'true',
+					'false'
+				];
+			}
+			return 'true' === val || 'false' === val;
+		},
+		noCliHistory(val) {
+			if ('string' !== typeofVal) {
+				return [
+					'true',
+					'false'
+				];
+			}
+			return 'true' === val || 'false' === val;
+		}
+	};
+	return validators[key](value);
+}
 
 const getModalHtml = function() {
 	return '<div id="uwotBrowseModal" class="uwot-browse-modal" style="display: none;"><h3 class="uwot-browse-modal-title"></h3><div class="uwot-browse-modal-content"></div><div id="uwotBrowseModalContent" style="display: none;"></div></div>';
@@ -55,9 +123,111 @@ class UwotBrowse {
 		}
 		this.isGui = opts.isGui;
 		this.gui = null;
-		this.listener.addHook('beforePost', this.performBrowseOperations);
-		this.listener.addHook('beforePost', this.changeLoadPath);
+		var self = this;
+		var performBrowseOperations = function(reqData) {
+			var oldCmd = reqData.cmd.trim();
+			var oldCmdArr = oldCmd.split(' ');
+			var noGo = false;
+			var msg = ' "browse operation performed"';
+			if (oldCmdArr[0] === 'clear') {
+				msg = '';
+				noGo = true;
+				performOperations('clear');
+			}
+			else if (oldCmdArr[0] === 'opacity') {
+				var setOpacity = self.modal.opacity(oldCmdArr[1]);
+				noGo = true;
+				msg = setOpacity ? ' "panel opacity: ' + oldCmdArr[1] + '%"' : ' "opacity must be a number in range 0-100"'
+			}
+			else if (oldCmdArr[0] === 'hide') {
+				self.modal.hide();
+				noGo = true;
+				msg = ' "panel hidden"';
+			}
+			else if (oldCmdArr[0] === 'show') {
+				var panelName;
+				if ('string' === typeof oldCmdArr[1]) {
+					panelName = oldCmdArr[1];
+				}
+				var setPanel = self.modal.show(panelName);
+				noGo = true;
+				msg = ' " panel';
+				msg += setPanel ? ' ' + setPanel + ' shown"' : ' shown"';
+			}
+			else if (oldCmdArr[0] === 'set') {
+				noGo = true;
+				var validSettings = Object.keys(getDefaultUwotBrowseSettings());
+				if ('string' !== typeof oldCmdArr[1]) {
+					msg = ' "save a setting with the set command followed by a key and a value. valid keys: ' + validSettings.join() + '"'
+				}
+				else if ('string' !== typeof oldCmdArr[2] && validSettings.indexOf(oldCmdArr[1]) !== -1) {
+					var currVal = self.getSetting(oldCmdArr[1])
+					msg = ' "valid values for setting ' + oldCmdArr[1] + ' are ' + UwotBrowseSettingsValidator[oldCmdArr[1]] + '. current value: ' + currVal + '"';
+				}
+				else {
+					var setResult = self.saveSetting(oldCmdArr[1], oldCmdArr[2]);
+					if (!setResult) {
+						msg = ' "setting ' + oldCmdArr[1] + ' changed to ' + oldCmdArr[2] + '"'
+					}
+					else {
+						msg = ' "' + setResult + '"';
+					}
+				}
+			}
+			if (noGo) {
+				reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + msg;
+			}
+			return reqData;
+		};
+		var changeLoadPath = function(reqData) {
+			var oldCmd = reqData.cmd;
+			var oldCmdArr = oldCmd.trim().split(' ');
+			if (oldCmdArr[0] === 'go' && 'string' !== typeof oldCmdArr[2]) {
+				reqData.cmd = oldCmd + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+			}
+			else if (oldCmdArr[0] === 'select' && oldCmdArr[1] === 'link') {
+				var linkIdx = parseInt(oldCmdArr[2]);
+				var linkHref = self.getAttrForLink(linkIdx, 'href');
+				var linkTarget = self.getAttrForLink(linkIdx, 'target');
+				if (Number.isNaN(linkIdx)) {
+					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid link index selected"';
+				}
+				else if ('string' !== typeof linkHref || '' === linkHref) {
+					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "link index selected has invalid target URI"';
+				}
+				else if ('_blank' === linkTarget) {
+					self.goToExternalLink(linkIdx);
+					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "external link opened in new tab or window"';
+					return reqData;
+				}
+				else {
+					reqData.cmd = 'go ' + linkHref + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+				}
+			}
+			else {
+				switch (oldCmd) {
+					case 'fwd':
+						reqData.cmd = 'go ' + self.getFwdPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+						break;
+					case 'back':
+						reqData.cmd = 'go ' + self.getBackPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+						break;
+					case 'reload':
+						reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+						break;
+					default:
+						uwotSetCookie('uwotBrowseLastOperation', oldCmd);
+				}
+			}
+			return reqData;
+		};
+		this.listener.addHook('beforePost', performBrowseOperations);
+		this.listener.addHook('beforePost', changeLoadPath);
 		this.modal = new UwotBrowseModal();
+		// init settings
+		if (this.getSetting('showPanel') === null) {
+			this.resetSettings();
+		}
 	}
 	destroy() {
 		delete this.history;
@@ -84,11 +254,16 @@ class UwotBrowse {
 		var isInitial = false;
 		var addToHistory = true;
 		var message = false;
+		var showPanel = false;
+		var showPanelSetting = this.getSetting('showPanel');
 		if ('object' === typeof opts && null !== opts) {
 			this.isGui = 'boolean' === typeof opts.isGui && true === opts.isGui;
 			isInitial = 'boolean' === typeof opts.isInitial && true === opts.isInitial;
 			addToHistory = 'boolean' === typeof opts.addToHistory && true === opts.addToHistory;
 			message = 'string' === typeof opts.msg ? opts.msg : message;
+		}
+		if ('true' === this.getSetting('noHistory')) {
+			addToHistory = false;
 		}
 		if (!isInitial && addToHistory) {
 			this.history.addItem(path);
@@ -98,6 +273,7 @@ class UwotBrowse {
 				this.gui = new UwotGui();
 			}
 			this.gui.update(content);
+			showPanel = showPanelSetting === 'true';
 		}
 		else {
 			if (null !== this.gui) {
@@ -108,13 +284,14 @@ class UwotBrowse {
 				performOperations('clear');	
 			}
 			jQuery('#uwotoutput .output-container').html(content);
+			showPanel = showPanelSetting === 'true' || showPanelSetting === 'default';
 		}
 		// generate modal content
 		if (!this.modal.initialized) {
-			this.modal.init();
+			this.modal.init(showPanel);
 		}
 		else {
-			this.modal.refreshAllContent();
+			this.modal.refreshAllContent(showPanel);
 		}
 		if (message) {
 			this.displayMsg(message);
@@ -122,22 +299,71 @@ class UwotBrowse {
 	}
 	displayMsg(msg, msgClass) {
 		var self = this;
+		var selfClose = this.getSetting('closeMsg');
 		var msgHtml = getMsgHtml(msg, msgClass);
 		if ('string' === typeof msgHtml && '' !== msgHtml) {
 			this.container.prepend(msgHtml);
 			return jQuery('#UwotBrowseMsg').fadeIn(400, function() {
-				window.setTimeout(self.removeMsg, 15000);
+				if ('true' === selfClose) {
+					window.setTimeout(self.removeMsg, 15000);
+				}
+				if ('number' === typeof parseInt(selfClose) && 0 < parseInt(selfClose)) {
+					window.setTimeout(self.removeMsg, parseInt(selfClose));
+				}
 			});
-			
 		}
 		else {
 			return false;
 		}
 	}
 	removeMsg() {
-	
-		jQuery('#UwotBrowseMsg').remove();
-	
+		jQuery('#UwotBrowseMsg').fadeOut(400, function() {
+			return jQuery('#UwotBrowseMsg').remove();
+		});
+	}
+	getSetting(key) {
+		var settingsObj, defaultSettings = getDefaultUwotBrowseSettings();
+		var validKeys = Object.keys(defaultSettings);
+		if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
+			return 'invalid key';
+		}
+		var allSettings = uwotGetCookieValue(UWOT_BROWSE_SETTINGS_COOKIE_NAME);
+		if ('string' === typeof allSettings && '' !== allSettings) {
+			settingsObj = JSON.parse(allSettings);
+			return settingsObj[key];
+		}
+		else {
+			return null;
+		}
+	}
+	saveSetting(key, value) {
+		var settingsObj, defaultSettings = getDefaultUwotBrowseSettings();
+		var validKeys = Object.keys(defaultSettings);
+		if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
+			return 'invalid key';
+		}
+		if (!UwotBrowseSettingsValidator(key, value)) {
+			return 'invalid value';
+		}
+		var expiry = new Date().setFullYear(expireDate.getFullYear() + 1);
+		var currentVal = uwotGetCookieValue(UWOT_BROWSE_SETTINGS_COOKIE_NAME);
+		if ('string' === typeof currentVal && '' !== currentVal) {
+			settingsObj = JSON.parse(currentVal)
+		}
+		else {
+			settingsObj = defaultSettings;
+		}
+		settingsObj[key] = value;
+		var newVal = JSON.stringify(settingsObj);
+		uwotSetCookie(UWOT_BROWSE_SETTINGS_COOKIE_NAME, newVal, expiry);
+		return false;
+	}
+	resetSettings() {
+		var expiry = new Date().setFullYear(new Date().getFullYear() + 1);
+		var defaultSettings = getDefaultUwotBrowseSettings();
+		var val = JSON.stringify(defaultSettings);
+		uwotSetCookie(UWOT_BROWSE_SETTINGS_COOKIE_NAME, val, expiry);
+		return false;
 	}
 	getFwdPath() {
 		this.history.incrementInterval();
@@ -179,88 +405,6 @@ class UwotBrowse {
 			console.error('invalid link index for goToExternalLink');
 		}
 		return;
-	}
-	performBrowseOperations(reqData) {
-		var self = this;
-		var oldCmd = reqData.cmd.trim();
-		var noGo = false;
-		var msg = ' "browse operation performed"';
-		if (0 === oldCmd.indexOf('clear')) {
-			msg = '';
-			noGo = true;
-			performOperations('clear');
-		}
-		else if (0 === oldCmd.indexOf('opacity') {
-			oldCmd = oldCmd.replace('opacity', '').trim();
-			oldCmdArr = oldCmd.split(' ');
-			var setOpacity = this.modal.opacity(oldCmdArr[0]);
-			noGo = true;
-			msg = setOpacity ? ' "panel opacity: ' + oldCmdArr[0] + '%"' : ' "opacity must be a number in range 0-100"'
-		}
-		else if (0 === oldCmd.indexOf('hide') {
-			this.modal.hide();
-			noGo = true;
-			msg = ' "panel hidden"';
-		}
-		else if (0 === oldCmd.indexOf('show') {
-			oldCmd = oldCmd.replace('show', '').trim();
-			oldCmdArr = oldCmd.split(' ');
-			var panelName;
-			if (oldCmdArr.length > 0) {
-				panelName = oldCmdArr[0];
-			}
-			var setPanel = this.modal.show(panelName);
-			noGo = true;
-			msg = ' " panel';
-			msg += setPanel ? ' ' + setPanel + ' shown"' : ' shown"';
-		}
-		if (noGo) {
-			reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + msg;
-		}
-		return reqData;
-	}
-	changeLoadPath(reqData) {
-		var self = this;
-		var oldCmd = reqData.cmd;
-		var oldCmdArr = oldCmd.trim().split(' ');
-		if (oldCmdArr[0] === 'go' && 'string' !== typeof oldCmdArr[2]) {
-			reqData.cmd = oldCmd + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
-		}
-		else if (oldCmdArr[0] === 'select' && oldCmdArr[1] === 'link') {
-			var linkIdx = parseInt(oldCmdArr[2]);
-			var linkHref = self.getAttrForLink(linkIdx, 'href');
-			var linkTarget = self.getAttrForLink(linkIdx, 'target');
-			if (Number.isNaN(linkIdx)) {
-				reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid link index selected"';
-			}
-			else if ('string' !== typeof linkHref || '' === linkHref) {
-				reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "link index selected has invalid target URI"';
-			}
-			else if ('_blank' === linkTarget) {
-				self.goToExternalLink(linkIdx);
-				reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "external link opened in new tab or window"';
-				return reqData;
-			}
-			else {
-				reqData.cmd = 'go ' + linkHref + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
-			}
-		}
-		else {
-			switch (oldCmd) {
-				case 'fwd':
-					reqData.cmd = 'go ' + self.getFwdPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
-					break;
-				case 'back':
-					reqData.cmd = 'go ' + self.getBackPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
-					break;
-				case 'reload':
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
-					break;
-				default:
-					uwotSetCookie('uwotBrowseLastOperation', oldCmd);
-			}
-		}
-		return reqData;
 	}
 }
 
@@ -370,7 +514,7 @@ class UwotBrowseModal {
 			jQuery('a.uwot-console-link').click(function(e) {
 				uwotConsoleOnClick(this, e);
 			});
-			jQuery('#uwotoutput .output-container').append(getCliLinksHtml());
+			jQuery('#uwotoutput .output-container').append(getModalHtml());
 			cliLinks.each((idx, el) => {
 				let linkNo = jQuery(el).attr('data-link-num');
 				let linkHref = jQuery(el).attr('href');
@@ -399,7 +543,8 @@ class UwotBrowseModal {
 		formsContentHtml += '</content></div>';
 		return formsContentHtml;
 	}
-	refreshAllContent() {
+	refreshAllContent(showOnRefresh) {
+		showOnRefresh = 'boolean' === typeof showOnRefresh && true === showOnRefresh;
 		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
 		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
 		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
@@ -407,6 +552,9 @@ class UwotBrowseModal {
 			this.currentPanel = 'links';
 		}
 		this.setPanel(this.currentPanel);
+		if (showOnRefresh) {
+			this.show();
+		}
 		return;
 	}
 	selectLink(linkIdx) {

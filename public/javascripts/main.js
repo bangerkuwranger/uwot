@@ -140,6 +140,7 @@ function uwotSetCookie(cname, cvalue, cexpiry) {
 		cstring += ";path=/";
 	}
 	document.cookie = cstring;
+	return cname;
 }
 
 function uwotClientRedirect(redirect) {

@@ -394,7 +394,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				},
 				additional: {
 					browseOpts: {
-						loadContent: false;
+						loadContent: false
 					}
 				}
 			};
@@ -463,7 +463,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			},
 			additional: {
 				browseOpts: {
-					loadContent: false;
+					loadContent: false
 				}
 			}
 		};
