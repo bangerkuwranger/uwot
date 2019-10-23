@@ -399,8 +399,19 @@ function outputToMain(data, args) {
 				};
 				browseRenderOpts.isInitial = true;
 				uwotBrowseInstance = new UwotBrowse(uwotListeners.browse, browsePath, browseInstanceOpts);
+				uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
 			}
-			uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
+			else if ('object' === typeof data.browseOpts && null !== data.browseOpts) {
+				if ('string' === typeof browseOpts.msg && '' !== browseOpts.msg) {
+					browseRenderOpts.msg = browseOpts.msg;
+				}
+				if (browseOpts.loadContent) {
+					uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
+				}
+				else if ('string' === typeof browseRenderOpts.msg) {
+					uwotBrowseInstance.displayMsg(browseRenderOpts.msg);
+				}
+			}
 		}
 		else {
 			if (uwotBrowseInstance !== null) {

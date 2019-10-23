@@ -199,6 +199,20 @@ module.exports = function(args) {
 								}
 				
 							}
+							if ('object' === typeof results.additional && null !== results.additional) {
+							
+								var addProps = Object.keys(results.additional);
+								addProps.forEach((propName) => {
+								
+									if (results.additional.hasOwnProperty(propName)) {
+									
+										res.uwotObj[propName] = results.additional[propName];
+									
+									}
+								
+								});
+							
+							}
 							return res.ansi(res.uwotObj, res);
 						
 						}

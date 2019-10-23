@@ -16,8 +16,7 @@ var listenerSettings = {
 	cmdSet: [
 		'quit',
 		'go',
-		'select',
-		'submit'
+		'nogo'
 	]
 };
 
@@ -48,23 +47,23 @@ const getArgsMapArr = function(cmdName) {
 					return sanitize.cleanBool(bool, false);
 				
 				}
+			},
+			{
+				name: 'msg',
+				cleanFn: (str) => {
+					
+					return sanitize.cleanString(str, 255, false);
+				
+				}
 			}
 		];
 	
 	}
-	else if ('select' === cmdName) {
+	else if ('nogo' === cmdName) {
 	
 		return [
 			{
-				name: 'idx',
-				cleanFn: (intgr) => {
-				
-					return sanitize.cleanInt(intgr, 0);
-				
-				}
-			},
-			{
-				name: 'href',
+				name: 'path',
 				cleanFn: (str) => {
 				
 					return sanitize.cleanString(str, 1024,  null);
@@ -74,38 +73,16 @@ const getArgsMapArr = function(cmdName) {
 			{
 				name: 'isGui',
 				cleanFn: (bool) => {
-				
+					
 					return sanitize.cleanBool(bool, false);
-				
-				}
-			}
-		];
-	
-	}
-	else if ('submit' === cmdName) {
-	
-		return [
-			{
-				name: 'ctrl',
-				cleanFn: (intgr) => {
-				
-					return sanitize.cleanInt(intgr, 0);
 				
 				}
 			},
 			{
-				name: 'attr',
-				cleanFn: (attrObj) => {
-				
-					return 'object' === typeof attrObj && null !== attrObj && ('string' === typeof attrObj.action) ? attrObj : {href: ''};
-				
-				}
-			},
-			{
-				name: 'isGui',
-				cleanFn: (bool) => {
-				
-					return sanitize.cleanBool(bool, false);
+				name: 'msg',
+				cleanFn: (str) => {
+					
+					return sanitize.cleanString(str, 255, false);
 				
 				}
 			}
@@ -313,10 +290,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					
 						case 'go':
 							return this.go(argsObj, callback);
-						case 'select':
-							return this.select(argsObj, callback);
-						case 'submit':
-							return this.submit(argsObj, callback);
+						case 'nogo':
+							return this.nogo(argsObj, callback);
 			
 					}
 				
@@ -416,8 +391,18 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					uwotBrowseCurrentStatus: {
 						value: 'active'
 					}
+				},
+				additional: {
+					browseOpts: {
+						loadContent: false;
+					}
 				}
 			};
+			if ('string' === typeof args.msg && '' !== args.msg) {
+		
+				goResult.additional.browseOpts.msg = args.msg;
+		
+			}
 			try {
 			
 				this.getPathContent(argPath, args, function(error, pathContent) {
@@ -461,88 +446,33 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	}
 	
-	select(args, callback) {
+	nogo(args, callback) {
 	
-		var selectResult = {
-			output: {
-				content: [{content: 'test select output data', classes: ['browseOutput']}]
+		var nogoResult = {
+			outputType: 'object',
+			cookies: {
+				uwotBrowseCurrentPath: {
+					value: args.path
+				},
+				uwotBrowseCurrentType: {
+					value: args.isGui ? 'gui' : 'cli'
+				},
+				uwotBrowseCurrentStatus: {
+					value: 'active'
+				}
 			},
-			outputType: 'object'
-		};
-		selectResult.cookies = {
-			uwotBrowseCurrentPath: {
-				value: args.href
-			},
-			uwotBrowseCurrentType: {
-				value: args.isGui ? 'gui' : 'cli'
-			},
-			uwotBrowseCurrentStatus: {
-				value: 'active'
+			additional: {
+				browseOpts: {
+					loadContent: false;
+				}
 			}
 		};
-		var argPath = args.href;
-		delete args.href;
-		try {
+		if ('string' === typeof args.msg && '' !== args.msg) {
 		
-			this.getPathContent(argPath, args, function(error, pathContent) {
-			
-				if (error) {
-				
-					return callback(error);
-				
-				}
-				else if ('string' !== typeof pathContent || '' === pathContent) {
-				
-					return callback(false, selectResult);
-				
-				}
-				else {
-				
-					selectResult.output.content[0].content = pathContent;
-					// TBD
-					// should be pulling this value from the user cookie after initial execute callback
-					// currently just do the same isGui check on content
-					if (-1 !== pathContent.indexOf(GUI_CLASS_STRING)) {
-					
-						selectResult.cookies.uwotBrowseCurrentType.value = 'gui';
-					
-					}
-					return callback(false, selectResult);
-					
-				
-				}
-			
-			});
+			nogoResult.additional.browseOpts.msg = args.msg;
 		
 		}
-		catch(e) {
-		
-			return callback(e);
-		
-		}
-	
-	}
-	
-	submit(args, callback) {
-	
-		var submitResult = {
-			output: {
-				content: [{content: 'test select output data', classes: ['browseOutput']}]
-			},
-			outputType: 'object'
-		};
-		submitResult.cookies = {
-			uwotBrowseCurrentPath: {
-				value: args.path
-			},
-			uwotBrowseCurrentType: {
-				value: args.isGui ? 'gui' : 'cli'
-			},
-			uwotBrowseCurrentStatus: {
-				value: 'active'
-			}
-		};
-		return callback(false, submitResult);
+		return callback(false, nogoResult);
 	
 	}
 	
