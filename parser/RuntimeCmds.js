@@ -609,7 +609,8 @@ class UwotRuntimeCmds extends AbstractRuntime {
 				var results = {
 					output: [],
 					operations: [],
-					cookies: {}
+					cookies: {},
+					additional: {}
 				};
 				// return empty object if map has no keys
 				if (exeMap.size < 1) {
@@ -794,6 +795,20 @@ class UwotRuntimeCmds extends AbstractRuntime {
 													});
 													delete result.cookies;
 											
+												}
+												if ('object' === typeof result.additional && null !== result.additional) {
+							
+													var addProps = Object.keys(result.additional);
+													addProps.forEach((propName) => {
+								
+														if (result.additional.hasOwnProperty(propName)) {
+									
+															results.additional[propName] = result.additional[propName];
+									
+														}
+								
+													});
+							
 												}
 												if ('object' === typeof result.output) {
 										

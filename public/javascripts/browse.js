@@ -467,7 +467,7 @@ class UwotBrowse {
 		var selfClose = this.getSetting('closeMsg');
 		var msgHtml = getMsgHtml(msg, msgClass);
 		if ('string' === typeof msgHtml && '' !== msgHtml) {
-			this.container.prepend(msgHtml);
+			jQuery('#uwotoutput .output-container').prepend(msgHtml);
 			return jQuery('#UwotBrowseMsg').fadeIn(400, function() {
 				if ('true' === selfClose) {
 					window.setTimeout(self.removeMsg, 15000);
