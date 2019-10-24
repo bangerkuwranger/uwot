@@ -403,10 +403,10 @@ function outputToMain(data, args) {
 				uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
 			}
 			else if ('object' === typeof data.browseOpts && null !== data.browseOpts) {
-				if ('string' === typeof browseOpts.msg && '' !== browseOpts.msg) {
-					browseRenderOpts.msg = browseOpts.msg;
+				if ('string' === typeof data.browseOpts.msg && '' !== data.browseOpts.msg) {
+					browseRenderOpts.msg = data.browseOpts.msg;
 				}
-				if (browseOpts.loadContent) {
+				if (data.browseOpts.loadContent) {
 					uwotBrowseInstance.render(data.output, browsePath, browseRenderOpts);
 				}
 				else if ('string' === typeof browseRenderOpts.msg) {

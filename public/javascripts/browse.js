@@ -93,6 +93,171 @@ const getMsgHtml = function(msg, msgClass) {
 		msgClass = 'info';
 	}
 	return '<div id="UwotBrowseMsg" class="uwot-browse-msg ' + msgClass + '" style="display: none;><span class="uwot-browse-msg-icon"></span><span class="uwot-browse-msg-text">' + msg + '</span><span class="uwot-browse-msg-close" onClick="uwotBrowseInstance.removeMsg()">X</span></div>';
+};
+
+// class strictly for info/interface panel used during browse
+class UwotBrowseModal {
+	constructor() {
+		this.visible = false;
+		this.panelNames = [
+			'links',
+			'forms',
+			'history'
+		];
+		this.container = null;
+		this.initialized = false;
+		this.currentPanel = null;
+	}
+	show(panelName) {
+		var validArg = true;
+		var wasSet = false;
+		if ('string' !== typeof panelName || -1 === this.panelNames.indexOf(panelName)) {
+			panelName = 'links';
+			validArg = false;
+		}
+		if (!this.initialized) {
+			this.init(false);
+		}
+		if (null === this.currentPanel || (validArg && panelName !== this.currentPanel)) {
+			this.setPanel(panelName);
+			wasSet = true;
+		}
+		this.container.fadeIn();
+		this.visible = true;
+		return wasSet ? panelName : false;
+	}
+	hide() {
+		this.container.fadeOut();
+		this.visible = false;
+	}
+	opacity(opacityPct) {
+		if ('number' === typeof opacityPct || ('string' === typeof opacityPct && 'number' === typeof parseInt(opacityPct))) {
+			// only uses the whole number without rounding
+			opacityPct = parseInt(opacityPct);
+			if (opacityPct > 100) {
+				opacityPct = 100;
+			}
+			else if (opacityPct < 0) {
+				opacityPct = 0;
+			}
+			if (opacityPct === 0) {
+				this.hide();
+				return '0';
+			}
+			else {
+				var opacityFloat = opacityPct/100;
+				if (!this.visible) {
+					this.show();
+				}
+				this.container.fadeTo(400, opacityFloat);
+				return opacityPct.toString();
+			}
+		}
+		else {
+			console.error('Invalid opacity percentage: ' + opacityPct);
+			return false;
+		}
+	}
+	init(showOnInit, firstPanel) {
+		showOnInit = 'boolean' === typeof showOnInit && true === showOnInit;
+		if ('string' !== typeof firstPanel || -1 === this.panelNames.indexOf(firstPanel)) {
+			firstPanel = 'links';
+		}
+		var currentModal = jQuery('#uwotBrowseModal');
+		if (currentModal.length > 0) {
+			currentModal.remove();
+		}
+		jQuery('#uwotoutput .output-container').append(getModalHtml());
+		this.container = jQuery('#uwotBrowseModal');
+		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
+		this.setPanel(firstPanel);
+		if (showOnInit) {
+			this.show();
+		}
+		this.initialized = true;
+		return;
+	}
+	destroy() {
+		this.container = null;
+		jQuery('#uwotBrowseModal').remove();
+		this.initialized = false;
+		return;
+	}
+	setPanel(panelName) {
+		if ('string' !== typeof panelName || -1 === this.panelNames.indexOf(panelName)) {
+			panelName = 'links';
+		}
+		var thisPanelContent = jQuery('#uwotBrowseModalContent [data-panel-name="' + panelName + '"]');
+		this.container.find('.uwot-browse-modal-title').html(thisPanelContent.find('title').html());
+		this.container.find('.uwot-browse-modal-content').html(thisPanelContent.find('content').html());
+		this.currentPanel = panelName;
+		return;
+	}
+	getLinksContent() {
+		var linksContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="links"><title>Links</title><content>';
+		var cliLinks = jQuery('#uwotoutput #uwotBrowseHtml a');
+		if (cliLinks.length > 0) {
+			jQuery('a.uwot-console-link').click(function(e) {
+				uwotConsoleOnClick(this, e);
+			});
+			jQuery('#uwotoutput .output-container').append(getModalHtml());
+			cliLinks.each((idx, el) => {
+				let linkNo = jQuery(el).attr('data-link-num');
+				let linkHref = jQuery(el).attr('href');
+				let linkTarget = jQuery(el).attr('target');
+				linkTarget = 'string' === typeof linkTarget && '_blank' === linkTarget ? linkTarget : '_self';
+				let linkTxt = jQuery(el).text();
+				linksContentHtml += '<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>';
+			});
+		}
+		else {
+			linksContentHtml += '<h4>No links found.</h4>';
+		}
+		linksContentHtml += '</content></div>';
+		return linksContentHtml;
+	}
+	getFormsContent() {
+		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="forms"><title>Forms</title><content>';
+		var cliForms = jQuery('#uwotoutput #uwotBrowseHtml form');
+		formsContentHtml += '<h4>No forms found.</h4>';
+		formsContentHtml += '</content></div>';
+		return formsContentHtml;
+	}
+	getHistoryContent() {
+		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="history"><title>History</title><content>';
+		formsContentHtml += '<h4>No history found.</h4>';
+		formsContentHtml += '</content></div>';
+		return formsContentHtml;
+	}
+	refreshAllContent(showOnRefresh) {
+		showOnRefresh = 'boolean' === typeof showOnRefresh && true === showOnRefresh;
+		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
+		if (null === this.currentPanel) {
+			this.currentPanel = 'links';
+		}
+		this.setPanel(this.currentPanel);
+		if (showOnRefresh) {
+			this.show();
+		}
+		return;
+	}
+	selectLink(linkIdx) {
+		var $link = this.container.find('#uwotBrowseModalContent [data-panel-name="links"] content .uwot-browse-modal-content-line[data-link-num="' + linkIdx + '"]');
+		if ($link.length < 1) {
+			$link = null;
+		}
+		return $link;
+	}
+	selectForm(formIdx) {
+	
+	}
+	selectHistory(histIdx) {
+	
+	}
 }
 
 // class contains instance methods for opening, closing, and maintaining browse instance in the user interface
@@ -137,7 +302,7 @@ class UwotBrowse {
 			else if (oldCmdArr[0] === 'opacity') {
 				var setOpacity = self.modal.opacity(oldCmdArr[1]);
 				noGo = true;
-				msg = setOpacity ? ' "panel opacity: ' + oldCmdArr[1] + '%"' : ' "opacity must be a number in range 0-100"'
+				msg = setOpacity ? ' "panel opacity: ' + oldCmdArr[1] + '%"' : ' "opacity must be a number in range 0-100"';
 			}
 			else if (oldCmdArr[0] === 'hide') {
 				self.modal.hide();
@@ -158,16 +323,16 @@ class UwotBrowse {
 				noGo = true;
 				var validSettings = Object.keys(getDefaultUwotBrowseSettings());
 				if ('string' !== typeof oldCmdArr[1]) {
-					msg = ' "save a setting with the set command followed by a key and a value. valid keys: ' + validSettings.join() + '"'
+					msg = ' "save a setting with the set command followed by a key and a value. valid keys: ' + validSettings.join() + '"';
 				}
 				else if ('string' !== typeof oldCmdArr[2] && validSettings.indexOf(oldCmdArr[1]) !== -1) {
-					var currVal = self.getSetting(oldCmdArr[1])
+					var currVal = self.getSetting(oldCmdArr[1]);
 					msg = ' "valid values for setting ' + oldCmdArr[1] + ' are ' + UwotBrowseSettingsValidator[oldCmdArr[1]] + '. current value: ' + currVal + '"';
 				}
 				else {
 					var setResult = self.saveSetting(oldCmdArr[1], oldCmdArr[2]);
 					if (!setResult) {
-						msg = ' "setting ' + oldCmdArr[1] + ' changed to ' + oldCmdArr[2] + '"'
+						msg = ' "setting ' + oldCmdArr[1] + ' changed to ' + oldCmdArr[2] + '"';
 					}
 					else {
 						msg = ' "' + setResult + '"';
@@ -348,7 +513,7 @@ class UwotBrowse {
 		var expiry = new Date().setFullYear(expireDate.getFullYear() + 1);
 		var currentVal = uwotGetCookieValue(UWOT_BROWSE_SETTINGS_COOKIE_NAME);
 		if ('string' === typeof currentVal && '' !== currentVal) {
-			settingsObj = JSON.parse(currentVal)
+			settingsObj = JSON.parse(currentVal);
 		}
 		else {
 			settingsObj = defaultSettings;
@@ -405,169 +570,5 @@ class UwotBrowse {
 			console.error('invalid link index for goToExternalLink');
 		}
 		return;
-	}
-}
-
-class UwotBrowseModal {
-	constructor() {
-		this.visible = false;
-		this.panelNames = [
-			'links',
-			'forms',
-			'history'
-		];
-		this.container = null;
-		this.initialized = false;
-		this.currentPanel = null;
-	}
-	show(panelName) {
-		var validArg = true;
-		var wasSet = false;
-		if ('string' !== typeof panelName || -1 === this.panelNames.indexOf(panelName)) {
-			panelName = 'links';
-			validArg = false;
-		}
-		if (!this.initialized) {
-			this.init(false);
-		}
-		if (null === this.currentPanel || (validArg && panelName !== this.currentPanel)) {
-			this.setPanel(panelName);
-			wasSet = true;
-		}
-		this.container.fadeIn();
-		this.visible = true;
-		return wasSet ? panelName : false;
-	}
-	hide() {
-		this.container.fadeOut();
-		this.visible = false;
-	}
-	opacity(opacityPct) {
-		if ('number' === typeof opacityPct || ('string' === typeof opacityPct && 'number' === typeof parseInt(opacityPct))) {
-			// only uses the whole number without rounding
-			opacityPct = parseInt(opacityPct);
-			if (opacityPct > 100) {
-				opacityPct = 100;
-			}
-			else if (opacityPct < 0) {
-				opacityPct = 0;
-			}
-			if (opacityPct === 0) {
-				this.hide();
-				return '0';
-			}
-			else {
-				var opacityFloat = opacityPct/100;
-				if (!this.visible) {
-					this.show();
-				}
-				this.container.fadeTo(400, opacityFloat);
-				return opacityPct.toString();
-			}
-		}
-		else {
-			console.error('Invalid opacity percentage: ' + opacityPct);
-			return false;
-		}
-	}
-	init(showOnInit, firstPanel) {
-		showOnInit = 'boolean' === typeof showOnInit && true === showOnInit;
-		if ('string' !== typeof firstPanel || -1 === this.panelNames.indexOf(firstPanel)) {
-			firstPanel = 'links';
-		}
-		var currentModal = jQuery('#uwotBrowseModal');
-		if (currentModal.length > 0) {
-			currentModal.remove();
-		}
-		jQuery('#uwotoutput .output-container').append(getModalHtml());
-		this.container = jQuery('#uwotBrowseModal');
-		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
-		this.setPanel(firstPanel);
-		if (showOnInit) {
-			this.show();
-		}
-		this.initialized = true;
-		return;
-	}
-	destroy() {
-		this.container = null;
-		jQuery('#uwotBrowseModal').remove();
-		this.initialized = false;
-		return;
-	}
-	setPanel(panelName) {
-		if ('string' !== typeof panelName || -1 === this.panelNames.indexOf(panelName)) {
-			panelName = 'links';
-		}
-		var thisPanelContent = jQuery('#uwotBrowseModalContent [data-panel-name="' + panelName + '"]');
-		this.container.find('.uwot-browse-modal-title').html(thisPanelContent.find('title').html());
-		this.container.find('.uwot-browse-modal-content').html(thisPanelContent.find('content').html());
-		this.currentPanel = panelName;
-		return;
-	}
-	getLinksContent() {
-		var linksContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="links"><title>Links</title><content>';
-		var cliLinks = jQuery('#uwotoutput #uwotBrowseHtml a');
-		if (cliLinks.length > 0) {
-			jQuery('a.uwot-console-link').click(function(e) {
-				uwotConsoleOnClick(this, e);
-			});
-			jQuery('#uwotoutput .output-container').append(getModalHtml());
-			cliLinks.each((idx, el) => {
-				let linkNo = jQuery(el).attr('data-link-num');
-				let linkHref = jQuery(el).attr('href');
-				let linkTarget = jQuery(el).attr('target');
-				linkTarget = 'string' === typeof linkTarget && '_blank' === linkTarget ? linkTarget : '_self';
-				let linkTxt = jQuery(el).text();
-				linksContentHtml += '<div class="uwot-browse-modal-content-line" data-link-href="' + linkHref + '" data-link-num="' + linkNo + '" data-link-target="' + linkTarget + '"><span class="uwot-browse-modal-link-num">' + linkNo + '</span>&nbsp;<span class="uwot-browse-modal-link-name">' + linkTxt + '</span></div>';
-			});
-		}
-		else {
-			linksContentHtml += '<h4>No links found.</h4>';
-		}
-		linksContentHtml += '</content></div>';
-		return linksContentHtml;
-	}
-	getFormsContent() {
-		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="forms"><title>Forms</title><content>';
-		var cliForms = jQuery('#uwotoutput #uwotBrowseHtml form');
-		formsContentHtml += '<h4>No forms found.</h4>';
-		formsContentHtml += '</content></div>';
-		return formsContentHtml;
-	}
-	getHistoryContent() {
-		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="history"><title>History</title><content>';
-		formsContentHtml += '<h4>No history found.</h4>';
-		formsContentHtml += '</content></div>';
-		return formsContentHtml;
-	}
-	refreshAllContent(showOnRefresh) {
-		showOnRefresh = 'boolean' === typeof showOnRefresh && true === showOnRefresh;
-		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
-		if (null === this.currentPanel) {
-			this.currentPanel = 'links';
-		}
-		this.setPanel(this.currentPanel);
-		if (showOnRefresh) {
-			this.show();
-		}
-		return;
-	}
-	selectLink(linkIdx) {
-		var $link = this.container.find('#uwotBrowseModalContent [data-panel-name="links"] content .uwot-browse-modal-content-line[data-link-num="' + linkIdx + '"]');
-		if ($link.length < 1) {
-			$link = null;
-		}
-		return $link;
-	}
-	selectForm(formIdx) {
-	
-	}
-	selectHistory(histIdx) {
-	
 	}
 }

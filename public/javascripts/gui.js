@@ -1,5 +1,5 @@
 'use strict';
-/* global jQuery, uwotInteractive, getCliLinksHtml, uwotConsoleOnClick */
+/* global jQuery, uwotInteractive, getCliLinksHtml */
 
 class UwotGui {
 	constructor() {
