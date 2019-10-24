@@ -16,7 +16,7 @@ const getDefaultUwotBrowseSettings = function() {
 		noHistory: false,		//can be true or false
 		noCliHistory: false		//can be true or false 
 	};
-}
+};
 
 const UwotBrowseSettingsValidator = function(key, value) {
 	var validKeys = Object.keys(getDefaultUwotBrowseSettings());
@@ -54,7 +54,7 @@ const UwotBrowseSettingsValidator = function(key, value) {
 			}
 		},
 		noHistory(val) {
-			if ('string' !== typeofVal) {
+			if ('string' !== typeof val) {
 				return [
 					'true',
 					'false'
@@ -63,7 +63,7 @@ const UwotBrowseSettingsValidator = function(key, value) {
 			return 'true' === val || 'false' === val;
 		},
 		noCliHistory(val) {
-			if ('string' !== typeof Val) {
+			if ('string' !== typeof val) {
 				return [
 					'true',
 					'false'
