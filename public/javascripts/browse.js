@@ -240,8 +240,8 @@ class UwotBrowse {
 		else {
 			performOperations('clear');	
 		}
-		this.listener.removeHook('beforePost', this.performBrowseOperations.name);
-		this.listener.removeHook('beforePost', this.changeLoadPath.name);
+		this.listener.removeHook('beforePost', 'performBrowseOperations');
+		this.listener.removeHook('beforePost', 'changeLoadPath');
 		this.listener = null;
 	}
 	render(content, path, opts) {
