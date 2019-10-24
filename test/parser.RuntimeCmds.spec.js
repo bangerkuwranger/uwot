@@ -1560,6 +1560,7 @@ describe('RuntimeCmds.js', function() {
 				return expect(testRuntime.executeMap(new Map())).to.eventually.be.fulfilled.then((testResult) => {
 				
 					expect(testResult).to.deep.equal({
+						additional: {},
 						output: [],
 						operations: [],
 						cookies: {}
