@@ -546,7 +546,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					
 						var respCode = browseErrorHelper.getErrIntFromSysCode(e.code);
 						var htmlError = browseErrorHelper.getHtmlForError(respCode);
-						if (htmlError instanceof Error && error.message === 'invalid browser Error') {
+						if (htmlError instanceof Error && htmlError.message === 'invalid browser Error') {
 						
 							return callback(e);
 						

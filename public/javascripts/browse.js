@@ -19,7 +19,7 @@ const getDefaultUwotBrowseSettings = function() {
 }
 
 const UwotBrowseSettingsValidator = function(key, value) {
-	var validKeys = Objecy.keys(getDefaultUwotBrowseSettings());
+	var validKeys = Object.keys(getDefaultUwotBrowseSettings());
 	if ('string' !== typeof key || -1 === validKeys.indexOf(key)) {
 		return false;
 	}
@@ -63,7 +63,7 @@ const UwotBrowseSettingsValidator = function(key, value) {
 			return 'true' === val || 'false' === val;
 		},
 		noCliHistory(val) {
-			if ('string' !== typeofVal) {
+			if ('string' !== typeof Val) {
 				return [
 					'true',
 					'false'
@@ -73,7 +73,7 @@ const UwotBrowseSettingsValidator = function(key, value) {
 		}
 	};
 	return validators[key](value);
-}
+};
 
 const getModalHtml = function() {
 	return '<div id="uwotBrowseModal" class="uwot-browse-modal" style="display: none;"><h3 class="uwot-browse-modal-title"></h3><div class="uwot-browse-modal-content"></div><div id="uwotBrowseModalContent" style="display: none;"></div></div>';
@@ -510,7 +510,7 @@ class UwotBrowse {
 		if (!UwotBrowseSettingsValidator(key, value)) {
 			return 'invalid value';
 		}
-		var expiry = new Date().setFullYear(expireDate.getFullYear() + 1);
+		var expiry = new Date().setFullYear(new Date().getFullYear() + 1);
 		var currentVal = uwotGetCookieValue(UWOT_BROWSE_SETTINGS_COOKIE_NAME);
 		if ('string' === typeof currentVal && '' !== currentVal) {
 			settingsObj = JSON.parse(currentVal);
