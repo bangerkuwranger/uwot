@@ -202,7 +202,6 @@ class UwotBrowseModal {
 			jQuery('a.uwot-console-link').click(function(e) {
 				uwotConsoleOnClick(this, e);
 			});
-			jQuery('#uwotoutput .output-container').append(getModalHtml());
 			cliLinks.each((idx, el) => {
 				let linkNo = jQuery(el).attr('data-link-num');
 				let linkHref = jQuery(el).attr('href');
