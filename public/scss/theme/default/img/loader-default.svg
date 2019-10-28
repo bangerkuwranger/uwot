@@ -1,0 +1,17 @@
+<svg class="lds-blocks" width="200px" height="200px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="shape-rendering: auto; animation-play-state: running; animation-delay: 0s; background-image: none; background-position: initial initial; background-repeat: initial initial;"><rect x="16" y="16" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="0s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="40" y="16" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="0.25s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="64" y="16" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="0.5s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="16" y="40" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="1.75s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="64" y="40" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="0.75s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="16" y="64" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="1.5s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="40" y="64" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="1.25s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect><rect x="64" y="64" width="20" height="20" fill="#ffffff" style="animation-play-state: running; animation-delay: 0s;">
+  <animate attributeName="fill" values="#00e9f5;#ffffff;#ffffff" keyTimes="0;0.125;1" dur="2s" repeatCount="indefinite" begin="1s" calcMode="discrete" style="animation-play-state: running; animation-delay: 0s;"></animate>
+</rect></svg>

@@ -35,6 +35,12 @@ body {
 			.header {
 				border-color: mapGet($theme-colors, 'tag', 'border');
 				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+
+				.indicator-container.loading {
+					background-image: url("/scss/theme/beard/img/loader-beard.gif");
+					background-image: url("/scss/theme/beard/img/loader-beard.svg");
+				}
+
 			}
 
 			.output {

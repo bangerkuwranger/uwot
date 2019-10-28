@@ -35,6 +35,12 @@ body {
 			.header {
 				border-color: mapGet($theme-colors, 'tag', 'border');
 				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+
+				.indicator-container.loading {
+					background-image: url("/scss/theme/clone/img/loader-clone.gif");
+					background-image: url("/scss/theme/clone/img/loader-clone.svg");
+				}
+
 			}
 
 			.output {
@@ -120,6 +126,12 @@ body {
 				.header {
 					border-color: mapGet($theme-colors, 'scheme', 'secondary', 'bg');
 					background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
+
+					.indicator-container.loading {
+						background-image: url("/scss/theme/clone/img/loader-clone-dark.gif");
+						background-image: url("/scss/theme/clone/img/loader-clone-dark.svg");
+					}
+
 				}
 
 				.output {

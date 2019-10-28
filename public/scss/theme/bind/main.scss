@@ -31,10 +31,17 @@ body {
 			.header {
 				border-color: mapGet($theme-colors, 'tag', 'border');
 				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+
+				.indicator-container.loading {
+					background-image: url("/scss/theme/bind/img/loader-bind.gif");
+					background-image: url("/scss/theme/bind/img/loader-bind.svg");
+				}
+
 			}
 
 			.output {
 				background-image: url(/scss/theme/bind/img/wotbindbg.png);
+				background-image: url(/scss/theme/bind/img/wotbindbg.svg);
 
 				.output-container {
 

@@ -37,6 +37,12 @@ body {
 			.header {
 				border-color: none;
 				background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+
+				.indicator-container.loading {
+					background-image: url("/scss/theme/bot/img/loader-bot.gif");
+					background-image: url("/scss/theme/bot/img/loader-bot.svg");
+				}
+
 			}
 
 			.output {
