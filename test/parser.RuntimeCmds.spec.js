@@ -3223,7 +3223,7 @@ describe('RuntimeCmds.js', function() {
 						testArgs = testArgs.concat(args);
 						for (let i = 0; i < args.length; i++) {
 						
-							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+							result += Number.isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
 						
 						}
 						return cb(false, result);
@@ -3284,7 +3284,7 @@ describe('RuntimeCmds.js', function() {
 								return cb(new Error('test execute error'), null);
 							
 							}
-							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+							result += Number.isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
 						
 						}
 						return cb(false, result);
@@ -3318,7 +3318,7 @@ describe('RuntimeCmds.js', function() {
 						testArgs = testArgs.concat(args);
 						for (let i = 0; i < args.length; i++) {
 						
-							result += isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
+							result += Number.isNaN(parseInt(args[i])) ? 0 : parseInt(args[i]);
 						
 						}
 					

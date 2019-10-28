@@ -206,7 +206,7 @@ class CliHistory {
 	getAsInt(key) {
 	
 		var intRes = parseInt(localStorage.getItem(key));
-		return isNaN(intRes) ? null : intRes;
+		return Number.isNaN(intRes) ? null : intRes;
 	
 	}
 	

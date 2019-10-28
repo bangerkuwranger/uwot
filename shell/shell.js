@@ -424,7 +424,7 @@ function addSetupCategoryKeyArrayValue(category, key, value, envs) {
 function removeSetupCategoryKeyArrayValue(category, key, index, envs) {
 
 	//sanity check
-	if ('string' !== typeof category || 'string' !== typeof key || isNaN(parseInt(index))) {
+	if ('string' !== typeof category || 'string' !== typeof key || Number.isNaN(parseInt(index))) {
 	
 		console.error('category and key must be strings. index must be an integer.');
 	

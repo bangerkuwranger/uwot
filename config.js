@@ -788,7 +788,7 @@ class UwotConfigBase {
 			throw new TypeError('invalid callback passed to setArrVal.');
 		
 		}
-		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' !== typeof index || isNaN(parseInt(index))) {
+		else if ('string' !== typeof cat || 'string' !== typeof key || 'number' !== typeof index || Number.isNaN(parseInt(index))) {
 		
 			return callback(new TypeError('invalid args passed to removeArrIdx.'), false);
 		
