@@ -468,8 +468,8 @@ class UwotBrowse {
 		if ('string' === typeof msgHtml && '' !== msgHtml) {
 			jQuery('#uwotoutput .output-container').prepend(msgHtml);
 			return jQuery('#UwotBrowseMsg').fadeIn(400, function() {
-				if ('true' === selfClose) {
-					window.setTimeout(self.removeMsg, 15000);
+				if (true === selfClose || 'true' === selfClose) {
+					window.setTimeout(self.removeMsg, 5000);
 				}
 				if ('number' === typeof parseInt(selfClose) && 0 < parseInt(selfClose)) {
 					window.setTimeout(self.removeMsg, parseInt(selfClose));

@@ -191,6 +191,27 @@ body {
 
 					}
 
+					#UwotBrowseMsg {
+						position: absolute;
+						width: 93%;
+						padding: 1ch 1%;
+						border: 4px solid;
+						border-top-width: 0;
+						border-left-width: 0;
+						border-bottom-left-radius: 10px;
+						border-top-right-radius: 10px;
+
+						.uwot-browse-msg-close {
+							min-width: 2em;
+							display: inline-block;
+							text-align: center;
+							position: absolute;
+							right: 0;
+							cursor: pointer;
+						}
+
+					}
+
 					#uwotBrowseHtml {
 						position: relative;
 

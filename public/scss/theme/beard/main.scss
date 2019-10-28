@@ -43,8 +43,34 @@ body {
 
 				.output-container {
 
+					#UwotBrowseMsg {
+						background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+						border-color: mapGet($theme-colors, 'tag', 'border');
+						border-radius: 0;
+
+						&.info {
+							background-color: mapGet($theme-colors, 'tag', 'link');
+							border-color: mapGet($ansi-colors, 'cyan');
+							color: mapGet($ansi-colors, 'cyan');
+						}
+
+						&.warn {
+							background-color: mapGet($ansi-colors, 'yellow');
+							color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+							border-color: mapGet($theme-colors, 'tag', 'link');
+						}
+
+						&.error {
+							background-color: mapGet($ansi-colors, 'red');
+							color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+							border-color: mapGet($ansi-colors, 'magenta');
+						}
+
+					}
+
 					> .uwot-browse-modal {
 						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+						bottom: 12ch;
 					}
 
 				}
