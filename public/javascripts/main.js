@@ -413,6 +413,11 @@ function outputToMain(data, args) {
 					uwotBrowseInstance.displayMsg(browseRenderOpts.msg);
 				}
 			}
+			else {
+				if ('string' === typeof data.output && '' !== data.output) {
+					jQuery('#uwotoutput .output-container').append('<div class="' + lineClasses + '">'+ data.output +'</div>');
+				}
+			}
 		}
 		else {
 			if (uwotBrowseInstance !== null) {

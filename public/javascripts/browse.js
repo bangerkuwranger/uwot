@@ -326,7 +326,7 @@ class UwotBrowse {
 				}
 				else if ('string' !== typeof oldCmdArr[2] && validSettings.indexOf(oldCmdArr[1]) !== -1) {
 					var currVal = self.getSetting(oldCmdArr[1]);
-					msg = ' "valid values for setting ' + oldCmdArr[1] + ' are ' + UwotBrowseSettingsValidator[oldCmdArr[1]] + '. current value: ' + currVal + '"';
+					msg = ' "valid values for setting ' + oldCmdArr[1] + ' are ' + UwotBrowseSettingsValidator(oldCmdArr[1]) + '. current value: ' + currVal + '"';
 				}
 				else {
 					var setResult = self.saveSetting(oldCmdArr[1], oldCmdArr[2]);
@@ -465,6 +465,9 @@ class UwotBrowse {
 		var self = this;
 		var selfClose = this.getSetting('closeMsg');
 		var msgHtml = getMsgHtml(msg, msgClass);
+		if (jQuery('#UwotBrowseMsg').length > 0) {
+			jQuery('#UwotBrowseMsg').remove();
+		}
 		if ('string' === typeof msgHtml && '' !== msgHtml) {
 			jQuery('#uwotoutput .output-container').prepend(msgHtml);
 			return jQuery('#UwotBrowseMsg').fadeIn(400, function() {
