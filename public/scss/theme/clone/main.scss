@@ -69,7 +69,7 @@ body {
 					}
 
 					> .uwot-browse-modal {
-						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+						background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 					}
 
 				}
@@ -159,7 +159,7 @@ body {
 						}
 
 						> .uwot-browse-modal {
-							background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'fg'), 0.8);
+							background-color: mapGet($theme-colors, 'scheme', 'primary', 'fg');
 						}
 
 					}
@@ -206,3 +206,16 @@ body {
 	}
 
 }
+
+@media (min-width: 1200px) {
+
+	body {
+
+		#uwot {
+			font-size: 16px;
+		}
+
+	}
+
+}
+

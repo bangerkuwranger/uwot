@@ -70,7 +70,7 @@ body {
 					}
 
 					> .uwot-browse-modal {
-						background: rgba(mapGet($theme-colors, 'scheme', 'primary', 'bg'), 0.8);
+						background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 					}
 
 				}
@@ -120,11 +120,10 @@ body {
 				background-color: #00002A;
 
 				a {
-					color: #0000CF;
 
 					&:hover,
 					&:active {
-						color: #0000DF;
+						color: #035fc4;
 					}
 
 				}
@@ -139,7 +138,7 @@ body {
 					.output-container {
 
 						> .uwot-browse-modal {
-							background: rgba(#111111, 0.8);
+							background-color: #111111;
 						}
 
 					}
@@ -186,3 +185,16 @@ body {
 	}
 
 }
+
+@media (min-width: 1200px) {
+
+	body {
+
+		#uwot {
+			font-size: 16px;
+		}
+
+	}
+
+}
+

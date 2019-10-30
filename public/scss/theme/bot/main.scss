@@ -72,7 +72,7 @@ body {
 					}
 
 					> .uwot-browse-modal {
-						background: mapGet($theme-colors, 'scheme', 'primary', 'bg');
+						background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 					}
 
 				}
@@ -136,7 +136,7 @@ body {
 					.output-container {
 
 						> .uwot-browse-modal {
-							background: rgba(#001C23, 0.8);
+							background-color: #001C23;
 						}
 
 					}

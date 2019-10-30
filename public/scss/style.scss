@@ -147,6 +147,8 @@ body {
 					> .uwot-browse-modal {
 						border: 1px solid;
 						padding: 1ch 1em;
+						background-color: rgb(03, 03, 03);
+						opacity: 0.8;
 					}
 
 					.outputline {
@@ -356,7 +358,6 @@ body {
 						> .uwot-browse-modal {
 							position: fixed;
 							z-index: 100;
-							background: rgba(0, 0, 0, 0.8);
 							bottom: 8ch;
 							left: 1em;
 						}
@@ -384,6 +385,18 @@ body {
 
 			}
 
+		}
+
+	}
+
+}
+
+@media (min-width: 1200px) {
+
+	body {
+
+		#uwot {
+			font-size: 18px;
 		}
 
 	}
