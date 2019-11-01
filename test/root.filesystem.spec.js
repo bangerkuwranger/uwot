@@ -1107,6 +1107,31 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('pFile(op, argArr, isSudo)', function() {
+		
+			it('should return a Promise');
+			it('should reject with a SystemError if op is not a string that matches a valid file operation');
+			it('should reject with a SystemError if argArr is not an object');
+			it('should use an empty array for argArr if passed value is not an Array');
+			it('should set this.sudo to false if isSudo does not equal true or this.user.maySudo does not return true');
+			it('should set this.sudo to true if isSudo equals true and this.user.maySudo returns true');
+			it('should reject with a SystemError if the first element in argArr is not a non-empty string');
+			it('should reject with a SystemError if the op is "append" or "write" and the second element of argArr is not a non-empty string');
+			it('should resolve with true if op equals "append" and this.appendPromise resolves with true');
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "append" and this.appendPromise resolves with a value other than true');
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "append" and this.appendPromise rejects');
+			it('should resolve with true if op equals "delete" and this.removeFilePromise resolves with true');
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "delete" and this.removeFilePromise resolves with a value other than true');
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.removeFilePromise if op equals "delete" and this.removeFilePromise rejects');
+			it('should resolve with the result of data read from the file at path argArr[0]\'s toString method if op equals "read" and this.readFilePromise resolves with a non-string with a function property "toString"');
+			it('should resolve with the data read from the file at path argArr[0] if op equals "read" and this.readFilePromise resolves with a string');
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "read" and this.readFilePromise resolves with a non-string value that does not have a toString method');
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.readFilePromise if op equals "read" and this.readFilePromise rejects');
+			it('should resolve with true if op equals "write" and this.writeFilePromise resolves with true');
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "write" and this.writeFilePromise resolves with a value other than true');
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "write" and this.writeFilePromise rejects');
+		
+		});
 		describe('changeCwd(pth)', function() {
 		
 			it('should be a function', function() {
@@ -1290,6 +1315,20 @@ describe('filesystem.js', function() {
 				expect(filesystem.append(path.resolve(filesystem.root.path + '/', testPath), testData)).to.be.true;
 			
 			});
+		
+		});
+		describe('appendPromise(pth, data)', function() {
+		
+			it('should return a Promise');
+			it('should reject with an Error if pth is not a string');
+			it('should reject with an Error if data is not a string or a Buffer');
+			it('should use pth value unchanged if it is an absolute path within the VFS root');
+			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root');
+			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string');
+			it('should reject with an Error if this.isWritable returns an Error');
+			it('should reject with a SystemError if this.isWritable does not return a truthy value');
+			it('should resolve with true if this.isWritable returns a truthy value and fs.appendFile returns a resolved Promise');
+			it('should reject with an Error if this.isWritable returns a truthy value and fs.appendFile rejects with an Error');
 		
 		});
 		describe('touch(pth)', function() {
@@ -1846,6 +1885,19 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('readFilePromise(pth)', function() {
+		
+			it('should return a Promise');
+			it('should reject with an Error if pth is not a string');
+			it('should use pth value unchanged if it is an absolute path within the VFS root');
+			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root');
+			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string');
+			it('should reject with an Error if this.isReadable returns an Error');
+			it('should reject with a SystemError if this.isReadable does not return a truthy value');
+			it('should resolve with the data from the resolved Promise if this.isReadable returns a truthy value and fs.readFile returns a resolved Promise');
+			it('should reject with an Error if this.isReadable returns a truthy value and fs.readFile rejects with an Error');
+		
+		});
 		describe('moveFile(source, target)', function() {
 		
 			it('should be a function', function() {
@@ -2177,6 +2229,19 @@ describe('filesystem.js', function() {
 			});
 		
 		});
+		describe('removeFilePromise(pth)', function() {
+		
+			it('should return a Promise');
+			it('should reject with an Error if pth is not a string');
+			it('should use pth value unchanged if it is an absolute path within the VFS root');
+			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root');
+			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string');
+			it('should reject with an Error if this.isWritable returns an Error');
+			it('should reject with a SystemError if this.isWritable does not return a truthy value');
+			it('should resolve with true if this.isWritable returns a truthy value and fs.unlink returns a resolved Promise');
+			it('should reject with an Error if this.isWritable returns a truthy value and fs.unlink rejects with an Error');
+		
+		});
 		describe('stat(pth, isVerbose, appendFtc, format)', function() {
 		
 			it('should be a function', function() {
@@ -2398,6 +2463,20 @@ describe('filesystem.js', function() {
 				expect(filesystem.write(path.join(filesystem.root.path + "/", testPath), testData)).to.be.true;
 			
 			});
+		
+		});
+		describe('writePromise(pth, data)', function() {
+		
+			it('should return a Promise');
+			it('should reject with an Error if pth is not a string');
+			it('should reject with an Error if data is not a string or a Buffer');
+			it('should use pth value unchanged if it is an absolute path within the VFS root');
+			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root');
+			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string');
+			it('should reject with an Error if this.isWritable returns an Error');
+			it('should reject with a SystemError if this.isWritable does not return a truthy value');
+			it('should resolve with true if this.isWritable returns a truthy value and fs.writeFile returns a resolved Promise');
+			it('should reject with an Error if this.isWritable returns a truthy value and fs.writeFile rejects with an Error');
 		
 		});
 		describe('isInUser(pth, userName)', function() {

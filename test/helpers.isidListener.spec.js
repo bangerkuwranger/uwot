@@ -770,5 +770,15 @@ describe('isidListener.js', function() {
 		});
 		
 	});
+	describe('getServerListeners(isid)', function() {
+	
+		it('should be a function');
+		it('should call this.ensureGlobalListener with value of isid arg');
+		it('should return an Array');
+		it('should return an empty Array if global.Uwot.Listeners[isid] does not have any own properties');
+		it('should add an element to the result Array for each property in global.Uwot.Listeners[isid] that has a name property not equal to "disabledForExclusive"');
+		it('should return an array of objects with properties "name", "options", and "status"');
+	
+	});
 
 });

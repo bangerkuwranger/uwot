@@ -362,7 +362,12 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	go(args, callback) {
 	
 		var argPath;
-		if ('object' !== typeof args || args === null) {
+		if ('function' !== typeof callback) {
+		
+			throw new TypeError('invalid callback passed to bin/browse/handler/go');
+		
+		}
+		else if ('object' !== typeof args || args === null) {
 		
 			return callback(new TypeError('invalid args passed to bin/browse/go'));
 		
@@ -394,7 +399,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				},
 				additional: {
 					browseOpts: {
-						loadContent: false
+						loadContent: true
 					}
 				}
 			};
@@ -409,7 +414,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				
 					if (error) {
 					
-						return callback(error);
+						goResult.output.content[0].content = error.message;
+						return callback(false, goResult);
 					
 					}
 					else if ('string' !== typeof pathContent || '' === pathContent) {
@@ -438,7 +444,8 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			}
 			catch(e) {
 			
-				return callback(e);
+				goResult.output.content[0].content = e.message;
+				return callback(false, goResult);
 			
 			}
 		
@@ -448,31 +455,40 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 	
 	nogo(args, callback) {
 	
-		var nogoResult = {
-			outputType: 'object',
-			cookies: {
-				uwotBrowseCurrentPath: {
-					value: args.path
-				},
-				uwotBrowseCurrentType: {
-					value: args.isGui ? 'gui' : 'cli'
-				},
-				uwotBrowseCurrentStatus: {
-					value: 'active'
-				}
-			},
-			additional: {
-				browseOpts: {
-					loadContent: false
-				}
-			}
-		};
-		if ('string' === typeof args.msg && '' !== args.msg) {
+		if ('function' !== typeof callback) {
 		
-			nogoResult.additional.browseOpts.msg = args.msg;
+			throw new TypeError('invalid callback passed to bin/browse/handler/nogo');
 		
 		}
-		return callback(false, nogoResult);
+		else {
+		
+			var nogoResult = {
+				outputType: 'object',
+				cookies: {
+					uwotBrowseCurrentPath: {
+						value: args.path
+					},
+					uwotBrowseCurrentType: {
+						value: args.isGui ? 'gui' : 'cli'
+					},
+					uwotBrowseCurrentStatus: {
+						value: 'active'
+					}
+				},
+				additional: {
+					browseOpts: {
+						loadContent: false
+					}
+				}
+			};
+			if ('string' === typeof args.msg && '' !== args.msg) {
+		
+				nogoResult.additional.browseOpts.msg = args.msg;
+		
+			}
+			return callback(false, nogoResult);
+		
+		}
 	
 	}
 	

@@ -28,7 +28,7 @@ const getTestListenerOpts = function() {
 	
 };
 
-describe('instanceSessions.js', function() {
+describe('listener.js', function() {
 
 	before(function() {
 	
@@ -796,6 +796,7 @@ describe('instanceSessions.js', function() {
 				expect(testListener.status).to.equal('enabled');
 			
 			});
+			it('should add elements to global.Uwot.Bin for each member of this.cmdSet if listener type is not default and parser is "cmdParser"; each element should be an object with a name property and function properties "execute" and "matchOpt"');
 		
 		});
 		describe('disable()', function() {

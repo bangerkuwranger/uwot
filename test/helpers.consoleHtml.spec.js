@@ -166,6 +166,7 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.getRemoteResources(null)).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('urlOrUrlArray must be a string or an Array of strings');
 		
 		});
+		it('should set type arg value to "file" if passed value is not "script" or "style"');
 		it('should return a Promise resolved with a cached value if urlOrUrlArray is a string and the matching value is cached', function() {
 		
 			var testUrl = 'https://www.chadacarino.com/css/singlepage.css';
@@ -232,6 +233,8 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.getRemoteResources(testUrl)).to.eventually.be.rejectedWith(Error).with.property('message').that.equals('test request error');
 		
 		});
+		it('should return a Promise resolved with the result of this.localizeCss called with retrieved value and cache the final value if urlOrUrlArray is a string, type is "style", value is not cached, and the remote data is retrieved successfully');
+		it('should prepend a comment containing the source url to the result if type is "style" or "script"');
 		it('should return a Promise rejected with an Error if urlOrUrlArray arg is an empty Array and contentString is not a string', function() {
 		
 			var testUrls = [];
@@ -349,6 +352,8 @@ describe('consoleHtml.js', function() {
 			});
 		
 		});
+		it('should call this.localizeCss with each result if urlOrUrlArray is an Array, type is "style", values are not cached, and the remote data is retrieved successfully for each');
+		it('should prepend a comment containing the source url to each result if type is "style" or "script" and urlOrUrlArray is an Array');
 	
 	});
 	describe('pullHeadElements(jqObj, type)', function() {
@@ -449,6 +454,7 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.pullHeadElements(testObj, 'script')).to.eventually.equal('<script type="text/javascript">' + matchedScripts.length + '</script>');
 		
 		});
+		it('should add the transport specified by config value server:transport to any URI that does not specify a transport explicitly, i.e. begins with "//:" rather than "http://" or "https://"');
 		it('should return a Promise rejected with an Error if getRemoteResources returns a rejected Promise', function() {
 		
 			getRemoteResourcesStub.returns(Promise.reject('test getRemoteResources rejection'))
