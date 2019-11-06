@@ -7,6 +7,7 @@ chai.use(chaiAsPromised);
 const cheerio = require('cheerio');
 const request = require('request-promise-native');
 const path = require('path');
+const EOL = require('os').EOL;
 const globalSetupHelper = require('../helpers/globalSetup');
 
 var consoleHtml = require('../helpers/consoleHtml');
@@ -153,7 +154,7 @@ describe('consoleHtml.js', function() {
 		});
 		afterEach('restore stub', function() {
 		
-			requestGetStub.restore();
+			sinon.restore();
 		
 		});
 		it('should be a function', function() {
@@ -166,7 +167,21 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.getRemoteResources(null)).to.eventually.be.rejectedWith(TypeError).with.property('message').that.equals('urlOrUrlArray must be a string or an Array of strings');
 		
 		});
-		it('should set type arg value to "file" if passed value is not "script" or "style"');
+		it('should set type arg value to "file" if passed value is not "script" or "style"', function() {
+		
+			var testUrl = 'https://www.chadacarino.com/testpage.html';
+			var testBody = '<html><head><title>testpage</title></head><body><h1>Test Page</h1></body></html>';
+			requestGetStub.returns(Promise.resolve(testBody));
+			consoleHtml.cache.flushAll();
+			return expect(consoleHtml.getRemoteResources(testUrl)).to.eventually.be.fulfilled.then((content) => {
+		
+				expect(content).to.equal(testBody);
+				expect(content).to.not.contain('/***  https://www.chadacarino.com/testpage.html  ***/');
+				consoleHtml.cache.del(testUrl);
+			
+			});
+		
+		});
 		it('should return a Promise resolved with a cached value if urlOrUrlArray is a string and the matching value is cached', function() {
 		
 			var testUrl = 'https://www.chadacarino.com/css/singlepage.css';
@@ -233,8 +248,61 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.getRemoteResources(testUrl)).to.eventually.be.rejectedWith(Error).with.property('message').that.equals('test request error');
 		
 		});
-		it('should return a Promise resolved with the result of this.localizeCss called with retrieved value and cache the final value if urlOrUrlArray is a string, type is "style", value is not cached, and the remote data is retrieved successfully');
-		it('should prepend a comment containing the source url to the result if type is "style" or "script"');
+		it('should return a Promise resolved with the result of this.localizeCss called with retrieved value and cache the final value if urlOrUrlArray is a string, type is "style", value is not cached, and the remote data is retrieved successfully', function() {
+		
+			var testUrl = 'https://www.chadacarino.com/css/singlepage.css';
+			var testBody = 'body {background: #333;color: #ddd}';
+			var localizedStr = "/* localized CSS */" + EOL;
+			var commentStr = "/***  " + testUrl + "  ***/" + EOL;
+			requestGetStub.returns(Promise.resolve(testBody));
+			var localizeCssStub = sinon.stub(consoleHtml, 'localizeCss').callsFake(function returnPrependedString(str) {
+			
+				return Promise.resolve(localizedStr + str);
+			
+			});
+			consoleHtml.cache.flushAll();
+			return expect(consoleHtml.getRemoteResources(testUrl, '', 'style')).to.eventually.be.fulfilled.then((content) => {
+		
+				expect(content).to.equal(commentStr + localizedStr + testBody);
+				expect(consoleHtml.cache.get(testUrl)).to.equal(content);
+				consoleHtml.cache.del(testUrl);
+			
+			});
+		
+		});
+		it('should prepend a comment containing the source url to the result if type is "style" or "script"', function() {
+		
+			var testCssUrl = 'https://www.chadacarino.com/css/singlepage.css';
+			var testCssBody = 'body {background: #333;color: #ddd}';
+			var testJsUrl = 'https://www.chadacarino.com/js/singlepage.js';
+			var testJsBody = 'console.log("test script run");';
+			var localizedCssStr = "/* localized CSS */" + EOL;
+			var commentCssStr = "/***  " + testCssUrl + "  ***/" + EOL;
+			var commentJsStr = "/***  " + testJsUrl + "  ***/" + EOL;
+			requestGetStub.onCall(0).returns(Promise.resolve(testCssBody));
+			requestGetStub.onCall(1).returns(Promise.resolve(testJsBody));
+			var localizeCssStub = sinon.stub(consoleHtml, 'localizeCss').callsFake(function returnPrependedString(str) {
+			
+				return Promise.resolve(localizedCssStr + str);
+			
+			});
+			consoleHtml.cache.flushAll();
+			return expect(consoleHtml.getRemoteResources(testCssUrl, '', 'style')).to.eventually.be.fulfilled.then((content) => {
+		
+				expect(content).to.equal(commentCssStr + localizedCssStr + testCssBody);
+				expect(consoleHtml.cache.get(testCssUrl)).to.equal(content);
+				consoleHtml.cache.del(testCssUrl);
+				return expect(consoleHtml.getRemoteResources(testJsUrl, '', 'script')).to.eventually.be.fulfilled.then((content) => {
+		
+					expect(content).to.equal(commentJsStr + testJsBody);
+					expect(consoleHtml.cache.get(testJsUrl)).to.equal(content);
+					consoleHtml.cache.del(testJsUrl);
+			
+				});
+			
+			});
+		
+		});
 		it('should return a Promise rejected with an Error if urlOrUrlArray arg is an empty Array and contentString is not a string', function() {
 		
 			var testUrls = [];
@@ -352,8 +420,79 @@ describe('consoleHtml.js', function() {
 			});
 		
 		});
-		it('should call this.localizeCss with each result if urlOrUrlArray is an Array, type is "style", values are not cached, and the remote data is retrieved successfully for each');
-		it('should prepend a comment containing the source url to each result if type is "style" or "script" and urlOrUrlArray is an Array');
+		it('should call this.localizeCss with each result if urlOrUrlArray is an Array, type is "style", values are not cached, and the remote data is retrieved successfully for each', function() {
+		
+			var testUrl1 = 'https://www.chadacarino.com/css/singlepage.css';
+			var testUrl2 = 'https://www.chadacarino.com/css/darkmode.css';
+			var testUrls = [testUrl1, testUrl2];
+			var testBody1 = 'body {background: #333;color: #ddd}';
+			var testBody2 = 'body.darkmode {background: #000; color: #ccc}';
+			var localizedStr = "/* localized CSS */" + EOL;
+			var commentStr1 = "/***  " + testUrl1 + "  ***/" + EOL;
+			var commentStr2 = "/***  " + testUrl2 + "  ***/" + EOL;
+			requestGetStub.onCall(0).returns(Promise.resolve(testBody1));
+			requestGetStub.onCall(1).returns(Promise.resolve(testBody2));
+			var localizeCssStub = sinon.stub(consoleHtml, 'localizeCss').callsFake(function returnPrependedString(str) {
+			
+				return Promise.resolve(localizedStr + str);
+			
+			});
+			consoleHtml.cache.flushAll();
+			return expect(consoleHtml.getRemoteResources(testUrls, '', 'style')).to.eventually.be.fulfilled.then((content) => {
+		
+				expect(content).to.equal(commentStr1 + localizedStr + testBody1 + commentStr2 + localizedStr + testBody2);
+				expect(consoleHtml.cache.get(testUrl1)).to.equal(commentStr1 + localizedStr + testBody1);
+				expect(consoleHtml.cache.get(testUrl2)).to.equal(commentStr2 + localizedStr + testBody2);
+				consoleHtml.cache.flushAll();
+			
+			});
+		
+		});
+		it('should prepend a comment containing the source url to each result if type is "style" or "script" and urlOrUrlArray is an Array', function() {
+		
+			var testUrl1 = 'https://www.chadacarino.com/css/singlepage.css';
+			var testUrl2 = 'https://www.chadacarino.com/css/darkmode.css';
+			var testUrls = [testUrl1, testUrl2];
+			var testBody1 = 'body {background: #333;color: #ddd}';
+			var testBody2 = 'body.darkmode {background: #000; color: #ccc}';
+			var localizedStr = "/* localized CSS */" + EOL;
+			var commentStr1 = "/***  " + testUrl1 + "  ***/" + EOL;
+			var commentStr2 = "/***  " + testUrl2 + "  ***/" + EOL;
+			var testUrl3 = 'https://www.chadacarino.com/js/singlepage.js';
+			var testUrl4 = 'https://www.chadacarino.com/js/darkmode.js';
+			var testUrls2 = [testUrl3, testUrl4];
+			var testBody3 = 'console.log("test script run");';
+			var testBody4 = 'console.log("test darkmode script run");';
+			var commentStr3 = "/***  " + testUrl3 + "  ***/" + EOL;
+			var commentStr4 = "/***  " + testUrl4 + "  ***/" + EOL;
+			requestGetStub.onCall(0).returns(Promise.resolve(testBody1));
+			requestGetStub.onCall(1).returns(Promise.resolve(testBody2));
+			requestGetStub.onCall(2).returns(Promise.resolve(testBody3));
+			requestGetStub.onCall(3).returns(Promise.resolve(testBody4));
+			var localizeCssStub = sinon.stub(consoleHtml, 'localizeCss').callsFake(function returnPrependedString(str) {
+			
+				return Promise.resolve(localizedStr + str);
+			
+			});
+			consoleHtml.cache.flushAll();
+			return expect(consoleHtml.getRemoteResources(testUrls, '', 'style')).to.eventually.be.fulfilled.then((content) => {
+		
+				expect(content).to.equal(commentStr1 + localizedStr + testBody1 + commentStr2 + localizedStr + testBody2);
+				expect(consoleHtml.cache.get(testUrl1)).to.equal(commentStr1 + localizedStr + testBody1);
+				expect(consoleHtml.cache.get(testUrl2)).to.equal(commentStr2 + localizedStr + testBody2);
+				consoleHtml.cache.flushAll();
+				return expect(consoleHtml.getRemoteResources(testUrls2, '', 'script')).to.eventually.be.fulfilled.then((content) => {
+		
+					expect(content).to.equal(commentStr3 + testBody3 + commentStr4 + testBody4);
+					expect(consoleHtml.cache.get(testUrl3)).to.equal(commentStr3 + testBody3);
+					expect(consoleHtml.cache.get(testUrl4)).to.equal(commentStr4 + testBody4);
+					consoleHtml.cache.flushAll();
+			
+				});
+			
+			});
+		
+		});
 	
 	});
 	describe('pullHeadElements(jqObj, type)', function() {
@@ -454,7 +593,46 @@ describe('consoleHtml.js', function() {
 			return expect(consoleHtml.pullHeadElements(testObj, 'script')).to.eventually.equal('<script type="text/javascript">' + matchedScripts.length + '</script>');
 		
 		});
-		it('should add the transport specified by config value server:transport to any URI that does not specify a transport explicitly, i.e. begins with "//:" rather than "http://" or "https://"');
+		it('should add the transport specified by config value server:transport to any URI that does not specify a transport explicitly, i.e. begins with "//:" rather than "http://" or "https://"', function() {
+			var headLinks = testObj('head > link');
+			var matchedLinks = [];
+			var reqLinkUrls = [];
+			headLinks.each(function(i, thisLink) {
+			
+				if (testObj(thisLink).attr('rel') === 'stylesheet' && 'string' === typeof testObj(thisLink).attr('href') && '' !== testObj(thisLink).attr('href')) {
+	
+					matchedLinks.push(thisLink);
+	
+				}
+			
+			});
+			testObj('head').append('<link rel="stylesheet" id="noHrefTransportLink" href="//www.chadacarino.com/css/notransport.css" />');
+			getRemoteResourcesStub.callsFake(function returnArrayLength(urlArray) {
+			
+				return new Promise((resolve) => {
+
+					let i = 0;
+					urlArray.forEach((urlStr) => {
+					
+						reqLinkUrls.push(urlStr);
+						if (++i === urlArray.length) {
+					
+							resolve(reqLinkUrls.length);
+					
+						}
+					
+					});
+					
+				});
+			
+			});
+			return expect(consoleHtml.pullHeadElements(testObj), 'style').to.eventually.be.fulfilled.then((result) => {
+				
+				expect(reqLinkUrls).to.contain('http://www.chadacarino.com/css/notransport.css');
+		
+			});
+		
+		});
 		it('should return a Promise rejected with an Error if getRemoteResources returns a rejected Promise', function() {
 		
 			getRemoteResourcesStub.returns(Promise.reject('test getRemoteResources rejection'))

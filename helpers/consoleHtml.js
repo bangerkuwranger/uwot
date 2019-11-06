@@ -186,7 +186,7 @@ module.exports = {
 										contentString += localizedCss;
 		
 									}
-									return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+									return self.getRemoteResources(urlOrUrlArray, contentString, type).then((content) => {
 					
 										return resolve(content);
 					
@@ -217,7 +217,7 @@ module.exports = {
 									contentString += body;
 		
 								}
-								return self.getRemoteResources(urlOrUrlArray, contentString).then((content) => {
+								return self.getRemoteResources(urlOrUrlArray, contentString, type).then((content) => {
 					
 									resolve(content);
 					
