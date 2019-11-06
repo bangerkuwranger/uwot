@@ -89,14 +89,42 @@ describe('htmlBrowseErrors.js', function() {
 	});
 	describe('getHtmlForError(errInt)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(browseErrors.getHtmlForError).to.be.a('function');
 		
 		});
-		it('should return an Error if errInt arg value is not a number');
-		it('should return an Error if errInt arg value is not one of 401, 403, 404, or 500');
-		it('should return the result of this.getErrorHtmlFromTemplate called with errInt arg value if errInt is a valid error integer');
+		it('should return an Error if errInt arg value is not a number', function() {
+		
+			var testResult = browseErrors.getHtmlForError();
+			expect(testResult).to.be.an.instanceof(Error).with.property('message').that.equals('invalid browser Error');
+		
+		});
+		it('should return an Error if errInt arg value is not one of 401, 403, 404, or 500, i.e. getErrorHtmlFromTemplate is passed null', function() {
+		
+			var getErrorHtmlFromTemplateStub = sinon.stub(browseErrors, 'getErrorHtmlFromTemplate').returns(new Error('test invalid browser Error'));
+			var testResult = browseErrors.getHtmlForError(418);
+			expect(testResult).to.be.an.instanceof(Error).with.property('message').that.equals('invalid browser Error');
+		
+		});
+		it('should return the result of this.getErrorHtmlFromTemplate called with errInt arg value if errInt is a valid error integer', function() {
+		
+			var testObj = getNotFoundObj();
+			var expectedResult = testObj.errInt + testObj.name + testObj.rawDesc;
+			var getErrorHtmlFromTemplateStub = sinon.stub(browseErrors, 'getErrorHtmlFromTemplate').callsFake(function returnConcatStr(obj) {
+			
+				return obj.errInt + obj.name + obj.rawDesc;
+			
+			});
+			var testResult = browseErrors.getHtmlForError(404);
+			expect(testResult).to.equal(expectedResult);
+		
+		});
 	
 	});
 	describe('getErrIntFromSysCode(sysCode)', function() {
@@ -106,11 +134,32 @@ describe('htmlBrowseErrors.js', function() {
 			expect(browseErrors.getErrIntFromSysCode).to.be.a('function');
 		
 		});
-		it('should return 0 if sysCode arg value is not a string');
-		it('should return 500 if sysCode arg value is a string that does not equal one of "EACCES", "EPERM", "ENOENT", or "EISDIR"');
-		it('should return 401 if sysCode arg value equals "EACCES"');
-		it('should return 403 if sysCode arg value equals "EPERM"');
-		it('should return 404 if sysCode arg value equals "ENOENT" or "EISDIR"');
+		it('should return 0 if sysCode arg value is not a string', function() {
+		
+			expect(browseErrors.getErrIntFromSysCode()).to.equal(0);
+		
+		});
+		it('should return 500 if sysCode arg value is a string that does not equal one of "EACCES", "EPERM", "ENOENT", or "EISDIR"', function() {
+		
+			expect(browseErrors.getErrIntFromSysCode('EIO')).to.equal(500);
+		
+		});
+		it('should return 401 if sysCode arg value equals "EACCES"', function() {
+		
+			expect(browseErrors.getErrIntFromSysCode('EACCES')).to.equal(401);
+		
+		});
+		it('should return 403 if sysCode arg value equals "EPERM"', function() {
+		
+			expect(browseErrors.getErrIntFromSysCode('EPERM')).to.equal(403);
+		
+		});
+		it('should return 404 if sysCode arg value equals "ENOENT" or "EISDIR"', function() {
+		
+			expect(browseErrors.getErrIntFromSysCode('ENOENT')).to.equal(404);
+			expect(browseErrors.getErrIntFromSysCode('EISDIR')).to.equal(404);
+		
+		});
 	
 	});
 

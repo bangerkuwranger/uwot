@@ -83,7 +83,7 @@ module.exports = {
 		if ('number' === typeof errInt) {
 		
 			var errorContent = getErrorContentObj(errInt);
-			if (errorContent !== null) {
+			if ('object' == typeof errorContent && errorContent !== null && !(errorContent instanceof Error)) {
 			
 				return this.getErrorHtmlFromTemplate(errorContent);
 			
