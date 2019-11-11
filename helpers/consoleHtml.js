@@ -458,73 +458,112 @@ module.exports = {
 					cssPath = '/' !== cssUrl.pathname && '' !== cssUrl.pathname ? path.dirname(cssUrl.pathname) + '/' : '/';
 			
 				}
-				for (let i = 0; i < cssObj.stylesheet.rules.length; i++) {
-			
-					if ('object' === typeof cssObj.stylesheet.rules[i].selectors && Array.isArray(cssObj.stylesheet.rules[i].selectors)) {
-				
-						cssObj.stylesheet.rules[i].selectors.forEach((selectStr, idx) => {
-				
-							if (selectStr.indexOf('body') !== -1) {
+				var locBlock = this.localizeSSBlock(cssObj.stylesheet, baseUrl, cssPath);
+				if (locBlock instanceof Error) {
 					
-								cssObj.stylesheet.rules[i].selectors[idx] = selectStr.replace('body', '#uwotBrowseHtml');
+					return process.nextTick(resolve, cssString);
 					
-							}
-							else {
-					
-								cssObj.stylesheet.rules[i].selectors[idx] = '#uwotBrowseHtml ' + selectStr;
-					
-							}
+				}
+				else {
 				
-						});
+					cssObj.stylesheet = locBlock;
+					return process.nextTick(resolve, css.stringify(cssObj));
 				
-					}
-					if ('object' === typeof cssObj.stylesheet.rules[i].declarations && Array.isArray(cssObj.stylesheet.rules[i].declarations)) {
-				
-						cssObj.stylesheet.rules[i].declarations.forEach((declaration, idx) => {
-				
-							if ('string' === typeof declaration.value && '' !== declaration.value && declaration.value.indexOf('url(') !== -1) {
-					
-								var thisUrl;
-								if (declaration.value.indexOf('url(\'') !== -1 || declaration.value.indexOf('url("') !== -1) {
-								
-									thisUrl = declaration.value.replace(/(url\W*\(\W*['"])(.*?)(\W*['"]?\W*\))/g, '$2');
-								
-								}
-								else {
-								
-									thisUrl = declaration.value.replace(/url\(([^)'"]+)\)/g, '$1');
-								
-								}
-								var thisParsedUrl = url.parse(thisUrl);
-								if (thisParsedUrl.protocol === null && thisParsedUrl.host === null && baseUrl !== null) {
-						
-									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + url.resolve(baseUrl + cssPath, thisUrl) + "')";
-						
-								}
-								else if (thisParsedUrl.protocol === null & thisParsedUrl.host !== null) {
-						
-									cssObj.stylesheet.rules[i].declarations[idx].value = "url('" + global.Uwot.Config.getVal('server', 'transport') + ':' + thisParsedUrl.href + "')";
-						
-								}
-					
-							}
-				
-						});
-				
-					}
-					if ((i + 1) >= cssObj.stylesheet.rules.length) {
-				
-						return process.nextTick(resolve, css.stringify(cssObj));
-				
-					}
-			
 				}
 			
-		
 			}
 		
 		});
 	
+	},
+	
+	localizeSSBlock(blockObj, baseUrl, cssPath) {
+	
+		if ('object' === typeof blockObj && null !== blockObj && 'object' === typeof blockObj.rules && Array.isArray(blockObj.rules)) {
+		
+			for (let i = 0; i < blockObj.rules.length; i++) {
+	
+				if (blockObj.rules[i].type === 'rule') {
+				
+					if ('object' === typeof blockObj.rules[i].selectors && Array.isArray(blockObj.rules[i].selectors)) {
+		
+						blockObj.rules[i].selectors.forEach((selectStr, idx) => {
+		
+							if (selectStr.indexOf('body') !== -1) {
+			
+								blockObj.rules[i].selectors[idx] = selectStr.replace('body', '#uwotBrowseHtml');
+			
+							}
+							else {
+			
+								blockObj.rules[i].selectors[idx] = '#uwotBrowseHtml ' + selectStr;
+			
+							}
+		
+						});
+		
+					}
+					if ('object' === typeof blockObj.rules[i].declarations && Array.isArray(blockObj.rules[i].declarations)) {
+		
+						blockObj.rules[i].declarations.forEach((declaration, idx) => {
+		
+							if ('string' === typeof declaration.value && '' !== declaration.value && declaration.value.indexOf('url(') !== -1) {
+			
+								var thisUrl;
+								if (declaration.value.indexOf('url(\'') !== -1 || declaration.value.indexOf('url("') !== -1) {
+						
+									thisUrl = declaration.value.replace(/(url\W*\(\W*['"])(.*?)(\W*['"]?\W*\))/g, '$2');
+						
+								}
+								else {
+						
+									thisUrl = declaration.value.replace(/url\(([^)'"]+)\)/g, '$1');
+						
+								}
+								var thisParsedUrl = url.parse(thisUrl, false, true);
+								if (thisParsedUrl.protocol === null && thisParsedUrl.host === null && baseUrl !== null) {
+				
+									blockObj.rules[i].declarations[idx].value = "url('" + url.resolve(baseUrl + cssPath, thisUrl) + "')";
+				
+								}
+								else if (thisParsedUrl.protocol === null & thisParsedUrl.host !== null) {
+				
+									blockObj.rules[i].declarations[idx].value = "url('" + global.Uwot.Config.getVal('server', 'transport') + ':' + thisParsedUrl.href + "')";
+				
+								}
+			
+							}
+		
+						});
+		
+					}
+				
+				}
+				else {
+				
+					var locSubBlock = this.localizeSSBlock(blockObj.rules[i], baseUrl, cssPath);
+					if (!(locSubBlock instanceof Error)) {
+					
+						blockObj.rules[i] = locSubBlock;
+					
+					}
+				
+				}
+				if ((i + 1) >= blockObj.rules.length) {
+		
+					return blockObj;
+		
+				}
+	
+			}
+		
+		}
+		else {
+	
+			return new Error('invalid blockObj');
+	
+		}
+
 	}
 
 };

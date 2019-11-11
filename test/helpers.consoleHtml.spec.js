@@ -8,6 +8,8 @@ const cheerio = require('cheerio');
 const request = require('request-promise-native');
 const path = require('path');
 const EOL = require('os').EOL;
+const css = require('css');
+const url = require('url');
 const globalSetupHelper = require('../helpers/globalSetup');
 
 var consoleHtml = require('../helpers/consoleHtml');
@@ -23,6 +25,13 @@ const getTestCliHtmlString = function() {
 
 };
 
+const getTestCssString = function() {
+
+	return 'body{min-height:320px;font-size:16px;height:100vh}a{text-decoration:none;font-weight:800;opacity:1;transition:opacity .5s ease-in-out}body a:hover,body a:active{opacity:.75}body.dumb-flex row{padding:1ch 2em;margin:0;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:space-evenly;align-items:stretch;align-content:stretch}body.dumb-flex row.left{justify-content:flex-start}body.dumb-flex row.right{justify-content:flex-end}body.dumb-flex row.right>column{text-align:right}body.dumb-flex row.vcenter{align-items:center;align-content:center}body.dumb-flex row.vbottom{align-items:flex-end;align-content:flex-end}body.dumb-flex row>column{flex-grow:1;padding:0 1em}body.cAc{background:#fff;color:#3a4a3a;font-family:monospace;background-image:url(img/cacbg.png);background-image:url(\'img/cacbg.svg\');background-size:initial;background-repeat:no-repeat;background-position:center;margin:0}body.cAc a{color:#00ca12}body.cAc row{background-color:rgba(255,255,255,.8)}@media(prefers-color-scheme:dark){body.cAc{color:#00ca12;background-color:#1c1c1c;background-image:url("img/cacbg_dark.png"");background-image:url(//www.chadacarino.com/css/img/cacbg_dark.svg)}body.cAc a{color:#32ff44}body.cAc row{background-color:rgba(15,15,15,.8)}}body.tensor>divergence{display:none}body h1{font-size:2.5em;font-weight:200;margin-block-start:0;margin-block-end:0}body h2{font-size:2em;font-weight:200;text-transform:lowercase;margin-block-start:.25em;margin-block-end:.25em}body h3{font-size:1.5em;font-weight:200;text-transform:lowercase;margin-block-start:.65em;margin-block-end:.65em}body h4{font-size:1em;font-weight:200;text-transform:uppercase;margin-block-start:1.5em;margin-block-end:1.5em}body h5{font-size:.75em;font-weight:800;margin-block-start:2em;margin-block-end:2em}body h6{font-size:.5em;font-weight:800;margin-block-start:4em;margin-block-end:4em}@media(min-width:1200px){body{font-size:18px}}';
+
+};
+
+const cssBaseUri = 'https://www.chadacarino.com/css/static.css';
 
 var testInString, testObj, testOutString;
 var testCliInString, testCliObj, testCliOutString;
@@ -806,6 +815,132 @@ describe('consoleHtml.js', function() {
 				makeConsoleHtmlStub.restore();
 				pullHeadElementsStub.restore();
 				done();
+			
+			});
+		
+		});
+	
+	});
+	describe('localizeCss(cssString, cssUri)', function() {
+	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		it('should be a function', function() {
+		
+			expect(consoleHtml.localizeCss).to.be.a('function');
+		
+		});
+		it('should return a Promise', function() {
+		
+			expect(consoleHtml.localizeCss()).to.be.a('Promise');
+		
+		});
+		it('should resolve the Promise with the value of cssString arg if it is not a non-empty string', function() {
+		
+			var testCssString = null;
+			return expect(consoleHtml.localizeCss(testCssString)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.null;
+			
+			});
+		
+		});
+		it('should resolve the Promise with the value of cssString arg if css.parse(cssString) throws an Error', function() {
+		
+			var testCssString = getTestCssString();
+			var cssParseStub = sinon.stub(css, 'parse').throws(new Error('test css parse error'));
+			return expect(consoleHtml.localizeCss(testCssString)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.equal(testCssString);
+			
+			});
+		
+		});
+		it('should resolve the Promise with the value of cssString arg if cssUri is a non-empty string and url.parse(cssUri) throws an Error', function() {
+		
+			var testCssString = getTestCssString();
+			var urlParseStub = sinon.stub(url, 'parse').throws(new Error('test url parse error'));
+			return expect(consoleHtml.localizeCss(testCssString, cssBaseUri)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.equal(testCssString);
+			
+			});
+		
+		});
+		it('should resolve the Promise with the modified cssString value if arg value is a non-empty string containing valid CSS and cssUri is a valid URI string', function() {
+		
+			var testCssString = getTestCssString();
+			return expect(consoleHtml.localizeCss(testCssString, cssBaseUri)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+			
+			});
+		
+		});
+		it('should not perform any url replacements if cssUri is not a valid URL', function() {
+		
+			var testCssString = getTestCssString();
+			var testCssObj = css.parse(testCssString);
+			return expect(consoleHtml.localizeCss(testCssString, '')).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+				var resultCssObj = css.parse(result);
+				expect(resultCssObj.stylesheet.rules[10].declarations[3].value).to.equal(testCssObj.stylesheet.rules[10].declarations[3].value);
+			
+			});
+		
+		});
+		it('should replace "body" with "#uwotBrowseHtml" in each selector that references a body element in the given CSS', function() {
+		
+			var testCssString = getTestCssString();
+			var testCssObj = css.parse(testCssString);
+			return expect(consoleHtml.localizeCss(testCssString, cssBaseUri)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+				var resultCssObj = css.parse(result);
+				expect(resultCssObj.stylesheet.rules[0].selectors[0]).to.equal('#uwotBrowseHtml');
+			
+			});
+		
+		});
+		it('should prepend all selectors that do not contain "body" with "#uwotBrowseHtml "', function() {
+		
+			var testCssString = getTestCssString();
+			var testCssObj = css.parse(testCssString);
+			return expect(consoleHtml.localizeCss(testCssString, '')).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+				var resultCssObj = css.parse(result);
+				expect(resultCssObj.stylesheet.rules[1].selectors[0]).to.equal("#uwotBrowseHtml " + testCssObj.stylesheet.rules[1].selectors[0]);
+			
+			});
+		
+		});
+		it('should add the protocol, hostname, and path of the parsed cssUri string to the beginning of any url declaration that doesn\'t contain a protocol and host', function() {
+		
+			var testCssString = getTestCssString();
+			var testCssObj = css.parse(testCssString);
+			return expect(consoleHtml.localizeCss(testCssString, cssBaseUri)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+				var resultCssObj = css.parse(result);
+				expect(resultCssObj.stylesheet.rules[10].declarations[3].value).to.equal("url('https://www.chadacarino.com/css/img/cacbg.png')");
+			
+			});
+		
+		});
+		it('should add the protocol set in config server:transport to any url declaration that includes a host but does not include a protocol', function() {
+		
+			var testCssString = getTestCssString();
+			var testCssObj = css.parse(testCssString);
+			return expect(consoleHtml.localizeCss(testCssString, cssBaseUri)).to.eventually.be.fulfilled.then((result) => {
+			
+				expect(result).to.be.a('string').that.does.not.equal(testCssString);
+				var resultCssObj = css.parse(result);
+				expect(resultCssObj.stylesheet.rules[13].rules[0].declarations[3].value).to.equal("url('" + global.Uwot.Config.getVal('server', 'transport') + "://www.chadacarino.com/css/img/cacbg_dark.svg')");
 			
 			});
 		
