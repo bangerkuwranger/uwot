@@ -8,6 +8,8 @@ const sinon = require("sinon");
 const chai = require("chai");
 const sinonChai = require('sinon-chai');
 const expect = chai.expect;
+const chaiAsPromised = require("chai-as-promised");
+chai.use(chaiAsPromised);
 
 const FileSystem = require('../filesystem');
 var filesystem;
@@ -1109,27 +1111,210 @@ describe('filesystem.js', function() {
 		});
 		describe('pFile(op, argArr, isSudo)', function() {
 		
-			it('should return a Promise');
-			it('should reject with a SystemError if op is not a string that matches a valid file operation');
-			it('should reject with a SystemError if argArr is not an object');
-			it('should use an empty array for argArr if passed value is not an Array');
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(filesystem.pFile).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				expect(filesystem.pFile()).to.be.a('Promise');
+			
+			});
+			it('should reject with a SystemError if op is not a string that matches a valid file operation', function() {
+			
+				return expect(filesystem.pFile(null, [], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+					return expect(filesystem.pFile('eat', [], false)).to.eventually.be.rejected.then((result) => {
+				
+						expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				
+					});
+				
+				});
+			
+			});
+			it('should reject with a SystemError if argArr is not an object', function() {
+			
+				return expect(filesystem.pFile('read', 'minds', false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				
+				});
+			
+			});
+			it('should use an empty array for argArr if passed value is not an Array', function() {
+			
+				return expect(filesystem.pFile('read', null, true)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				
+				});
+			
+			});
 			it('should set this.sudo to false if isSudo does not equal true or this.user.maySudo does not return true');
 			it('should set this.sudo to true if isSudo equals true and this.user.maySudo returns true');
-			it('should reject with a SystemError if the first element in argArr is not a non-empty string');
-			it('should reject with a SystemError if the op is "append" or "write" and the second element of argArr is not a non-empty string');
-			it('should resolve with true if op equals "append" and this.appendPromise resolves with true');
-			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "append" and this.appendPromise resolves with a value other than true');
-			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "append" and this.appendPromise rejects');
-			it('should resolve with true if op equals "delete" and this.removeFilePromise resolves with true');
-			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "delete" and this.removeFilePromise resolves with a value other than true');
-			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.removeFilePromise if op equals "delete" and this.removeFilePromise rejects');
-			it('should resolve with the result of data read from the file at path argArr[0]\'s toString method if op equals "read" and this.readFilePromise resolves with a non-string with a function property "toString"');
-			it('should resolve with the data read from the file at path argArr[0] if op equals "read" and this.readFilePromise resolves with a string');
-			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "read" and this.readFilePromise resolves with a non-string value that does not have a toString method');
-			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.readFilePromise if op equals "read" and this.readFilePromise rejects');
-			it('should resolve with true if op equals "write" and this.writeFilePromise resolves with true');
-			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "write" and this.writeFilePromise resolves with a value other than true');
-			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "write" and this.writeFilePromise rejects');
+			it('should reject with a SystemError if the first element in argArr is not a non-empty string', function() {
+			
+				return expect(filesystem.pFile('read', [''], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				
+				});
+			
+			});
+			it('should reject with a SystemError if the op is "append" or "write" and the second element of argArr is not a non-empty string', function() {
+			
+				return expect(filesystem.pFile('append', ['/tmp/testFile', ''], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EINVAL');
+				
+				});
+			
+			});
+			it('should resolve with true if op equals "append" and this.appendPromise resolves with true', function() {
+			
+				var appendPromiseStub = sinon.stub(filesystem, 'appendPromise').returns(Promise.resolve(true));
+				return expect(filesystem.pFile('append', ['/tmp/testFile', 'would you do it for a Scooby Snack?'], false)).to.eventually.be.fulfilled.then((result) => {
+				
+					expect(result).to.be.true;
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "append" and this.appendPromise resolves with a value other than true', function() {
+			
+				var appendPromiseStub = sinon.stub(filesystem, 'appendPromise').returns(Promise.resolve(false));
+				var dissolveErrorPaths = sinon.stub(filesystem, 'dissolveErrorPaths').returnsArg(0);
+				return expect(filesystem.pFile('append', ['/tmp/testFile', 'would you do it for a Scooby Snack?'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(result.path).to.equal('/tmp/testFile');
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "append" and this.appendPromise rejects', function() {
+			
+				var appendPromiseStub = sinon.stub(filesystem, 'appendPromise').returns(Promise.reject(new Error('test appendPromise error')));
+				var dissolveErrorPaths = sinon.stub(filesystem, 'dissolveErrorPaths').returnsArg(0);
+				return expect(filesystem.pFile('append', ['/tmp/testFile', 'would you do it for a Scooby Snack?'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test appendPromise error');
+				
+				});
+			
+			});
+			it('should resolve with true if op equals "delete" and this.removeFilePromise resolves with true', function() {
+			
+				var removeFilePromiseStub = sinon.stub(filesystem, 'removeFilePromise').returns(Promise.resolve(true));
+				return expect(filesystem.pFile('delete', ['/tmp/testFile'], false)).to.eventually.be.fulfilled.then((result) => {
+				
+					expect(result).to.be.true;
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "delete" and this.removeFilePromise resolves with a value other than true', function() {
+			
+				var removeFilePromiseStub = sinon.stub(filesystem, 'removeFilePromise').returns(Promise.resolve(false));
+				var dissolveErrorPaths = sinon.stub(filesystem, 'dissolveErrorPaths').returnsArg(0);
+				return expect(filesystem.pFile('delete', ['/tmp/testFile'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+					expect(result.path).to.equal('/tmp/testFile');
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.removeFilePromise if op equals "delete" and this.removeFilePromise rejects', function() {
+			
+				var removeFilePromiseStub = sinon.stub(filesystem, 'removeFilePromise').returns(Promise.reject(new Error('test removeFilePromise error')));
+				var dissolveErrorPaths = sinon.stub(filesystem, 'dissolveErrorPaths').returnsArg(0);
+				return expect(filesystem.pFile('delete', ['/tmp/testFile'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test removeFilePromise error');
+				
+				});
+			
+			});
+			it('should resolve with the result of data read from the file at path argArr[0]\'s toString method if op equals "read" and this.readFilePromise resolves with a non-string with a function property "toString"', function() {
+			
+				var readFilePromiseStub = sinon.stub(filesystem, 'readFilePromise').returns(Promise.resolve(Buffer.from('Ro ray. Ruh ruh.')));
+				return expect(filesystem.pFile('read', ['/tmp/testFile'], false)).to.eventually.be.fulfilled.then((result) => {
+				
+					expect(result).to.equal('Ro ray. Ruh ruh.');
+				
+				});
+			
+			});
+			it('should resolve with the data read from the file at path argArr[0] if op equals "read" and this.readFilePromise resolves with a string', function() {
+			
+				var readFilePromiseStub = sinon.stub(filesystem, 'readFilePromise').returns(Promise.resolve('Ro ray. Ruh ruh.'));
+				return expect(filesystem.pFile('read', ['/tmp/testFile'], false)).to.eventually.be.fulfilled.then((result) => {
+				
+					expect(result).to.equal('Ro ray. Ruh ruh.');
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "read" and this.readFilePromise resolves with a non-string value that does not have a toString method', function() {
+			
+				var readFilePromiseStub = sinon.stub(filesystem, 'readFilePromise').returns(Promise.resolve(null));
+				return expect(filesystem.pFile('read', ['/tmp/testFile'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.readFilePromise if op equals "read" and this.readFilePromise rejects', function() {
+			
+				var readFilePromiseStub = sinon.stub(filesystem, 'readFilePromise').returns(Promise.reject(new Error('test readFilePromise error')));
+				var dissolveErrorPaths = sinon.stub(filesystem, 'dissolveErrorPaths').returnsArg(0);
+				return expect(filesystem.pFile('read', ['/tmp/testFile'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test readFilePromise error');
+				
+				});
+			
+			});
+			it('should resolve with true if op equals "write" and this.writePromise resolves with true', function() {
+			
+				var writePromiseStub = sinon.stub(filesystem, 'writePromise').returns(Promise.resolve(true));
+				return expect(filesystem.pFile('write', ['/tmp/testFile', 'You\'re gonna be the bait. Go into the hallway and lead him under the net.'], false)).to.eventually.be.fulfilled.then((result) => {
+				
+					expect(result).to.be.true;
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with a SystemError if op equals "write" and this.writeFilePromise resolves with a value other than true', function() {
+			
+				var writePromiseStub = sinon.stub(filesystem, 'writePromise').returns(Promise.resolve(false));
+				return expect(filesystem.pFile('write', ['/tmp/testFile', 'You\'re gonna be the bait. Go into the hallway and lead him under the net.'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EIO');
+				
+				});
+			
+			});
+			it('should reject with the result of this.dissolveErrorPaths called with the Error from the rejection of this.appendPromise if op equals "write" and this.writeFilePromise rejects', function() {
+			
+				var writePromiseStub = sinon.stub(filesystem, 'writePromise').returns(Promise.reject(new Error('test writePromise error')));
+				return expect(filesystem.pFile('write', ['/tmp/testFile', 'You\'re gonna be the bait. Go into the hallway and lead him under the net.'], false)).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test writePromise error');
+				
+				});
+			
+			});
 		
 		});
 		describe('changeCwd(pth)', function() {
@@ -1319,16 +1504,144 @@ describe('filesystem.js', function() {
 		});
 		describe('appendPromise(pth, data)', function() {
 		
-			it('should return a Promise');
-			it('should reject with an Error if pth is not a string');
-			it('should reject with an Error if data is not a string or a Buffer');
-			it('should use pth value unchanged if it is an absolute path within the VFS root');
-			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root');
-			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string');
-			it('should reject with an Error if this.isWritable returns an Error');
-			it('should reject with a SystemError if this.isWritable does not return a truthy value');
-			it('should resolve with true if this.isWritable returns a truthy value and fs.appendFile returns a resolved Promise');
-			it('should reject with an Error if this.isWritable returns a truthy value and fs.appendFile rejects with an Error');
+			afterEach(function() {
+			
+				sinon.restore();
+			
+			});
+			it('should be a function', function() {
+			
+				expect(filesystem.appendPromise).to.be.a('function');
+			
+			});
+			it('should return a Promise', function() {
+			
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.a('Promise');
+			
+			});
+			it('should reject with an Error if pth is not a string', function() {
+			
+				var testPath = [global.Uwot.Constants.appRoot, '/fs/var/run/for/your/life.grl'];
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.contains('argument must be of type string');
+				
+				});
+			
+			});
+			it('should reject with an Error if data is not a string or a Buffer', function() {
+			
+				var testPath = global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl';
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.reject(new Error('test appendFile error')));
+				return expect(filesystem.appendPromise(testPath, ['be with another man'])).to.eventually.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test appendFile error');
+				
+				});
+			
+			});
+			it('should use pth value unchanged if it is an absolute path within the VFS root', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.fulfilled.then((result) => {
+				
+					var appendArgs = appendFileStub.getCall(0).args;
+					expect(appendArgs[0]).to.equal(testPath);
+				
+				});
+			
+			});
+			it('should use the result of this.resolvePath(pth) if it returns a string and pth is not an absolute path within the VFS root', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').callsFake(function prependRoot(pth) {
+				
+					return path.join(global.Uwot.Constants.appRoot, '/fs', pth);
+				
+				});
+				return expect(filesystem.appendPromise('var/run/for/your/life.grl', 'be with another man')).to.be.fulfilled.then((result) => {
+				
+					var appendArgs = appendFileStub.getCall(0).args;
+					expect(appendArgs[0]).to.equal(testPath);
+				
+				});
+			
+			});
+			it('should reject with an Error if pth is not an absolute path within root and this.resolvePath(pth) does not return a string', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				var resolvePathStub = sinon.stub(filesystem, 'resolvePath').callsFake(function returnError(pth) {
+				
+					return new Error('test resolvePath error');
+				
+				});
+				return expect(filesystem.appendPromise('var/run/for/your/life.grl', 'be with another man')).to.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test resolvePath error');
+				
+				});
+			
+			});
+			it('should reject with an Error if this.isWritable returns an Error', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(new Error('test isWritable error'));
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test isWritable error');
+				
+				});
+			
+			});
+			it('should reject with a SystemError if this.isWritable does not return a truthy value', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(false);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('code').that.equals('EACCES');
+				
+				});
+			
+			});
+			it('should resolve with true if this.isWritable returns a truthy value and fs.appendFile returns a resolved Promise', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.resolve(true));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.fulfilled.then((result) => {
+				
+					expect(result).to.be.true;
+				
+				});
+			
+			});
+			it('should reject with an Error if this.isWritable returns a truthy value and fs.appendFile rejects with an Error', function() {
+			
+				var testPath = path.join(global.Uwot.Constants.appRoot + '/fs/var/run/for/your/life.grl');
+				var isWritableStub = sinon.stub(filesystem, 'isWritable').returns(true);
+				var appendFileStub = sinon.stub(fs, 'appendFile').returns(Promise.reject(new Error('test appendFile error')));
+				return expect(filesystem.appendPromise(testPath, 'be with another man')).to.be.rejected.then((result) => {
+				
+					expect(result).to.be.an.instanceof(Error).with.property('message').that.equals('test appendFile error');
+				
+				});
+			
+			});
 		
 		});
 		describe('touch(pth)', function() {

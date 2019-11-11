@@ -145,9 +145,20 @@ module.exports = {
 	
 	getServerListeners(isid) {
 	
-		var globalListeners = this.ensureGlobalListener(isid);
+		var globalListeners = [];
+		if ('string' !== typeof isid || '' === isid) {
+		
+			return globalListeners;
+		
+		}
+		globalListeners = this.ensureGlobalListener(isid);
 		var allListenerNames = Object.keys(globalListeners);
 		var serverListeners = [];
+		if (allListenerNames.length < 1) {
+		
+			return serverListeners;
+		
+		}
 		for (let i = 0; i < allListenerNames.length; i++) {
 		
 			if (allListenerNames[i] !== 'disabledForExclusive') {

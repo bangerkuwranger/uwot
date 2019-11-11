@@ -741,7 +741,7 @@ class UwotFs {
 						case 'read':
 							return this.readFilePromise(...argArr).then((fileData) => {
 							
-								if ('string' !== typeof fileData && fileData.hasOwnProperty('toString')) {
+								if ('string' !== typeof fileData && null !== fileData && 'undefined' !== fileData && 'toString' in fileData && 'function' === typeof fileData.toString) {
 								
 									return resolve(fileData.toString());
 								
@@ -765,7 +765,7 @@ class UwotFs {
 							});
 							break;
 						case 'write':
-							return this.writeFilePromise(...argArr).then((written) => {
+							return this.writePromise(...argArr).then((written) => {
 							
 								if (written) {
 								

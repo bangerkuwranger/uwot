@@ -18,7 +18,8 @@ describe('isidListener.js', function() {
 		testDefaultListener = {
 			name: 'default',
 			isid: testIsid,
-			type: 'default'
+			type: 'default',
+			status: 'enabled'
 		};
 	
 	});
@@ -772,12 +773,87 @@ describe('isidListener.js', function() {
 	});
 	describe('getServerListeners(isid)', function() {
 	
-		it('should be a function');
-		it('should call this.ensureGlobalListener with value of isid arg');
-		it('should return an Array');
-		it('should return an empty Array if global.Uwot.Listeners[isid] does not have any own properties');
-		it('should add an element to the result Array for each property in global.Uwot.Listeners[isid] that has a name property not equal to "disabledForExclusive"');
-		it('should return an array of objects with properties "name", "options", and "status"');
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		it('should be a function', function() {
+		
+			expect(isidListener.getServerListeners).to.be.a('function');
+		
+		});
+		it('should return an empty array if isid arg value is not a non-empty string', function() {
+		
+			expect(isidListener.getServerListeners()).to.be.an('array').that.is.empty;
+		
+		});
+		it('should call this.ensureGlobalListener with value of isid arg', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function createTestGlobals() {
+			
+				global.Uwot.Listeners[testIsid] = {default: testDefaultListener};
+				return global.Uwot.Listeners[testIsid];
+			
+			});
+			var testResult = isidListener.getServerListeners(testIsid);
+			expect(ensureGlobalListenerStub.calledWith(testIsid)).to.be.true;
+		
+		});
+		it('should return an Array', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function createTestGlobals() {
+			
+				global.Uwot.Listeners[testIsid] = {default: testDefaultListener};
+				return global.Uwot.Listeners[testIsid];
+			
+			});
+			var testResult = isidListener.getServerListeners(testIsid);
+			expect(testResult).to.be.an('array');
+		
+		});
+		it('should return an empty Array if global.Uwot.Listeners[isid] does not have any own properties', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function createTestGlobals() {
+			
+				global.Uwot.Listeners[testIsid] = {};
+				return global.Uwot.Listeners[testIsid];
+			
+			});
+			var testResult = isidListener.getServerListeners(testIsid);
+			expect(testResult).to.be.an('array').that.is.empty;
+		
+		});
+		it('should add an element to the result Array for each property in global.Uwot.Listeners[isid] that has a name property not equal to "disabledForExclusive"', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function createTestGlobals() {
+			
+				global.Uwot.Listeners[testIsid] = {default: testDefaultListener, disabledForExclusive: []};
+				return global.Uwot.Listeners[testIsid];
+			
+			});
+			var testResult = isidListener.getServerListeners(testIsid);
+			expect(testResult).to.be.an('array');
+			expect(testResult.length).to.equal(1);
+			expect(testResult[0]).to.be.an('object').with.property('name').that.equals('default');
+		
+		});
+		it('should return an array of objects with properties "name", "options", and "status"', function() {
+		
+			var ensureGlobalListenerStub = sinon.stub(isidListener, 'ensureGlobalListener').callsFake(function createTestGlobals() {
+			
+				global.Uwot.Listeners[testIsid] = {default: testDefaultListener, disabledForExclusive: []};
+				return global.Uwot.Listeners[testIsid];
+			
+			});
+			var testResult = isidListener.getServerListeners(testIsid);
+			expect(testResult).to.be.an('array');
+			expect(testResult.length).to.equal(1);
+			expect(testResult[0]).to.be.an('object').with.property('name').that.is.a('string');
+			expect(testResult[0].options).to.be.an('object').with.property('type').that.is.a('string');
+			expect(testResult[0].status).to.be.a('string');
+		
+		});
 	
 	});
 
