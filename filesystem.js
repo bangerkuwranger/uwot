@@ -1388,6 +1388,16 @@ class UwotFs {
 					try {
 			
 						fullPath = this.resolvePath(pth, false);
+						if (fullPath instanceof Error) {
+						
+							throw fullPath;
+						
+						}
+						else if ('string' !== typeof fullPath) {
+						
+							throw systemError.ENOENT({'path': pth, 'syscall': 'stat'});
+							
+						}
 			
 					}
 					catch(err) {

@@ -796,7 +796,16 @@ describe('listener.js', function() {
 				expect(testListener.status).to.equal('enabled');
 			
 			});
-			it('should add elements to global.Uwot.Bin for each member of this.cmdSet if listener type is not default and parser is "cmdParser"; each element should be an object with a name property and function properties "execute" and "matchOpt"');
+			it('should add elements to global.Uwot.Bin for each member of this.cmdSet if listener type is not default and parser is "cmdParser"; each element should be an object with a name property and function properties "execute" and "matchOpt"', function() {
+			
+				testListener.enable();
+				testListener.cmdSet.forEach((cmdName) => {
+				
+					expect(global.Uwot.Bin[cmdName]).to.be.an('object').with.property('name').that.equals(cmdName);
+				
+				});
+			
+			});
 		
 		});
 		describe('disable()', function() {
