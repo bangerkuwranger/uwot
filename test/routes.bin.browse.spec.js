@@ -7,6 +7,76 @@ const expect = chai.expect;
 
 var binBrowse;
 const path = require('path');
+const ansi = require('../output/ansi');
+const sanitize = require('../helpers/valueConversion');
+
+const getTestUser = function() {
+
+	return {
+		"fName": "Found",
+		"lName": "User",
+		"uName": "fuser",
+		"password": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI.Ai1mX96Xc7efm",
+		"sudoer": true,
+		"salt": "$2a$16$UV6V2nmIoFY14OZqfRWxpuSsId5m6E3k4crTUTI",
+		"createdAt": new Date(1546450800498),
+		"updatedAt": new Date(1546450800498),
+		"_id": "CDeOOrH0gOg791cZ",
+		"maySudo": function() { return this.sudoer; }
+	};
+
+};
+
+const createTestUserFS = function(uid) {
+
+	if ('string' !== typeof uid) {
+	
+		uid = getTestUser()._id;
+	
+	}
+	if ('object' !== typeof global.Uwot.FileSystems || null === global.Uwot.FileSystems) {
+	
+		global.Uwot.FileSystems = {};
+	
+	}
+	if ('object' !== typeof global.Uwot.FileSystems[uid] || null === global.Uwot.FileSystems[uid]) {
+	
+		global.Uwot.FileSystems[uid] = {
+			cmd: function(op, args, cb) {
+	
+				return cb(false, op + '(' + args.join() + ')');
+	
+			},
+			pFile: function(op, args, isSudo) {
+	
+				return Promise.resolve(op + '(' + args.join(', ') + ')');
+	
+			},
+			getVcwd: function() {
+			
+				return "/home/" + getTestUser().uName;
+			
+			}
+		};
+	
+	}
+
+}
+
+const removeTestUserFS = function(uid) {
+
+	if ('string' !== typeof uid) {
+	
+		uid = getTestUser()._id;
+	
+	}
+	if ('object' === typeof global.Uwot.FileSystems && null !== global.Uwot.FileSystems && 'object' === typeof global.Uwot.FileSystems[uid] && null !== global.Uwot.FileSystems[uid]) {
+	
+		delete global.Uwot.FileSystems[uid];
+	
+	}
+
+};
 
 describe('browse.js', function() {
 
@@ -208,6 +278,23 @@ describe('browse.js', function() {
 	});
 	describe('execute(args, options, app, user, callback, isSudo, isid)', function() {
 	
+		var testUser;
+		beforeEach(function() {
+		
+			testUser = getTestUser();
+			createTestUserFS(testUser._id);
+		
+		});
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		after(function() {
+		
+			removeTestUserFS();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.execute).to.be.a('function');
@@ -258,9 +345,50 @@ describe('browse.js', function() {
 			}, false, null);
 		
 		});
-		it('should return a TypeError to callback if isid arg value is not a string');
-		it('should return a TypeError to callback if user arg value is not a non-null object with an _id property that is a string');
-		it('should return an Error to callback if global.Uwot.FileSystems[user._id] is not a non-null object');
+		it('should return a TypeError to callback if isid arg value is not a string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.execute([{text: testPath}], [], {}, {}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid isid passed to bin/browse/execute');
+				done();
+			
+			}, false, null);
+		
+		});
+		it('should return a TypeError to callback if user arg value is not a non-null object with an _id property that is a string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.execute([{text: testPath}], [], {}, 'fuser', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user passed to bin/browse/execute');
+				binBrowse.execute([{text: testPath}], [], {}, null, function(error, result) {
+			
+					expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user passed to bin/browse/execute');
+					binBrowse.execute([{text: testPath}], [], {}, {uName: 'fuser'}, function(error, result) {
+			
+						expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user passed to bin/browse/execute');
+						done();
+			
+					}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+				}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an Error to callback if global.Uwot.FileSystems[user._id] is not a non-null object', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			delete global.Uwot.FileSystems[testUser._id];
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(error, result) {
+	
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid user fileSystem');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
 		// it('should return false to the callback function if args[0].text is a string', function(done) {
 // 		
 // 			var testName = 'ten';
@@ -274,33 +402,383 @@ describe('browse.js', function() {
 // 			}, false, null);
 // 		
 // 		});
-		it('should return an Error to callback if this.getPathContent throws an Error');
-		it('should return an Error to callback if this.getPathContent returns an Error to its callback');
-		it('should return an unfilled executeResult object with "no content found" content if this.getPathContent does not return a non-empty string');
-		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener throws an Error');
-		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener returns an Error');
-		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener does not return "enabled"');
-		it('should return a filled executeResult object, with output.content from the result of getPathContent and browse process cookies, to callback if this.getPathContent returns a non-empty string and super.enableListener returns "enabled"');
+		it('should return an Error to callback if this.getPathContent throws an Error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').throws(new Error('test getPathContent error'));
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(error, result) {
+	
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test getPathContent error');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an Error to callback if this.getPathContent returns an Error to its callback', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnErrorToCb(pth, args, cb) {
+			
+				return cb(new Error('test getPathContent error'));
+			
+			});
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.an.instanceof(Error).with.property('message').that.equals('test getPathContent error');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an unfilled executeResult object with "no content found" content if this.getPathContent does not return a non-empty string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '');
+			
+			});
+			var testResult = {
+				output: {
+					content: [{content: 'no content found', classes: ['browseOutput']}]
+				},
+				outputType: 'object'
+			};
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.false;
+				expect(result).to.deep.equal(testResult);
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener throws an Error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '<html><body><h1>Test Content</h1></body></html>');
+			
+			});
+			var enableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'enableListener').throws(new Error('test enableListener error'));
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.an.instanceof(Error).with.property('message').that.equals('test enableListener error');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener returns an Error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '<html><body><h1>Test Content</h1></body></html>');
+			
+			});
+			var enableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'enableListener').returns(new Error('test enableListener error'));
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.an.instanceof(Error).with.property('message').that.equals('test enableListener error');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return an Error to callback if this.getPathContent returns a non-empty string and super.enableListener does not return "enabled"', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '<html><body><h1>Test Content</h1></body></html>');
+			
+			});
+			var enableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'enableListener').returns('disabled');
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.an.instanceof(Error).with.property('message').that.equals('could not enable listener for bin/browse');
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return a filled executeResult object, with output.content from the result of getPathContent and browse process cookies, to callback if this.getPathContent returns a non-empty string and super.enableListener returns "enabled"', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '<html><body><h1>Test Content</h1></body></html>');
+			
+			});
+			var testResult = {
+				output: {
+					content: [
+						{
+							content: "<html><body><h1>Test Content</h1></body></html>",
+							classes: [
+								"browseOutput"
+							]
+						}
+					]
+				},
+				outputType: "object",
+				cookies: {
+					uwotBrowseCurrentPath: {
+						value: "/var/www/html/example.html"
+					},
+					uwotBrowseCurrentType: {
+						value:"cli"
+					},
+					uwotBrowseCurrentStatus: {
+						value: "active"
+					}
+				}
+			};
+			var enableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'enableListener').returns('enabled');
+			binBrowse.execute([{text: testPath}], [], {}, testUser, function(e, result) {
+	
+				expect(e).to.be.false;
+				expect(result).to.deep.equal(testResult);
+				done();
+	
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
 	
 	});
 	describe('handler(bin, args, options, app, user, callback, isSudo, isid)', function() {
 	
+		var testUser;
+		beforeEach(function() {
+		
+			testUser = getTestUser();
+			createTestUserFS(testUser._id);
+		
+		});
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		after(function() {
+		
+			removeTestUserFS();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.handler).to.be.a('function');
 		
 		});
-		it('should throw a TypeError if callback is not a function');
-		it('should return a TypeError to callback if bin arg value is not a string matching an element of this.cmdSet');
-		it('should return a TypeError to callback if bin arg value is "quit" and isid arg value is not a non-empty string');
-		it('should return the result of this.quit to callback if bin arg value is "quit" and isid arg value is a non-empty string');
-		it('should return a TypeError to callback if bin arg value matches a member of this.cmdSet that is not "quit" and args is not a non-empty Array');
-		it('should use values of isSudo and user args as properties of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo" and args is a non-empty Array');
-		it('should pass the sanitized value of the first member of args as the "path" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[0] is a string');
-		it('should pass the sanitized value of the second member of args as the "isGui" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[1] is a string');
-		it('should pass the sanitized value of the third member of args as the "msg" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[2] is a string');
-		it('should return the result of this.go called with the processed args to callback if bin arg value is "go" and args is a non-empty Array');
-		it('should return the result of this.nogo called with the processed args to callback if bin arg value is "nogo" and args is a non-empty Array');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binBrowse.handler();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/browse/handler');
+		
+		});
+		it('should return a TypeError to callback if bin arg value is not a string matching an element of this.cmdSet', function(done) {
+		
+			binBrowse.handler('headstand', [], [], {}, testUser, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid cmd passed to bin/browse/handler');
+				done();
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return a TypeError to callback if bin arg value is "quit" and isid arg value is not a non-empty string', function(done) {
+		
+			binBrowse.handler('quit', [], [], {}, testUser, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('invalid isid passed to bin/browse/handler');
+				done();
+			
+			}, false, '');
+		
+		});
+		it('should return the result of this.quit to callback if bin arg value is "quit" and isid arg value is a non-empty string', function(done) {
+		
+			var quitStub = sinon.stub(binBrowse, 'quit').callsFake(function returnStrToCb(isid, cb) {
+			
+				return cb(false, 'test quit output');
+			
+			});
+			binBrowse.handler('quit', [], [], {}, testUser, function(error, result) {
+			
+				expect(result).to.equal('test quit output');
+				done();
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return a TypeError to callback if bin arg value matches a member of this.cmdSet that is not "quit" and args is not a non-empty Array', function(done) {
+		
+			binBrowse.handler('go', [], [], {}, testUser, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid args passed to bin/browse/handler');
+				done();
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should use values of isSudo and user args as properties of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo" and args is a non-empty Array', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var goStub = sinon.stub(binBrowse, 'go').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test go output');
+			
+			});
+			var nogoStub = sinon.stub(binBrowse, 'nogo').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test nogo output');
+			
+			});
+			var goArgs, nogoArgs;
+			binBrowse.handler('go', [{text: testPath}, {text: 'false'}], [], {}, testUser, function(error, result) {
+			
+				goArgs = goStub.getCall(0).args;
+				expect(goArgs[0].user).to.deep.equal(testUser);
+				expect(goArgs[0].isSudo).to.be.false;
+				binBrowse.handler('nogo', [{text: testPath}, {text: 'false'}, {text: 'you tell me'}], [], {}, testUser, function(error, result) {
+			
+					nogoArgs = nogoStub.getCall(0).args;
+					expect(nogoArgs[0].user).to.deep.equal(testUser);
+					expect(nogoArgs[0].isSudo).to.be.true;
+					done();
+			
+				}, true, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should pass the sanitized value of the first member of args as the "path" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[0] is a string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var goStub = sinon.stub(binBrowse, 'go').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test go output');
+			
+			});
+			var nogoStub = sinon.stub(binBrowse, 'nogo').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test nogo output');
+			
+			});
+			var goArgs, nogoArgs;
+			binBrowse.handler('go', [{text: testPath}, {text: 'false'}], [], {}, testUser, function(error, result) {
+			
+				goArgs = goStub.getCall(0).args;
+				expect(goArgs[0].path).to.equal(sanitize.cleanString(testPath, 1024,  null));
+				binBrowse.handler('nogo', [{text: testPath}, {text: 'false'}, {text: 'you tell me'}], [], {}, testUser, function(error, result) {
+			
+					nogoArgs = nogoStub.getCall(0).args;
+					expect(nogoArgs[0].path).to.equal(sanitize.cleanString(testPath, 1024,  null));
+					done();
+			
+				}, true, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should pass the sanitized value of the second member of args as the "isGui" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[1] is a string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var goStub = sinon.stub(binBrowse, 'go').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test go output');
+			
+			});
+			var nogoStub = sinon.stub(binBrowse, 'nogo').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test nogo output');
+			
+			});
+			var goArgs, nogoArgs;
+			binBrowse.handler('go', [{text: testPath}, {text: 'false'}], [], {}, testUser, function(error, result) {
+			
+				goArgs = goStub.getCall(0).args;
+				expect(goArgs[0].isGui).to.be.false;
+				binBrowse.handler('nogo', [{text: testPath}, {text: 'true'}, {text: 'you tell me'}], [], {}, testUser, function(error, result) {
+			
+					nogoArgs = nogoStub.getCall(0).args;
+					expect(nogoArgs[0].isGui).to.be.true;
+					done();
+			
+				}, true, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should pass the sanitized value of the third member of args as the "msg" property of args object passed to this.go or this.nogo if bin arg value is "go" or "nogo", args is a non-empty Array, and args[2] is a string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var goStub = sinon.stub(binBrowse, 'go').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test go output');
+			
+			});
+			var nogoStub = sinon.stub(binBrowse, 'nogo').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test nogo output');
+			
+			});
+			var goArgs, nogoArgs;
+			binBrowse.handler('go', [{text: testPath}, {text: 'false'}, {text: '  nothing to say'}], [], {}, testUser, function(error, result) {
+			
+				goArgs = goStub.getCall(0).args;
+				expect(goArgs[0].msg).to.equal(sanitize.cleanString('nothing to say', 255, false));
+				binBrowse.handler('nogo', [{text: testPath}, {text: 'true'}, {text: 'you tell me'}], [], {}, testUser, function(error, result) {
+			
+					nogoArgs = nogoStub.getCall(0).args;
+					expect(nogoArgs[0].msg).to.equal(sanitize.cleanString('you tell me', 255, false));
+					done();
+			
+				}, true, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return the result of this.go called with the processed args to callback if bin arg value is "go" and args is a non-empty Array', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var goStub = sinon.stub(binBrowse, 'go').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test go output');
+			
+			});
+			var goArgs;
+			binBrowse.handler('go', [{text: testPath}, {text: 'false'}], [], {}, testUser, function(error, result) {
+
+				expect(result).to.equal('test go output');
+				done();
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
+		it('should return the result of this.nogo called with the processed args to callback if bin arg value is "nogo" and args is a non-empty Array', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var nogoStub = sinon.stub(binBrowse, 'nogo').callsFake(function returnStrToCb(args, cb) {
+			
+				return cb(false, 'test nogo output');
+			
+			});
+			var nogoArgs;
+			binBrowse.handler('nogo', [{text: testPath}, {text: 'false'}], [], {}, testUser, function(error, result) {
+			
+				expect(result).to.equal('test nogo output');
+				done();
+			
+			}, false, 'z4EC2GTd1vQV7XbKuVMIxXG4');
+		
+		});
 	
 	});
 	describe('help(callback)', function() {
@@ -335,7 +813,16 @@ describe('browse.js', function() {
 			expect(binBrowse.outputBrowse).to.be.a('function');
 		
 		});
-		it('should return the result of output/ansi export function called on obj arg');
+		it('should return the result of output/ansi export function called on obj arg', function() {
+		
+			var testObj = {
+				noOutput: 'keep it steady',
+				output: {content: 'change it up'}
+			};
+			var testResult = ansi(testObj);
+			expect(binBrowse.outputBrowse(testObj)).to.deep.equal(testResult);
+		
+		});
 	
 	});
 	describe('quit(isid, callback)', function() {

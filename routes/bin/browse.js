@@ -243,7 +243,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			throw new TypeError('invalid callback passed to bin/browse/handler');
 		
 		}
-		else if ('string' !== typeof bin || -1 === this.listenerSettings.cmdSet) {
+		else if ('string' !== typeof bin || -1 === this.listenerSettings.options.cmdSet.indexOf(bin)) {
 		
 			return callback(new TypeError('invalid cmd passed to bin/browse/handler'));
 		
