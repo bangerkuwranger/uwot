@@ -827,55 +827,438 @@ describe('browse.js', function() {
 	});
 	describe('quit(isid, callback)', function() {
 	
+		var testUser;
+		beforeEach(function() {
+		
+			testUser = getTestUser();
+			createTestUserFS(testUser._id);
+		
+		});
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		after(function() {
+		
+			removeTestUserFS();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.quit).to.be.a('function');
 		
 		});
-		it('should throw a TypeError if callback is not a function');
-		it('should return a TypeError to callback if isid is not a non-empty string');
-		it('should return an Error if call to super.disableListener(isid) throws an Error');
-		it('should return an Error if call to super.disableListener(isid) returns an Error');
-		it('should return an Error if call to super.disableListener(isid) does not return "disabled"');
-		it('should return the string "thanks for browsing!" if super.disableListener(isid) returns "disabled"');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binBrowse.quit();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/browse/handler/quit');
+		
+		});
+		it('should return a TypeError to callback if isid is not a non-empty string', function(done) {
+		
+			binBrowse.quit(null, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid isid passed to bin/browse/handler/quit');
+				done();
+			
+			});
+		
+		});
+		it('should return an Error if call to super.disableListener(isid) throws an Error', function(done) {
+		
+			var uwotCmdDisableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'disableListener').throws(new Error('test disableListener error'));
+			binBrowse.quit('z4EC2GTd1vQV7XbKuVMIxXG4', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test disableListener error');
+				done();
+			
+			});
+		
+		});
+		it('should return an Error if call to super.disableListener(isid) returns an Error', function(done) {
+		
+			var uwotCmdDisableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'disableListener').returns(new Error('test disableListener error'));
+			binBrowse.quit('z4EC2GTd1vQV7XbKuVMIxXG4', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test disableListener error');
+				done();
+			
+			});
+		
+		});
+		it('should return an Error if call to super.disableListener(isid) does not return "disabled"', function(done) {
+		
+			var uwotCmdDisableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'disableListener').returns('enabled');
+			binBrowse.quit('z4EC2GTd1vQV7XbKuVMIxXG4', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('could not disable listener for bin/browse');
+				done();
+			
+			});
+		
+		});
+		it('should return the string "thanks for browsing!" if super.disableListener(isid) returns "disabled"', function(done) {
+		
+			var uwotCmdDisableListenerStub = sinon.stub(global.Uwot.Exports.Cmd.prototype, 'disableListener').returns('disabled');
+			binBrowse.quit('z4EC2GTd1vQV7XbKuVMIxXG4', function(error, result) {
+			
+				expect(result).to.equal('thanks for browsing!');
+				done();
+			
+			});
+		
+		});
 	
 	});
 	describe('go(args, callback)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.go).to.be.a('function');
 		
 		});
-		it('should throw a TypeError if callback is not a function');
-		it('should return a TypeError to callback if args is not a non-null object');
-		it('should return a TypeError to callback if args.path is not a non-empty string');
-		it('should return an object with properties output, outputType, cookies, and additional');
-		it('should set return object property output to an object with content property that is an array containing an object with classes property that is an array containing "browseOutput"');
-		it('should set return object property outputType to "object"');
-		it('should set return object property cookies to an object with properties uwotBrowseCurrentPath, uwotBrowseCurrentType, and uwotBrowseCurrentStatus');
-		it('should set return object property additional to an object with property browseOpts that has property loadContent with value true');
-		it('should set return object property additional.browseOpts.msg to the value of args.msg if args.msg is a non-empty string');
-		it('should set the return object property output.content[0].content to the error message if this.getPathContent throws an error');
-		it('should set the return object property output.content[0].content to the error message if this.getPathContent returns an error');
-		it('should set the return object property output.content[0].content to "no content found" if this.getPathContent does not return a non-empty string after completing without error');
-		it('should set the return object property output.content[0].content to the result of this.getPathContent if it returns a non-empty string after completing without error');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binBrowse.go();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/browse/handler/go');
+		
+		});
+		it('should return a TypeError to callback if args is not a non-null object', function(done) {
+		
+			binBrowse.go('null', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid args passed to bin/browse/go');
+				binBrowse.go(null, function(error, result) {
+			
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid args passed to bin/browse/go');
+					done();
+			
+				});
+			
+			});
+		
+		});
+		it('should return a TypeError to callback if args.path is not a non-empty string', function(done) {
+		
+			binBrowse.go({}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/go');
+				binBrowse.go({path: ''}, function(error, result) {
+			
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid path passed to bin/browse/go');
+					done();
+			
+				});
+			
+			});
+		
+		});
+		it('should return an object with properties output, outputType, cookies, and additional', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.outputType).to.be.a('string');
+				expect(result.cookies).to.be.an('object').that.is.not.null;
+				expect(result.additional).to.be.an('object').that.is.not.null;
+				done();
+		
+			});
+		
+		});
+		it('should set return object property output to an object with content property that is an array containing an object with classes property that is an array containing "browseOutput"', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+				expect(result.output.content[0]).to.be.an('object').with.property('classes').that.is.an('array').that.contains('browseOutput');
+				done();
+		
+			});
+		
+		});
+		it('should set return object property outputType to "object"', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('outputType').that.equals('object');
+				done();
+		
+			});
+		
+		});
+		it('should set return object property cookies to an object with properties uwotBrowseCurrentPath, uwotBrowseCurrentType, and uwotBrowseCurrentStatus', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('cookies').that.is.an('object').that.has.property('uwotBrowseCurrentPath');
+				expect(result.cookies).to.have.property('uwotBrowseCurrentType');
+				expect(result.cookies).to.have.property('uwotBrowseCurrentStatus');
+				done();
+		
+			});
+		
+		});
+		it('should set return object property additional to an object with property browseOpts that has property loadContent with value true', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+				expect(result.additional.browseOpts).to.have.property('loadContent').that.is.true;
+				done();
+		
+			});
+		
+		});
+		it('should set return object property additional.browseOpts.msg to the value of args.msg if args.msg is a non-empty string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false, msg: ''}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+				expect(result.additional.browseOpts).to.not.have.property('msg');
+				binBrowse.go({path: testPath, isGui: false, msg: 'test go msg'}, function(error, result) {
+		
+					expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+					expect(result.additional.browseOpts).to.have.property('msg').that.equals('test go msg');
+					done();
+		
+				});
+		
+			});
+		
+		});
+		it('should set the return object property output.content[0].content to the error message if this.getPathContent throws an error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function throwError(pth, args, cb) {
+			
+				throw new Error('thrown test getPathContent Error');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+				expect(result.output.content[0]).to.be.an('object').with.property('content').that.equals('thrown test getPathContent Error');
+				done();
+		
+			});
+		
+		});
+		it('should set the return object property output.content[0].content to the error message if this.getPathContent returns an error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnErrorToCb(pth, args, cb) {
+			
+				return cb(new Error('returned test getPathContent Error'));
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+				expect(result.output.content[0]).to.be.an('object').with.property('content').that.equals('returned test getPathContent Error');
+				done();
+		
+			});
+		
+		});
+		it('should set the return object property output.content[0].content to "no content found" if this.getPathContent does not return a non-empty string after completing without error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent');
+			getPathContentStub.onCall(0).callsFake(function returnNullToCb(pth, args, cb) {
+			
+				return cb(false, null);
+			
+			});
+			getPathContentStub.onCall(1).callsFake(function returnEmptyToCb(pth, args, cb) {
+			
+				return cb(false, '');
+			
+			});
+			binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+				expect(result.output.content[0]).to.be.an('object').with.property('content').that.equals('no content found');
+				binBrowse.go({path: testPath, isGui: false}, function(error, result) {
+		
+					expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+					expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+					expect(result.output.content[0]).to.be.an('object').with.property('content').that.equals('no content found');
+					done();
+		
+				});
+		
+			});
+		
+		});
+		it('should set the return object property output.content[0].content to the result of this.getPathContent if it returns a non-empty string after completing without error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, '<div class="uwotGui-html">test go content</div>');
+			
+			});
+			binBrowse.go({path: testPath, isGui: true}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('output').that.is.an('object').that.is.not.null;
+				expect(result.output).to.have.property('content').that.is.an('array').that.is.not.empty;
+				expect(result.output.content[0]).to.be.an('object').with.property('content').that.equals('<div class="uwotGui-html">test go content</div>');
+				done();
+		
+			});
+		
+		});
 	
 	});
 	describe('nogo(args, callback)', function() {
 	
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.nogo).to.be.a('function');
 		
 		});
-		it('should throw a TypeError if callback is not a function');
-		it('should return a TypeError to callback if args is not a non-null object');
-		it('should return an object with properties outputType, cookies, and additional');
-		it('should set return object property outputType to "object"');
-		it('should set return object property cookies to an object with properties uwotBrowseCurrentPath, uwotBrowseCurrentType, and uwotBrowseCurrentStatus');
-		it('should set return object property additional to an object with property browseOpts that has property loadContent with value false');
-		it('should set return object property additional.browseOpts.msg to the value of args.msg if args.msg is a non-empty string');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binBrowse.nogo();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/browse/handler/nogo');
+		
+		});
+		it('should return an object with properties outputType, cookies, and additional', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.nogo({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('outputType').that.is.a('string');
+				expect(result.cookies).to.be.an('object').that.is.not.null;
+				expect(result.additional).to.be.an('object').that.is.not.null;
+				done();
+		
+			});
+		
+		});
+		it('should set return object property outputType to "object"', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.nogo({path: testPath, isGui: true}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('outputType').that.equals('object');
+				done();
+		
+			});
+		
+		});
+		it('should set return object property cookies to an object with properties uwotBrowseCurrentPath, uwotBrowseCurrentType, and uwotBrowseCurrentStatus', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.nogo({path: testPath, isGui: true}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('cookies').that.is.an('object').that.has.property('uwotBrowseCurrentPath').that.is.an('object').that.has.property('value').that.equals(testPath);
+				expect(result.cookies).to.have.property('uwotBrowseCurrentType').that.is.an('object').that.has.property('value').that.equals('gui');
+				expect(result.cookies).to.have.property('uwotBrowseCurrentStatus').that.is.an('object').that.has.property('value').that.equals('active');
+				done();
+		
+			});
+		
+		});
+		it('should set return object property additional to an object with property browseOpts that has property loadContent with value false', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.nogo({path: testPath, isGui: false}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+				expect(result.additional.browseOpts).to.have.property('loadContent').that.is.false;
+				done();
+		
+			});
+		
+		});
+		it('should set return object property additional.browseOpts.msg to the value of args.msg if args.msg is a non-empty string', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var getPathContentStub = sinon.stub(binBrowse, 'getPathContent').callsFake(function returnStrToCb(pth, args, cb) {
+			
+				return cb(false, 'test go content');
+			
+			});
+			binBrowse.nogo({path: testPath, isGui: false, msg: ''}, function(error, result) {
+		
+				expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+				expect(result.additional.browseOpts).to.not.have.property('msg');
+				binBrowse.nogo({path: testPath, isGui: false, msg: 'test nogo msg'}, function(error, result) {
+		
+					expect(result).to.be.an('object').with.property('additional').that.is.an('object').that.has.property('browseOpts');
+					expect(result.additional.browseOpts).to.have.property('msg').that.equals('test nogo msg');
+					done();
+		
+				});
+		
+			});
+		
+		});
 	
 	});
 	describe('getPathContent(pth, args, callback)', function() {
@@ -885,9 +1268,47 @@ describe('browse.js', function() {
 			expect(binBrowse.getPathContent).to.be.a('function');
 		
 		});
-		it('should return a TypeError if callback is not a function');
-		it('should return a TypeError to callback if pth is not a non-empty string');
-		it('should return a TypeError to callback if args is not a non-null object');
+		it('should throw a TypeError if callback is not a function', function() {
+		
+			function throwError() {
+			
+				return binBrowse.getPathContent();
+			
+			}
+			expect(throwError).to.throw(TypeError, 'invalid callback passed to bin/browse/getPathContent');
+		
+		});
+		it('should return a TypeError to callback if pth is not a non-empty string', function(done) {
+		
+			binBrowse.getPathContent(null, [], function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to bin/browse/getPathContent');
+				binBrowse.getPathContent('', [], function(error, result) {
+			
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid pth passed to bin/browse/getPathContent');
+					done();
+			
+				});
+			
+			});
+		
+		});
+		it('should return a TypeError to callback if args is not a non-null object', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			binBrowse.getPathContent(testPath, 'isLocal: false', function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid args passed to bin/browse/getPathContent');
+				binBrowse.getPathContent(testPath, null, function(error, result) {
+			
+					expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid args passed to bin/browse/getPathContent');
+					done();
+			
+				});
+			
+			});
+		
+		});
 		it('should set args.isLocal to the result of validUrl.isUri(pth) if args.isLocal is not a boolean value');
 		it('should set args.isSudo to false if args.isSudo is any value other than true');
 		it('should return a TypeError to callback if args.isLocal is true and there is no valid filesystem loaded to global for user');

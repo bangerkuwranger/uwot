@@ -481,7 +481,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 					}
 				}
 			};
-			if ('string' === typeof args.msg && '' !== args.msg) {
+			if ('object' === typeof args && null !== args && 'string' === typeof args.msg && '' !== args.msg) {
 		
 				nogoResult.additional.browseOpts.msg = args.msg;
 		
