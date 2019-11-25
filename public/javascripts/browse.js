@@ -224,7 +224,7 @@ class UwotBrowseModal {
 			cliForms.each((formIdx, el) => {
 				let formId = jQuery(el).attr('id');
 				let formElements = jQuery(el).find('input, select, textarea');
-				formsContentHtml += '<div class="uwot-browse-modal-content-line" data-form-id="' + formId + '" data-form-num="' + formIdx + '"><span class="uwot-browse-modal-form-num">' + formIdx + '</span>&nbsp;<span class="uwot-browse-modal-form-id">' + formId + '</span>'
+				formsContentHtml += '<div class="uwot-browse-modal-content-line" data-form-id="' + formId + '" data-form-num="' + formIdx + '"><span class="uwot-browse-modal-form-num">' + formIdx + '</span>&nbsp;<span class="uwot-browse-modal-form-id">' + formId + '</span>';
 				if (formElements.length > 0) {
 					formsContentHtml += '<ul class="uwot-browse-modal-content-ul">';
 					let fieldHtmlMap = [];
@@ -288,7 +288,7 @@ class UwotBrowseModal {
 										thisFieldObj.values = [];
 										fieldOptions.each((valueIdx, el) => {
 											let thisFieldValue = jQuery(el).val();
-											thisFieldObj.values.push('<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + formIdx + '" data-field-num="' + fieldIterator + '" data-field-name="' + fieldName + '" data-field-value-num="' + valueIdx + '" data-field-value="' + thisFieldValue + '"><span class="uwot-browse-modal-form-field-value-num">' + valueIdx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-value">' + thisFieldValue +'</span></li>')
+											thisFieldObj.values.push('<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + formIdx + '" data-field-num="' + fieldIterator + '" data-field-name="' + fieldName + '" data-field-value-num="' + valueIdx + '" data-field-value="' + thisFieldValue + '"><span class="uwot-browse-modal-form-field-value-num">' + valueIdx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-value">' + thisFieldValue +'</span></li>');
 										});
 									}
 								}
