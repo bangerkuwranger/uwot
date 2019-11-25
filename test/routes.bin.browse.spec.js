@@ -9,6 +9,9 @@ var binBrowse;
 const path = require('path');
 const ansi = require('../output/ansi');
 const sanitize = require('../helpers/valueConversion');
+const remoteHtml = require('../helpers/consoleHtml');
+const systemError = require('../helpers/systemError');
+const browseErrorHelper = require('../helpers/htmlBrowseErrors');
 
 const getTestUser = function() {
 
@@ -1263,6 +1266,23 @@ describe('browse.js', function() {
 	});
 	describe('getPathContent(pth, args, callback)', function() {
 	
+		var testUser;
+		beforeEach(function() {
+		
+			testUser = getTestUser();
+			createTestUserFS(testUser._id);
+		
+		});
+		afterEach(function() {
+		
+			sinon.restore();
+		
+		});
+		after(function() {
+		
+			removeTestUserFS();
+		
+		});
 		it('should be a function', function() {
 		
 			expect(binBrowse.getPathContent).to.be.a('function');
@@ -1309,15 +1329,281 @@ describe('browse.js', function() {
 			});
 		
 		});
-		it('should set args.isLocal to the result of validUrl.isUri(pth) if args.isLocal is not a boolean value');
-		it('should set args.isSudo to false if args.isSudo is any value other than true');
-		it('should return a TypeError to callback if args.isLocal is true and there is no valid filesystem loaded to global for user');
-		it('should return the result of consoleHtml helper method loadForConsole called with resolved result of user filesystem method pFile if args.isLocal is true and pFile call does not reject');
-		it('should return an html error string to second arg of callback if args.isLocal is true and user filesystem method pFile call rejects with a SystemError');
-		it('should return an error to the first argument of callback if args.isLocal is true and user filesystem method pFile call rejects with a non SystemError Error');
-		it('should return the result of consoleHtml helper method loadForConsole called with resolved result of consoleHtml helper method getRemoteResources(pth) if args.isLocal is false and getRemoteResources call does not reject');
-		it('should return an html error string to second arg of callback if args.isLocal is false and consoleHtml helper method getRemoteResources(pth) call rejects with a SystemError');
-		it('should return an error to the first argument of callback if args.isLocal is false and consoleHtml helper method getRemoteResources(pth) call rejects with a non SystemError Error');
+		it('should set args.isLocal to the result of validUrl.isUri(pth) if args.isLocal is not a boolean value', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function resolveWithStr(op, args, isSudo) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: null, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(pFileStub.called).to.be.true;
+				done();
+			
+			});
+		
+		});
+		it('should set args.isSudo to false if args.isSudo is any value other than true', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function resolveWithStr(op, args, isSudo) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: null, user: testUser, isSudo: null}, function(error, result) {
+			
+				var pFileArgs = pFileStub.getCall(0).args;
+				expect(pFileArgs[2]).to.be.false;
+				done();
+			
+			});
+		
+		});
+		it('should return a TypeError to callback if args.user is not a valid user', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function resolveWithStr(op, args, isSudo) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			delete global.Uwot.FileSystems[testUser._id].pFile;
+			binBrowse.getPathContent(testPath, {isLocal: null, user: {_id: null}, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user');
+				done();
+			
+			});
+		
+		});
+		it('should return a TypeError to callback if args.isLocal is true and there is no valid filesystem loaded to global for user', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function resolveWithStr(op, args, isSudo) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			delete global.Uwot.FileSystems[testUser._id].pFile;
+			binBrowse.getPathContent(testPath, {isLocal: null, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(TypeError).with.property('message').that.equals('invalid user fileSystem');
+				done();
+			
+			});
+		
+		});
+		it('should return the result of consoleHtml helper method loadForConsole called with resolved result of user filesystem method pFile if args.isLocal is true and pFile call does not reject', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function resolveWithStr(op, args, isSudo) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: true, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(result).to.equal(testResult);
+				expect(loadForConsoleStub.called).to.be.true;
+				done();
+			
+			});
+		
+		});
+		it('should return an html error string to second arg of callback if args.isLocal is true and user filesystem method pFile call rejects with a SystemError', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var test404Err = '<html><head><title>404 Not Found</title></head><body><h1>Error 404 Not Found</h1><p>The requested URL was not found on this server. If you entered the URL manually please check your spelling and try again.</p></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function rejectWithSysError(op, args, isSudo) {
+			
+				return Promise.reject(systemError.ENOENT({syscall: 'read', path: args[0]}));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: true, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(result).to.equal(test404Err);
+				done();
+			
+			});
+		
+		});
+		it('should return the original error to callback if args.isLocal is true, user filesystem method pFile call rejects with a SystemError, and browseErrorHelper.getHtmlForError call returns an "invalid browser Error" error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var testError = new Error('invalid browser Error');
+			var getHtmlForErrorStub = sinon.stub(browseErrorHelper, 'getHtmlForError').returns(testError);
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function rejectWithSysError(op, args, isSudo) {
+			
+				return Promise.reject(systemError.ENOENT({syscall: 'read', path: args[0]}));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: true, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+				done();
+			
+			});
+		
+		});
+		it('should return an error to the first argument of callback if args.isLocal is true and user filesystem method pFile call rejects with a non SystemError Error', function(done) {
+		
+			var testPath = '/var/www/html/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var pFileStub = sinon.stub(global.Uwot.FileSystems[testUser._id], 'pFile').callsFake(function rejectWithError(op, args, isSudo) {
+			
+				return Promise.reject(new Error('test pFile error'));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: true, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test pFile error');
+				done();
+			
+			});
+		
+		});
+		it('should return the result of consoleHtml helper method loadForConsole called with resolved result of consoleHtml helper method getRemoteResources(pth) if args.isLocal is false and getRemoteResources call does not reject', function(done) {
+		
+			var testPath = 'https://www.chadacarino.com/example.html';
+			var testResult = '<html><body><h1>Test getRemoteResources Data</h1></body></html>';
+			var getRemoteResourcesStub = sinon.stub(remoteHtml, 'getRemoteResources').callsFake(function resolveWithStr(pth) {
+			
+				return Promise.resolve(testResult);
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: false, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(result).to.equal(testResult);
+				expect(loadForConsoleStub.called).to.be.true;
+				done();
+			
+			});
+		
+		});
+		it('should return an html error string to second arg of callback if args.isLocal is false and consoleHtml helper method getRemoteResources(pth) call rejects with a SystemError', function(done) {
+		
+			var testPath = 'https://www.chadacarino.com/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var test404Err = '<html><head><title>404 Not Found</title></head><body><h1>Error 404 Not Found</h1><p>The requested URL was not found on this server. If you entered the URL manually please check your spelling and try again.</p></body></html>';
+			var getRemoteResourcesStub = sinon.stub(remoteHtml, 'getRemoteResources').callsFake(function rejecteWithSysError(pth) {
+			
+				return Promise.reject(systemError.ENOENT({syscall: 'socketcall', path: testPath}));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: false, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(result).to.equal(test404Err);
+				done();
+			
+			});
+		
+		});
+		it('should return the original error to callback if args.isLocal is false, consoleHtml helper method getRemoteResources(pth) call rejects with a SystemError, and browseErrorHelper.getHtmlForError call returns an "invalid browser Error" error', function(done) {
+		
+			var testPath = 'https://www.chadacarino.com/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var testError = new Error('invalid browser Error');
+			var getHtmlForErrorStub = sinon.stub(browseErrorHelper, 'getHtmlForError').returns(testError);
+			var getRemoteResourcesStub = sinon.stub(remoteHtml, 'getRemoteResources').callsFake(function rejecteWithSysError(pth) {
+			
+				return Promise.reject(systemError.ENOENT({syscall: 'socketcall', path: testPath}));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: false, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('code').that.equals('ENOENT');
+				done();
+			
+			});
+		
+		});
+		it('should return an error to the first argument of callback if args.isLocal is false and consoleHtml helper method getRemoteResources(pth) call rejects with a non SystemError Error', function(done) {
+		
+			var testPath = 'https://www.chadacarino.com/example.html';
+			var testResult = '<html><body><h1>Test getPathContent Data</h1></body></html>';
+			var getRemoteResourcesStub = sinon.stub(remoteHtml, 'getRemoteResources').callsFake(function rejecteWithError(pth) {
+			
+				return Promise.reject(new Error('test getRemoteResources error'));
+			
+			});
+			var loadForConsoleStub = sinon.stub(remoteHtml, 'loadForConsole').callsFake(function returnStrToCb(data, cb) {
+			
+				return cb(false, data);
+			
+			});
+			binBrowse.getPathContent(testPath, {isLocal: false, user: testUser, isSudo: false}, function(error, result) {
+			
+				expect(error).to.be.an.instanceof(Error).with.property('message').that.equals('test getRemoteResources error');
+				done();
+			
+			});
+		
+		});
 	
 	});
 

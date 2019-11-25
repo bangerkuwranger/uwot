@@ -536,7 +536,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 			
 				
 					userFs = global.Uwot.FileSystems[args.user._id];
-					if ('object' !== typeof userFs || 'function' !== typeof userFs.cmd) {
+					if ('object' !== typeof userFs || 'function' !== typeof userFs.pFile) {
 			
 						throw new TypeError('invalid user fileSystem');
 			
