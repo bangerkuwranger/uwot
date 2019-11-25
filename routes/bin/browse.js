@@ -388,7 +388,7 @@ class UwotCmdBrowse extends global.Uwot.Exports.Cmd {
 				outputType: 'object',
 				cookies: {
 					uwotBrowseCurrentPath: {
-						value: args.path
+						value: argPath
 					},
 					uwotBrowseCurrentType: {
 						value: args.isGui ? 'gui' : 'cli'

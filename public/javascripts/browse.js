@@ -243,24 +243,18 @@ class UwotBrowseModal {
 		var currentLinksContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="links"]');
 		var currentFormsContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="forms"]');
 		var currentHistoryContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="history"]');
-		if (currentLinksContent.length < 1) {
-			this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
+		if (currentLinksContent.length > 0) {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="links"]').remove();
 		}
-		else {
-			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="links"]').html(this.getLinksContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
+		if (currentFormsContent.length > 0) {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="forms"]').remove();
 		}
-		if (currentFormsContent.length < 1) {
-			this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
+		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
+		if (currentHistoryContent.length > 0) {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="history"]').remove();
 		}
-		else {
-			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="forms"]').html(this.getFormsContent());
-		}
-		if (currentHistoryContent.length < 1) {
-			this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
-		}
-		else {
-			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="history"]').html(this.getHistoryContent());
-		}
+		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
 		if (null === this.currentPanel) {
 			this.currentPanel = 'links';
 		}
@@ -278,10 +272,16 @@ class UwotBrowseModal {
 		return $link;
 	}
 	selectForm(formIdx) {
-	
+		
 	}
 	selectHistory(histIdx) {
-	
+		var $hist = this.container.find('#uwotBrowseModalContent [data-panel-name="history"] content .uwot-browse-modal-content-line[data-hist-num="' + histIdx + '"]');
+		if ($hist.length < 1) {
+			return '';
+		}
+		var histHref = $hist.attr('data-hist-cmd');
+		histHref = 'string' === typeof histHref ? histHref : '';
+		return histHref;
 	}
 }
 
@@ -380,7 +380,7 @@ class UwotBrowse {
 				var linkHref = self.getAttrForLink(linkIdx, 'href');
 				var linkTarget = self.getAttrForLink(linkIdx, 'target');
 				if (Number.isNaN(linkIdx)) {
-					reqData.cmd = 'go ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid link index selected"';
+					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid link index selected"';
 				}
 				else if ('string' !== typeof linkHref || '' === linkHref) {
 					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "link index selected has invalid target URI"';
@@ -392,6 +392,19 @@ class UwotBrowse {
 				}
 				else {
 					reqData.cmd = 'go ' + linkHref + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
+				}
+			}
+			else if (oldCmdArr[0] === 'select' && oldCmdArr[1] === 'history') {
+				var histIdx = parseInt(oldCmdArr[2]);
+				var histHref = self.getHistHref(histIdx);
+				if (Number.isNaN(histIdx)) {
+					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "invalid history index selected"';
+				}
+				else if ('string' !== typeof histHref || '' === histHref) {
+					reqData.cmd = 'nogo ' + self.getReloadPath() + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui') + ' "history index selected has invalid target URI"';
+				}
+				else {
+					reqData.cmd = 'go ' + histHref + ' ' + (uwotGetCookieValue('uwotBrowseCurrentType') === 'gui');
 				}
 			}
 			else {
@@ -598,5 +611,9 @@ class UwotBrowse {
 			console.error('invalid link index for goToExternalLink');
 		}
 		return;
+	}
+	getHistHref(idx) {
+		var histHref = this.modal.selectHistory(idx);
+		return histHref;
 	}
 }

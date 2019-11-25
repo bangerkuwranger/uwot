@@ -254,7 +254,7 @@ function getEnabledListeners() {
 }
 
 function uwotConsoleOnClick(element, event) {
-	if (!uwotInteractive) {
+	if (!uwotInteractive && jQuery(element).attr('target') !== '_blank') {
 		return event.preventDefault();
 	}
 	else if (jQuery(element).attr('target') !== '_blank') {
