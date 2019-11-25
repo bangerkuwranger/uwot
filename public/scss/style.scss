@@ -134,6 +134,13 @@ body {
 					padding: 1ch 1em;
 					background-color: rgb(03, 03, 03);
 					opacity: 0.8;
+
+					.uwot-browse-modal-content-ul {
+						margin-top: 0;
+						list-style-type: none;
+						padding-inline-start: 1em;
+					}
+
 				}
 
 				.output-container {

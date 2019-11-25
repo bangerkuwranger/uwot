@@ -220,7 +220,100 @@ class UwotBrowseModal {
 	getFormsContent() {
 		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="forms"><title>Forms</title><content>';
 		var cliForms = jQuery('#uwotoutput #uwotBrowseHtml form');
-		formsContentHtml += '<h4>No forms found.</h4>';
+		if (cliForms.length > 0) {
+			cliForms.each((idx, el) => {
+				let formId = jQuery(el).attr('id');
+				let formElements = jQuery(el).find('input, select, textarea');
+				formsContentHtml += '<div class="uwot-browse-modal-content-line" data-form-id="' + formId + '" data-form-num="' + idx + '"><span class="uwot-browse-modal-form-num">' + idx + '</span>&nbsp;<span class="uwot-browse-modal-form-id">' + formId + '</span>'
+				if (formElements.length > 0) {
+					let parentIdx = idx;
+					formsContentHtml += '<ul class="uwot-browse-modal-content-ul">';
+					let fieldHtmlMap = [];
+					formElements.each((idx, el) => {
+						let fieldType = jQuery(el).attr('type');
+						if (fieldType !== 'submit' && fieldType !== 'hidden') {
+							if ('string' !== typeof fieldType) {
+								let fieldTag = jQuery(el).prop('tagName');
+								switch(fieldTag) {
+									case 'SELECT':
+										if (jQuery(el).attr('multiple')){
+											fieldType = 'multiselect';
+										}
+										else {
+											fieldType = 'select';
+										}
+										break;
+									case 'TEXTAREA':
+										fieldType = 'textarea';
+										break;
+									default:
+										fieldType = 'input';
+								}
+							}
+							let fieldName = jQuery(el).attr('name');
+							if (fieldType === 'radio') {
+								let fieldNames = fieldHtmlMap.map((obj) => {
+									return obj.name;
+								});
+								let nameIdx = fieldNames.indexOf(fieldName);
+								let value = jQuery(el).val();
+								if (-1 !== nameIdx) {
+									let valueIdx = fieldHtmlMap[nameIdx].values.length;
+									fieldHtmlMap[nameIdx].values.push('<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + parentIdx + '" data-field-num="' + nameIdx + '" data-field-name="' + fieldName + '" data-field-value-idx="' + valueIdx + '" data-field-value="' + value + '"><span class="uwot-browse-modal-form-field-value-num">' + valueIdx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-value">' + value +'</span></li>');
+									
+								}
+								else {
+									fieldHtmlMap.push({
+										name: fieldName,
+										open: '<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + parentIdx + '" data-field-num="' + idx + '" data-field-name="' + fieldName + '" ' + 'data-field-type="' + fieldType + '"><span class="uwot-browse-modal-form-field-num">' + idx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-name">',
+										content: fieldName,
+										close: '</li>',
+										values: [
+											'<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + parentIdx + '" data-field-num="' + idx + '" data-field-name="' + fieldName + '" data-field-value-idx="0" data-field-value="' + value + '"><span class="uwot-browse-modal-form-field-value-num">0</span>&nbsp;<span class="uwot-browse-modal-form-field-value">' + value +'</span></li>'
+										]
+									});
+								}
+							}
+							else {
+								let thisFieldObj = {
+									name: fieldName,
+									open: '<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + parentIdx + '" data-field-num="' + idx + '" data-field-name="' + fieldName + '" ' + 'data-field-type="' + fieldType + '">',
+									content: '<span class="uwot-browse-modal-form-field-num">' + idx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-name">' + fieldName + '</span>',
+									close: '</li>'
+								};
+								if ('select' === fieldType || 'multiselect' === fieldType) {
+									let fieldOptions = jQuery(el).find('option');
+									if (fieldOptions.length > 0) {
+										thisFieldObj.values = [];
+										let thisFieldIdx = idx;
+										fieldOptions.each((idx, el) => {
+											let thisFieldValue = jQuery(el).val();
+											thisFieldObj.values.push('<li class="uwot-browse-modal-content-li" data-form-id="' + formId + '" data-form-num="' + parentIdx + '" data-field-num="' + thisFieldIdx + '" data-field-name="' + fieldName + '" data-field-value-idx="' + idx + '" data-field-value="' + thisFieldValue + '"><span class="uwot-browse-modal-form-field-value-num">' + idx + '</span>&nbsp;<span class="uwot-browse-modal-form-field-value">' + thisFieldValue +'</span></li>')
+										});
+									}
+								}
+								fieldHtmlMap.push(thisFieldObj);
+							}
+						}
+					});
+					fieldHtmlMap.forEach((fieldObj) => {
+						formsContentHtml += fieldObj.open;
+						formsContentHtml += fieldObj.content;
+						if ('object' === typeof fieldObj.values && Array.isArray(fieldObj.values) && fieldObj.values.length > 0) {
+							formsContentHtml += '<ul class="uwot-browse-modal-content-ul">';
+							formsContentHtml += fieldObj.values.join('');
+							formsContentHtml += '</ul>';
+						}
+						formsContentHtml += fieldObj.close;
+					});
+					formsContentHtml += '</ul>'
+				}
+				formsContentHtml += '</div>';
+			});
+		}
+		else {
+			formsContentHtml += '<h4>No forms found.</h4>';
+		}
 		formsContentHtml += '</content></div>';
 		return formsContentHtml;
 	}

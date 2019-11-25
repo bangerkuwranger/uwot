@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Useless Waste of Time - About Forms</title>
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="viewport" content="width=device-width, user-scalable=no">
+		<meta name="viewport" content="initial-scale=1.0">
+		<meta name="application-name" content="uwotCli">
+	</head>
+	<body>
+		<header>
+			<h1>About Forms</h1>
+			<p><a href="example.html">Go back to example home</a></p>
+		</header>
+		<content>
+			<p>To enter data in a form, use the "select forms" command.</p>
+			<h2>Example Form</h2>
+			<form id="uwot-example-form">
+				<p><label for="uefName">Name:</label><br>
+					<input type="text" name="uefName"></p>
+				<p><label for="uefGender">Gender:</label><br>
+					<input type="radio" name="uefGender" value="male" checked> Male<br>
+  					<input type="radio" name="uefGender" value="female"> Female<br>
+  					<input type="radio" name="uefGender" value="neither"> Neither<br>
+					<input type="radio" name="uefGender" value="both"> Both
+				</p>
+				<p><label for="uefOccupation">Occupation:</label><br>
+					<select name="uefOccupation">
+						<option value="reading">Reading example pages</option>
+						<option value="wasting">Wasting valuable time</option>
+						<option value="suppressing">Suppressing the urge to strangle irritating developers</option>
+						<option value="floating">Floating through life like plankton</option>
+					</select>
+				</p>
+				<p><label for="uefTheme">Favorite included themes:</label><br>
+					<select name="uefTheme" multiple>
+						<option value="beard">The Unix-y one with tiny, tiny text</option>
+						<option value="bind">The weird, illegible one with Turkish</option>
+						<option value="borg">The one that gives me flashbacks to working in 2003</option>
+						<option value="bot">The one with huge text designed for huge screens that are supposed to be portable</option>
+						<option value="cac">The illegible one that smacks of egotism</option>
+						<option value="clone">The one that fills me with undeserved superiority</option>
+						<option value="default">There's more than one? The one I always see... that one.</option>
+					</select>
+				</p>
+				<p><label for="uefVague">Vague Complaints:</label><br>
+					<textarea name="uefVague" rows="6" cols="32">Everything always makes too much sense.</textarea>
+				</p>
+				<input type="submit" value="Submit">
+			</form>
+		</content>
+	</body>
+</html>
