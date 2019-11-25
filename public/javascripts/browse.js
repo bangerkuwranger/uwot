@@ -307,7 +307,7 @@ class UwotBrowseModal {
 						}
 						formsContentHtml += fieldObj.close;
 					});
-					formsContentHtml += '</ul>'
+					formsContentHtml += '</ul>';
 				}
 				formsContentHtml += '</div>';
 			});
