@@ -167,7 +167,7 @@ class UwotBrowseModal {
 		if (currentModal.length > 0) {
 			currentModal.remove();
 		}
-		jQuery('#uwotoutput .output-container').append(getModalHtml());
+		jQuery('#uwotoutput').append(getModalHtml());
 		this.container = jQuery('#uwotBrowseModal');
 		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
 		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
@@ -226,15 +226,41 @@ class UwotBrowseModal {
 	}
 	getHistoryContent() {
 		var formsContentHtml = '<div class="uwot-browse-modal-panel-content" data-panel-name="history"><title>History</title><content>';
-		formsContentHtml += '<h4>No history found.</h4>';
+		var histItems = uwotBrowseInstance.history.getAllItems();
+		if (histItems.length < 1) {
+			formsContentHtml += '<h4>No history found.</h4>';
+		}
+		else {
+			for (let i = 0; i < histItems.length; i++) {
+				formsContentHtml += '<div class="uwot-browse-modal-content-line" data-hist-cmd="' + histItems[i] + '" data-hist-num="' + i + '"><span class="uwot-browse-modal-hist-num">' + i + '</span>&nbsp;<span class="uwot-browse-modal-hist-name">' + histItems[i] + '</span></div>';
+			}
+		}
 		formsContentHtml += '</content></div>';
 		return formsContentHtml;
 	}
 	refreshAllContent(showOnRefresh) {
 		showOnRefresh = 'boolean' === typeof showOnRefresh && true === showOnRefresh;
-		this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
-		this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
+		var currentLinksContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="links"]');
+		var currentFormsContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="forms"]');
+		var currentHistoryContent = this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="history"]');
+		if (currentLinksContent.length < 1) {
+			this.container.find('#uwotBrowseModalContent').append(this.getLinksContent());
+		}
+		else {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="links"]').html(this.getLinksContent());
+		}
+		if (currentFormsContent.length < 1) {
+			this.container.find('#uwotBrowseModalContent').append(this.getFormsContent());
+		}
+		else {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="forms"]').html(this.getFormsContent());
+		}
+		if (currentHistoryContent.length < 1) {
+			this.container.find('#uwotBrowseModalContent').append(this.getHistoryContent());
+		}
+		else {
+			this.container.find('#uwotBrowseModalContent .uwot-browse-modal-panel-content[data-panel-name="history"]').html(this.getHistoryContent());
+		}
 		if (null === this.currentPanel) {
 			this.currentPanel = 'links';
 		}

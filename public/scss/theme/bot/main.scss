@@ -71,10 +71,10 @@ body {
 
 					}
 
-					> .uwot-browse-modal {
-						background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
-					}
+				}
 
+				.uwot-browse-modal {
+					background-color: mapGet($theme-colors, 'scheme', 'primary', 'bg');
 				}
 
 			}
@@ -133,12 +133,8 @@ body {
 
 				.output {
 
-					.output-container {
-
-						> .uwot-browse-modal {
-							background-color: #001C23;
-						}
-
+					.uwot-browse-modal {
+						background-color: #001C23;
 					}
 
 				}
