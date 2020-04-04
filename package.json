@@ -40,7 +40,7 @@
     "jquery-touchswipe": "^1.6.19",
     "lodash": "^4.17.15",
     "lodash.defaultsdeep": "^4.6.1",
-    "minimist": "^1.2.0",
+    "minimist": "^1.2.3",
     "morgan": "^1.9.1",
     "nconf": "^0.10.0",
     "nedb-core": "^3.0.6",
