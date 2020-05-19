@@ -4,6 +4,8 @@
 
 Another unsupported, half-finished experiment made in a non-existent kind of time (free?).
 
+[![ko-fi](https://www.ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q61Q949)
+
 ## What does it do?
 
 It creates a web interface that simulates the experience of a bash(ish) shell, which can be used for any number of applications, depending on configuration. When complete, at a minimum, it will allow an admin to set up an application that allows users to browse content in a public directory within a virtual file system. Future plans include reverse proxy support for additional content, 'console' or 'x-window' mode for graphical content, support for generating custom themes or 'bins', and some other miscellania.
