@@ -44,7 +44,7 @@
     "lodash.defaultsdeep": "^4.6.1",
     "minimist": "^1.2.5",
     "morgan": "^1.10.0",
-    "nconf": "^0.11.0",
+    "nconf": "^0.12.0",
     "nedb-core": "^3.0.6",
     "nedb-session-store": "^1.1.2",
     "node-cache": "^4.2.1",
