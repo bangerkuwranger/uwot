@@ -50,7 +50,7 @@
     "node-cache": "^4.2.1",
     "node-cron": "^2.0.3",
     "node-timednonce": "^1.1.4",
-    "passport": "^0.4.1",
+    "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "password-rules": "^0.0.3",
     "path-is-inside": "^1.0.2",
