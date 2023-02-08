@@ -37,7 +37,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "express-winston": "^3.4.0",
-    "favicons": "^5.5.0",
+    "favicons": "^6.2.1",
     "fs-extra": "^7.0.1",
     "jquery-touchswipe": "^1.6.19",
     "lodash": "^4.17.20",
