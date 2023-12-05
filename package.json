@@ -63,7 +63,7 @@
     "serve-favicon": "~2.4.5",
     "uid-safe": "^2.1.5",
     "winston": "^3.3.3",
-    "snyk": "^1.465.0"
+    "snyk": "^1.685.0"
   },
   "os": [
     "darwin",
